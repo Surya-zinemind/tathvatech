@@ -2,3 +2,6 @@
 **/.DS_Store
 TestsutraCommon/target/classes/*
 TestsutraCommon/target/*
+TestSutraUsers/target/classes/*
+TestSutraUsers/target/*
+TestSutraUsers/target/classes/application.properties

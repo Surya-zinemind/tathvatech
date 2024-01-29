@@ -2,81 +2,63 @@ package com.tathvatech.user.service;
 
 
 import com.tathvatech.common.wrapper.PersistWrapper;
-import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.entity.Equipment;
-import com.tathvatech.user.entity.Project;
-import com.tathvatech.user.repo.EquipmentRepo;
-import com.tathvatech.user.repo.ProjectRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Service("equipmentService")
 public class EquipmentServiceImpl implements EquipmentService{
-	
+
+
 	@Autowired
 	PersistWrapper persistWrapper;
 	
-	@Autowired
-	EquipmentRepo equipmentRepo;
-	
-	@Autowired
-	ProjectRepo projectRepo;
-	
+//	@Autowired
+//	EquipmentRepo equipmentRepo;
+
+	public Equipment getEquipment(long id)
+	{
+		return (Equipment) persistWrapper.readByPrimaryKey(Equipment.class, id);
+		//return persistWrapper.readList(Equipment.class, "select * from equipment order by pk desc limit 0, 2", null);
+	}
+
 	public List<Equipment> getEquipments()
 	{
-		return persistWrapper.readList(Equipment.class, "select * from equipment", null);
+//		return dao.findAll(Equipment.class);
+		return persistWrapper.readList(Equipment.class, "select * from equipment order by pk desc limit 0, 2");
 	}
 
-	@Override
-	public List<Project> getProjects() {
-		return persistWrapper.readList(Project.class, "select * from tab_project where projectName like ?", "%1080%");
+	public List<Equipment> getAllEquipments()
+	{
+//		return dao.findAll(Equipment.class);
+		return (List<Equipment>) persistWrapper.readAll(Equipment.class);
 	}
 
+	@Transactional
+	public void addEquipment() throws Exception {
+		Equipment eq = new Equipment();
+		eq.setCreatedBy(110);
+		eq.setDescription("Testing new Persist wrapper" + new Date().getTime());
+		persistWrapper.createEntity(eq);
+//		dao.create(eq);
+	}
 
-	@Override
-	public List<TestProcObj> getTestProcs()
-	{
-		String fetchSql = "select ut.pk as pk, uth.name as name, 0 as appliedByUserFk, uth.projectTestProcPk as projectTestProcPk, "
-				+ " uth.projectPk as projectPk, uth.workstationPk as workstationPk, uth.unitPk as unitPk, "
-				+ " 0 as formPk, uth.createdBy, uth.createdDate "
-				+ " from unit_testproc ut"
-				+ " join unit_testproc_h uth on uth.unitTestProcFk = ut.pk and now() between uth.effectiveDateFrom and uth.effectiveDateTo "
-				+ " where 1 = 1 and uth.unitPk = ? ";
-		
-		return persistWrapper.readList(TestProcObj.class, fetchSql, 7095);
+	@Transactional
+	public void updateEquipment()  throws Exception{
+		Equipment eq = getEquipment(2741);
+		eq.setApprovedComment("Updating approved Comment from code.............");
+		persistWrapper.update(eq);
 	}
-	
-	@Override
-	public long createProject() throws Exception
+
+	@Transactional
+	public void deleteEquipment() throws Exception
 	{
-		Project p = new Project();
-		p.setPk(1368);
-		p.setAccountPk(2);
-		p.setContractNo("112233");
-		p.setCopyrightNotice("Notice");
-		p.setCreatedBy(110);
-		p.setManagerPk(110);
-		p.setLastUpdated(new Date());
-		
-		p = projectRepo.save(p);
-		
-		return p.getPk();
+		Equipment eq = getEquipment(2741);
+		persistWrapper.delete(eq);
 	}
-	
-	@Override
-	public void updateProject() throws Exception
-	{
-		Optional<Project> pO = projectRepo.findById(1368l);
-		if(pO.isPresent())
-		{
-			Project p = pO.get();
-			
-			p.setContractNo("33333");
-			projectRepo.save(p);
-		}
-	}
+
 }
