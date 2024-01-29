@@ -1,14 +1,19 @@
 package com.tathvatech.user.entity;
 
 
+import com.tathvatech.common.entity.AbstractEntity;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
+import java.io.Serializable;
 import java.util.Date;
 
+@Entity
 @Table(name = "equipment")
-public class Equipment
-{
-	private int pk;
+public class Equipment extends AbstractEntity implements Serializable {
+	@Id
+	private long pk;
 	private Integer equipmentTypeFk;
 	private String modelNo;
 	private String description;
@@ -24,12 +29,12 @@ public class Equipment
 	private Date approvedDate;
 	private String approvedComment;
 
-	public int getPk()
+	public long getPk()
 	{
 		return pk;
 	}
 
-	public void setPk(int pk)
+	public void setPk(long pk)
 	{
 		this.pk = pk;
 	}

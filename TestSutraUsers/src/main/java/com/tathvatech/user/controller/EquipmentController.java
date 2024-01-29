@@ -15,7 +15,14 @@ public class EquipmentController {
 
 	@Autowired
 	EquipmentService service;
-	
+
+	@RequestMapping("/getEquipment")
+	public Equipment getEquipment()
+	{
+		Equipment eq = service.getEquipment(1l);
+		return eq;
+	}
+
 	@RequestMapping("/equipmentlist")
 	public List<Equipment> getEquipmentList()
 	{
@@ -23,43 +30,25 @@ public class EquipmentController {
 		return eqList;
 	}
 
-	@RequestMapping("/projectlist")
-	public List<Project> getProjectList()
+	@RequestMapping("/allEquipments")
+	public List<Equipment> getAllEquipments()
 	{
-		List<Project> eqList = service.getProjects();
+		List<Equipment> eqList = service.getAllEquipments();
 		return eqList;
 	}
 
-	@RequestMapping("/testproclist")
-	public List<TestProcObj> getTestProcList()
-	{
-		List<TestProcObj> eqList = service.getTestProcs();
-		return eqList;
+	@RequestMapping("/addEquipment")
+	public void addEquipment() throws Exception{
+		service.addEquipment();
 	}
 
-	@RequestMapping("/createproject")
-	public String createProject()
-	{
-		try {
-			long val = service.createProject();
-			return val+"";
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return "Error";
-		}
+	@RequestMapping("/updateEquipment")
+	public void updateEquipment() throws Exception{
+		service.updateEquipment();
 	}
 
-	@RequestMapping("/updateproject")
-	public String updateProject()
-	{
-		try {
-			service.updateProject();
-			return "Success";
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return "Error";
-		}
+	@RequestMapping("/deleteEquipment")
+	public void deleteEquipment() throws Exception{
+		service.deleteEquipment();
 	}
 }
