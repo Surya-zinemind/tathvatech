@@ -10,6 +10,8 @@ public interface PersistWrapper {
 
 	<T> List<T> readList(final Class<T> objectClass, final String sql, final Object...parameters);
 
+	<T> T read(final Class<T> objectClass, final String sql, final Object...parameters);
+
 	List<? extends AbstractEntity> readAll(final Class<? extends AbstractEntity> objectClass);
 
 	long createEntity(AbstractEntity inObject) throws Exception;
