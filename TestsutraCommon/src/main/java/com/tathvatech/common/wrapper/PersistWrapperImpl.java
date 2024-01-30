@@ -27,6 +27,14 @@ public class PersistWrapperImpl implements PersistWrapper {
 	}
 
 	@Override
+	public <T> T read(final Class<T> objectClass, final String sql, final Object...parameters)
+	{
+		RowMapper<T> rowMapper = BeanPropertyRowMapper.newInstance(objectClass);
+		List<T> list = jdbcTemplate.query(sql, rowMapper, parameters);
+		return list.getLast();
+	}
+
+	@Override
 	public <T> List<T> readList(final Class<T> objectClass, final String sql, final Object...parameters)
 	{
 		RowMapper<T> rowMapper = BeanPropertyRowMapper.newInstance(objectClass);
