@@ -10,7 +10,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Hari
@@ -20,7 +21,7 @@ import org.apache.log4j.Logger;
  */
 public class AccountStatusTypes
 {
-	public static final Logger logger = Logger.getLogger(AccountStatusTypes.class);
+	public static final Logger logger = LoggerFactory.getLogger(AccountStatusTypes.class);
 	
     private String id;
     private String name;
@@ -29,7 +30,8 @@ public class AccountStatusTypes
 
     /**
      * @param id
-     * @param value
+     * @param name
+     *
      */
     public AccountStatusTypes(String id, String name)
     {

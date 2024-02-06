@@ -10,7 +10,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Hari
@@ -20,7 +22,7 @@ import org.apache.log4j.Logger;
  */
 public class SendResponseToTypes
 {
-	public static final Logger logger = Logger.getLogger(SendResponseToTypes.class);
+	public static final Logger logger = LoggerFactory.getLogger(SendResponseToTypes.class);
 	
     private String displayName;
     private String value;
@@ -29,8 +31,9 @@ public class SendResponseToTypes
     private static List itemList = new ArrayList();
 
     /**
-     * @param id
+     * @param displayName
      * @param value
+     * @Param notifyMethod
      */
     public SendResponseToTypes(String displayName, String value, String notifyMethod)
     {

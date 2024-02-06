@@ -1,8 +1,11 @@
 package com.tathvatech.user.entity;
 
+import com.tathvatech.common.entity.AbstractEntity;
+import jakarta.persistence.Entity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -11,9 +14,11 @@ import java.util.Date;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
+@Entity
 @Table(name="TAB_PROJECT")
-public class Project
+public class Project extends AbstractEntity implements Serializable
 {
+	@Id
 	private long pk;
 	private int accountPk;
 	private String projectName;

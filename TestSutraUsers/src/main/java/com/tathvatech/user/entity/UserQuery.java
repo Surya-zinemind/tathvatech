@@ -10,17 +10,15 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 
-import net.sf.persist.annotations.NoColumn;
-import net.sf.persist.annotations.NoTable;
+
 
 /**
  * @author Hari
  *
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
- * @param <T>
  */
-@NoTable
+
 public class UserQuery implements Serializable, Comparable<UserQuery>
 {
 	private int pk;
@@ -254,13 +252,13 @@ public class UserQuery implements Serializable, Comparable<UserQuery>
 		return firstName + " " + lastName + " / " + siteName +  ((User.STATUS_INACTIVE.equals(status))?" (Inactive)":"");
 	}
 
-	@NoColumn
+
     public void putAccountDate(String key, String value)
     {
     	accountData.put(key, value);
     }
     
-    @NoColumn
+
     public String getAccountData(String key)
     {
     	return (String)accountData.get(key);
