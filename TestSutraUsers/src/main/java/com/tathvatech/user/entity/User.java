@@ -12,14 +12,11 @@ import java.util.HashMap;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.tathvatech.common.common.EntitySelectorItem;
 import com.tathvatech.common.entity.AbstractEntity;
-import com.tathvatech.ts.caf.DateFormats;
-import com.tathvatech.ts.core.UserBase;
-import com.tathvatech.ts.core.common.EntitySelectorItem;
-import com.tathvatech.ts.core.sites.Site;
-import com.tathvatech.ts.core.sites.SiteCache;
-import com.tathvatech.ts.core.sites.SiteOID;
 
+
+import com.tathvatech.user.OID.SiteOID;
 import com.tathvatech.user.OID.UserOID;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

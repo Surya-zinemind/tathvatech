@@ -1,7 +1,7 @@
 package com.tathvatech.user.OID;
 
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.OID;
+import com.tathvatech.common.EntityTypeEnum;
+
 
 public class FormItemResponseOID extends OID{
 

@@ -9,11 +9,7 @@ import java.sql.Connection;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerFactory;
 
-import com.tathvatech.ts.caf.core.envr.EnvironmentInterface;
 
 
 public class ServiceAdaptor implements EnvironmentInterface

@@ -1,4 +1,4 @@
-package com.tathvatech.user.entity;
+package com.tathvatech.common.entity;
 
 
 public interface AttachmentIntf 

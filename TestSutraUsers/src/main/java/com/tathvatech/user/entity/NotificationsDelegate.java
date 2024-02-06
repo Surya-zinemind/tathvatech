@@ -5,6 +5,7 @@ import com.tathvatech.common.common.ApplicationProperties;
 import com.tathvatech.common.common.FileStoreManager;
 import com.tathvatech.common.common.TestSutraProperties;
 import com.tathvatech.common.email.EmailMessageInfo;
+import com.tathvatech.common.entity.AttachmentIntf;
 
 import java.io.File;
 import java.util.ArrayList;

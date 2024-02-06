@@ -12,9 +12,7 @@ import java.util.Timer;
 import com.tathvatech.common.common.ApplicationProperties;
 import com.tathvatech.common.email.EmailMessageInfo;
 import com.tathvatech.common.email.EmailServiceDelegate;
-import org.apache.log4j.Logger;
 
-import com.tathvatech.ts.caf.ApplicationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

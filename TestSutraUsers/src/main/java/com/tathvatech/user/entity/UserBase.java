@@ -5,7 +5,7 @@ import com.tathvatech.user.OID.UserOID;
 
 public interface UserBase {
 
-	int getPk();
+	long getPk();
 
 	String getUserName();
 

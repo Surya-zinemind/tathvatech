@@ -1,5 +1,7 @@
 package com.tathvatech.user.repository;
 
+import com.tathvatech.user.controller.AccountController;
+import com.tathvatech.user.entity.UserQuery;
 import org.apache.commons.collections4.map.ReferenceMap;
 
 import com.tathvatech.ts.core.accounts.delegate.AccountDelegate;
@@ -38,7 +40,7 @@ public class UserRepository {
 		UserQuery u = map.get(userPk);
 		if(u == null)
 		{
-			u = AccountDelegate.getUserQuery(userPk);
+			u = AccountController.getUserQuery(userPk);
 			if(u == null)
 				return null;
 			

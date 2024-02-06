@@ -71,10 +71,11 @@ public class UserTypes extends AbstractEntity implements Serializable
 	{
 		this.lastUpdated = lastUpdated;
 	}
-	
-	public static List<UserTypes> getAllUserTypes() throws Exception
+
+	//Not using in project, remove the code after testing it
+	/*public static List<UserTypes> getAllUserTypes() throws Exception
 	{
 		return PersistWrapper.readList(UserTypes.class, "select * from tab_usertypes");
-	}
+	}*/
 
 }

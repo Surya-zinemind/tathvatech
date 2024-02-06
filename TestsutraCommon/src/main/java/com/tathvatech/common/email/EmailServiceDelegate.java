@@ -2,7 +2,8 @@ package com.tathvatech.common.email;
 
 import java.sql.Connection;
 
-import com.tathvatech.ts.caf.util.ServiceLocator;
+import com.tathvatech.common.common.ServiceLocator;
+
 
 public class EmailServiceDelegate
 {

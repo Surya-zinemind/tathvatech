@@ -2,8 +2,7 @@ package com.tathvatech.user.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tathvatech.ts.tasks.TaskDefBean;
-import com.tathvatech.ts.tasks.TaskTypes;
+
 
 public class UserCreateRequestTaskBean extends TaskDefBean
 {

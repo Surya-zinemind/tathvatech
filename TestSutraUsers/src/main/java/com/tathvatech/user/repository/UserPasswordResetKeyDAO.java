@@ -3,8 +3,12 @@ package com.tathvatech.user.repository;
 import java.util.Date;
 import java.util.Random;
 
+import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.ts.caf.db.PersistWrapper;
 import com.tathvatech.ts.core.common.EStatusEnum;
+import com.tathvatech.user.OID.UserOID;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.entity.UserPasswordResetKey;
 
 public class UserPasswordResetKeyDAO
 {

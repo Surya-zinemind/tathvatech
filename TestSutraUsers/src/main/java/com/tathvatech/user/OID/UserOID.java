@@ -3,8 +3,8 @@ package com.tathvatech.user.OID;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.OID;
+import com.tathvatech.common.EntityTypeEnum;
+
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserOID extends OID{

@@ -6,6 +6,8 @@
  */
 package com.tathvatech.common.email;
 
+import com.tathvatech.common.entity.AttachmentIntf;
+
 import java.util.List;
 
 /**

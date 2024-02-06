@@ -22,6 +22,7 @@ import com.tathvatech.common.EntityTypeEnum;
 import com.tathvatech.common.common.ApplicationConstants;
 import com.tathvatech.common.common.ServiceLocator;
 import com.tathvatech.common.email.EmailMessageInfo;
+import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.common.exception.LoginFailedException;
 import com.tathvatech.common.licence.LicenseManager;
 import com.tathvatech.common.service.CommonServiceManager;
@@ -72,7 +73,7 @@ public class AccountService
         logger.info("new account object created, pk-" + accountPk);
 
         //now fetch the account back
-        account = persistWrapper.readByPrimaryKey(Account.class, accountPk);
+        account = (Account) persistWrapper.readByPrimaryKey(Account.class, accountPk);
 
         logger.info("Account fetched back - " + account);
 
@@ -100,7 +101,7 @@ public class AccountService
         //encrypt the password
         user.setPassword(OnewayEncryptUtils.encryptString(user.getPassword()));
 
-        int userPk = persistWrapper.createEntity(user);
+        long userPk = persistWrapper.createEntity(user);
 
         //now fetch the account back
         user = persistWrapper.readByPrimaryKey(User.class, userPk);

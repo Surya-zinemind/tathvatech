@@ -12,27 +12,15 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import com.tathvatech.ts.caf.ApplicationConstants;
-import com.tathvatech.ts.caf.ApplicationProperties;
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.caf.core.exception.LoginFailedException;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.caf.util.ServiceLocator;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.Account;
-import com.tathvatech.ts.core.accounts.AccountData;
+import com.tathvatech.common.Asynch.AsyncProcessor;
+import com.tathvatech.common.common.ApplicationConstants;
+import com.tathvatech.common.common.ServiceLocator;
+import com.tathvatech.common.email.EmailMessageInfo;
+import com.tathvatech.common.entity.AttachmentIntf;
+import com.tathvatech.user.entity.Account;
+import com.tathvatech.user.entity.User;
 import com.tathvatech.user.service.AccountService;
-import com.tathvatech.ts.core.accounts.AccountNote;
-import com.tathvatech.ts.core.accounts.NotificationsDelegate;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.accounts.UserOID;
-import com.tathvatech.ts.core.accounts.UserPasswordResetKey;
-import com.tathvatech.ts.core.accounts.UserQuery;
-import com.tathvatech.ts.core.common.utils.AsyncProcessor;
-import com.tathvatech.ts.core.common.utils.AttachmentIntf;
-import com.tathvatech.ts.core.common.utils.EmailMessageInfo;
-import com.tathvatech.ts.core.common.utils.EmailServiceManager;
-import com.tathvatech.ts.core.survey.SurveyPerms;
+
 
 /**
  * @author Hari

@@ -6,11 +6,8 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.tathvatech.ts.core.authorization.Action;
-import com.tathvatech.ts.core.authorization.Role;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.OID;
-import com.tathvatech.ts.core.part.ProjectRolesEnum;
+import com.tathvatech.common.EntityTypeEnum;
+
 
 public class ProjectOID extends OID{
 

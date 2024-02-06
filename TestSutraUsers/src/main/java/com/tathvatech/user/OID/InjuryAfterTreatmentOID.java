@@ -2,6 +2,7 @@ package com.tathvatech.user.OID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.tathvatech.common.EntityTypeEnum;
 
 public class InjuryAfterTreatmentOID extends OID {
 
