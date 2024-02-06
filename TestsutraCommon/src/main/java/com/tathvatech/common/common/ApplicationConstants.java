@@ -17,7 +17,7 @@ package com.tathvatech.common.common;
  */
 public class ApplicationConstants
 {
-    public static final int SEQID_FETCH_LOTSIZE = new Integer(ApplicationProperties.getProperty("config/SeqIdFetchLotSize")).intValue();
+    public static final int SEQID_FETCH_LOTSIZE = Integer.parseInt(ApplicationProperties.getProperty("config/SeqIdFetchLotSize"));
 
     //email address from which messages are send to customers.
     public static final String SERVICE_EMAIL_ADDRESS = ApplicationProperties.getProperty("config/email/ServiceEmailAddress");

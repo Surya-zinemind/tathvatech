@@ -20,6 +20,7 @@ import com.tathvatech.ts.core.sites.Site;
 import com.tathvatech.ts.core.sites.SiteCache;
 import com.tathvatech.ts.core.sites.SiteOID;
 
+import com.tathvatech.user.OID.UserOID;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;

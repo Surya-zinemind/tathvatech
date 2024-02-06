@@ -1,4 +1,4 @@
-package com.tathvatech.user.entity;
+package com.tathvatech.user.OID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

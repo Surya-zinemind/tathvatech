@@ -29,6 +29,7 @@ import com.tathvatech.common.utils.OnewayEncryptUtils;
 import com.tathvatech.common.utils.SequenceIdGenerator;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.user.OID.UserOID;
 import com.tathvatech.user.entity.*;
 import com.tathvatech.user.repository.UserPasswordResetKeyDAO;
 import org.apache.commons.lang3.RandomStringUtils;

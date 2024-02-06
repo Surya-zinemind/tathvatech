@@ -11,6 +11,7 @@ import java.util.Date;
 
 import com.tathvatech.common.entity.AbstractEntity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 
@@ -24,6 +25,7 @@ import jakarta.persistence.Table;
 @Table(name="TAB_ATTACHMENT")
 public class Attachment  extends AbstractEntity   implements AttachmentIntf , Serializable
 {
+	@Id
 	private long pk;
 	private int objectPk;
 	private int objectType;

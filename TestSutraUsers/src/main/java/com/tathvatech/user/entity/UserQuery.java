@@ -6,6 +6,8 @@
  */
 package com.tathvatech.user.entity;
 
+import com.tathvatech.user.OID.UserOID;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;

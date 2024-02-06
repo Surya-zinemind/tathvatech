@@ -1,15 +1,15 @@
 package com.tathvatech.user.entity;
 
+import com.tathvatech.common.Asynch.AsyncProcessor;
+import com.tathvatech.common.common.ApplicationProperties;
+import com.tathvatech.common.common.FileStoreManager;
+import com.tathvatech.common.common.TestSutraProperties;
+import com.tathvatech.common.email.EmailMessageInfo;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.tathvatech.ts.caf.ApplicationProperties;
-import com.tathvatech.ts.caf.TestSutraProperties;
-import com.tathvatech.ts.core.common.FileStoreManager;
-import com.tathvatech.ts.core.common.utils.AsyncProcessor;
-import com.tathvatech.ts.core.common.utils.AttachmentIntf;
-import com.tathvatech.ts.core.common.utils.EmailMessageInfo;
 
 public class NotificationsDelegate {
 
