@@ -18,11 +18,11 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 
 import com.tathvatech.common.Asynch.AsyncProcessor;
-import com.tathvatech.common.EntityTypeEnum;
 import com.tathvatech.common.common.ApplicationConstants;
 import com.tathvatech.common.common.ServiceLocator;
 import com.tathvatech.common.email.EmailMessageInfo;
 import com.tathvatech.common.entity.AttachmentIntf;
+import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.common.exception.LoginFailedException;
 import com.tathvatech.common.licence.LicenseManager;
 import com.tathvatech.common.service.CommonServiceManager;
@@ -31,6 +31,7 @@ import com.tathvatech.common.utils.SequenceIdGenerator;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.user.OID.UserOID;
+import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.*;
 import com.tathvatech.user.repository.UserPasswordResetKeyDAO;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -104,7 +105,7 @@ public class AccountService
         long userPk = persistWrapper.createEntity(user);
 
         //now fetch the account back
-        user = persistWrapper.readByPrimaryKey(User.class, userPk);
+        user = (User)persistWrapper.readByPrimaryKey(User.class, userPk);
 
         return user;
 	}
@@ -177,10 +178,10 @@ public class AccountService
             user.setPassPin(OnewayEncryptUtils.encryptString(_user.getPassPin()));
         	
 
-        int userPk = persistWrapper.createEntity(user);
+        long userPk = persistWrapper.createEntity(user);
 
         //now fetch the account back
-        user = persistWrapper.readByPrimaryKey(User.class, userPk);
+        user = (User)persistWrapper.readByPrimaryKey(User.class, userPk);
 
         //if the user is of restricted type, make sure that it has no users assigned to it.
         String userType = user.getUserType();
@@ -255,7 +256,7 @@ public class AccountService
         persistWrapper.update(user);
 
         //now fetch the account back
-        user = persistWrapper.readByPrimaryKey(User.class,user.getPk());
+        user = (User)persistWrapper.readByPrimaryKey(User.class,user.getPk());
         
         
         
@@ -295,14 +296,14 @@ public class AccountService
         persistWrapper.update(user);
 
         //now fetch the account back
-        user = persistWrapper.readByPrimaryKey(User.class, user.getPk());
+        user = (User)persistWrapper.readByPrimaryKey(User.class, user.getPk());
 
         return user;
 	}
 
 	public  void activateUser(int userPk)throws Exception
     {
-        User user = persistWrapper.readByPrimaryKey(User.class, userPk);
+        User user = (User)persistWrapper.readByPrimaryKey(User.class, userPk);
 
         if(user != null)
         {
@@ -322,7 +323,7 @@ public class AccountService
 	 */
     public  void deleteAddonUser(int userPk)throws Exception
     {
-    	User user = persistWrapper.readByPrimaryKey(User.class, userPk);
+    	User user =(User) persistWrapper.readByPrimaryKey(User.class, userPk);
 
         if(user == null)
         {
@@ -370,7 +371,7 @@ public class AccountService
 
     public void deactivateUser(int userPk)throws Exception 
     {
-    	User user = persistWrapper.readByPrimaryKey(User.class, userPk);
+    	User user = (User)persistWrapper.readByPrimaryKey(User.class, userPk);
 
         if(user == null)
         {
@@ -425,7 +426,7 @@ public class AccountService
         user.setAccountPk(account.getPk());
         user.setStatus(User.STATUS_ACTIVE);
 
-	    int newPk = persistWrapper.createEntity(user);
+	    long newPk = persistWrapper.createEntity(user);
 
 	}
 
@@ -520,7 +521,7 @@ public class AccountService
 
 	public  User getUser(int userPk)
 	{
-    	return persistWrapper.readByPrimaryKey(User.class, userPk);
+    	return (User)persistWrapper.readByPrimaryKey(User.class, userPk);
 	}
 	
     /**
@@ -581,7 +582,7 @@ public class AccountService
      */
     public  Account getAccount(int accountPk) throws Exception
     {
-        return persistWrapper.readByPrimaryKey(Account.class, accountPk);
+        return (Account)persistWrapper.readByPrimaryKey(Account.class, accountPk);
     }
 
 	public  Account getAccountByAccountNo(String accountNo) throws Exception
@@ -837,9 +838,9 @@ public class AccountService
 		persistWrapper.createEntity(alert);
 	}
 
-	public  void dismissAlert(UserContext context, String alertPk)throws Exception
+	public  void dismissAlert(UserContext context, long alertPk)throws Exception
 	{
-		AccountAlert alert = persistWrapper.readByPrimaryKey(AccountAlert.class, alertPk);
+		AccountAlert alert = (AccountAlert)persistWrapper.readByPrimaryKey(AccountAlert.class, alertPk);
 		alert.setStatus(AccountAlert.STATUS_DISMISSED);
 
 		persistWrapper.update(alert);
@@ -852,8 +853,7 @@ public class AccountService
         persistWrapper.update(user);
 	}
 
-	public  void updateAccount(Account account)
-	{
+	public  void updateAccount(Account account) throws Exception {
 		persistWrapper.update(account);
 	}
 
@@ -1110,13 +1110,12 @@ public class AccountService
         }
 	}
 	
-	public  User updateUserEmail(UserContext context, String newEmail)
-	{
-		User user = persistWrapper.readByPrimaryKey(User.class, context.getUser().getPk());
+	public  User updateUserEmail(UserContext context, String newEmail) throws Exception {
+		User user = (User)persistWrapper.readByPrimaryKey(User.class, context.getUser().getPk());
 		user.setEmail(newEmail);
 		persistWrapper.update(user);
 
-		user = persistWrapper.readByPrimaryKey(User.class, context.getUser().getPk());
+		user = (User)persistWrapper.readByPrimaryKey(User.class, context.getUser().getPk());
 		
 		return user;
 	}

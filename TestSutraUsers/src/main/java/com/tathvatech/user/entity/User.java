@@ -12,6 +12,7 @@ import java.util.HashMap;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.tathvatech.common.common.DateFormats;
 import com.tathvatech.common.common.EntitySelectorItem;
 import com.tathvatech.common.entity.AbstractEntity;
 
@@ -38,7 +39,7 @@ public class User extends AbstractEntity implements UserBase, Serializable, Enti
 
 	@Id
 	private long pk;
-	private int accountPk;
+	private long accountPk;
 	private int sitePk;
 	private String userType;
 	private String status;
@@ -67,12 +68,12 @@ public class User extends AbstractEntity implements UserBase, Serializable, Enti
 		this.pk = pk;
 	}
 
-	public int getAccountPk()
+	public long getAccountPk()
 	{
 		return accountPk;
 	}
 
-	public void setAccountPk(int accountPk)
+	public void setAccountPk(long accountPk)
 	{
 		this.accountPk = accountPk;
 	}

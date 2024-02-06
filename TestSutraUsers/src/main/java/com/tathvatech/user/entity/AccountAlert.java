@@ -30,7 +30,7 @@ public class AccountAlert extends AbstractEntity implements Serializable
 
 	@Id
     private long pk;
-    private int accountPk;
+    private long accountPk;
     private Date submitTime;
     private String text;
     private String status;
@@ -45,11 +45,11 @@ public class AccountAlert extends AbstractEntity implements Serializable
 		this.pk = pk;
 	}
 
-	public int getAccountPk()
+	public long getAccountPk()
 	{
 		return accountPk;
 	}
-	public void setAccountPk(int accountPk)
+	public void setAccountPk(long accountPk)
 	{
 		this.accountPk = accountPk;
 	}

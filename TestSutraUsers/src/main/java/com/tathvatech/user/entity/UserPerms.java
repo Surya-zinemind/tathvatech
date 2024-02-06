@@ -17,7 +17,7 @@ public class UserPerms extends AbstractEntity implements Serializable
 	private long pk;
 	private int objectPk;
 	private int objectType;
-	private int userPk;
+	private long userPk;
 	private String role;
 	private Date lastUpdated;
 
@@ -46,11 +46,11 @@ public class UserPerms extends AbstractEntity implements Serializable
 	{
 		this.objectType = objectType;
 	}
-	public int getUserPk()
+	public long getUserPk()
 	{
 		return userPk;
 	}
-	public void setUserPk(int userPk)
+	public void setUserPk(long userPk)
 	{
 		this.userPk = userPk;
 	}

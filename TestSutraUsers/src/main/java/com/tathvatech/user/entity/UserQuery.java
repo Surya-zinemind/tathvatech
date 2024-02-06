@@ -285,7 +285,7 @@ public class UserQuery implements Serializable, Comparable<UserQuery>
 		}
 	}
     
-	static String sql = "select u.*, concat(u.firstName, ' ' , u.lastName)as fullName, site.name as siteName from TAB_USER u, site where u.sitePk = site.pk";
+	public static String sql = "select u.*, concat(u.firstName, ' ' , u.lastName)as fullName, site.name as siteName from TAB_USER u, site where u.sitePk = site.pk";
 
 	
 	@Override
