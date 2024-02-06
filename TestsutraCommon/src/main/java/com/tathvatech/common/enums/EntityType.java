@@ -1,4 +1,4 @@
-package com.tathvatech.common;
+package com.tathvatech.common.enums;
 
 public interface EntityType 
 {

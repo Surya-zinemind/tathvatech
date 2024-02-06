@@ -1,6 +1,6 @@
-package com.tathvatech.common;
+package com.tathvatech.common.enums;
 
-public enum EntityTypeEnum implements EntityType{
+public enum EntityTypeEnum implements EntityType {
 	Form(1),
     Response(2),
     Project(3),
