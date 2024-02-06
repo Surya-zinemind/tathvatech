@@ -1,0 +1,49 @@
+package com.tathvatech.user.repository;
+
+import org.apache.commons.collections4.map.ReferenceMap;
+
+import com.tathvatech.ts.core.accounts.delegate.AccountDelegate;
+
+public class UserRepository {
+
+	private static UserRepository instance;
+	private static long EXPIRY = 1000*60*15; //15 mins
+	private boolean isReportRunning = false;
+	
+	private ReferenceMap<Integer, UserQuery> map;
+	
+	private UserRepository()
+	{
+		map = new ReferenceMap<>();
+	}
+	
+	public static UserRepository getInstance()
+	{
+		if(instance == null)
+		{
+			synchronized (UserRepository.class) 
+			{
+				if(instance == null)
+				{
+					instance = new UserRepository();
+				}
+			}
+		}
+		
+		return instance;
+	}
+	
+	public UserQuery getUser(int userPk)
+	{
+		UserQuery u = map.get(userPk);
+		if(u == null)
+		{
+			u = AccountDelegate.getUserQuery(userPk);
+			if(u == null)
+				return null;
+			
+			map.put(userPk, u);
+		}
+		return u;
+	}
+}
