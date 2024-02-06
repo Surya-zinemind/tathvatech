@@ -43,12 +43,12 @@ import org.springframework.stereotype.Service;
  * Window - Preferences - Java - Code Style - Code Templates
  */
 @Service
-public class AccountManager
+public class AccountService
 {
-    private static final Logger logger = LoggerFactory.getLogger(AccountManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(AccountService.class);
 	private final PersistWrapper persistWrapper;
 
-    public AccountManager(PersistWrapper persistWrapper) {
+    public AccountService(PersistWrapper persistWrapper) {
         this.persistWrapper = persistWrapper;
     }
 
@@ -67,7 +67,7 @@ public class AccountManager
 
         logger.info("creating a new account object");
 
-        int accountPk = persistWrapper.createEntity(account);
+        long accountPk = persistWrapper.createEntity(account);
         logger.info("new account object created, pk-" + accountPk);
 
         //now fetch the account back

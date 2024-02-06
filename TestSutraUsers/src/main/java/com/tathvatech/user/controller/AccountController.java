@@ -21,7 +21,7 @@ import com.tathvatech.ts.caf.util.ServiceLocator;
 import com.tathvatech.ts.core.UserContext;
 import com.tathvatech.ts.core.accounts.Account;
 import com.tathvatech.ts.core.accounts.AccountData;
-import com.tathvatech.user.service.AccountManager;
+import com.tathvatech.user.service.AccountService;
 import com.tathvatech.ts.core.accounts.AccountNote;
 import com.tathvatech.ts.core.accounts.NotificationsDelegate;
 import com.tathvatech.ts.core.accounts.User;
@@ -40,7 +40,7 @@ import com.tathvatech.ts.core.survey.SurveyPerms;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public class AccountDelegate
+public class AccountController
 {
 
 	public static User createNewAccount(UserContext context, Account accVal, User uVal)throws Exception
@@ -48,12 +48,12 @@ public class AccountDelegate
         Connection con = null;
         try
         {
-            Account account = AccountManager.createNewAccount(accVal);
+            Account account = AccountService.createNewAccount(accVal);
 
             uVal.setAccountPk(account.getPk());
             uVal.setStatus(User.STATUS_ACTIVE);
 
-            User user = AccountManager.createPrimaryUser(uVal);
+            User user = AccountService.createPrimaryUser(uVal);
 
 
             //and add that info into the AccountData
@@ -63,7 +63,7 @@ public class AccountDelegate
             PersistWrapper.createEntity(aData);
 
             //create the default Guest Device for this account
-            AccountManager.createGuestUserForAccount(account);
+            AccountService.createGuestUserForAccount(account);
 
             con.commit();
 
@@ -94,7 +94,7 @@ public class AccountDelegate
 
             Account account = (Account)context.getAccount();
 
-	        User user = AccountManager.createAddonUser(context, userVal, profilePicAttachment, sendWelcomeKit);
+	        User user = AccountService.createAddonUser(context, userVal, profilePicAttachment, sendWelcomeKit);
 
 	        con.commit();
         }
@@ -116,7 +116,7 @@ public class AccountDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-            User user = AccountManager.updateCurrentUserProfile(context, userVal);
+            User user = AccountService.updateCurrentUserProfile(context, userVal);
 
             con.commit();
 
@@ -144,7 +144,7 @@ public class AccountDelegate
 
             userVal.setStatus(User.STATUS_ACTIVE);
 
-            User user = AccountManager.saveAddonUser(context, userVal, profilePicAttachment);
+            User user = AccountService.saveAddonUser(context, userVal, profilePicAttachment);
 
             con.commit();
         }
@@ -166,7 +166,7 @@ public class AccountDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-            AccountManager.deleteAddonUser(userPk);
+            AccountService.deleteAddonUser(userPk);
 
             con.commit();
         }
@@ -188,7 +188,7 @@ public class AccountDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-            AccountManager.activateUser(userPk);
+            AccountService.activateUser(userPk);
 
             con.commit();
         }
@@ -237,7 +237,7 @@ public class AccountDelegate
      */
     public static User login(String accountNo, String userName, String password)throws Exception
     {
-        User user = AccountManager.login(accountNo, userName, password);
+        User user = AccountService.login(accountNo, userName, password);
         
         if(user != null && User.USER_OPERATOR.equals(user.getUserType()))
         {
@@ -259,7 +259,7 @@ public class AccountDelegate
         User user = null;
         try
 		{
-            user = AccountManager.loginWithPassPin(accountNo, userName, password);
+            user = AccountService.loginWithPassPin(accountNo, userName, password);
 		}
         catch (LoginFailedException e)
         {
@@ -274,7 +274,7 @@ public class AccountDelegate
         {
         	try
 			{
-            	user = AccountManager.login(accountNo, userName, password);
+            	user = AccountService.login(accountNo, userName, password);
 			} 
             catch (LoginFailedException e)
             {
@@ -297,7 +297,7 @@ public class AccountDelegate
      */
     public static Account getAccount(int accountPk)throws Exception
     {
-        Account account = AccountManager.getAccount(accountPk);
+        Account account = AccountService.getAccount(accountPk);
         if(account != null)
         {
 	       	List dataList = PersistWrapper.readList(AccountData.class, "select * from TAB_ACCOUNT_DATA where accountPk=?", account.getPk());
@@ -312,7 +312,7 @@ public class AccountDelegate
 
 	public static Account getAccountByAccountNo(String accountNo) throws Exception
 	{
-        Account account = AccountManager.getAccountByAccountNo(accountNo);
+        Account account = AccountService.getAccountByAccountNo(accountNo);
         if(account != null)
         {
 	       	List dataList = PersistWrapper.readList(AccountData.class, "select * from TAB_ACCOUNT_DATA where accountPk=?", account.getPk());
@@ -332,12 +332,12 @@ public class AccountDelegate
      */
     public static User getUser(int userPk)
     {
-    	return AccountManager.getUser(userPk);
+    	return AccountService.getUser(userPk);
     }
 
     public static User findPrimaryUserByUserName(String userName)throws Exception
     {
-        User user = AccountManager.findPrimaryUserByUserName(userName);
+        User user = AccountService.findPrimaryUserByUserName(userName);
 
        	return user;
     }
@@ -349,28 +349,28 @@ public class AccountDelegate
 
 	public static User getPrimaryUser()throws Exception
 	{
-		return (User)AccountManager.getPrimaryUser();
+		return (User) AccountService.getPrimaryUser();
 	}
 
 	public static List getAllUserPermissionsOnSurvey(UserContext context, String surveyPk)throws Exception
 	{
-		return AccountManager.getAllUserPermissionsOnSurvey(context, surveyPk);
+		return AccountService.getAllUserPermissionsOnSurvey(context, surveyPk);
 	}
 
 	public static SurveyPerms getUserPermissionsOnSurvey(UserContext context, int userPk, int surveyPk)throws Exception
 	{
-		return AccountManager.getUserPermissionsOnSurvey(context, userPk, surveyPk);
+		return AccountService.getUserPermissionsOnSurvey(context, userPk, surveyPk);
 	}
 
 	public static void removeAllPermissionsOnSurvey(UserContext context, int surveyPk)throws Exception
 	{
-		AccountManager.removeAllPermissionsOnSurvey(context, surveyPk);
+		AccountService.removeAllPermissionsOnSurvey(context, surveyPk);
 	}
 
 	public static List getAllUserPermissions(UserContext context, int userPk)throws Exception
 	{
 		// TODO Auto-generated method stub
-		return AccountManager.getAllUserPermissions(context, userPk);
+		return AccountService.getAllUserPermissions(context, userPk);
 	}
 
 	public static void setUserPermissions(UserContext context, int userPk, List permsList)throws Exception
@@ -381,7 +381,7 @@ public class AccountDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-    		AccountManager.setUserPermissions(context, userPk, permsList);
+    		AccountService.setUserPermissions(context, userPk, permsList);
 
             con.commit();
         }
@@ -403,7 +403,7 @@ public class AccountDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-    		AccountManager.setSurveyPermissions(context, surveyPk, permsList);
+    		AccountService.setSurveyPermissions(context, surveyPk, permsList);
 
             con.commit();
         }
@@ -436,8 +436,8 @@ public class AccountDelegate
             	throw new Exception();
             }
 
-    		AccountManager.removeUsersFromManager(context, managerPk);
-    		AccountManager.addUsersToManager(context, managerPk, userPks);
+    		AccountService.removeUsersFromManager(context, managerPk);
+    		AccountService.addUsersToManager(context, managerPk, userPks);
 
             con.commit();
         }
@@ -464,7 +464,7 @@ public class AccountDelegate
             con.setAutoCommit(false);
 
 //            PaymentManager.invalidateAccountSubscriptions(acc);
-            AccountManager.cancelAccount(acc);
+            AccountService.cancelAccount(acc);
 
             con.commit();
         }
@@ -489,7 +489,7 @@ public class AccountDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-            AccountManager.activateAccount(acc);
+            AccountService.activateAccount(acc);
 
             con.commit();
 	    }
@@ -515,7 +515,7 @@ public class AccountDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-            AccountManager.sendPassword(context, userId);
+            AccountService.sendPassword(context, userId);
 
             con.commit();
 	    }
@@ -562,7 +562,7 @@ public class AccountDelegate
 
 	public static void markAccountAsPaymentPending(Account account)throws Exception
 	{
-    	AccountManager.markAccountAsPaymentPending(account);
+    	AccountService.markAccountAsPaymentPending(account);
 	}
 
 	public static void addAccountNote(UserContext context, AccountNote noteValue)throws Exception
@@ -573,7 +573,7 @@ public class AccountDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-    		AccountManager.addAccountNote(context, noteValue);
+    		AccountService.addAccountNote(context, noteValue);
 
             con.commit();
 	    }
@@ -596,7 +596,7 @@ public class AccountDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-    		AccountManager.addAccountAlert(account, text);
+    		AccountService.addAccountAlert(account, text);
 
             con.commit();
 	    }
@@ -619,7 +619,7 @@ public class AccountDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-    		AccountManager.changePassword(context, currentPassword, newPassword);
+    		AccountService.changePassword(context, currentPassword, newPassword);
 
             con.commit();
 	    }
@@ -641,7 +641,7 @@ public class AccountDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-    		AccountManager.changePassPin(context, currentPassPin, newPassPin);
+    		AccountService.changePassPin(context, currentPassPin, newPassPin);
 
             con.commit();
 	    }
@@ -665,13 +665,13 @@ public class AccountDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-    		AccountManager.adminChangePassword(context, user, password);
+    		AccountService.adminChangePassword(context, user, password);
 
             con.commit();
             
             if(notifyUser)
             {
-            	user = AccountManager.getUser(user.getPk());
+            	user = AccountService.getUser(user.getPk());
             	NotificationsDelegate.notifyPasswordReset(user, password);
             }
 	    }
@@ -694,13 +694,13 @@ public class AccountDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-    		AccountManager.adminChangePassPin(context, user, passPin);
+    		AccountService.adminChangePassPin(context, user, passPin);
 
             con.commit();
             
             if(notifyUser)
             {
-            	user = AccountManager.getUser(user.getPk());
+            	user = AccountService.getUser(user.getPk());
             	NotificationsDelegate.notifyPinReset(user, passPin);
             }
 	    }
@@ -717,27 +717,27 @@ public class AccountDelegate
 
 	public static void dismissAlert(UserContext context, String alertPk) throws Exception
 	{
-		AccountManager.dismissAlert(context, alertPk);
+		AccountService.dismissAlert(context, alertPk);
 	}
 
 	public static User getGuestUser(Account account)throws Exception
 	{
-		return AccountManager.getGuestUser(account);
+		return AccountService.getGuestUser(account);
 	}
 
 	public static User getUser(String userName)
 	{
-        return AccountManager.getUser(userName);
+        return AccountService.getUser(userName);
 	}
 
     public static List<User> getFormAssignableUsers()throws Exception
     {
-    	return AccountManager.getFormAssignableUsers();
+    	return AccountService.getFormAssignableUsers();
     }
 
     public static List getUserAssignableUsers(UserContext context)throws Exception
     {
-    	return AccountManager.getUserAssignableUsers(context);
+    	return AccountService.getUserAssignableUsers(context);
     }
 
 //	public static List getUserAssignedUsers(UserContext context)throws Exception
@@ -761,28 +761,28 @@ public class AccountDelegate
 
     public static long getCurrentAccountUserCount(UserContext context)throws Exception
     {
-        return AccountManager.getCurrentAccountUserCount(context);
+        return AccountService.getCurrentAccountUserCount(context);
     }
 
 	public static void changeAddonUserPassword(UserContext context,
 			User user, String password)throws Exception
 	{
-		AccountManager.changeAddonUserPassword(context, user, password);
+		AccountService.changeAddonUserPassword(context, user, password);
 	}
 
 	public static void updateAccount(Account account)
 	{
-		AccountManager.updateAccount(account);
+		AccountService.updateAccount(account);
 	}
 
 	public static List<User> getUserList()throws Exception
 	{
-		return AccountManager.getUserList();
+		return AccountService.getUserList();
 	}
 
 	public static List<User> getValidUserList()
 	{
-		return AccountManager.getValidUserList();
+		return AccountService.getValidUserList();
 	}
 
 	public static void setUserPermissions(int entityPk, int entityType, Collection userList, String role)throws Exception
@@ -793,7 +793,7 @@ public class AccountDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-    	    AccountManager.setUserPermissions(entityPk, entityType, userList, role);
+    	    AccountService.setUserPermissions(entityPk, entityType, userList, role);
         }
         catch(Exception ex)
         {
@@ -816,7 +816,7 @@ public class AccountDelegate
 
             for (int i = 0; i < userLists.length; i++)
 			{
-        	    AccountManager.setUserPermissions(projectPk, userLists[i], roles[i]);
+        	    AccountService.setUserPermissions(projectPk, userLists[i], roles[i]);
 			}
         }
         catch(Exception ex)
@@ -832,12 +832,12 @@ public class AccountDelegate
 	
 	public static boolean isUserInRole(UserOID userOID, int objectPk, int objectType, String[] roles)
 	{
-		return AccountManager.isUserInRole(userOID, objectPk, objectType, roles);
+		return AccountService.isUserInRole(userOID, objectPk, objectType, roles);
 	}
 
 	public static List<User> getACLs(int pk, int oBJECTTYPE_PROJECT, String rOLE_MANAGER) throws Exception
 	{
-		return AccountManager.getACLs(pk, oBJECTTYPE_PROJECT, rOLE_MANAGER);
+		return AccountService.getACLs(pk, oBJECTTYPE_PROJECT, rOLE_MANAGER);
 	}
 	
 	/**
@@ -850,7 +850,7 @@ public class AccountDelegate
 	public static int getUserCountfromTypeAndStatus(String userType,
 			String status) throws Exception {
 		
-		return AccountManager.getUserCountfromTypeAndStatus(userType, status);
+		return AccountService.getUserCountfromTypeAndStatus(userType, status);
 	}
 
 	public static void changeUserLicenseType(int userPk) throws Exception 
@@ -861,7 +861,7 @@ public class AccountDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-    		AccountManager.changeUserLicenseType(userPk);
+    		AccountService.changeUserLicenseType(userPk);
 
             con.commit();
             
@@ -875,12 +875,12 @@ public class AccountDelegate
 
 	public static List<User> searchUser(String searchString) 
 	{
-		return AccountManager.searchUser(searchString);
+		return AccountService.searchUser(searchString);
 	}
 
 	public static UserQuery getUserQuery(int userPk) 
 	{
-		return AccountManager.getUserQuery(userPk);
+		return AccountService.getUserQuery(userPk);
 	}
 
 	public static void createVerificationCodeForPasswordReset(User userToResetPasswordFor, User sendEmailTo)throws Exception
@@ -892,7 +892,7 @@ public class AccountDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-    		UserPasswordResetKey key = AccountManager.createUserPasswordResetKey(userToResetPasswordFor, sendEmailTo);
+    		UserPasswordResetKey key = AccountService.createUserPasswordResetKey(userToResetPasswordFor, sendEmailTo);
     		
 
             StringBuffer messageTextSb = new StringBuffer("Hi ");
@@ -937,7 +937,7 @@ public class AccountDelegate
 	public static void resetUserPasswordWithVerificationCode(User user, String verificationKey, String newPassword) throws Exception 
 	{
 		//transaction managed inside the manager
-    	AccountManager.resetUserPasswordWithVerificationCode(user, verificationKey, newPassword);
+    	AccountService.resetUserPasswordWithVerificationCode(user, verificationKey, newPassword);
 	}
 	
 	public static User updateUserEmail(UserContext context, String newEmail) throws Exception
@@ -948,7 +948,7 @@ public class AccountDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-    		User user = AccountManager.updateUserEmail(context, newEmail);
+    		User user = AccountService.updateUserEmail(context, newEmail);
 
             con.commit();
             
