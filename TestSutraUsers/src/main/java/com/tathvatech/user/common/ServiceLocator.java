@@ -2,9 +2,11 @@
 *Copyright (C) 2002 - 2003. All rights reserved.
 */
 
-package com.tathvatech.common.common;
+package com.tathvatech.user.common;
 
 
+import com.tathvatech.common.common.EnvironmentInterface;
+import com.tathvatech.common.common.ServiceAdaptor;
 
 public class ServiceLocator
 {

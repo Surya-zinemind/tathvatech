@@ -1,4 +1,4 @@
-package com.tathvatech.user.common;
+package com.tathvatech.common.common;
 
 
 public interface SecurityManagerBase {
