@@ -17,10 +17,11 @@ import com.tathvatech.common.common.ApplicationConstants;
 import com.tathvatech.common.common.ServiceLocator;
 import com.tathvatech.common.email.EmailMessageInfo;
 import com.tathvatech.common.entity.AttachmentIntf;
+import com.tathvatech.common.exception.AppException;
+import com.tathvatech.common.exception.LoginFailedException;
+import com.tathvatech.user.OID.UserOID;
 import com.tathvatech.user.common.UserContext;
-import com.tathvatech.user.entity.Account;
-import com.tathvatech.user.entity.AccountData;
-import com.tathvatech.user.entity.User;
+import com.tathvatech.user.entity.*;
 import com.tathvatech.user.service.AccountService;
 
 
@@ -231,7 +232,7 @@ public class AccountController
         
         if(user != null && User.USER_OPERATOR.equals(user.getUserType()))
         {
-        	throw new AppException("User is not authorized to login.");
+        	throw new AppException()n("User is not authorized to login.");
         }
         return user;
     }

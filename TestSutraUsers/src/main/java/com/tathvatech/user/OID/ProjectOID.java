@@ -1,12 +1,13 @@
 package com.tathvatech.user.OID;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.user.enums.ProjectRolesEnum;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 public class ProjectOID extends OID{

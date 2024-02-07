@@ -13,9 +13,13 @@ import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
+import com.tathvatech.common.common.EntityVersionFilter;
+import com.tathvatech.common.common.FileStoreManager;
 import com.tathvatech.common.common.ServiceLocator;
+import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.common.entity.EntityConfigData;
 import com.tathvatech.common.entity.EntityVersion;
+import com.tathvatech.common.exception.AppException;
 import org.apache.commons.codec.binary.Base64;
 
 import com.tathvatech.ts.caf.core.exception.AppException;
@@ -345,7 +349,7 @@ public class CommonServicesDelegate
 	}
 
 	public static void saveAttachments(UserContext context, int objectPk, int objectType, String attachmentContext, 
-			List<AttachmentIntf> attachedFiles) throws Exception 
+			List<AttachmentIntf> attachedFiles) throws Exception
 	{
         Connection con = null;
         try
