@@ -25,7 +25,7 @@ public class UserPasswordResetKeyDAO
 		key.setVerificationCode(""+new Random().nextInt(9999));
 		key.setUserFk(user.getPk());
 		key.setKeySentToUserFk(keysentToUser.getPk());
-		int pk = PersistWrapper.createEntity(key);
+		long pk = PersistWrapper.createEntity(key);
 		
 		return PersistWrapper.readByPrimaryKey(UserPasswordResetKey.class, pk);
 	}

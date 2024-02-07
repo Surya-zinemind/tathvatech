@@ -6,13 +6,13 @@
  */
 package com.tathvatech.user.entity;
 
-import java.io.Serializable;
-import java.util.Date;
-
 import com.tathvatech.common.entity.AbstractEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
+import java.io.Serializable;
+import java.util.Date;
 
 
 /**
@@ -30,10 +30,10 @@ public class UserPasswordResetKey extends AbstractEntity implements Serializable
 {
 	@Id
 	private long pk;
-	private int userFk;
+	private long userFk;
 	private String verificationCode;
 	private Date createdDate;
-	private int keySentToUserFk;
+	private long keySentToUserFk;
 	private int noOfTries;
 	private int estatus;
 	private int resetDone;
@@ -48,13 +48,11 @@ public class UserPasswordResetKey extends AbstractEntity implements Serializable
 		this.pk = pk;
 	}
 
-	public int getUserFk()
-	{
+	public long getUserFk() {
 		return userFk;
 	}
 
-	public void setUserFk(int userFk)
-	{
+	public void setUserFk(long userFk) {
 		this.userFk = userFk;
 	}
 
@@ -78,13 +76,11 @@ public class UserPasswordResetKey extends AbstractEntity implements Serializable
 		this.createdDate = createdDate;
 	}
 
-	public int getKeySentToUserFk()
-	{
+	public long getKeySentToUserFk() {
 		return keySentToUserFk;
 	}
 
-	public void setKeySentToUserFk(int keySentToUserFk)
-	{
+	public void setKeySentToUserFk(long keySentToUserFk) {
 		this.keySentToUserFk = keySentToUserFk;
 	}
 

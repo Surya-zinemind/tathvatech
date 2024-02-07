@@ -7,10 +7,12 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import com.tathvatech.common.common.FileStoreManager;
+import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.common.entity.EntityConfigData;
 import com.tathvatech.common.entity.EntityVersion;
 import com.tathvatech.common.enums.VersionableEntity;
-
+import com.tathvatech.common.exception.AppException;
 
 
 public class CommonServiceManager
@@ -332,7 +334,7 @@ public class CommonServiceManager
 	 * @throws Exception
 	 */
 	public static void saveAttachments(UserContext context, int objectPk, int objectType,
-			List<AttachmentIntf> attachedFiles, boolean deleteItemsNotInList) throws Exception 
+									   List<AttachmentIntf> attachedFiles, boolean deleteItemsNotInList) throws Exception
 	{
 		if(attachedFiles == null)
 			return;

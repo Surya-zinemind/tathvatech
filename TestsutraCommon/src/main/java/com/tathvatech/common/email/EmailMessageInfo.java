@@ -31,7 +31,7 @@ public class EmailMessageInfo
      * @param fromAddress
      * @param toAddress
      * @param subject
-     * @param message
+     * @param messageText
      */
     public EmailMessageInfo(String fromAddress, String[] toAddress, String subject, String messageText)
     {
