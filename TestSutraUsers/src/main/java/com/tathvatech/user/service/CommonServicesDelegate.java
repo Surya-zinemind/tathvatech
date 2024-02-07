@@ -1,4 +1,4 @@
-package com.tathvatech.common.service;
+package com.tathvatech.user.service;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -19,6 +19,7 @@ import com.tathvatech.common.common.ServiceLocator;
 import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.common.entity.EntityConfigData;
 import com.tathvatech.common.entity.EntityVersion;
+import com.tathvatech.common.entity.TSTimeZone;
 import com.tathvatech.common.exception.AppException;
 import org.apache.commons.codec.binary.Base64;
 
@@ -43,7 +44,7 @@ import com.tathvatech.ts.core.project.TestProcOID;
 
 public class CommonServicesDelegate 
 {
-	public List<TSTimeZone> getSupportedTimeZoneIDs() 
+	public List<TSTimeZone> getSupportedTimeZoneIDs()
 	{
 		List<TSTimeZone> ts = PersistWrapper.readList(TSTimeZone.class, "select * from timezones order by id", null);
 		for (Iterator iterator = ts.iterator(); iterator.hasNext();) 

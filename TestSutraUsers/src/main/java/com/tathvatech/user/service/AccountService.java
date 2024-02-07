@@ -25,7 +25,6 @@ import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.common.exception.LoginFailedException;
 import com.tathvatech.common.licence.LicenseManager;
-import com.tathvatech.common.service.CommonServiceManager;
 import com.tathvatech.common.utils.OnewayEncryptUtils;
 import com.tathvatech.common.utils.SequenceIdGenerator;
 import com.tathvatech.common.exception.AppException;

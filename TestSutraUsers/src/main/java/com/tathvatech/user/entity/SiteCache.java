@@ -1,6 +1,6 @@
 package com.tathvatech.user.entity;
 
-import com.tathvatech.common.service.CommonServicesDelegate;
+import com.tathvatech.user.service.CommonServicesDelegate;
 import com.tathvatech.user.OID.SiteOID;
 
 import java.util.HashMap;
