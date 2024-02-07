@@ -13,11 +13,23 @@ import com.tathvatech.common.entity.EntityConfigData;
 import com.tathvatech.common.entity.EntityVersion;
 import com.tathvatech.common.enums.VersionableEntity;
 import com.tathvatech.common.exception.AppException;
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.user.OID.OID;
+import com.tathvatech.user.OID.UserOID;
 import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.Attachment;
+import com.tathvatech.user.entity.UserPreferencesData;
+import com.tathvatech.user.entity.UserPreferencesDataBean;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 public class CommonServiceManager
 {
+
+	@Autowired
+	PersistWrapper persistWrapper;
+
 	public static void saveSnapshot(UserContext context, VersionableEntity versionableEntity)
 	{
 		saveSnapshot(context, null, versionableEntity);
@@ -33,11 +45,11 @@ public class CommonServiceManager
 				v.setVersionContext(versionContext);
 			
 			if(context != null)
-				v.setCreatedBy(context.getUser().getPk());
+				v.setCreatedBy((int) context.getUser().getPk());
 			v.setCreatedDate(new Date());
 			v.setEntityPk(((VersionableEntity) versionableEntity).getEntityPk());
 			v.setEntityType(((VersionableEntity) versionableEntity).getEntityType().getValue());
-			PersistWrapper.createEntity(v);
+			persistWrapper.createEntity(v);
 		}catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -68,7 +80,7 @@ public class CommonServiceManager
 		else
 			sb.append(" and stringParam1 is null ");
 
-		String val = PersistWrapper.read(String.class, 
+		String val = persistWrapper.read(String.class, 
 				sb.toString(), params.toArray());
 		
 		if(type == Boolean.class)
@@ -128,13 +140,13 @@ public class CommonServiceManager
 		else
 			sb.append(" and stringParam1 is null ");
 
-		EntityConfigData cdata = PersistWrapper.read(EntityConfigData.class,
+		EntityConfigData cdata = persistWrapper.read(EntityConfigData.class,
 				sb.toString(), params.toArray());
 		
 		if(cdata == null)
 			cdata = new EntityConfigData();
 		
-		cdata.setObjectPk(entityOID.getPk());
+		cdata.setObjectPk((int) entityOID.getPk());
 		cdata.setObjectType(entityOID.getEntityType().getValue());
 		cdata.setProperty(property);
 		cdata.setIntParam1(intParam1);
@@ -143,13 +155,13 @@ public class CommonServiceManager
 		
 		int pkRet = 0;
 		if(cdata.getPk() == 0)
-			pkRet = PersistWrapper.createEntity(cdata);
+			pkRet = persistWrapper.createEntity(cdata);
 		else
 		{
-			PersistWrapper.update(cdata);
+			persistWrapper.update(cdata);
 			pkRet = cdata.getPk();
 		}
-		return PersistWrapper.readByPrimaryKey(EntityConfigData.class, pkRet);
+		return persistWrapper.readByPrimaryKey(EntityConfigData.class, pkRet);
 	}
 
 	public static void removeEntityConfig(OID entityOID, String property, Integer intParam1, String stringParam1) throws Exception
@@ -178,11 +190,11 @@ public class CommonServiceManager
 			sb.append(" and stringParam1 is null ");
 
 
-		EntityConfigData cdata = PersistWrapper.read(EntityConfigData.class,
+		EntityConfigData cdata = persistWrapper.read(EntityConfigData.class,
 				sb.toString(), params.toArray());
 		
 		if(cdata != null)
-			PersistWrapper.deleteEntity(cdata);
+			persistWrapper.deleteEntity(cdata);
 	}
 
 	public static UserPreferencesData saveUserPreferenceData(UserPreferencesDataBean bean) throws Exception
@@ -205,24 +217,24 @@ public class CommonServiceManager
 		}
 		if(bean.getAnchorEntityOID() != null)
 		{
-			data.setEntityPk(bean.getAnchorEntityOID().getPk());
+			data.setEntityPk((int) bean.getAnchorEntityOID().getPk());
 			data.setEntityType(bean.getAnchorEntityOID().getEntityType().getValue());
 		}
 		data.setName(bean.getName());
 		data.setPk(bean.getPk());
 		data.setProperty(bean.getProperty());
-		data.setUserPk(bean.getUserOID().getPk());
+		data.setUserPk((int) bean.getUserOID().getPk());
 		data.setValue(bean.getValue());
 		
 		int pkRet = 0;
 		if(data.getPk() == 0)
-			pkRet = PersistWrapper.createEntity(data);
+			pkRet = persistWrapper.createEntity(data);
 		else
 		{
-			PersistWrapper.update(data);
+			persistWrapper.update(data);
 			pkRet = data.getPk();
 		}
-		return PersistWrapper.readByPrimaryKey(UserPreferencesData.class, pkRet);
+		return persistWrapper.readByPrimaryKey(UserPreferencesData.class, pkRet);
 	}
 	
 	public static List<UserPreferencesData> getUserPreferenceData(UserOID userOID, OID anchorObjectOID, String property)
@@ -244,19 +256,19 @@ public class CommonServiceManager
 		sb.append(" and property=? ");
 		params.add(property);
 		
-		return PersistWrapper.readList(UserPreferencesData.class, sb.toString(), params.toArray());
+		return persistWrapper.readList(UserPreferencesData.class, sb.toString(), params.toArray());
 	}
 
-	public static List<EntityReference> getEntityReferences(OID fromOID) 
+	public static List<EntityReference> getEntityReferences(OID fromOID)
 	{
-		List currentList = PersistWrapper.readList(EntityReference.class, "select * from reference where referenceFromPk = ? and referenceFromType = ?", 
+		List currentList = persistWrapper.readList(EntityReference.class, "select * from reference where referenceFromPk = ? and referenceFromType = ?", 
 				fromOID.getPk(), fromOID.getEntityType().getValue());
 		return currentList;
 	}
 	
 	public static void createEntityReference(UserContext context, OID fromOID, OID toOID)throws Exception
 	{
-		List currentList = PersistWrapper.readList(EntityReference.class, "select * from reference where referenceFromPk = ? and referenceFromType = ? and "
+		List currentList = persistWrapper.readList(EntityReference.class, "select * from reference where referenceFromPk = ? and referenceFromType = ? and "
 				+ " referenceToPk = ? and referenceToType = ?", 
 				fromOID.getPk(), fromOID.getEntityType().getValue(), toOID.getPk(), toOID.getEntityType().getValue());
 		if(currentList != null && currentList.size() > 0)
@@ -269,12 +281,12 @@ public class CommonServiceManager
 		ref.setReferenceToType(toOID.getEntityType().getValue());
 		ref.setCreatedBy(context.getUser().getPk());
 		ref.setCreatedDate(new Date());
-		PersistWrapper.createEntity(ref);
+		persistWrapper.createEntity(ref);
 	}
 	
 	public static List getAttachments(int objectPk, int objectType) 
 	{
-		return PersistWrapper.readList(Attachment.class, "select * from TAB_ATTACHMENT where objectPk=? and objectType=? and estatus != 9 ", 
+		return persistWrapper.readList(Attachment.class, "select * from TAB_ATTACHMENT where objectPk=? and objectType=? and estatus != 9 ",
 				objectPk, objectType);
 	}
 
@@ -283,7 +295,7 @@ public class CommonServiceManager
 		String pks = Arrays.deepToString(objectPkList);
 		pks = pks.replace('[', '(');
 		pks = pks.replace(']', ')');
-		return PersistWrapper.readList(Attachment.class, "select * from TAB_ATTACHMENT where objectPk in " + pks + " and objectType=?", 
+		return persistWrapper.readList(Attachment.class, "select * from TAB_ATTACHMENT where objectPk in " + pks + " and objectType=?", 
 				objectType);
 	}
 
@@ -291,13 +303,13 @@ public class CommonServiceManager
 	{
 		if(attachmentcontext == null)
 		{
-			return PersistWrapper.readList(Attachment.class, "select * from TAB_ATTACHMENT where objectPk=? and objectType=? and attachContext is null and estatus != 9 "
+			return persistWrapper.readList(Attachment.class, "select * from TAB_ATTACHMENT where objectPk=? and objectType=? and attachContext is null and estatus != 9 "
 					+ " order by createdDate ", 
 					objectPk, objectType);
 		}
 		else
 		{
-			return PersistWrapper.readList(Attachment.class, "select * from TAB_ATTACHMENT where objectPk=? and objectType=? and attachContext=? and estatus != 9 "
+			return persistWrapper.readList(Attachment.class, "select * from TAB_ATTACHMENT where objectPk=? and objectType=? and attachContext=? and estatus != 9 "
 				+ " order by createdDate ", 
 				objectPk, objectType, attachmentcontext);
 		}
@@ -320,7 +332,7 @@ public class CommonServiceManager
 				attachment.setCreatedBy(context.getUser().getPk());
 				attachment.setObjectType(objectType);
 				attachment.setObjectPk(objectPk);
-				PersistWrapper.createEntity(attachment);
+				persistWrapper.createEntity(attachment);
 		}
 	}
 
@@ -350,12 +362,12 @@ public class CommonServiceManager
 				attachment.setCreatedBy(context.getUser().getPk());
 				attachment.setObjectType(objectType);
 				attachment.setObjectPk(objectPk);
-				int i=PersistWrapper.createEntity(attachment);
+				int i=persistWrapper.createEntity(attachment);
 				System.out.println(i);
 			}
 			else
 			{
-				PersistWrapper.update(attachment);
+				persistWrapper.update(attachment);
 				currentAtts.remove(attachment);
 			}
 		}
@@ -364,7 +376,7 @@ public class CommonServiceManager
 		{
 			for (Iterator iterator = currentAtts.iterator(); iterator.hasNext();) {
 				Attachment aAtt = (Attachment) iterator.next();
-				PersistWrapper.deleteEntity(aAtt);
+				persistWrapper.deleteEntity(aAtt);
 			}
 		}
 	}
@@ -383,11 +395,11 @@ public class CommonServiceManager
 				attachment.setCreatedBy(context.getUser().getPk());
 				attachment.setObjectType(objectType);
 				attachment.setObjectPk(objectPk);
-				PersistWrapper.createEntity(attachment);
+				persistWrapper.createEntity(attachment);
 			}
 			else
 			{
-				PersistWrapper.update(attachment);
+				persistWrapper.update(attachment);
 				currentAtts.remove(attachment);
 			}
 		}
@@ -395,7 +407,7 @@ public class CommonServiceManager
 		for (Iterator iterator = currentAtts.iterator(); iterator.hasNext();) 
 		{
 			Attachment aAtt = (Attachment) iterator.next();
-			PersistWrapper.deleteEntity(aAtt);
+			persistWrapper.deleteEntity(aAtt);
 		}
 		
 	}
@@ -404,7 +416,7 @@ public class CommonServiceManager
 	{
 		String fileName = attachment.getFileName();
 		
-		PersistWrapper.deleteEntity(attachment);
+		persistWrapper.deleteEntity(attachment);
 
 		File aFile = FileStoreManager.getFile(fileName);
 		aFile.delete();

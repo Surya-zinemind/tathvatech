@@ -6,14 +6,14 @@
  */
 package com.tathvatech.user.entity;
 
-import java.io.Serializable;
-import java.util.Date;
-
 import com.tathvatech.common.entity.AbstractEntity;
 import com.tathvatech.common.entity.AttachmentIntf;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
+import java.io.Serializable;
+import java.util.Date;
 
 
 /**
@@ -35,7 +35,7 @@ public class Attachment  extends AbstractEntity   implements AttachmentIntf, Ser
 	private String fileDisplayName;
 	private String fileDescription;
 	private String attachContext; // something which can tell why it is attached. managed by the object
-	private int createdBy;
+	private long createdBy;
 	private Date createdDate;
 	private String param1; // 3 custom fields.. could be anything which the object manages
 	private String param2;
@@ -110,11 +110,11 @@ public class Attachment  extends AbstractEntity   implements AttachmentIntf, Ser
 		this.attachContext = attachContext;
 	}
 
-	public int getCreatedBy() {
+	public long getCreatedBy() {
 		return createdBy;
 	}
 
-	public void setCreatedBy(int createdBy) {
+	public void setCreatedBy(long createdBy) {
 		this.createdBy = createdBy;
 	}
 
