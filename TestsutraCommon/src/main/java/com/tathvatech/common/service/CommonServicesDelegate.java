@@ -13,6 +13,9 @@ import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
+import com.tathvatech.common.common.ServiceLocator;
+import com.tathvatech.common.entity.EntityConfigData;
+import com.tathvatech.common.entity.EntityVersion;
 import org.apache.commons.codec.binary.Base64;
 
 import com.tathvatech.ts.caf.core.exception.AppException;

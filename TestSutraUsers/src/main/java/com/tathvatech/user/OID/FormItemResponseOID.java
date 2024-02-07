@@ -1,6 +1,7 @@
 package com.tathvatech.user.OID;
 
-import com.tathvatech.common.EntityTypeEnum;
+
+import com.tathvatech.common.enums.EntityTypeEnum;
 
 
 public class FormItemResponseOID extends OID{
@@ -22,7 +23,7 @@ public class FormItemResponseOID extends OID{
 
 	@Override
 	public int hashCode() {
-		return getPk();
+		return (int) getPk();
 	}
 
 	@Override

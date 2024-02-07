@@ -6,8 +6,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.tathvatech.common.EntityType;
-import com.tathvatech.common.EntityTypeEnum;
+import com.tathvatech.common.enums.EntityType;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.common.enums.EntityType;
+import com.tathvatech.common.enums.EntityTypeEnum;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
@@ -35,7 +37,7 @@ import com.tathvatech.common.EntityTypeEnum;
     @JsonSubTypes.Type(value = MRFOID.class, name = "MRFOID")
     })
 public abstract class OID extends TSBeanBase implements Authorizable{
-	int pk;
+	long pk;
 	EntityType entityType;
 	String displayText;
 	
@@ -44,26 +46,29 @@ public abstract class OID extends TSBeanBase implements Authorizable{
 		
 	}
 	
-	public OID(int pk, EntityType entityType, String displayText)
+	public OID(long pk, EntityType entityType, String displayText)
 	{
 		this.pk = pk;
 		this.entityType = entityType;
 		this.displayText = displayText;
 	}
 	
-	public OID(int pk, int entityTypeEnumValue, String displayText)
+	public OID(long pk, int entityTypeEnumValue, String displayText)
 	{
 		this.pk = pk;
 		this.entityType = EntityTypeEnum.fromValue(entityTypeEnumValue);
 		this.displayText = displayText;
 	}
-	
-	public int getPk() {
+
+	@Override
+	public long getPk() {
 		return pk;
 	}
-	public void setPk(int pk) {
+
+	public void setPk(long pk) {
 		this.pk = pk;
 	}
+
 	public EntityType getEntityType() {
 		return entityType;
 	}

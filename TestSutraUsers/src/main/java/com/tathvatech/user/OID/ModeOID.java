@@ -14,7 +14,7 @@ public class ModeOID extends OID{
 
 	@Override
 	public int hashCode() {
-		return getPk();
+		return (int) getPk();
 	}
 
 	@Override

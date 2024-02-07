@@ -4,22 +4,22 @@
 
 package com.tathvatech.common.common;
 
-import java.io.InputStream;
+import org.apache.xpath.XPathAPI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.apache.log4j.Logger;
-import org.apache.xpath.XPathAPI;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+import java.io.InputStream;
 
 public class ApplicationProperties
 {
-	private static Logger logger = Logger.getLogger(ApplicationProperties.class);
+	private static Logger logger = LoggerFactory.getLogger(ApplicationProperties.class);
 
 	private static ApplicationProperties instance;
 

@@ -2,7 +2,8 @@ package com.tathvatech.user.OID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.tathvatech.common.EntityTypeEnum;
+import com.tathvatech.common.enums.EntityTypeEnum;
+
 
 public class PersonOID extends OID {
 
@@ -24,7 +25,7 @@ public class PersonOID extends OID {
 
 	@Override
 	public int hashCode() {
-		return getPk();
+		return (int) getPk();
 	}
 
 	@Override

@@ -5,12 +5,11 @@ import java.io.OutputStreamWriter;
 import java.sql.Connection;
 import java.util.Date;
 
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tathvatech.common.common.ServiceLocator;
 import com.tathvatech.common.entity.EmailQueue;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.caf.util.ServiceLocator;
-import com.tathvatech.ts.core.accounts.AccountManager;
-import com.tathvatech.ts.core.accounts.User;
+
 
 public class EmailServiceManager
 {

@@ -2,7 +2,8 @@ package com.tathvatech.user.OID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.tathvatech.common.EntityTypeEnum;
+import com.tathvatech.common.enums.EntityTypeEnum;
+
 
 
 public class SiteOID extends OID{
@@ -13,12 +14,12 @@ public class SiteOID extends OID{
 	}
 	
 	@JsonCreator
-	public SiteOID(@JsonProperty("pk") int pk)
+	public SiteOID(@JsonProperty("pk") long pk)
 	{
 		super(pk, EntityTypeEnum.Site, null);
 	}
 	
-	public SiteOID(int pk, String displayText)
+	public SiteOID(long pk, String displayText)
 	{
 		super(pk, EntityTypeEnum.Site, displayText);
 	}
@@ -45,7 +46,7 @@ public class SiteOID extends OID{
 	
 	@Override
 	public int hashCode() {
-		return super.getPk();
+		return (int) super.getPk();
 	}
 
 }

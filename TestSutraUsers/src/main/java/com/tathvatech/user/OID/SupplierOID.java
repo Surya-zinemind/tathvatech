@@ -2,7 +2,7 @@ package com.tathvatech.user.OID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.tathvatech.common.EntityTypeEnum;
+import com.tathvatech.common.enums.EntityTypeEnum;
 
 
 public class SupplierOID extends OID {
@@ -39,7 +39,7 @@ public class SupplierOID extends OID {
 	public int hashCode()
 	{
 		// TODO Auto-generated method stub
-		return getPk();
+		return (int) getPk();
 	}
 	
 }

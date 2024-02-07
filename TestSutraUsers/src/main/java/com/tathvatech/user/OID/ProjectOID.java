@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.tathvatech.common.EntityTypeEnum;
+import com.tathvatech.common.enums.EntityTypeEnum;
 
 
 public class ProjectOID extends OID{
@@ -29,7 +29,7 @@ public class ProjectOID extends OID{
 
 	@Override
 	public int hashCode() {
-		return getPk();
+		return (int) getPk();
 	}
 
 	@Override

@@ -1,7 +1,7 @@
 package com.tathvatech.user.OID;
 
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.OID;
+
+import com.tathvatech.common.enums.EntityTypeEnum;
 
 public class TestProcOID extends OID {
 
@@ -37,7 +37,7 @@ public class TestProcOID extends OID {
 	
 	@Override
 	public int hashCode() {
-		return super.getPk();
+		return (int) super.getPk();
 	}
 
 }

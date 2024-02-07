@@ -17,7 +17,9 @@ import com.tathvatech.common.common.ApplicationConstants;
 import com.tathvatech.common.common.ServiceLocator;
 import com.tathvatech.common.email.EmailMessageInfo;
 import com.tathvatech.common.entity.AttachmentIntf;
+import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.Account;
+import com.tathvatech.user.entity.AccountData;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.user.service.AccountService;
 

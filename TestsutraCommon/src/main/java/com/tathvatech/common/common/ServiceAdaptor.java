@@ -4,17 +4,21 @@
 
 package com.tathvatech.common.common;
 
-import java.sql.Connection;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+import java.sql.Connection;
 
 
 
 
 public class ServiceAdaptor implements EnvironmentInterface
 {
-	private static Logger logger = Logger.getLogger(ServiceAdaptor.class);
+	private static Logger logger = LoggerFactory.getLogger(ServiceAdaptor.class);
 
 	private static ServiceAdaptor instance;
 
@@ -46,7 +50,7 @@ public class ServiceAdaptor implements EnvironmentInterface
 	{
 		if (instance == null)
 		{
-			synchronized (com.tathvatech.ts.caf.util.ServiceAdaptor.class)
+			synchronized (ServiceAdaptor.class)
 			{
 				if (instance == null)
 				{

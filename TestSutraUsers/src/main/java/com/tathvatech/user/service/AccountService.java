@@ -390,7 +390,7 @@ public class AccountService
 		persistWrapper.update(user);
     }
     /**
-     * @param account
+     * @param
      * @return
      */
     public  long getCurrentAccountUserCount(UserContext context)throws Exception
@@ -442,7 +442,7 @@ public class AccountService
 
 	/**
 	 * users to whome forms can be assigned
-	 * @param context
+	 * @param
 	 * @return
 	 * @throws Exception
 	 */
@@ -503,8 +503,8 @@ public class AccountService
 	 * This method used for assignment management permissions, so it will return only the valid assignments.
 	 * Method with the same name with no userPk as the argument is used by individual users for selecting devices
 	 * for running reports etc. In that function, if no assignments are found, all devices for the account is returned
-	 * @param context
-	 * @param userPk
+	 * @param
+	 * @param
 	 * @return
 	 * @throws Exception
 	 */

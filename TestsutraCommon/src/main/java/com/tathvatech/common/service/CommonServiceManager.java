@@ -7,22 +7,11 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
+import com.tathvatech.common.entity.EntityConfigData;
+import com.tathvatech.common.entity.EntityVersion;
+import com.tathvatech.common.enums.VersionableEntity;
 
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.UserOID;
-import com.tathvatech.ts.core.common.Attachment;
-import com.tathvatech.ts.core.common.EntityConfigData;
-import com.tathvatech.ts.core.common.EntityReference;
-import com.tathvatech.ts.core.common.EntityVersion;
-import com.tathvatech.ts.core.common.FileStoreManager;
-import com.tathvatech.ts.core.common.OID;
-import com.tathvatech.ts.core.common.UserPreferencesData;
-import com.tathvatech.ts.core.common.UserPreferencesDataBean;
-import com.tathvatech.ts.core.common.VersionableEntity;
-import com.tathvatech.ts.core.common.utils.AttachmentIntf;
+
 
 public class CommonServiceManager
 {

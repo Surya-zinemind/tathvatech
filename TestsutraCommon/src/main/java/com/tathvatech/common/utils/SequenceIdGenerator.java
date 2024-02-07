@@ -9,6 +9,7 @@ package com.tathvatech.common.utils;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Hari
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SequenceIdGenerator
 {
+    @Autowired
     private final PersistWrapper persistWrapper;
 
     private static final Logger logger = LoggerFactory.getLogger(SequenceIdGenerator.class);
@@ -110,7 +112,7 @@ public class SequenceIdGenerator
      * @return
      * @throws Exception
      */
-    public synchronized int getNextSequence(String sequenceKey, String param1, String param2, String param3, String param4) throws Exception
+    public static synchronized int getNextSequence(String sequenceKey, String param1, String param2, String param3, String param4) throws Exception
     {
         try
         {
