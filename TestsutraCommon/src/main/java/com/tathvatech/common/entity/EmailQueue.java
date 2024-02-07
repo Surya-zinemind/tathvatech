@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.io.Serializable;
 import java.util.Date;
 
 
@@ -19,7 +20,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name="email_queue")
-public class EmailQueue
+public class EmailQueue extends  AbstractEntity implements Serializable
 {
 	public static enum Status{Pending, Completed, Failed};
 

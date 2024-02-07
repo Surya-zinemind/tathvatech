@@ -4,7 +4,7 @@ import com.tathvatech.user.controller.AccountController;
 import com.tathvatech.user.entity.UserQuery;
 import org.apache.commons.collections4.map.ReferenceMap;
 
-import com.tathvatech.ts.core.accounts.delegate.AccountDelegate;
+
 
 public class UserRepository {
 

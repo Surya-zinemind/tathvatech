@@ -1,15 +1,9 @@
 package com.tathvatech.user.service;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-
 import com.tathvatech.common.common.FileStoreManager;
 import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.common.entity.EntityConfigData;
+import com.tathvatech.common.entity.EntityReference;
 import com.tathvatech.common.entity.EntityVersion;
 import com.tathvatech.common.enums.VersionableEntity;
 import com.tathvatech.common.exception.AppException;
@@ -23,12 +17,15 @@ import com.tathvatech.user.entity.UserPreferencesDataBean;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.File;
+import java.util.*;
+
 
 public class CommonServiceManager
 {
 
 	@Autowired
-	PersistWrapper persistWrapper;
+	static PersistWrapper persistWrapper;
 
 	public static void saveSnapshot(UserContext context, VersionableEntity versionableEntity)
 	{
@@ -153,7 +150,7 @@ public class CommonServiceManager
 		cdata.setStringParam1(stringParam1);
 		cdata.setValue(value);
 		
-		int pkRet = 0;
+		long pkRet = 0;
 		if(cdata.getPk() == 0)
 			pkRet = persistWrapper.createEntity(cdata);
 		else
@@ -161,7 +158,7 @@ public class CommonServiceManager
 			persistWrapper.update(cdata);
 			pkRet = cdata.getPk();
 		}
-		return persistWrapper.readByPrimaryKey(EntityConfigData.class, pkRet);
+		return (EntityConfigData) persistWrapper.readByPrimaryKey(EntityConfigData.class, pkRet);
 	}
 
 	public static void removeEntityConfig(OID entityOID, String property, Integer intParam1, String stringParam1) throws Exception
@@ -226,7 +223,7 @@ public class CommonServiceManager
 		data.setUserPk((int) bean.getUserOID().getPk());
 		data.setValue(bean.getValue());
 		
-		int pkRet = 0;
+		long pkRet = 0;
 		if(data.getPk() == 0)
 			pkRet = persistWrapper.createEntity(data);
 		else
@@ -234,7 +231,7 @@ public class CommonServiceManager
 			persistWrapper.update(data);
 			pkRet = data.getPk();
 		}
-		return persistWrapper.readByPrimaryKey(UserPreferencesData.class, pkRet);
+		return (UserPreferencesData) persistWrapper.readByPrimaryKey(UserPreferencesData.class, pkRet);
 	}
 	
 	public static List<UserPreferencesData> getUserPreferenceData(UserOID userOID, OID anchorObjectOID, String property)
@@ -362,7 +359,7 @@ public class CommonServiceManager
 				attachment.setCreatedBy(context.getUser().getPk());
 				attachment.setObjectType(objectType);
 				attachment.setObjectPk(objectPk);
-				int i=persistWrapper.createEntity(attachment);
+				long i=persistWrapper.createEntity(attachment);
 				System.out.println(i);
 			}
 			else

@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class SequenceIdGenerator
 {
     @Autowired
-    private final PersistWrapper persistWrapper;
+    private static  PersistWrapper persistWrapper;
 
     private static final Logger logger = LoggerFactory.getLogger(SequenceIdGenerator.class);
 

@@ -3,11 +3,14 @@ package com.tathvatech.common.licence;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.accounts.User;
+import com.tathvatech.common.wrapper.PersistWrapper;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class LicenseManager 
 {
+	@Autowired
+	static PersistWrapper persistWrapper;
 
 	public static int getLicenseCount()throws Exception
 	{
@@ -39,7 +42,7 @@ public class LicenseManager
 	
 	public static int getCurrentRegularUserCount() throws Exception
 	{
-		int userCount = PersistWrapper.read(Integer.class, "select count(pk) from TAB_USER where userType in (?,?, ?) and status = ? ", 
+		int userCount = persistWrapper.read(Integer.class, "select count(pk) from TAB_USER where userType in (?,?, ?) and status = ? ",
 				User.USER_ENGINEER, User.USER_MANAGER, User.USER_TECHNICIAN, User.STATUS_ACTIVE);
 		return userCount;
 	}

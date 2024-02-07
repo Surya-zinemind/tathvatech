@@ -1,18 +1,25 @@
 package com.tathvatech.common.email;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tathvatech.common.common.ServiceLocator;
+import com.tathvatech.common.email.EmailMessageInfo;
+import com.tathvatech.common.email.EmailSenderConfig;
+import com.tathvatech.common.entity.EmailQueue;
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.user.entity.User;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.sql.Connection;
 import java.util.Date;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tathvatech.common.common.ServiceLocator;
-import com.tathvatech.common.entity.EmailQueue;
-
-
 public class EmailServiceManager
 {
+	@Autowired
+	static PersistWrapper persistWrapper;
+
 	public static void scheduleEmail(EmailMessageInfo emailMessage) throws Exception
 	{
 		Date nowDate = new Date();
@@ -33,7 +40,7 @@ public class EmailServiceManager
 		for (int i = 0; i < emailMessage.getToAddress().length; i++)
 		{
 			String emailAddress = emailMessage.getToAddress()[i];
-			User user = AccountManager.findUserByEmail(emailAddress);
+			User user = accountService.findUserByEmail(emailAddress);
 			if(user != null)
 			{
 				if(User.STATUS_ACTIVE.contentEquals(user.getStatus()))
@@ -68,7 +75,7 @@ public class EmailServiceManager
 		}
 		
 		
-		PersistWrapper.createEntity(eq);
+		persistWrapper.createEntity(eq);
 		
 	}
 	
@@ -79,11 +86,11 @@ public class EmailServiceManager
         	Connection con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(true);
 
-            EmailQueue item = PersistWrapper.readByPrimaryKey(EmailQueue.class, emailQueueItemPk);
+            EmailQueue item = (EmailQueue) persistWrapper.readByPrimaryKey(EmailQueue.class, emailQueueItemPk);
             item.setTryCount(item.getTryCount() + 1);
             item.setLastTryDate(new Date());
             item.setStatus(EmailQueue.Status.Completed.name());
-            PersistWrapper.update(item);
+            persistWrapper.update(item);
         }
         catch(Exception ex)
         {
@@ -98,7 +105,7 @@ public class EmailServiceManager
         	Connection con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(true);
 
-            EmailQueue item = PersistWrapper.readByPrimaryKey(EmailQueue.class, emailQueueItemPk);
+            EmailQueue item = (EmailQueue) persistWrapper.readByPrimaryKey(EmailQueue.class, emailQueueItemPk);
             item.setTryCount(item.getTryCount() + 1);
             item.setLastTryDate(new Date());
             if(item.getTryCount() == EmailSenderConfig.maxEmailTries)
@@ -106,7 +113,7 @@ public class EmailServiceManager
             else
             	item.setStatus(EmailQueue.Status.Pending.name());
             	
-            PersistWrapper.update(item);
+            persistWrapper.update(item);
         }
         catch(Exception ex)
         {

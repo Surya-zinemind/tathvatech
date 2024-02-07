@@ -7,27 +7,17 @@
 package com.tathvatech.user.service;
 
 
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-
 import com.tathvatech.common.Asynch.AsyncProcessor;
 import com.tathvatech.common.common.ApplicationConstants;
 import com.tathvatech.common.common.ServiceLocator;
 import com.tathvatech.common.email.EmailMessageInfo;
 import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.exception.LoginFailedException;
 import com.tathvatech.common.licence.LicenseManager;
 import com.tathvatech.common.utils.OnewayEncryptUtils;
 import com.tathvatech.common.utils.SequenceIdGenerator;
-import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.user.OID.UserOID;
 import com.tathvatech.user.common.UserContext;
@@ -37,6 +27,11 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import java.sql.Connection;
+import java.util.*;
 
 /**
  * @author Hari
@@ -198,7 +193,7 @@ public class AccountService
         }
         
 		//now save the attachments
-        CommonServiceManager.saveAttachments(context, user.getPk(), EntityTypeEnum.User.getValue(), User.AttachContext_ProfilePic, attachments);
+        CommonServiceManager.saveAttachments(context, (int) user.getPk(), EntityTypeEnum.User.getValue(), User.AttachContext_ProfilePic, attachments);
         
 		NotificationsDelegate.notifyNewUserCreated(user, userPassword, sendWelcomeKit);
         return user;
@@ -267,7 +262,7 @@ public class AccountService
         }
         
 		//now save the attachments
-        CommonServiceManager.saveAttachments(context, user.getPk(), EntityTypeEnum.User.getValue(), User.AttachContext_ProfilePic, attachments);
+        CommonServiceManager.saveAttachments(context, (int) user.getPk(), EntityTypeEnum.User.getValue(), User.AttachContext_ProfilePic, attachments);
         
 
         //if the user is of restricted type, make sure that it has no users assigned to it.
@@ -518,7 +513,7 @@ public class AccountService
 		return findUserByUserName(userName);
 	}
 
-	public  User getUser(int userPk)
+	public  User getUser(long userPk)
 	{
     	return (User)persistWrapper.readByPrimaryKey(User.class, userPk);
 	}

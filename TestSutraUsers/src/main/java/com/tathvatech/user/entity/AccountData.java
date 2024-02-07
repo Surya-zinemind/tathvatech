@@ -6,13 +6,13 @@
  */
 package com.tathvatech.user.entity;
 
-import java.io.Serializable;
-import java.util.Date;
-
 import com.tathvatech.common.entity.AbstractEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
+import java.io.Serializable;
+import java.util.Date;
 
 
 /**
@@ -27,7 +27,7 @@ public class AccountData extends AbstractEntity implements Serializable
 {
 	@Id
 	private long pk;
-	private int accountPk;
+	private long accountPk;
 	private String property;
 	private String value;
 	private Date lastUpdated;
@@ -40,14 +40,14 @@ public class AccountData extends AbstractEntity implements Serializable
 		this.pk = pk;
 	}
 
-	public int getAccountPk()
-	{
+	public long getAccountPk() {
 		return accountPk;
 	}
-	public void setAccountPk(int accountPk)
-	{
+
+	public void setAccountPk(long accountPk) {
 		this.accountPk = accountPk;
 	}
+
 	public String getProperty()
 	{
 		return property;

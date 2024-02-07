@@ -20,33 +20,31 @@ import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.common.entity.EntityConfigData;
 import com.tathvatech.common.entity.EntityVersion;
 import com.tathvatech.common.entity.TSTimeZone;
+import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.common.exception.AppException;
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.user.OID.OID;
+import com.tathvatech.user.OID.OIDGeneric;
+import com.tathvatech.user.OID.TestProcOID;
+import com.tathvatech.user.OID.UserOID;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.Attachment;
+import com.tathvatech.user.entity.UserPreferencesData;
+import com.tathvatech.user.entity.UserPreferencesDataBean;
+import com.tathvatech.user.repository.UserRepository;
 import org.apache.commons.codec.binary.Base64;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.caf.util.ServiceLocator;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.UserOID;
-import com.tathvatech.ts.core.accounts.UserRepository;
-import com.tathvatech.ts.core.common.Attachment;
-import com.tathvatech.ts.core.common.EntityConfigData;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.EntityVersion;
-import com.tathvatech.ts.core.common.FileStoreManager;
-import com.tathvatech.ts.core.common.OID;
-import com.tathvatech.ts.core.common.OIDGeneric;
-import com.tathvatech.ts.core.common.TSTimeZone;
-import com.tathvatech.ts.core.common.UserPreferencesData;
-import com.tathvatech.ts.core.common.UserPreferencesDataBean;
-import com.tathvatech.ts.core.common.utils.AttachmentIntf;
-import com.tathvatech.ts.core.project.TestProcOID;
+
 
 public class CommonServicesDelegate 
 {
+	@Autowired
+	static PersistWrapper persistWrapper;
+	
 	public List<TSTimeZone> getSupportedTimeZoneIDs()
 	{
-		List<TSTimeZone> ts = PersistWrapper.readList(TSTimeZone.class, "select * from timezones order by id", null);
+		List<TSTimeZone> ts = persistWrapper.readList(TSTimeZone.class, "select * from timezones order by id", null);
 		for (Iterator iterator = ts.iterator(); iterator.hasNext();) 
 		{
 			TSTimeZone tsTimeZone = (TSTimeZone) iterator.next();
@@ -117,12 +115,12 @@ public class CommonServicesDelegate
 		if(filter.getLimitFetchRecords() != null)
 			sb.append(" limit 0, " + filter.getLimitFetchRecords());
 		
-		return PersistWrapper.readList(EntityVersion.class, sb.toString(), params.toArray());
+		return persistWrapper.readList(EntityVersion.class, sb.toString(), params.toArray());
 	}
 	
 	public Object getObjectByPk(Class class1, int pk)
 	{
-		return PersistWrapper.readByPrimaryKey(class1, pk);
+		return persistWrapper.readByPrimaryKey(class1, pk);
 	}
 
 	public static EntityConfigData saveEntityConfig(OID entityOID, String property, String value) throws Exception
@@ -282,7 +280,7 @@ public class CommonServicesDelegate
 	}
 
 
-	public static List getEntityReferences(TestProcOID oid) 
+	public static List getEntityReferences(TestProcOID oid)
 	{
 		return CommonServiceManager.getEntityReferences(oid);
 	}	
@@ -303,8 +301,8 @@ public class CommonServicesDelegate
 		return CommonServiceManager.getAttachments(objectPk, objectType, attachmentcontext);
 	}
 
-	public static void addAttachments(UserContext context, int objectPk, int objectType, 
-			List<AttachmentIntf> attachedFiles) throws Exception 
+	public static void addAttachments(UserContext context, int objectPk, int objectType,
+									  List<AttachmentIntf> attachedFiles) throws Exception
 	{
         Connection con = null;
         try
