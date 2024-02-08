@@ -4,14 +4,14 @@
  * TODO To change the template for this generated file go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-package com.tathvatech.common.Asynch;
+package com.tathvatech.user.Asynch;
 
 import com.tathvatech.common.common.ApplicationProperties;
 import com.tathvatech.common.common.CustomerSupportEmailMessageInfo;
 import com.tathvatech.common.common.LoginLogInfo;
 import com.tathvatech.common.common.LoginLoggerJob;
 import com.tathvatech.common.email.EmailMessageInfo;
-import com.tathvatech.common.email.EmailServiceDelegate;
+import com.tathvatech.user.service.EmailServiceDelegate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

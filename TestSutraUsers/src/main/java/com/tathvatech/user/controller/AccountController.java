@@ -7,12 +7,12 @@
 package com.tathvatech.user.controller;
 
 
-import com.tathvatech.common.Asynch.AsyncProcessor;
+import com.tathvatech.user.Asynch.AsyncProcessor;
 import com.tathvatech.common.common.ApplicationConstants;
 import com.tathvatech.common.common.ApplicationProperties;
 import com.tathvatech.common.common.ServiceLocator;
 import com.tathvatech.common.email.EmailMessageInfo;
-import com.tathvatech.common.email.EmailServiceManager;
+import com.tathvatech.user.service.EmailServiceManager;
 import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.exception.LoginFailedException;

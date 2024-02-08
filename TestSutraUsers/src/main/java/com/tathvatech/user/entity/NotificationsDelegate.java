@@ -1,6 +1,6 @@
 package com.tathvatech.user.entity;
 
-import com.tathvatech.common.Asynch.AsyncProcessor;
+import com.tathvatech.user.Asynch.AsyncProcessor;
 import com.tathvatech.common.common.ApplicationProperties;
 import com.tathvatech.common.common.FileStoreManager;
 import com.tathvatech.common.common.TestSutraProperties;

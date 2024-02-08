@@ -1,11 +1,12 @@
-package com.tathvatech.common.licence;
+package com.tathvatech.user.service;
+
+import com.tathvatech.common.licence.License;
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.user.entity.User;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
-
-import com.tathvatech.common.wrapper.PersistWrapper;
-
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class LicenseManager 
 {
@@ -49,7 +50,7 @@ public class LicenseManager
 
 	public static int getCurrentReadonlyUserCount() throws Exception
 	{
-		int userCount = PersistWrapper.read(Integer.class, "select count(pk) from TAB_USER where userType = ? and status = ?", "Readonly User", "Active");
+		int userCount = persistWrapper.read(Integer.class, "select count(pk) from TAB_USER where userType = ? and status = ?", "Readonly User", "Active");
 		return userCount;
 	}
 }
