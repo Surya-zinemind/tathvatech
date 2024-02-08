@@ -74,6 +74,11 @@ public class PersistWrapperImpl implements PersistWrapper {
 		return jdbcTemplate.update(whereClause, parameters);
 	}
 
+	@Override
+	public int executeUpdate(String whereClause, Object... parameters) throws Exception {
+		return jdbcTemplate.update(whereClause, parameters);
+	}
+
 //   public long createEntityBk(Object inObject) throws Exception
 //    {
 //		String tableName = inObject.getClass().getAnnotation(Table.class).name();
