@@ -7,7 +7,7 @@
 package com.tathvatech.user.service;
 
 
-import com.tathvatech.common.Asynch.AsyncProcessor;
+import com.tathvatech.user.Asynch.AsyncProcessor;
 import com.tathvatech.common.common.ApplicationConstants;
 import com.tathvatech.common.common.ServiceLocator;
 import com.tathvatech.common.email.EmailMessageInfo;
@@ -15,7 +15,6 @@ import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.exception.LoginFailedException;
-import com.tathvatech.common.licence.LicenseManager;
 import com.tathvatech.common.utils.OnewayEncryptUtils;
 import com.tathvatech.common.utils.SequenceIdGenerator;
 import com.tathvatech.common.wrapper.PersistWrapper;

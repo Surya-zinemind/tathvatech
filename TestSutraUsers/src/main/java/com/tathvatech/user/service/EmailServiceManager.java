@@ -1,4 +1,4 @@
-package com.tathvatech.common.email;
+package com.tathvatech.user.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tathvatech.common.common.ServiceLocator;
@@ -19,6 +19,9 @@ public class EmailServiceManager
 {
 	@Autowired
 	static PersistWrapper persistWrapper;
+
+	@Autowired
+	static AccountService accountService;
 
 	public static void scheduleEmail(EmailMessageInfo emailMessage) throws Exception
 	{

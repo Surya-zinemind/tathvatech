@@ -1,6 +1,7 @@
-package com.tathvatech.common.email;
+package com.tathvatech.user.service;
 
 import com.tathvatech.common.common.ServiceLocator;
+import com.tathvatech.common.email.EmailMessageInfo;
 
 import java.sql.Connection;
 
