@@ -15,6 +15,7 @@ import com.tathvatech.common.entity.AbstractEntity;
 import com.tathvatech.user.OID.OID;
 import com.tathvatech.user.OID.UserOID;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 
@@ -28,6 +29,7 @@ import jakarta.persistence.Table;
 @Table(name="user_preferences_data")
 public class UserPreferencesDataBean extends AbstractEntity implements Serializable
 {
+	@Id
 	private long pk;
 	private UserOID userOID;
 	private OID anchorEntityOID;

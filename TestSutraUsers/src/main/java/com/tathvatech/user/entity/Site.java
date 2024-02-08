@@ -16,6 +16,7 @@ import com.tathvatech.user.OID.SiteOID;
 import com.tathvatech.user.enums.SiteActionsEnum;
 import com.tathvatech.user.enums.SiteRolesEnum;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.io.Serializable;
@@ -34,6 +35,7 @@ import java.util.List;
 @Table(name="site")
 public class Site extends AbstractEntity implements Authorizable, Serializable
 {
+	@Id
 	private long pk;
 	private Integer siteGroupFk;
 	private String name;

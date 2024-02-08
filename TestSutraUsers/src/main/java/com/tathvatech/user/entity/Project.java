@@ -2,7 +2,7 @@ package com.tathvatech.user.entity;
 
 import com.tathvatech.common.entity.AbstractEntity;
 import jakarta.persistence.Entity;
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.io.Serializable;
