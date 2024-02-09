@@ -6,22 +6,22 @@
  */
 package com.tathvatech.user.entity;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.HashMap;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.tathvatech.common.common.DateFormats;
 import com.tathvatech.common.common.EntitySelectorItem;
 import com.tathvatech.common.entity.AbstractEntity;
-
-
 import com.tathvatech.user.OID.SiteOID;
 import com.tathvatech.user.OID.UserOID;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.io.Serializable;
+import java.util.Date;
+import java.util.HashMap;
 
 
 /**
@@ -55,7 +55,8 @@ public class User extends AbstractEntity implements UserBase, Serializable, Enti
 	private String lastName;
 	private String email;
 	private Date lastUpdated;
-	
+
+	@JdbcTypeCode(SqlTypes.JSON)
 	private HashMap accountData = new HashMap();
 
 

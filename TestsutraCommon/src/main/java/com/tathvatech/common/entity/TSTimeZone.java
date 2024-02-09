@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -20,7 +21,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name="timezones")
-public class TSTimeZone
+public class TSTimeZone extends  AbstractEntity implements Serializable
 {
 	@Id
 	private long pk;

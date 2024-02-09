@@ -6,17 +6,16 @@
  */
 package com.tathvatech.user.entity;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.HashMap;
-
 import com.tathvatech.common.entity.AbstractEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-
-
-
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.relational.core.mapping.Table;
+
+import java.io.Serializable;
+import java.util.Date;
+import java.util.HashMap;
 
 /**
  * @author Hari
@@ -24,6 +23,7 @@ import org.springframework.data.relational.core.mapping.Table;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
+
 @Entity
 @Table(name = "TAB_ACCOUNT")
 public class Account extends AbstractEntity implements AccountBase, Serializable
@@ -163,6 +163,8 @@ public class Account extends AbstractEntity implements AccountBase, Serializable
 		this.lastUpdated = lastUpdated;
 	}
 
+
+	@JdbcTypeCode(SqlTypes.JSON)
 	private HashMap accountData = new HashMap();
 	
     /**

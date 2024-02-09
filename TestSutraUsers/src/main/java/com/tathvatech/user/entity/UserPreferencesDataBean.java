@@ -6,17 +6,13 @@
  */
 package com.tathvatech.user.entity;
 
-import java.io.Serializable;
-import java.util.Date;
-
 import com.tathvatech.common.entity.AbstractEntity;
-
-
 import com.tathvatech.user.OID.OID;
 import com.tathvatech.user.OID.UserOID;
-import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+
+import java.io.Serializable;
+import java.util.Date;
 
 
 /**
@@ -25,8 +21,9 @@ import jakarta.persistence.Table;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-@Entity
-@Table(name="user_preferences_data")
+
+/*@Entity
+@Table(name="user_preferences_data")*/
 public class UserPreferencesDataBean extends AbstractEntity implements Serializable
 {
 	@Id
