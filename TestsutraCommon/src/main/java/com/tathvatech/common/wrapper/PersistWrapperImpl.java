@@ -59,6 +59,11 @@ public class PersistWrapperImpl implements PersistWrapper {
 		return context.getBean(GenericJpaDao.class).update(inObject);
 	}
 
+	public int executeUpdate(String sql, Object... parameters) throws Exception
+	{
+		return jdbcTemplate.update(sql, parameters);
+	}
+
 	public void deleteEntity(AbstractEntity inObject) throws Exception
 	{
 		context.getBean(GenericJpaDao.class).delete(inObject);
