@@ -23,7 +23,6 @@ public interface PersistWrapper {
 	void deleteEntity(Class objClass, long pk) throws Exception;
 
 	int delete(String whereClause, Object... parameters) throws Exception;
-	int executeUpdate(String whereClause, Object... parameters) throws Exception;
 
 
 }

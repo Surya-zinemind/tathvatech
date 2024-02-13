@@ -594,8 +594,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
 	public  Account getAccount(int accountPk) throws Exception
     {
-		return  persistWrapper.read(Account.class,"select * from tab_account where pk=?",accountPk);
-//        return (Account)persistWrapper.readByPrimaryKey(Account.class, accountPk);
+		return (Account)persistWrapper.readByPrimaryKey(Account.class, accountPk);
     }
 
 	@Override
