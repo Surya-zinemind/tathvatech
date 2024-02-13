@@ -18,6 +18,8 @@ public interface PersistWrapper {
 
 	AbstractEntity update(AbstractEntity inObject) throws Exception;
 
+	int executeUpdate(String sql, Object... parameters) throws Exception;
+
 	void deleteEntity(AbstractEntity inObject) throws Exception;
 
 	void deleteEntity(Class objClass, long pk) throws Exception;
