@@ -16,12 +16,17 @@ import com.tathvatech.user.OID.UserOID;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Data;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 
 /**
@@ -33,7 +38,8 @@ import java.util.HashMap;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="TAB_USER")
-public class User extends AbstractEntity implements UserBase, Serializable, EntitySelectorItem
+@Data
+public class User extends AbstractEntity implements UserBase, Serializable, EntitySelectorItem, UserDetails
 {
 	public static String AttachContext_ProfilePic = "ProfilePic";
 
@@ -226,28 +232,29 @@ public class User extends AbstractEntity implements UserBase, Serializable, Enti
 
 	public String getSiteName()
 	{
-		Site site = SiteCache.getInstance().getSite(new SiteOID(this.getSitePk(), null));
-		return site.getName();
+//		Site site = SiteCache.getInstance().getSite(new SiteOID(this.getSitePk(), null));
+//		return site.getName();
+		return "";
 	}
 	
 	@JsonIgnore
 
 	public String getDisplayString()
 	{
-		Site site = SiteCache.getInstance().getSite(new SiteOID(this.getSitePk(), null));
+//		Site site = SiteCache.getInstance().getSite(new SiteOID(this.getSitePk(), null));
 		String siteName = "NA";
-		if(site != null)
-			siteName = site.getName();
+//		if(site != null)
+//			siteName = site.getName();
 		return firstName + " " + lastName + " / " + siteName +  ((User.STATUS_INACTIVE.equals(status))?" (Inactive)":"");
 	}
 
 	@JsonIgnore
 	public String getDisplayStringForPrints()
 	{
-		Site site = SiteCache.getInstance().getSite(new SiteOID(this.getSitePk(), null));
+//		Site site = SiteCache.getInstance().getSite(new SiteOID(this.getSitePk(), null));
 		String siteName = "NA";
-		if(site != null)
-			siteName = site.getName();
+//		if(site != null)
+//			siteName = site.getName();
 		return firstName + " " + lastName + " / " + siteName;
 	}
 
@@ -347,5 +354,34 @@ public class User extends AbstractEntity implements UserBase, Serializable, Enti
 	public String getLongString() {
 		return getDisplayString();
 	}
-    
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return List.of();
+	}
+
+	@Override
+	public String getUsername() {
+		return getUserName();
+	}
+
+	@Override
+	public boolean isAccountNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return true;
+	}
 }

@@ -12,16 +12,21 @@ import com.tathvatech.common.common.ApplicationConstants;
 import com.tathvatech.common.common.ApplicationProperties;
 import com.tathvatech.common.common.ServiceLocator;
 import com.tathvatech.common.email.EmailMessageInfo;
+import com.tathvatech.user.service.AccountService;
 import com.tathvatech.user.service.EmailServiceManager;
 import com.tathvatech.common.entity.AttachmentIntf;
-import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.exception.LoginFailedException;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.user.OID.UserOID;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.*;
-import com.tathvatech.user.service.AccountService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Connection;
 import java.util.Collection;
@@ -35,16 +40,17 @@ import java.util.List;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
+@RequestMapping("/account")
+@RestController
+@RequiredArgsConstructor
 public class AccountController
 {
-    @Autowired
-    static AccountService accountService;
+    private final  AccountService accountService;
 
-    @Autowired
-    static PersistWrapper persistWrapper;
+    private final  PersistWrapper persistWrapper;
     
 
-	public static User createNewAccount(UserContext context, Account accVal, User uVal)throws Exception
+	public User createNewAccount(UserContext context, Account accVal, User uVal)throws Exception
 	{
         Connection con = null;
         try
@@ -85,7 +91,7 @@ public class AccountController
         }
 	}
 
-	public static void createAddonUser(UserContext context, User userVal, AttachmentIntf profilePicAttachment, boolean sendWelcomeKit)throws Exception
+	public  void createAddonUser(UserContext context, User userVal, AttachmentIntf profilePicAttachment, boolean sendWelcomeKit)throws Exception
 	{
         Connection con = null;
         try
@@ -109,7 +115,7 @@ public class AccountController
         }
 	}
 
-	public static User updateCurrentUserProfile(UserContext context, User userVal)throws Exception
+	public  User updateCurrentUserProfile(UserContext context, User userVal)throws Exception
 	{
         Connection con = null;
         try
@@ -133,7 +139,7 @@ public class AccountController
         }
 	}
 
-	public static void saveAddonUser(UserContext context, User userVal, AttachmentIntf profilePicAttachment)throws Exception
+	public  void saveAddonUser(UserContext context, User userVal, AttachmentIntf profilePicAttachment)throws Exception
 	{
         Connection con = null;
         try
@@ -159,7 +165,7 @@ public class AccountController
         }
 	}
 
-	public static void deleteAddonUser(int userPk)throws Exception
+	public  void deleteAddonUser(int userPk)throws Exception
 	{
         Connection con = null;
         try
@@ -181,7 +187,7 @@ public class AccountController
         }
 	}
 
-    public static void activateUser(int userPk)throws Exception
+    public  void activateUser(int userPk)throws Exception
     {
         Connection con = null;
         try
@@ -207,7 +213,7 @@ public class AccountController
      * this also backs up the account logo if different and not null
      * @param acc
      */
-//    public static void updateAccount(Account acc)throws Exception
+//    public  void updateAccount(Account acc)throws Exception
 //    {
 //        Connection con = null;
 //        try
@@ -230,22 +236,7 @@ public class AccountController
 //        }
 //    }
 
-    /**
-     * this is the general login for users except the operator users. 
-     * @param userName
-     * @param password
-     * @return
-     */
-    public static User login(String accountNo, String userName, String password)throws Exception
-    {
-        User user = accountService.login(accountNo, userName, password);
-        
-        if(user != null && User.USER_OPERATOR.equals(user.getUserType()))
-        {
-        	throw new AppException("User is not authorized to login.");
-        }
-        return user;
-    }
+
 
     /**
      * All users including operator users are allowed to login using this call. 
@@ -254,7 +245,7 @@ public class AccountController
      * @param password could be passPin or the password
      * @return
      */
-    public static User loginFromDevice(String accountNo, String userName, String password)throws Exception
+    public  User loginFromDevice(String accountNo, String userName, String password)throws Exception
     {
     	String loginMessage = null;
         User user = null;
@@ -296,7 +287,8 @@ public class AccountController
      * @param accountPk
      * @return
      */
-    public static Account getAccount(int accountPk)throws Exception
+    @GetMapping
+    public ResponseEntity<Account> getAccount(int accountPk)throws Exception
     {
         Account account = accountService.getAccount(accountPk);
         if(account != null)
@@ -308,10 +300,10 @@ public class AccountController
 				account.putAccountDate(aData.getProperty(), aData.getValue());
 			}
         }
-       	return account;
+       	return ResponseEntity.ok(account);
     }
 
-	public static Account getAccountByAccountNo(String accountNo) throws Exception
+	public  Account getAccountByAccountNo(String accountNo) throws Exception
 	{
         Account account = accountService.getAccountByAccountNo(accountNo);
         if(account != null)
@@ -331,50 +323,50 @@ public class AccountController
      * @param userPk
      * @return
      */
-    public static User getUser(int userPk)
+    public  User getUser(int userPk)
     {
     	return accountService.getUser(userPk);
     }
 
-    public static User findPrimaryUserByUserName(String userName)throws Exception
+    public  User findPrimaryUserByUserName(String userName)throws Exception
     {
         User user = accountService.findPrimaryUserByUserName(userName);
 
        	return user;
     }
 
-    public static Account getAccountForUser(User user)throws Exception
+    public  Account getAccountForUser(User user)throws Exception
     {
         return (Account) persistWrapper.readByPrimaryKey(Account.class, user.getAccountPk());
     }
 
-	public static User getPrimaryUser()throws Exception
+	public  User getPrimaryUser()throws Exception
 	{
 		return (User) accountService.getPrimaryUser();
 	}
 
-	public static List getAllUserPermissionsOnSurvey(UserContext context, String surveyPk)throws Exception
+	public  List getAllUserPermissionsOnSurvey(UserContext context, String surveyPk)throws Exception
 	{
 		return accountService.getAllUserPermissionsOnSurvey(context, surveyPk);
 	}
 
-	public static SurveyPerms getUserPermissionsOnSurvey(UserContext context, int userPk, int surveyPk)throws Exception
+	public  SurveyPerms getUserPermissionsOnSurvey(UserContext context, int userPk, int surveyPk)throws Exception
 	{
 		return accountService.getUserPermissionsOnSurvey(context, userPk, surveyPk);
 	}
 
-	public static void removeAllPermissionsOnSurvey(UserContext context, int surveyPk)throws Exception
+	public  void removeAllPermissionsOnSurvey(UserContext context, int surveyPk)throws Exception
 	{
         accountService.removeAllPermissionsOnSurvey(context, surveyPk);
 	}
 
-	public static List getAllUserPermissions(UserContext context, int userPk)throws Exception
+	public  List getAllUserPermissions(UserContext context, int userPk)throws Exception
 	{
 		// TODO Auto-generated method stub
 		return accountService.getAllUserPermissions(context, userPk);
 	}
 
-	public static void setUserPermissions(UserContext context, int userPk, List permsList)throws Exception
+	public  void setUserPermissions(UserContext context, int userPk, List permsList)throws Exception
 	{
         Connection con = null;
         try
@@ -396,7 +388,7 @@ public class AccountController
         }
 	}
 
-	public static void setSurveyPermissions(UserContext context, int surveyPk, List permsList)throws Exception
+	public  void setSurveyPermissions(UserContext context, int surveyPk, List permsList)throws Exception
 	{
         Connection con = null;
         try
@@ -418,7 +410,7 @@ public class AccountController
         }
 	}
 
-    public static void setUserDevices(UserContext context, int managerPk, Integer[] userPks)throws Exception
+    public  void setUserDevices(UserContext context, int managerPk, Integer[] userPks)throws Exception
     {
         Connection con = null;
         try
@@ -456,7 +448,7 @@ public class AccountController
     /**
      * @param acc
      */
-    public static void cancelAccount(Account acc)throws Exception
+    public  void cancelAccount(Account acc)throws Exception
     {
         Connection con = null;
         try
@@ -482,7 +474,7 @@ public class AccountController
     /**
      * @param acc
      */
-    public static void activateAccount(Account acc)throws Exception
+    public  void activateAccount(Account acc)throws Exception
     {
         Connection con = null;
         try
@@ -508,7 +500,7 @@ public class AccountController
     /**
      * @param userId
      */
-    public static void sendPassword(UserContext context, String userId)throws Exception
+    public  void sendPassword(UserContext context, String userId)throws Exception
     {
         Connection con = null;
         try
@@ -531,7 +523,7 @@ public class AccountController
     }
 
 
-//    public static int chooseSubscriptionPlan(Account account, PaymentOption selectedOption, PaymentMethod paymentMethod, PaymentMethodConfig methodConfig)throws Exception
+//    public  int chooseSubscriptionPlan(Account account, PaymentOption selectedOption, PaymentMethod paymentMethod, PaymentMethodConfig methodConfig)throws Exception
 //    {
 //        Connection con = null;
 //        try
@@ -556,12 +548,12 @@ public class AccountController
 //	    }
 //    }
 
-	public static void markAccountAsPaymentPending(Account account)throws Exception
+	public  void markAccountAsPaymentPending(Account account)throws Exception
 	{
         accountService.markAccountAsPaymentPending(account);
 	}
 
-	public static void addAccountNote(UserContext context, AccountNote noteValue)throws Exception
+	public  void addAccountNote(UserContext context, AccountNote noteValue)throws Exception
 	{
         Connection con = null;
         try
@@ -584,7 +576,7 @@ public class AccountController
 	}
 
 
-	public static void addAccountAlert(Account account, String text)throws Exception
+	public  void addAccountAlert(Account account, String text)throws Exception
 	{
         Connection con = null;
         try
@@ -607,7 +599,7 @@ public class AccountController
 	}
 
 
-	public static void changePassword(UserContext context, String currentPassword, String newPassword)throws Exception
+	public  void changePassword(UserContext context, String currentPassword, String newPassword)throws Exception
 	{
         Connection con = null;
         try
@@ -629,7 +621,7 @@ public class AccountController
 	    }
 	}
 
-	public static void changePassPin(UserContext context, String currentPassPin, String newPassPin)throws Exception
+	public  void changePassPin(UserContext context, String currentPassPin, String newPassPin)throws Exception
 	{
         Connection con = null;
         try
@@ -653,7 +645,7 @@ public class AccountController
 
 
 
-	public static void adminChangePassword(UserContext context, User user, String password, boolean notifyUser)throws Exception
+	public  void adminChangePassword(UserContext context, User user, String password, boolean notifyUser)throws Exception
 	{
         Connection con = null;
         try
@@ -682,7 +674,7 @@ public class AccountController
 	}
 
 
-	public static void adminChangePassPin(UserContext context, User user, String passPin, boolean notifyUser)throws Exception
+	public  void adminChangePassPin(UserContext context, User user, String passPin, boolean notifyUser)throws Exception
 	{
         Connection con = null;
         try
@@ -711,32 +703,32 @@ public class AccountController
 	}
 
 
-	public static void dismissAlert(UserContext context, String alertPk) throws Exception
+	public  void dismissAlert(UserContext context, String alertPk) throws Exception
 	{
 		accountService.dismissAlert(context, Long.parseLong(alertPk));
 	}
 
-	public static User getGuestUser(Account account)throws Exception
+	public  User getGuestUser(Account account)throws Exception
 	{
 		return accountService.getGuestUser(account);
 	}
 
-	public static User getUser(String userName)
+	public  User getUser(String userName)
 	{
         return accountService.getUser(userName);
 	}
 
-    public static List<User> getFormAssignableUsers()throws Exception
+    public  List<User> getFormAssignableUsers()throws Exception
     {
     	return accountService.getFormAssignableUsers();
     }
 
-    public static List getUserAssignableUsers(UserContext context)throws Exception
+    public  List getUserAssignableUsers(UserContext context)throws Exception
     {
     	return accountService.getUserAssignableUsers(context);
     }
 
-//	public static List getUserAssignedUsers(UserContext context)throws Exception
+//	public  List getUserAssignedUsers(UserContext context)throws Exception
 //	{
 //		return AccountManager.getUserAssignedUsers(context);
 //	}
@@ -750,37 +742,37 @@ public class AccountController
 	 * @return
 	 * @throws Exception
 	 */
-//	public static List getUserAssignedUsers(UserContext context, int userPk)throws Exception
+//	public  List getUserAssignedUsers(UserContext context, int userPk)throws Exception
 //	{
 //		return AccountManager.getUserAssignedUsers(context, userPk);
 //	}
 
-    public static long getCurrentAccountUserCount(UserContext context)throws Exception
+    public  long getCurrentAccountUserCount(UserContext context)throws Exception
     {
         return accountService.getCurrentAccountUserCount(context);
     }
 
-	public static void changeAddonUserPassword(UserContext context,
+	public  void changeAddonUserPassword(UserContext context,
 			User user, String password)throws Exception
 	{
 		accountService.changeAddonUserPassword(context, user, password);
 	}
 
-	public static void updateAccount(Account account) throws Exception {
+	public  void updateAccount(Account account) throws Exception {
 		accountService.updateAccount(account);
 	}
 
-	public static List<User> getUserList()throws Exception
+	public  List<User> getUserList()throws Exception
 	{
 		return accountService.getUserList();
 	}
 
-	public static List<User> getValidUserList()
+	public  List<User> getValidUserList()
 	{
 		return accountService.getValidUserList();
 	}
 
-	public static void setUserPermissions(int entityPk, int entityType, Collection userList, String role)throws Exception
+	public  void setUserPermissions(int entityPk, int entityType, Collection userList, String role)throws Exception
 	{
         Connection con = null;
         try
@@ -801,7 +793,7 @@ public class AccountController
         }
 	}
 
-	public static void setUserPermissions(int projectPk, Collection[] userLists, String[] roles)throws Exception
+	public  void setUserPermissions(int projectPk, Collection[] userLists, String[] roles)throws Exception
 	{
         Connection con = null;
         try
@@ -825,12 +817,12 @@ public class AccountController
         }
 	}
 	
-	public static boolean isUserInRole(UserOID userOID, int objectPk, int objectType, String[] roles)
+	public  boolean isUserInRole(UserOID userOID, int objectPk, int objectType, String[] roles)
 	{
 		return accountService.isUserInRole(userOID, objectPk, objectType, roles);
 	}
 
-	public static List<User> getACLs(int pk, int oBJECTTYPE_PROJECT, String rOLE_MANAGER) throws Exception
+	public  List<User> getACLs(int pk, int oBJECTTYPE_PROJECT, String rOLE_MANAGER) throws Exception
 	{
 		return accountService.getACLs(pk, oBJECTTYPE_PROJECT, rOLE_MANAGER);
 	}
@@ -842,13 +834,13 @@ public class AccountController
 	 * @return int
 	 * @throws Exception
 	 */
-	public static int getUserCountfromTypeAndStatus(String userType,
+	public  int getUserCountfromTypeAndStatus(String userType,
 			String status) throws Exception {
 		
 		return accountService.getUserCountfromTypeAndStatus(userType, status);
 	}
 
-	public static void changeUserLicenseType(int userPk) throws Exception 
+	public  void changeUserLicenseType(int userPk) throws Exception
 	{
         Connection con = null;
         try
@@ -868,17 +860,17 @@ public class AccountController
         }
 	}
 
-	public static List<User> searchUser(String searchString) 
+	public  List<User> searchUser(String searchString)
 	{
 		return accountService.searchUser(searchString);
 	}
 
-	public static UserQuery getUserQuery(int userPk) 
+	public  UserQuery getUserQuery(int userPk)
 	{
 		return accountService.getUserQuery(userPk);
 	}
 
-	public static void createVerificationCodeForPasswordReset(User userToResetPasswordFor, User sendEmailTo)throws Exception
+	public  void createVerificationCodeForPasswordReset(User userToResetPasswordFor, User sendEmailTo)throws Exception
 	{
         Connection con = null;
         
@@ -929,13 +921,13 @@ public class AccountController
         }
 	}
 	
-	public static void resetUserPasswordWithVerificationCode(User user, String verificationKey, String newPassword) throws Exception 
+	public  void resetUserPasswordWithVerificationCode(User user, String verificationKey, String newPassword) throws Exception
 	{
 		//transaction managed inside the manager
     	accountService.resetUserPasswordWithVerificationCode(user, verificationKey, newPassword);
 	}
 	
-	public static User updateUserEmail(UserContext context, String newEmail) throws Exception
+	public  User updateUserEmail(UserContext context, String newEmail) throws Exception
 	{
         Connection con = null;
         try

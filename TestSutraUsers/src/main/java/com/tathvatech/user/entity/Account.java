@@ -6,12 +6,14 @@
  */
 package com.tathvatech.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.tathvatech.common.entity.AbstractEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import org.springframework.data.relational.core.mapping.Table;
+import jakarta.persistence.Table;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -26,6 +28,7 @@ import java.util.HashMap;
 
 @Entity
 @Table(name = "TAB_ACCOUNT")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Account extends AbstractEntity implements AccountBase, Serializable
 {
 	@Id
@@ -165,6 +168,7 @@ public class Account extends AbstractEntity implements AccountBase, Serializable
 
 
 	@JdbcTypeCode(SqlTypes.JSON)
+	@Transient
 	private HashMap accountData = new HashMap();
 	
     /**

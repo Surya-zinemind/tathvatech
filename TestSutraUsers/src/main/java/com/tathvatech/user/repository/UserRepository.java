@@ -40,7 +40,7 @@ public class UserRepository {
 		UserQuery u = map.get(userPk);
 		if(u == null)
 		{
-			u = AccountController.getUserQuery(userPk);
+//			u = AccountController.getUserQuery(userPk);
 			if(u == null)
 				return null;
 			

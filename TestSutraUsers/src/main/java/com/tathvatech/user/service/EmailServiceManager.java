@@ -21,7 +21,7 @@ public class EmailServiceManager
 	static PersistWrapper persistWrapper;
 
 	@Autowired
-	static AccountService accountService;
+	static AccountService accountServiceImpl;
 
 	public static void scheduleEmail(EmailMessageInfo emailMessage) throws Exception
 	{
@@ -43,7 +43,7 @@ public class EmailServiceManager
 		for (int i = 0; i < emailMessage.getToAddress().length; i++)
 		{
 			String emailAddress = emailMessage.getToAddress()[i];
-			User user = accountService.findUserByEmail(emailAddress);
+			User user = accountServiceImpl.findUserByEmail(emailAddress);
 			if(user != null)
 			{
 				if(User.STATUS_ACTIVE.contentEquals(user.getStatus()))
