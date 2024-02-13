@@ -1,0 +1,104 @@
+{
+	"info": {
+		"_postman_id": "b759e9e4-4681-44cb-89fa-40a79fb44cdf",
+		"name": "Testsutra migration",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19964632"
+	},
+	"item": [
+		{
+			"name": "authentication controller",
+			"item": [
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"npadavet\",\n    \"password\": \"npadavet\",\n    \"accountNo\": \"npadavet\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "account controller",
+			"item": [
+				{
+					"name": "account",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/account?accountPk=254",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"account"
+							],
+							"query": [
+								{
+									"key": "accountPk",
+									"value": "254"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJucGFkYXZldCIsImlhdCI6MTcwNzgwMjc4MywiZXhwIjoxNzA3ODA2MzgzfQ.VOw5A42M2PzQ9mpWyI8yxrF1XX_lCc83hlLgteyWnYM",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	]
+}
