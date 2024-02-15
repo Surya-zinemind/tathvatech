@@ -15,13 +15,9 @@ import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.common.exception.LoginFailedException;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.user.Asynch.AsyncProcessor;
-import com.tathvatech.user.OID.UserOID;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.*;
-import com.tathvatech.user.request.AccountAlertRequest;
-import com.tathvatech.user.request.LoginWithPassPinRequest;
-import com.tathvatech.user.request.UserPermissionsRequest;
-import com.tathvatech.user.request.UserProjectPermissionsRequest;
+import com.tathvatech.user.request.*;
 import com.tathvatech.user.service.AccountService;
 import com.tathvatech.user.service.EmailServiceManager;
 import lombok.RequiredArgsConstructor;
@@ -734,15 +730,19 @@ public class AccountController
 			}
 
 	}
-	
-	public  boolean isUserInRole(UserOID userOID, int objectPk, int objectType, String[] roles)
+
+    @PostMapping("/isUserInRole")
+	public ResponseEntity<Boolean>  isUserInRole(@RequestBody UserInRoleRequest userInRoleRequest)
 	{
-		return accountService.isUserInRole(userOID, objectPk, objectType, roles);
+        Boolean isUserInRole = accountService.isUserInRole(userInRoleRequest.getUserOID(), userInRoleRequest.getObjectPk(), userInRoleRequest.getObjectType(), userInRoleRequest.getRoles());
+		return ResponseEntity.ok(isUserInRole);
 	}
 
-	public  List<User> getACLs(int pk, int oBJECTTYPE_PROJECT, String rOLE_MANAGER) throws Exception
+    @PostMapping("/acls")
+	public ResponseEntity<List<User>>  getACLs(@RequestBody ACLRequest aclRequest) throws Exception
 	{
-		return accountService.getACLs(pk, oBJECTTYPE_PROJECT, rOLE_MANAGER);
+        List<User> users = accountService.getACLs(aclRequest.getPk(), aclRequest.getObjectTypeProject(), aclRequest.getRoleManager());
+		return ResponseEntity.ok(users);
 	}
 	
 	/**
