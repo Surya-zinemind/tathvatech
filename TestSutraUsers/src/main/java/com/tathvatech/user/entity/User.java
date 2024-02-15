@@ -11,11 +11,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.tathvatech.common.common.DateFormats;
 import com.tathvatech.common.common.EntitySelectorItem;
 import com.tathvatech.common.entity.AbstractEntity;
-import com.tathvatech.user.OID.SiteOID;
 import com.tathvatech.user.OID.UserOID;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Data;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -63,6 +63,7 @@ public class User extends AbstractEntity implements UserBase, Serializable, Enti
 	private Date lastUpdated;
 
 	@JdbcTypeCode(SqlTypes.JSON)
+	@Transient
 	private HashMap accountData = new HashMap();
 
 

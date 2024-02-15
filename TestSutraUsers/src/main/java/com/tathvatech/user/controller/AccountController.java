@@ -7,26 +7,23 @@
 package com.tathvatech.user.controller;
 
 
-import com.tathvatech.user.Asynch.AsyncProcessor;
 import com.tathvatech.common.common.ApplicationConstants;
 import com.tathvatech.common.common.ApplicationProperties;
 import com.tathvatech.common.common.ServiceLocator;
 import com.tathvatech.common.email.EmailMessageInfo;
-import com.tathvatech.user.service.AccountService;
-import com.tathvatech.user.service.EmailServiceManager;
 import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.common.exception.LoginFailedException;
 import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.user.Asynch.AsyncProcessor;
 import com.tathvatech.user.OID.UserOID;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.*;
+import com.tathvatech.user.request.LoginWithPassPinRequest;
+import com.tathvatech.user.service.AccountService;
+import com.tathvatech.user.service.EmailServiceManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.Connection;
 import java.util.Collection;
@@ -165,48 +162,19 @@ public class AccountController
         }
 	}
 
-	public  void deleteAddonUser(int userPk)throws Exception
+    @DeleteMapping("/andonUser")
+	public  ResponseEntity<?> deleteAddonUser(int userPk)throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
             accountService.deleteAddonUser(userPk);
+            return (ResponseEntity<?>) ResponseEntity.noContent();
 
-            con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
 	}
-
+@PutMapping("/activateUser")
     public  void activateUser(int userPk)throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
             accountService.activateUser(userPk);
 
-            con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
     }
 
     /**
@@ -245,13 +213,14 @@ public class AccountController
      * @param password could be passPin or the password
      * @return
      */
-    public  User loginFromDevice(String accountNo, String userName, String password)throws Exception
+    @PostMapping("/loginFromDevice")
+    public ResponseEntity<User>  loginFromDevice(@RequestBody LoginWithPassPinRequest loginWithPassPinRequest)throws Exception
     {
     	String loginMessage = null;
         User user = null;
         try
 		{
-            user = accountService.loginWithPassPin(accountNo, userName, password);
+            user = accountService.loginWithPassPin(loginWithPassPinRequest.getAccountNo(), loginWithPassPinRequest.getUsername(), loginWithPassPinRequest.getPassPin());
 		}
         catch (LoginFailedException e)
         {
@@ -266,7 +235,7 @@ public class AccountController
         {
         	try
 			{
-            	user = accountService.login(accountNo, userName, password);
+            	user = accountService.login(loginWithPassPinRequest.getAccountNo(), loginWithPassPinRequest.getUsername(), loginWithPassPinRequest.getPassPin());
 			} 
             catch (LoginFailedException e)
             {
@@ -280,7 +249,7 @@ public class AccountController
         if(user == null)
         	throw new LoginFailedException(loginMessage);
         else
-        	return user;
+        	return ResponseEntity.ok(user);
     }
     
     /**
@@ -303,7 +272,8 @@ public class AccountController
        	return ResponseEntity.ok(account);
     }
 
-	public  Account getAccountByAccountNo(String accountNo) throws Exception
+    @GetMapping("/{accountNo}")
+	public  ResponseEntity<Account> getAccountByAccountNo(@PathVariable("accountNo") String accountNo) throws Exception
 	{
         Account account = accountService.getAccountByAccountNo(accountNo);
         if(account != null)
@@ -315,7 +285,7 @@ public class AccountController
 				account.putAccountDate(aData.getProperty(), aData.getValue());
 			}
         }
-       	return account;
+       	return ResponseEntity.ok(account);
 	}
 
 
@@ -323,26 +293,34 @@ public class AccountController
      * @param userPk
      * @return
      */
-    public  User getUser(int userPk)
+    @GetMapping("/user/{pk}")
+    public ResponseEntity<User>  getUser(@PathVariable("pk") int userPk)
     {
-    	return accountService.getUser(userPk);
+        User user = accountService.getUser(userPk);
+    	return ResponseEntity.ok(user) ;
     }
 
-    public  User findPrimaryUserByUserName(String userName)throws Exception
+
+    @GetMapping("/user")
+    public  ResponseEntity<User> findPrimaryUserByUserName(String userName)throws Exception
     {
         User user = accountService.findPrimaryUserByUserName(userName);
 
-       	return user;
+       	return ResponseEntity.ok(user);
     }
 
-    public  Account getAccountForUser(User user)throws Exception
+    @GetMapping("/accountForUser")
+    public  ResponseEntity<Account> getAccountForUser(@RequestBody User user)throws Exception
     {
-        return (Account) persistWrapper.readByPrimaryKey(Account.class, user.getAccountPk());
+        Account account = (Account) persistWrapper.readByPrimaryKey(Account.class, user.getAccountPk());
+        return ResponseEntity.ok(account);
     }
 
-	public  User getPrimaryUser()throws Exception
+    @GetMapping("/primaryUser")
+	public  ResponseEntity<User>  getPrimaryUser()throws Exception
 	{
-		return (User) accountService.getPrimaryUser();
+        User user = (User) accountService.getPrimaryUser();
+		return ResponseEntity.ok(user);
 	}
 
 	public  List getAllUserPermissionsOnSurvey(UserContext context, String surveyPk)throws Exception
