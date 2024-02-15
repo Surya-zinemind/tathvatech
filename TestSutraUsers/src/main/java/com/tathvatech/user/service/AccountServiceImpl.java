@@ -26,6 +26,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -910,8 +911,9 @@ public class AccountServiceImpl implements AccountService {
 		return persistWrapper.readList(User.class, sql, User.STATUS_ACTIVE, User.USER_PRIMARY, User.USER_OPERATOR, User.USER_TSSUPPORT);
 	}
 
+	@Transactional
 	@Override
-	public  void setUserPermissions(int entityPk, int entityType, Collection userList, String role)throws Exception
+	public  void setUserPermissions(int entityPk, int entityType, Collection<User> userList, String role)throws Exception
 	{
 		//delete the existing list of users with that role
 		persistWrapper.delete("delete from TAB_USER_PERMS where objectType=? and objectPk=? " +
@@ -930,7 +932,7 @@ public class AccountServiceImpl implements AccountService {
 	}
 
 	@Override
-	public  void setUserPermissions(int projectPk, Collection[] userLists, String[] roles)throws Exception
+	public  void setUserPermissions(int projectPk, Collection<User> [] userLists, String[] roles)throws Exception
 	{
         Connection con = null;
         try
@@ -954,6 +956,7 @@ public class AccountServiceImpl implements AccountService {
         }
 	}
 
+	@Transactional
 	@Override
 	public  void setUserPermissions(int projectPk, Collection userList, String role)throws Exception
 	{

@@ -18,7 +18,10 @@ import com.tathvatech.user.Asynch.AsyncProcessor;
 import com.tathvatech.user.OID.UserOID;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.*;
+import com.tathvatech.user.request.AccountAlertRequest;
 import com.tathvatech.user.request.LoginWithPassPinRequest;
+import com.tathvatech.user.request.UserPermissionsRequest;
+import com.tathvatech.user.request.UserProjectPermissionsRequest;
 import com.tathvatech.user.service.AccountService;
 import com.tathvatech.user.service.EmailServiceManager;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +29,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Connection;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -169,7 +171,7 @@ public class AccountController
             return (ResponseEntity<?>) ResponseEntity.noContent();
 
 	}
-@PutMapping("/activateUser")
+    @PutMapping("/activateUser")
     public  void activateUser(int userPk)throws Exception
     {
 
@@ -426,53 +428,21 @@ public class AccountController
     /**
      * @param acc
      */
-    public  void cancelAccount(Account acc)throws Exception
+    @PostMapping("/cancelAccount")
+    public  void cancelAccount(@RequestBody Account acc)throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
 //            PaymentManager.invalidateAccountSubscriptions(acc);
             accountService.cancelAccount(acc);
-
-            con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-	    finally
-	    {
-	    }
     }
 
     /**
      * @param acc
      */
-    public  void activateAccount(Account acc)throws Exception
+    @PostMapping("/activateAccount")
+    public  void activateAccount(@RequestBody Account acc)throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
             accountService.activateAccount(acc);
 
-            con.commit();
-	    }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-	    finally
-	    {
-            con = ServiceLocator.locate().getConnection();
-	    }
     }
 
     /**
@@ -526,7 +496,8 @@ public class AccountController
 //	    }
 //    }
 
-	public  void markAccountAsPaymentPending(Account account)throws Exception
+    @PutMapping("/markAccountAsPaymentPending")
+	public  void markAccountAsPaymentPending(@RequestBody Account account)throws Exception
 	{
         accountService.markAccountAsPaymentPending(account);
 	}
@@ -554,26 +525,11 @@ public class AccountController
 	}
 
 
-	public  void addAccountAlert(Account account, String text)throws Exception
+    @PostMapping("/addAccountAlert")
+	public  void addAccountAlert(@RequestBody AccountAlertRequest accountAlertRequest)throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+    		accountService.addAccountAlert(accountAlertRequest.getAccount(), accountAlertRequest.getText());
 
-    		accountService.addAccountAlert(account, text);
-
-            con.commit();
-	    }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-	    finally
-	    {
-	    }
 	}
 
 
@@ -686,19 +642,25 @@ public class AccountController
 		accountService.dismissAlert(context, Long.parseLong(alertPk));
 	}
 
-	public  User getGuestUser(Account account)throws Exception
+    @PostMapping("/guestUser")
+	public ResponseEntity<User>  getGuestUser(Account account)throws Exception
 	{
-		return accountService.getGuestUser(account);
+        User user = accountService.getGuestUser(account);
+		return ResponseEntity.ok(user);
 	}
 
-	public  User getUser(String userName)
+    @GetMapping("/userByUsername")
+	public ResponseEntity<User>  getUser(String userName)
 	{
-        return accountService.getUser(userName);
+        User user = accountService.getUser(userName);
+        return ResponseEntity.ok(user);
 	}
 
-    public  List<User> getFormAssignableUsers()throws Exception
+    @GetMapping("/formAssignableUsers")
+    public ResponseEntity<List<User>>  getFormAssignableUsers()throws Exception
     {
-    	return accountService.getFormAssignableUsers();
+        List<User> users = accountService.getFormAssignableUsers();
+    	return ResponseEntity.ok(users);
     }
 
     public  List getUserAssignableUsers(UserContext context)throws Exception
@@ -736,63 +698,41 @@ public class AccountController
 		accountService.changeAddonUserPassword(context, user, password);
 	}
 
-	public  void updateAccount(Account account) throws Exception {
+    @PutMapping("/updateAccount")
+	public  void updateAccount(@RequestBody Account account) throws Exception {
 		accountService.updateAccount(account);
 	}
 
-	public  List<User> getUserList()throws Exception
+    @GetMapping("/users")
+	public ResponseEntity<List<User>>  getUserList()throws Exception
 	{
-		return accountService.getUserList();
+        List<User> users =  accountService.getUserList();
+		return ResponseEntity.ok(users);
 	}
 
-	public  List<User> getValidUserList()
+    @GetMapping("/validUsers")
+	public  ResponseEntity<List<User>> getValidUserList()
 	{
-		return accountService.getValidUserList();
+        List<User> users = accountService.getValidUserList();
+        return ResponseEntity.ok(users);
 	}
 
-	public  void setUserPermissions(int entityPk, int entityType, Collection userList, String role)throws Exception
+    @PostMapping("/setUserPermissions")
+	public  void setUserPermissions(@RequestBody UserPermissionsRequest userPermissionsRequest)throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+    	    accountService.setUserPermissions(userPermissionsRequest.getEntityPk(), userPermissionsRequest.getEntityType(), userPermissionsRequest.getUserList(), userPermissionsRequest.getRole());
 
-    	    accountService.setUserPermissions(entityPk, entityType, userList, role);
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
 	}
 
-	public  void setUserPermissions(int projectPk, Collection[] userLists, String[] roles)throws Exception
+    @PostMapping("/setUserPermissionsByProject")
+	public  void setUserPermissions(@RequestBody UserProjectPermissionsRequest userProjectPermissionsRequest)throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-            for (int i = 0; i < userLists.length; i++)
+            for (int i = 0; i < userProjectPermissionsRequest.getUserLists().length; i++)
 			{
-        	    accountService.setUserPermissions(projectPk, userLists[i], roles[i]);
+        	    accountService.setUserPermissions(userProjectPermissionsRequest.getProjectPk(), userProjectPermissionsRequest.getUserLists()[i], userProjectPermissionsRequest.getRoles()[i]);
 			}
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
 	}
 	
 	public  boolean isUserInRole(UserOID userOID, int objectPk, int objectType, String[] roles)

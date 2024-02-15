@@ -113,9 +113,9 @@ public interface AccountService {
 
     List<User> getValidUserList();
 
-    void setUserPermissions(int entityPk, int entityType, Collection userList, String role) throws Exception;
+    void setUserPermissions(int entityPk, int entityType, Collection<User> userList, String role) throws Exception;
 
-    void setUserPermissions(int projectPk, Collection[] userLists, String[] roles) throws Exception;
+    void setUserPermissions(int projectPk, Collection<User> [] userLists, String[] roles) throws Exception;
 
     void setUserPermissions(int projectPk, Collection userList, String role) throws Exception;
 
