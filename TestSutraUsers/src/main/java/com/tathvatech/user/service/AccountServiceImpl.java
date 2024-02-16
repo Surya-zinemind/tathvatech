@@ -44,8 +44,11 @@ public class AccountServiceImpl implements AccountService {
     private static final Logger logger = LoggerFactory.getLogger(AccountServiceImpl.class);
 	private final PersistWrapper persistWrapper;
 
-    public AccountServiceImpl(PersistWrapper persistWrapper) {
+	private  final UserPasswordResetKeyDAO userPasswordResetKeyDAO;
+
+    public AccountServiceImpl(PersistWrapper persistWrapper, UserPasswordResetKeyDAO userPasswordResetKeyDAO) {
         this.persistWrapper = persistWrapper;
+        this.userPasswordResetKeyDAO = userPasswordResetKeyDAO;
     }
 
 
@@ -1034,7 +1037,7 @@ public class AccountServiceImpl implements AccountService {
 	 * @throws Exception
 	 */
 	@Override
-	public  int getUserCountfromTypeAndStatus(String userType,
+	public  Integer getUserCountfromTypeAndStatus(String userType,
 											  String status) throws Exception {
 		String query = "SELECT COUNT(*) FROM TAB_USER WHERE userType = ? and status = ?";
 
@@ -1110,12 +1113,12 @@ public class AccountServiceImpl implements AccountService {
 	@Override
 	public  UserPasswordResetKey createUserPasswordResetKey(User user, User sendKeyToUser) throws Exception
 	{
-		UserPasswordResetKeyDAO dao = new UserPasswordResetKeyDAO();
+
 
 		//invalidate keys if there is any valid key entry.
-		dao.invalidateKeys(user.getOID());
+		userPasswordResetKeyDAO.invalidateKeys(user.getOID());
 		
-		return dao.createUserPasswordResetKey(user, sendKeyToUser);
+		return userPasswordResetKeyDAO.createUserPasswordResetKey(user, sendKeyToUser);
 	}
 	
 	@Override
@@ -1127,8 +1130,8 @@ public class AccountServiceImpl implements AccountService {
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-    		UserPasswordResetKeyDAO dao = new UserPasswordResetKeyDAO();
-    		UserPasswordResetKey keyEntry = dao.getValidUserPasswordResetKey(user.getOID(), 3, 24);
+
+    		UserPasswordResetKey keyEntry = userPasswordResetKeyDAO.getValidUserPasswordResetKey(user.getOID(), 3, 24);
 			if(keyEntry == null)
 			{
 				throw new AppException("Invalid verification code. Password cannot be reset");
@@ -1136,7 +1139,7 @@ public class AccountServiceImpl implements AccountService {
 			if(!(verificationKey.equals(keyEntry.getVerificationCode())))
 			{
 				keyEntry.setNoOfTries(keyEntry.getNoOfTries()+1);
-				dao.updateUserPasswordResetKey(keyEntry);
+				userPasswordResetKeyDAO.updateUserPasswordResetKey(keyEntry);
 	            con.commit();
 				
 				throw new AppException("Invalid verification code. Password cannot be reset");
@@ -1148,7 +1151,7 @@ public class AccountServiceImpl implements AccountService {
 		        
 		        keyEntry.setNoOfTries(keyEntry.getNoOfTries()+1);
 		        keyEntry.setResetDone(1);
-		        dao.updateUserPasswordResetKey(keyEntry);
+				userPasswordResetKeyDAO.updateUserPasswordResetKey(keyEntry);
 	            con.commit();
 			}
         }

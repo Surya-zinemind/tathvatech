@@ -125,7 +125,7 @@ public interface AccountService {
 
     List<Integer> getObjectPksWithRoleForUser(UserOID userOID, int objectType, String role) throws Exception;
 
-    int getUserCountfromTypeAndStatus(String userType,
+    Integer getUserCountfromTypeAndStatus(String userType,
                                       String status) throws Exception;
 
     void changeUserLicenseType(int userPk) throws Exception;

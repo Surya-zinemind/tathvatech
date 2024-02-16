@@ -752,52 +752,38 @@ public class AccountController
 	 * @return int
 	 * @throws Exception
 	 */
-	public  int getUserCountfromTypeAndStatus(String userType,
-			String status) throws Exception {
-		
-		return accountService.getUserCountfromTypeAndStatus(userType, status);
+    @PostMapping ("/getUserCount")
+	public  ResponseEntity<Integer> getUserCountfromTypeAndStatus(@RequestBody UserCountByTypeRequest userCountByTypeRequest) throws Exception {
+        Integer count = accountService.getUserCountfromTypeAndStatus(userCountByTypeRequest.getUserType(), userCountByTypeRequest.getStatus());
+		return ResponseEntity.ok(count);
 	}
 
+    @PutMapping("/changeUserLicenseType")
 	public  void changeUserLicenseType(int userPk) throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
     		accountService.changeUserLicenseType(userPk);
-
-            con.commit();
-            
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
 	}
 
-	public  List<User> searchUser(String searchString)
+    @GetMapping("/searchUser")
+	public ResponseEntity<List<User>> searchUser(String searchString)
 	{
-		return accountService.searchUser(searchString);
+        List<User> users = accountService.searchUser(searchString);
+        return ResponseEntity.ok(users);
 	}
 
-	public  UserQuery getUserQuery(int userPk)
+    @GetMapping("/getUserQuery")
+	public ResponseEntity<UserQuery>  getUserQuery(int userPk)
 	{
-		return accountService.getUserQuery(userPk);
+        UserQuery userQuery = accountService.getUserQuery(userPk);
+		return ResponseEntity.ok(userQuery);
 	}
 
-	public  void createVerificationCodeForPasswordReset(User userToResetPasswordFor, User sendEmailTo)throws Exception
+    @PostMapping("/createVerificationCodeForPasswordReset")
+	public  void createVerificationCodeForPasswordReset(@RequestBody VerificationCodeRequest verificationCodeRequest)throws Exception
 	{
-        Connection con = null;
-        
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-    		UserPasswordResetKey key = accountService.createUserPasswordResetKey(userToResetPasswordFor, sendEmailTo);
+
+    		UserPasswordResetKey key = accountService.createUserPasswordResetKey(verificationCodeRequest.getUserToResetPasswordFor(), verificationCodeRequest.getSendEmailTo());
     		
 
             StringBuffer messageTextSb = new StringBuffer("Hi ");
@@ -808,8 +794,8 @@ public class AccountController
             messageTextSb.append("\n\tTestSutra Support");
 
             String messageText = messageTextSb.toString();
-            messageText = messageText.replace("{NameOfUser}", (userToResetPasswordFor.getFirstName() + " " + userToResetPasswordFor.getLastName()));
-            messageText = messageText.replace("{userName}", (userToResetPasswordFor.getUserName()));
+            messageText = messageText.replace("{NameOfUser}", (verificationCodeRequest.getUserToResetPasswordFor().getFirstName() + " " + verificationCodeRequest.getUserToResetPasswordFor().getLastName()));
+            messageText = messageText.replace("{userName}", (verificationCodeRequest.getUserToResetPasswordFor().getUserName()));
             messageText = messageText.replace("{key}", (key.getVerificationCode()));
             
             StringBuffer messageHtmlSb = new StringBuffer("Hi ");
@@ -820,29 +806,22 @@ public class AccountController
             messageHtmlSb.append("<br/>TestSutra Support");
 
             String messageHtml = messageHtmlSb.toString();
-            messageHtml = messageHtml.replace("{NameOfUser}", (userToResetPasswordFor.getFirstName() + " " + userToResetPasswordFor.getLastName()));
-            messageHtml = messageHtml.replace("{userName}", (userToResetPasswordFor.getUserName()));
+            messageHtml = messageHtml.replace("{NameOfUser}", (verificationCodeRequest.getUserToResetPasswordFor().getFirstName() + " " + verificationCodeRequest.getUserToResetPasswordFor().getLastName()));
+            messageHtml = messageHtml.replace("{userName}", (verificationCodeRequest.getUserToResetPasswordFor().getUserName()));
             messageHtml = messageHtml.replace("{key}", (key.getVerificationCode()));
 
-            EmailMessageInfo info = new EmailMessageInfo(ApplicationProperties.getEmailFromAddress(), null, new String[]{sendEmailTo.getEmail()},
+            EmailMessageInfo info = new EmailMessageInfo(ApplicationProperties.getEmailFromAddress(), null, new String[]{verificationCodeRequest.getSendEmailTo().getEmail()},
     				"Password reset request", messageText, messageHtml, null);
 
             EmailServiceManager.scheduleEmail(info);
-            
-            con.commit();
-            
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
+
 	}
-	
-	public  void resetUserPasswordWithVerificationCode(User user, String verificationKey, String newPassword) throws Exception
+
+    @PostMapping("/resetUserPasswordWithVerificationCode")
+	public  void resetUserPasswordWithVerificationCode(@RequestBody ResetUserPasswordRequest resetUserPasswordRequest) throws Exception
 	{
 		//transaction managed inside the manager
-    	accountService.resetUserPasswordWithVerificationCode(user, verificationKey, newPassword);
+    	accountService.resetUserPasswordWithVerificationCode(resetUserPasswordRequest.getUser(), resetUserPasswordRequest.getVerificationKey(), resetUserPasswordRequest.getNewPassword());
 	}
 	
 	public  User updateUserEmail(UserContext context, String newEmail) throws Exception

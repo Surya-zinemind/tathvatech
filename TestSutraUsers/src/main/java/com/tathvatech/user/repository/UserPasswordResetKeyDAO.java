@@ -1,20 +1,26 @@
 package com.tathvatech.user.repository;
 
-import java.util.Date;
-import java.util.Random;
-
 import com.tathvatech.common.enums.EStatusEnum;
 import com.tathvatech.common.wrapper.PersistWrapper;
-
 import com.tathvatech.user.OID.UserOID;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.user.entity.UserPasswordResetKey;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
+import java.util.Random;
+
+@Repository
 public class UserPasswordResetKeyDAO
 {
-	@Autowired
-	PersistWrapper persistWrapper;
+	private final PersistWrapper persistWrapper;
+
+
+	public UserPasswordResetKeyDAO(PersistWrapper persistWrapper) {
+		this.persistWrapper = persistWrapper;
+	}
+	@Transactional
 	public UserPasswordResetKey createUserPasswordResetKey(User user, User keysentToUser) throws Exception
 	{
 		//invalidate keys if there is any valid key entry.
