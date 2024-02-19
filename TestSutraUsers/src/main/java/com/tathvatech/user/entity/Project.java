@@ -20,7 +20,7 @@ public class Project extends AbstractEntity implements Serializable
 {
 	@Id
 	private long pk;
-	private long accountPk;
+	private int accountPk;
 	private String projectName;
 	private String projectDescription;
 	private String projectRefNo;
@@ -29,7 +29,7 @@ public class Project extends AbstractEntity implements Serializable
 	private String contractNo;
 	private String copyrightNotice;
 	private Integer managerPk;
-	private long createdBy;
+	private int createdBy;
 	private Date createdDate;
 	private Boolean disableDailySummaryEmails;
 	private Boolean disableNotifications;
@@ -49,11 +49,13 @@ public class Project extends AbstractEntity implements Serializable
 		this.pk = pk;
 	}
 
-	public long getAccountPk() {
+	public int getAccountPk()
+	{
 		return accountPk;
 	}
 
-	public void setAccountPk(long accountPk) {
+	public void setAccountPk(int accountPk)
+	{
 		this.accountPk = accountPk;
 	}
 
@@ -129,11 +131,13 @@ public class Project extends AbstractEntity implements Serializable
 		this.managerPk = managerPk;
 	}
 
-	public long getCreatedBy() {
+	public int getCreatedBy()
+	{
 		return createdBy;
 	}
 
-	public void setCreatedBy(long createdBy) {
+	public void setCreatedBy(int createdBy)
+	{
 		this.createdBy = createdBy;
 	}
 

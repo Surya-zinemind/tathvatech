@@ -20,17 +20,9 @@ import java.util.Objects;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
-import com.tathvatech.common.enums.EStatusEnum;
-import com.tathvatech.common.enums.EntityTypeEnum;
-import com.tathvatech.common.exception.AppException;
-import com.tathvatech.common.exception.FormApprovedException;
 import com.tathvatech.common.wrapper.PersistWrapper;
-import com.tathvatech.user.OID.*;
-import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
-import com.tathvatech.user.entity.*;
-import com.tathvatech.user.enums.ProjectRolesEnum;
-import com.tathvatech.user.enums.SiteRolesEnum;
+import com.tathvatech.user.entity.User;
 import org.apache.commons.lang3.StringUtils;
 
 import org.slf4j.Logger;
@@ -46,7 +38,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProjectServiceImpl
 {
-	private  final Logger logger = LoggerFactory.getLogger(ProjectServiceImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(ProjectServiceImpl.class);
 	private final PersistWrapper persistWrapper;
 
     public ProjectServiceImpl(PersistWrapper persistWrapper) {
@@ -54,8 +46,8 @@ public class ProjectServiceImpl
     }
 
     // TODO:: implement a cache with this hashmap
-	// private  HashMap surveyMap = new HashMap();
-	public  List<ProjectQuery> getProjectList(UserContext context, ProjectFilter filter)
+	// private static HashMap surveyMap = new HashMap();
+	public static List<ProjectQuery> getProjectList(UserContext context, ProjectFilter filter)
 	{
 		if (User.USER_PRIMARY.equals(context.getUser().getUserType())) // all
 																		// projects
@@ -92,7 +84,7 @@ public class ProjectServiceImpl
 
 			sb.append(" order by project.createdDate desc");
 
-			List<ProjectQuery> list = persistWrapper.readList(ProjectQuery.class, sb.toString(), params.toArray());
+			List<ProjectQuery> list = PersistWrapper.readList(ProjectQuery.class, sb.toString(), params.toArray());
 			if (list != null)
 			{
 				List<Integer> projectPks = list.stream().map(query -> query.getPk()).collect(Collectors.toList());
@@ -146,7 +138,7 @@ public class ProjectServiceImpl
 						str = str.replace('[', '(');
 						str = str.replace(']', ')');
 
-						List<Integer> projectPksFromSites = persistWrapper.readList(Integer.class,
+						List<Integer> projectPksFromSites = PersistWrapper.readList(Integer.class,
 								"select distinct projectFk from project_site_config where siteFk in " + str);
 						ignoreEnableCheckSheetFilterSettingPkList.addAll(projectPksFromSites);
 					}
@@ -166,7 +158,7 @@ public class ProjectServiceImpl
 						str = str.replace('[', '(');
 						str = str.replace(']', ')');
 
-						List<Integer> projectPksFromProjectSiteRoles = persistWrapper.readList(Integer.class,
+						List<Integer> projectPksFromProjectSiteRoles = PersistWrapper.readList(Integer.class,
 								"select distinct projectFk from project_site_config where pk in " + str);
 						ignoreEnableCheckSheetFilterSettingPkList.addAll(projectPksFromProjectSiteRoles);
 					}
@@ -181,11 +173,11 @@ public class ProjectServiceImpl
 			if (filter.getValidRoles() == null || filter.getIncludeProjectAndUnitUserAssignments() == true)
 			{
 				// where I am the manager
-				ignoreEnableCheckSheetFilterSettingPkList.addAll(persistWrapper.readList(Integer.class,
+				ignoreEnableCheckSheetFilterSettingPkList.addAll(PersistWrapper.readList(Integer.class,
 						"select pk from TAB_PROJECT where managerPk = ?", context.getUser().getPk()));
 
 				// where i am the project coordinator or data clerk or readonly
-				List<Integer> mgrProjects = persistWrapper.readList(Integer.class,
+				List<Integer> mgrProjects = PersistWrapper.readList(Integer.class,
 						"select objectPk from TAB_USER_PERMS where userPk=? and objectType=? and role in (?)",
 						context.getUser().getPk(), UserPerms.OBJECTTYPE_PROJECT, UserPerms.ROLE_MANAGER);
 				for (Iterator iterator = mgrProjects.iterator(); iterator.hasNext();)
@@ -194,7 +186,7 @@ public class ProjectServiceImpl
 					if (!(ignoreEnableCheckSheetFilterSettingPkList.contains(integer)))
 						ignoreEnableCheckSheetFilterSettingPkList.add(integer);
 				}
-				List<Integer> otherUserProjects = persistWrapper.readList(Integer.class,
+				List<Integer> otherUserProjects = PersistWrapper.readList(Integer.class,
 						"select objectPk from TAB_USER_PERMS where userPk=? and objectType=? and role in (?,?)",
 						context.getUser().getPk(), UserPerms.OBJECTTYPE_PROJECT, UserPerms.ROLE_DATACLERK,
 						UserPerms.ROLE_READONLY);
@@ -219,7 +211,7 @@ public class ProjectServiceImpl
 
 				// Projects where the user is added as a dataclerk in
 				// tab_project_users
-				List<Integer> pkList = persistWrapper.readList(Integer.class,
+				List<Integer> pkList = PersistWrapper.readList(Integer.class,
 						"select projectPk from TAB_PROJECT_USERS where userPk=? and workstationPk=? and role=?",
 						context.getUser().getPk(), DummyWorkstation.getPk(), User.ROLE_READONLY);
 				for (Iterator iterator = pkList.iterator(); iterator.hasNext();)
@@ -229,7 +221,7 @@ public class ProjectServiceImpl
 						respectEnableCheckSheetFilterSettingPkList.add(integer);
 				}
 
-				List<Integer> testerApproverList = persistWrapper.readList(Integer.class,
+				List<Integer> testerApproverList = PersistWrapper.readList(Integer.class,
 						"(select projectPk from TAB_PROJECT_USERS where userPk = ?)" + " union "
 								+ " (select upr.projectPk from unit_project_ref upr, TAB_UNIT u, TAB_UNIT_USERS uu "
 								+ " where upr.unitPk = u.pk and u.pk = uu.unitPk and userPk = ?)",
@@ -341,7 +333,7 @@ public class ProjectServiceImpl
 			}
 			mainSql.append(") projects order by projects.createdDate desc");
 
-			List<ProjectQuery> list = persistWrapper.readList(ProjectQuery.class, mainSql.toString(),
+			List<ProjectQuery> list = PersistWrapper.readList(ProjectQuery.class, mainSql.toString(),
 					params.toArray(new Object[params.size()]));
 			if (list != null)
 			{
@@ -366,18 +358,18 @@ public class ProjectServiceImpl
 	 * @param projectPk
 	 * @return
 	 */
-	public  Project getProject(int projectPk)
+	public static Project getProject(int projectPk)
 	{
-		return persistWrapper.readByPrimaryKey(Project.class, projectPk);
+		return PersistWrapper.readByPrimaryKey(Project.class, projectPk);
 	}
 
 	/**
 	 * @param projectPk
 	 * @return
 	 */
-	public  Project getProjectByName(String projectName) throws Exception
+	public static Project getProjectByName(String projectName) throws Exception
 	{
-		List<Project> pList = (List<Project>) persistWrapper.readList(Project.class,
+		List<Project> pList = (List<Project>) PersistWrapper.readList(Project.class,
 				"select * from TAB_PROJECT where projectName = ?", projectName);
 		if (pList.size() > 0)
 			return pList.get(0);
@@ -385,21 +377,21 @@ public class ProjectServiceImpl
 			return null;
 	}
 
-	public  List<Project> getProjectsAtSite(SiteOID siteOID)
+	public static List<Project> getProjectsAtSite(SiteOID siteOID)
 	{
 		String sql = "select p.* from tab_project p join project_site_config psc on psc.projectFk = p.pk "
 				+ "where p.status= ? and psc.siteFk = ? and estatus = 1 order by p.createdDate desc ";
 
-		return persistWrapper.readList(Project.class, sql, Project.STATUS_OPEN, siteOID.getPk());
+		return PersistWrapper.readList(Project.class, sql, Project.STATUS_OPEN, siteOID.getPk());
 	}
 
 	/**
 	 * @param projectPk
 	 * @return
 	 */
-	public  ProjectQuery getProjectByPk(int projectPk)
+	public static ProjectQuery getProjectByPk(int projectPk)
 	{
-		ProjectQuery projectQuery = persistWrapper.read(ProjectQuery.class,
+		ProjectQuery projectQuery = PersistWrapper.read(ProjectQuery.class,
 				ProjectQuery.fetchSQL + " where 1 = 1 and project.pk=?", projectPk);
 		if (projectQuery != null)
 		{
@@ -414,9 +406,9 @@ public class ProjectServiceImpl
 		return projectQuery;
 	}
 
-	public  List<Project> getActiveProjects() throws Exception
+	public static List<Project> getActiveProjects() throws Exception
 	{
-		List list = persistWrapper.readList(Project.class, "select * from TAB_PROJECT where status =?",
+		List list = PersistWrapper.readList(Project.class, "select * from TAB_PROJECT where status =?",
 				new Object[] { Project.STATUS_OPEN });
 		return list;
 	}
@@ -426,9 +418,9 @@ public class ProjectServiceImpl
 	 * @param projectName
 	 * @return
 	 */
-	public  boolean isProjectNameExist(Account acc, String projectName) throws Exception
+	public static boolean isProjectNameExist(Account acc, String projectName) throws Exception
 	{
-		List list = persistWrapper.readList(Project.class,
+		List list = PersistWrapper.readList(Project.class,
 				"select * from TAB_PROJECT where accountPk=? and " + "projectName =?", acc.getPk(), projectName);
 		if (list.size() > 0)
 		{
@@ -449,11 +441,11 @@ public class ProjectServiceImpl
 	 * @return
 	 * @throws Exception
 	 */
-	public  boolean isProjectNameExistForAnotherProject(String projectName, long projectPk) throws Exception
+	public static boolean isProjectNameExistForAnotherProject(String projectName, int projectPk) throws Exception
 	{
 		try
 		{
-			List list = persistWrapper.readList(Project.class, "select * from TAB_PROJECT where projectName =?",
+			List list = PersistWrapper.readList(Project.class, "select * from TAB_PROJECT where projectName =?",
 					new Object[] { projectName });
 			if (list.size() == 0)
 			{
@@ -478,7 +470,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  ProjectQuery createProject(UserContext context, Project project) throws Exception
+	public static ProjectQuery createProject(UserContext context, Project project) throws Exception
 	{
 		Account acc = (Account) context.getAccount();
 		User user = (User) context.getUser();
@@ -493,11 +485,11 @@ public class ProjectServiceImpl
 		project.setCreatedDate(new Date());
 		project.setStatus(Project.STATUS_OPEN);
 
-		long pk = persistWrapper.createEntity(project);
+		int pk = PersistWrapper.createEntity(project);
 
 		// fetch the new project back
 
-		ProjectQuery projectQuery = persistWrapper.read(ProjectQuery.class,
+		ProjectQuery projectQuery = PersistWrapper.read(ProjectQuery.class,
 				ProjectQuery.fetchSQL + " where 1 = 1 and project.pk=?", pk);
 		if (projectQuery != null)
 		{
@@ -513,7 +505,7 @@ public class ProjectServiceImpl
 
 	}
 
-	public  List<UnitQuery> getUnitsBySerialNos(String[] serialNos, ProjectOID projectOID)
+	public static List<UnitQuery> getUnitsBySerialNos(String[] serialNos, ProjectOID projectOID)
 	{
 		StringBuffer sb = new StringBuffer(UnitQuery.sql);
 
@@ -539,7 +531,7 @@ public class ProjectServiceImpl
 		List<UnitQuery> units;
 		try
 		{
-			units = persistWrapper.readList(UnitQuery.class, sb.toString(), serialNos, params.toArray());
+			units = PersistWrapper.readList(UnitQuery.class, sb.toString(), serialNos, params.toArray());
 		}
 		catch (Exception e)
 		{
@@ -550,7 +542,7 @@ public class ProjectServiceImpl
 		return units;
 	}
 
-	public  List<UnitQuery> getUnitsByPks(int[] unitPks, ProjectOID projectOID)
+	public static List<UnitQuery> getUnitsByPks(int[] unitPks, ProjectOID projectOID)
 	{
 		List<Object> params = new ArrayList();
 
@@ -576,7 +568,7 @@ public class ProjectServiceImpl
 		List<UnitQuery> units;
 		try
 		{
-			units = persistWrapper.readList(UnitQuery.class, sb.toString(), unitPks);
+			units = PersistWrapper.readList(UnitQuery.class, sb.toString(), unitPks);
 		}
 		catch (Exception e)
 		{
@@ -587,23 +579,23 @@ public class ProjectServiceImpl
 		return units;
 	}
 
-	public  List<Project> getProjectsWhereUnitIsManufactured(UnitOID unitOID)
+	public static List<Project> getProjectsWhereUnitIsManufactured(UnitOID unitOID)
 	{
-		return persistWrapper.readList(Project.class, "select * from TAB_PROJECT where pk in "
+		return PersistWrapper.readList(Project.class, "select * from TAB_PROJECT where pk in "
 				+ "(select projectPk from unit_project_ref upr where upr.unitPk = ? and upr.unitOriginType = ?)",
 				unitOID.getPk(), UnitOriginType.Manufactured.name());
 	}
 
-	public  Project getProjectWhereUnitIsOpen(UnitOID unitOID)
+	public static Project getProjectWhereUnitIsOpen(UnitOID unitOID)
 	{
-		return persistWrapper.read(Project.class, "select * from TAB_PROJECT where pk = "
+		return PersistWrapper.read(Project.class, "select * from TAB_PROJECT where pk = "
 				+ "(select projectPk from unit_project_ref upr join unit_project_ref_h uprh on uprh.unitInProjectPk = upr.pk and now() between uprh.effectiveDateFrom and uprh.effectiveDateTo where upr.unitPk = ? and uprh.status = ?)",
 				unitOID.getPk(), UnitInProject.STATUS_OPEN);
 	}
 
-	public  Project getProjectWhereUnitWasOpenLast(UnitOID unitOID)
+	public static Project getProjectWhereUnitWasOpenLast(UnitOID unitOID)
 	{
-		Integer pk = persistWrapper.read(Integer.class,
+		Integer pk = PersistWrapper.read(Integer.class,
 				"select upr.projectPk from unit_project_ref upr join unit_project_ref_h uprh on uprh.unitInProjectPk = upr.pk where upr.unitPk = ? and uprh.status = ? order by uprh.createdDate desc limit 0, 1",
 				unitOID.getPk(), UnitInProject.STATUS_OPEN);
 		if (pk != null)
@@ -612,7 +604,7 @@ public class ProjectServiceImpl
 			return null;
 	}
 
-	public  List<UnitQuery> getChildUnitsForProject(ProjectOID projectOID, UnitOID parent) throws Exception
+	public static List<UnitQuery> getChildUnitsForProject(ProjectOID projectOID, UnitOID parent) throws Exception
 	{
 		List<Object> params = new ArrayList();
 
@@ -633,12 +625,12 @@ public class ProjectServiceImpl
 			params.add(uprObj.getPk());
 		}
 
-		List<UnitQuery> units = persistWrapper.readList(UnitQuery.class, sb.toString(), params.toArray());
+		List<UnitQuery> units = PersistWrapper.readList(UnitQuery.class, sb.toString(), params.toArray());
 
 		return units;
 	}
 
-	public  List<UnitQuery> getUnitsForProjectNew(UnitFilterBean unitFilter, UnitOID parent) throws Exception
+	public static List<UnitQuery> getUnitsForProjectNew(UnitFilterBean unitFilter, UnitOID parent) throws Exception
 	{
 		UnitInProjectListReportRequest request = new UnitInProjectListReportRequest(unitFilter.getProjectoid());
 		request.setShowRootUnitsOnly(unitFilter.getShowRootUnitsOnly());
@@ -670,7 +662,7 @@ public class ProjectServiceImpl
 	 *             Trying to migrate to the method above --
 	 *             getUnitsForProjectNew which uses the report.
 	 */
-	public  List<UnitQuery> getUnitsForProject(UnitFilterBean unitFilter, UnitOID parent) throws Exception
+	public static List<UnitQuery> getUnitsForProject(UnitFilterBean unitFilter, UnitOID parent) throws Exception
 	{
 		if (unitFilter.getSortOrder() != null)
 		{
@@ -765,12 +757,12 @@ public class ProjectServiceImpl
 			params.add(uprObj.getPk());
 		}
 
-		List<UnitQuery> units = persistWrapper.readList(UnitQuery.class, sb.toString(), params.toArray());
+		List<UnitQuery> units = PersistWrapper.readList(UnitQuery.class, sb.toString(), params.toArray());
 
 		return units;
 	}
 
-	public  List<UnitQuery> getUnitsForProjectLinear(UnitFilterBean unitFilter, boolean showOnlyTopLevel)
+	public static List<UnitQuery> getUnitsForProjectLinear(UnitFilterBean unitFilter, boolean showOnlyTopLevel)
 			throws Exception
 	{
 		String[] unitStatus = unitFilter.getUnitStatus();
@@ -874,7 +866,7 @@ public class ProjectServiceImpl
 			sb.append(" and uprh.parentPk is null");
 			sb.append(" order by uprh.orderNo " + ((unitFilter.getSortOrder() == UnitSortOrder.Desc
 					|| unitFilter.getSortOrder() == UnitSortOrder.TopDescAsc) ? "desc" : "asc"));
-			units = persistWrapper.readList(UnitQuery.class, sb.toString(), params.toArray());
+			units = PersistWrapper.readList(UnitQuery.class, sb.toString(), params.toArray());
 		} else
 		{
 			if (unitFilter.getSortOrder() == UnitSortOrder.Desc || unitFilter.getSortOrder() == UnitSortOrder.Asc)
@@ -882,15 +874,15 @@ public class ProjectServiceImpl
 				sb.append(" order by uprh.orderNo "
 						+ ((unitFilter.getSortOrder() == UnitSortOrder.Desc) ? "desc" : "asc"));
 
-				units = persistWrapper.readList(UnitQuery.class, sb.toString(), params.toArray());
+				units = PersistWrapper.readList(UnitQuery.class, sb.toString(), params.toArray());
 			} else
 			{
 				// sort is TopDescAsc
 				// we need 2 queries here one for top level and one for bottom
-				units = persistWrapper.readList(UnitQuery.class,
+				units = PersistWrapper.readList(UnitQuery.class,
 						sb.toString() + " and uprh.parentPk is null order by uprh.orderNo desc", params.toArray());
 
-				units.addAll(persistWrapper.readList(UnitQuery.class,
+				units.addAll(PersistWrapper.readList(UnitQuery.class,
 						sb.toString() + " and uprh.parentPk is not null order by uprh.orderNo asc", params.toArray()));
 			}
 		}
@@ -898,11 +890,11 @@ public class ProjectServiceImpl
 		return units;
 	}
 
-	public  List<UnitQuery> getUnitsWithWorkstationsAssigned(ProjectOID projectOID, WorkstationOID workstationOID)
+	public static List<UnitQuery> getUnitsWithWorkstationsAssigned(ProjectOID projectOID, WorkstationOID workstationOID)
 	{
 		try
 		{
-			return persistWrapper.readList(UnitQuery.class, UnitQuery.sql
+			return PersistWrapper.readList(UnitQuery.class, UnitQuery.sql
 					+ " where 1 = 1 and u.pk in (select unitPk from TAB_UNIT_WORKSTATIONS where projectPk = ? and workstationPk = ?)",
 					projectOID.getPk(), projectOID.getPk(), projectOID.getPk(), projectOID.getPk(),
 					workstationOID.getPk());
@@ -914,12 +906,12 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  List<UnitQuery> getUnitsWithWorkstationsAssigned(ProjectOID projectOID, ProjectPartOID projectPartOID,
+	public static List<UnitQuery> getUnitsWithWorkstationsAssigned(ProjectOID projectOID, ProjectPartOID projectPartOID,
 			WorkstationOID workstationOID)
 	{
 		try
 		{
-			return persistWrapper.readList(UnitQuery.class, UnitQuery.sql
+			return PersistWrapper.readList(UnitQuery.class, UnitQuery.sql
 					+ " where 1 = 1 and uprh.projectPartPk = ? and u.pk in (select unitPk from TAB_UNIT_WORKSTATIONS where projectPk = ? and workstationPk = ?)",
 					projectOID.getPk(), projectOID.getPk(), projectOID.getPk(), projectPartOID.getPk(),
 					projectOID.getPk(), workstationOID.getPk());
@@ -931,7 +923,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  ProjectQuery updateProject(UserContext context, Project project) throws Exception
+	public static ProjectQuery updateProject(UserContext context, Project project) throws Exception
 	{
 
 		String name = project.getProjectName();
@@ -940,8 +932,8 @@ public class ProjectServiceImpl
 			throw new AppException("Duplicate project name, Please choose a different project name.");
 		}
 
-		persistWrapper.update(project);
-		ProjectQuery projectQuery = persistWrapper.read(ProjectQuery.class,
+		PersistWrapper.update(project);
+		ProjectQuery projectQuery = PersistWrapper.read(ProjectQuery.class,
 				ProjectQuery.fetchSQL + " where 1 = 1 and project.pk=?", project.getPk());
 		if (projectQuery != null)
 		{
@@ -956,19 +948,19 @@ public class ProjectServiceImpl
 		return projectQuery;
 	}
 
-	public  UnitObj createUnit(UserContext context, int projectPk, UnitBean unitBean, boolean createAsPlannedUnit)
+	public static UnitObj createUnit(UserContext context, int projectPk, UnitBean unitBean, boolean createAsPlannedUnit)
 			throws Exception
 	{
 		return createUnit(context, projectPk, unitBean, createAsPlannedUnit, false);
 	}
 	
-	public  UnitObj createUnit(UserContext context, int projectPk, UnitBean unitBean, boolean createAsPlannedUnit, boolean pendingReview)
+	public static UnitObj createUnit(UserContext context, int projectPk, UnitBean unitBean, boolean createAsPlannedUnit, boolean pendingReview)
 			throws Exception
 	{
 		UnitDAO unitDAO = new UnitDAO();
 		UnitInProjectDAO uprDAO = new UnitInProjectDAO();
 
-		Project project = persistWrapper.readByPrimaryKey(Project.class, projectPk);
+		Project project = PersistWrapper.readByPrimaryKey(Project.class, projectPk);
 
 		Account acc = (Account) context.getAccount();
 		User user = (User) context.getUser();
@@ -994,7 +986,7 @@ public class ProjectServiceImpl
 				copyUsersConfig, copyFormsConfig, false, null, pendingReview);
 	}
 
-	public  UnitObj createUnitAtWorkstation(UserContext context, ProjectOID projectOID, 
+	public static UnitObj createUnitAtWorkstation(UserContext context, ProjectOID projectOID, 
 			WorkstationOID workstationOID, UnitBean unitBean,
 			boolean copyPartSpecificFormsToWorkstation, boolean pendingReview)
 			throws Exception
@@ -1002,7 +994,7 @@ public class ProjectServiceImpl
 		UnitDAO unitDAO = new UnitDAO();
 		UnitInProjectDAO uprDAO = new UnitInProjectDAO();
 
-		Project project = persistWrapper.readByPrimaryKey(Project.class, projectOID.getPk());
+		Project project = PersistWrapper.readByPrimaryKey(Project.class, projectOID.getPk());
 
 		Account acc = (Account) context.getAccount();
 		User user = (User) context.getUser();
@@ -1027,7 +1019,7 @@ public class ProjectServiceImpl
 	}
 
 
-	private  UnitObj createUnitInt(UserContext context, UnitDAO unitDAO, UnitInProjectDAO uprDAO, User user,
+	private static UnitObj createUnitInt(UserContext context, UnitDAO unitDAO, UnitInProjectDAO uprDAO, User user,
 			Project project, UnitBean unitBean, UnitOID parentOID, 
 			boolean createAsPlannedUnit, 
 			boolean copyProjectWorkstationUsersToUnit,
@@ -1058,7 +1050,7 @@ public class ProjectServiceImpl
 			if(parentOID == null)
 			{
 				manufacSql = manufacSql + " and uprh.parentPk is null ";
-				count = persistWrapper.read(Integer.class, manufacSql, UnitOriginType.Manufactured.name(),
+				count = PersistWrapper.read(Integer.class, manufacSql, UnitOriginType.Manufactured.name(),
 						unitBean.getUnitName());
 			}
 			else
@@ -1066,7 +1058,7 @@ public class ProjectServiceImpl
 				UnitInProjectObj parentUpr = UnitManager.getUnitInProject(parentOID, project.getOID());
 
 				manufacSql = manufacSql + " and uprh.parentPk =  ? ";
-				count = persistWrapper.read(Integer.class, manufacSql, UnitOriginType.Manufactured.name(),
+				count = PersistWrapper.read(Integer.class, manufacSql, UnitOriginType.Manufactured.name(),
 						unitBean.getUnitName(), parentUpr.getPk());
 			}
 			
@@ -1104,7 +1096,7 @@ public class ProjectServiceImpl
 			// as Manufactured or Procured in any project.
 			String manufacSql = "select count(*) from tab_unit u join tab_unit_h uh on uh.unitPk = u.pk and now() between uh.effectiveDateFrom  and uh.effectiveDateTo "
 					+ " join unit_project_ref upr on upr.unitPk = u.pk " + " where upper(uh.unitName) = upper(?) ";
-			Integer count = persistWrapper.read(Integer.class, manufacSql, unitBean.getUnitName());
+			Integer count = PersistWrapper.read(Integer.class, manufacSql, unitBean.getUnitName());
 			if (count > 0)
 			{
 				throw new AppException(
@@ -1154,7 +1146,7 @@ public class ProjectServiceImpl
 		return unit;
 	}
 
-	private  UnitInProjectObj addUnitToProjectInt(UserContext context, UnitInProjectDAO uprDAO, UnitBean unitBean,
+	private static UnitInProjectObj addUnitToProjectInt(UserContext context, UnitInProjectDAO uprDAO, UnitBean unitBean,
 			ProjectOID projectOID, UnitOID parentOID, boolean createAsPlannedUnit, 
 			boolean copyProjectWorkstationUsersToUnit, boolean copyProjectWorkstationFormsToUnit,
 			boolean copyPartSpecificFormsToWorkstation, WorkstationOID workstationToCopyPartSpecificFormsTo) throws Exception
@@ -1236,7 +1228,7 @@ public class ProjectServiceImpl
 		return pur;
 	}
 
-	public  UnitObj updateUnit(UserContext context, UnitObj unit) throws Exception
+	public static UnitObj updateUnit(UserContext context, UnitObj unit) throws Exception
 	{
 		if (unit.getPk() == 0)
 			throw new AppException("Invalid unit, Unit cannot be saved");
@@ -1253,7 +1245,7 @@ public class ProjectServiceImpl
 		return unit;
 	}
 
-	private  void copyProjectFormsToUnit(UserContext context, ProjectOID projectOID,
+	private static void copyProjectFormsToUnit(UserContext context, ProjectOID projectOID,
 			List<ProjectFormQuery> projectTests, UnitOID unitOID, WorkstationOID workstationOID) throws Exception
 	{
 		// copy projectForms to unitforms
@@ -1274,7 +1266,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	private  void copyProjectUsersToUnit(ProjectOID projectOID, UnitOID unitOID, WorkstationOID workstationOID,
+	private static void copyProjectUsersToUnit(ProjectOID projectOID, UnitOID unitOID, WorkstationOID workstationOID,
 			boolean copyDefaultTeam) throws Exception
 	{
 		UnitInProjectObj unitInProject = UnitManager.getUnitInProject(unitOID, projectOID);
@@ -1298,7 +1290,7 @@ public class ProjectServiceImpl
 				unitUser.setWorkstationPk(workstationOID.getPk());
 				unitUser.setUserPk(pUser.getPk());
 				unitUser.setRole(User.ROLE_TESTER);
-				persistWrapper.createEntity(unitUser);
+				PersistWrapper.createEntity(unitUser);
 			}
 		}
 		for (Iterator iterator = uWorkstationTesters.iterator(); iterator.hasNext();)
@@ -1326,7 +1318,7 @@ public class ProjectServiceImpl
 				unitUser.setWorkstationPk(workstationOID.getPk());
 				unitUser.setUserPk(pUser.getPk());
 				unitUser.setRole(User.ROLE_VERIFY);
-				persistWrapper.createEntity(unitUser);
+				PersistWrapper.createEntity(unitUser);
 			}
 		}
 		for (Iterator iterator = uWorkstationVerifiers.iterator(); iterator.hasNext();)
@@ -1354,7 +1346,7 @@ public class ProjectServiceImpl
 				unitUser.setWorkstationPk(workstationOID.getPk());
 				unitUser.setUserPk(pUser.getPk());
 				unitUser.setRole(User.ROLE_APPROVE);
-				persistWrapper.createEntity(unitUser);
+				PersistWrapper.createEntity(unitUser);
 			}
 		}
 		for (Iterator iterator = uWorkstationApprovers.iterator(); iterator.hasNext();)
@@ -1365,9 +1357,9 @@ public class ProjectServiceImpl
 
 	}
 
-	private  void copyProjectOilTeamToUnit(int projectPk, int unitPk) throws Exception
+	private static void copyProjectOilTeamToUnit(int projectPk, int unitPk) throws Exception
 	{
-		List<ProjectUser> users = persistWrapper.readList(ProjectUser.class,
+		List<ProjectUser> users = PersistWrapper.readList(ProjectUser.class,
 				"select * from TAB_PROJECT_USERS where projectPk=? and workstationPk=?", projectPk,
 				DummyWorkstation.getPk());
 		for (Iterator iterator2 = users.iterator(); iterator2.hasNext();)
@@ -1380,17 +1372,17 @@ public class ProjectServiceImpl
 			unitUser.setWorkstationPk(DummyWorkstation.getPk());
 			unitUser.setUserPk(projectUser.getUserPk());
 			unitUser.setRole(projectUser.getRole());
-			persistWrapper.createEntity(unitUser);
+			PersistWrapper.createEntity(unitUser);
 		}
 	}
 
-	public  boolean isUnitNameExist(String unitName) throws Exception
+	public static boolean isUnitNameExist(String unitName) throws Exception
 	{
 		StringBuffer query = new StringBuffer("select count(*) from TAB_UNIT u "
 				+ " join TAB_UNIT_H uh on uh.unitPk = u.pk and now() between uh.effectiveDateFrom and uh.effectiveDateTo"
 				+ " where uh.unitName =?");
 
-		Integer count = persistWrapper.read(Integer.class, query.toString(), unitName);
+		Integer count = PersistWrapper.read(Integer.class, query.toString(), unitName);
 		if (count > 0)
 		{
 			return true;
@@ -1410,9 +1402,9 @@ public class ProjectServiceImpl
 	 * @return
 	 * @throws Exception
 	 */
-	public  boolean isUnitNameExistForAnotherUnit(UnitObj unit) throws Exception
+	public static boolean isUnitNameExistForAnotherUnit(UnitObj unit) throws Exception
 	{
-		List list = persistWrapper.readList(Unit.class, "select u.* from TAB_UNIT u "
+		List list = PersistWrapper.readList(Unit.class, "select u.* from TAB_UNIT u "
 				+ " join TAB_UNIT_H uh on uh.unitPk = u.pk and now() between uh.effectiveDateFrom and uh.effectiveDateTo"
 				+ " where uh.unitName =?", unit.getUnitName());
 		if (list.size() == 0)
@@ -1427,7 +1419,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  void updateUnit(UnitObj unit) throws Exception
+	public static void updateUnit(UnitObj unit) throws Exception
 	{
 		if (isUnitNameExistForAnotherUnit(unit))
 		{
@@ -1435,30 +1427,30 @@ public class ProjectServiceImpl
 					"Duplicate unit name:" + unit.getUnitName() + ", Please choose a different unit name.");
 		}
 
-		persistWrapper.update(unit);
+		PersistWrapper.update(unit);
 	}
 
-	public  void deleteAllFormsFromProjectPart(UserContext context, ProjectPartOID projectPartOID,
+	public static void deleteAllFormsFromProjectPart(UserContext context, ProjectPartOID projectPartOID,
 			int workstationPk) throws Exception
 	{
-		List list = persistWrapper.readList(ProjectForm.class,
+		List list = PersistWrapper.readList(ProjectForm.class,
 				"select * from TAB_PROJECT_FORMS where projectPartPk=? and workstationPk=?", projectPartOID.getPk(),
 				workstationPk);
 		if (list != null)
 			for (Iterator iterator = list.iterator(); iterator.hasNext();)
 			{
 				ProjectForm object = (ProjectForm) iterator.next();
-				persistWrapper.deleteEntity(object);
+				PersistWrapper.deleteEntity(object);
 			}
 	}
 
-	public  void deleteProjectForm(UserContext context, ProjectFormOID projectFormOID) throws Exception
+	public static void deleteProjectForm(UserContext context, ProjectFormOID projectFormOID) throws Exception
 	{
-		ProjectForm pForm = persistWrapper.readByPrimaryKey(ProjectForm.class, projectFormOID.getPk());
-		persistWrapper.deleteEntity(pForm);
+		ProjectForm pForm = PersistWrapper.readByPrimaryKey(ProjectForm.class, projectFormOID.getPk());
+		PersistWrapper.deleteEntity(pForm);
 	}
 
-	public  void addFormToProjectPart(UserContext context, ProjectOID projectOID, ProjectPartOID projectPartOID,
+	public static void addFormToProjectPart(UserContext context, ProjectOID projectOID, ProjectPartOID projectPartOID,
 			WorkstationOID workstationOID, int formPk, String testName) throws Exception
 	{
 		ProjectForm pForm = new ProjectForm();
@@ -1471,7 +1463,7 @@ public class ProjectServiceImpl
 
 		pForm.setAppliedByUserFk(context.getUser().getPk());
 
-		persistWrapper.createEntity(pForm);
+		PersistWrapper.createEntity(pForm);
 	}
 
 	/**
@@ -1483,7 +1475,7 @@ public class ProjectServiceImpl
 	 * @param testName
 	 * @throws Exception
 	 */
-	public  void addFormToProjectPart(UserContext context, ProjectOID projectOID, ProjectPartOID projectPartOID,
+	public static void addFormToProjectPart(UserContext context, ProjectOID projectOID, ProjectPartOID projectPartOID,
 			int formPk, String testName) throws Exception
 	{
 		ProjectForm pForm = new ProjectForm();
@@ -1495,7 +1487,7 @@ public class ProjectServiceImpl
 
 		pForm.setAppliedByUserFk(context.getUser().getPk());
 
-		persistWrapper.createEntity(pForm);
+		PersistWrapper.createEntity(pForm);
 	}
 
 	/*
@@ -1504,7 +1496,7 @@ public class ProjectServiceImpl
 	 * But if the form is added from tablet, we need the response created right away. so we call this function
 	 * with forceResponseCreation = true from the tablet.
 	 */
-	public  TestProcOID addFormToUnit(UserContext context, ProjectForm projectTestProc, int unitPk,
+	public static TestProcOID addFormToUnit(UserContext context, ProjectForm projectTestProc, int unitPk,
 			ProjectOID projectOID, WorkstationOID workstationOID, int formPk, 
 			String testName, boolean makeWorkstationInProgress, boolean reviewPending) throws Exception
 	{
@@ -1514,7 +1506,7 @@ public class ProjectServiceImpl
 		if(!(Survey.STATUS_OPEN.equals(form.getStatus())))
 			throw new AppException("Form is not published, Please publish the form and try again");
 				
-		UnitWorkstation uw = getUnitWorkstationSetting(unitPk, projectOID, workstationOID);
+		UnitWorkstation uw = ProjectDelegate.getUnitWorkstationSetting(unitPk, projectOID, workstationOID);
 		if(uw == null || uw.getPk() == 0) //this means the workstation should be added to the unit.
 		{
 			uw = addWorkstationToUnit(context, projectOID, new UnitOID(unitPk), workstationOID);
@@ -1533,12 +1525,12 @@ public class ProjectServiceImpl
 				unitUser.setWorkstationPk(workstationOID.getPk());
 				unitUser.setUserPk(context.getUser().getPk());
 				unitUser.setRole(User.ROLE_TESTER);
-				persistWrapper.createEntity(unitUser);
+				PersistWrapper.createEntity(unitUser);
 			}
 		}
 
 		String currentWsStatus = null;
-		UnitLocationQuery uLoc = getUnitWorkstationStatus(new UnitOID(uw.getUnitPk(), null), projectOID, workstationOID);
+		UnitLocationQuery uLoc = ProjectManager.getUnitWorkstationStatus(new UnitOID(uw.getUnitPk(), null), projectOID, workstationOID);
 		if(uLoc != null)
 			currentWsStatus = uLoc.getStatus();
 		if(UnitLocation.STATUS_COMPLETED.equals(currentWsStatus))
@@ -1555,7 +1547,7 @@ public class ProjectServiceImpl
 
 		if (testName == null || testName.trim().length() == 0)
 		{
-			int count = persistWrapper.read(Integer.class, "select count(*) from unit_testproc ut "
+			int count = PersistWrapper.read(Integer.class, "select count(*) from unit_testproc ut "
 					+ " join testproc_form_assign tfa on tfa.testProcFk = ut.pk and tfa.current = 1 "
 					+ " join unit_testproc_h uth on uth.unitTestProcFk = ut.pk and now() between uth.effectiveDateFrom and uth.effectiveDateTo "
 					+ " where uth.unitPk=? and uth.projectPk = ? and uth.workstationPk=? and tfa.formFk=? and (uth.name is null or name = '') ",
@@ -1565,7 +1557,7 @@ public class ProjectServiceImpl
 						"Form already added with empty test name, you should specify a test name to add it again");
 		} else
 		{
-			int count = persistWrapper.read(Integer.class, "select count(*) from unit_testproc ut "
+			int count = PersistWrapper.read(Integer.class, "select count(*) from unit_testproc ut "
 					+ " join testproc_form_assign tfa on tfa.testProcFk = ut.pk and tfa.current = 1 "
 					+ " join unit_testproc_h uth on uth.unitTestProcFk = ut.pk and now() between uth.effectiveDateFrom and uth.effectiveDateTo "
 					+ " where uth.unitPk=? and uth.projectPk = ? and uth.workstationPk=? and tfa.formFk=? and uth.name = ? ",
@@ -1629,7 +1621,7 @@ public class ProjectServiceImpl
 		return obj.getOID();
 	}
 
-	public  void deleteTestProcFromUnit(UserContext context, TestProcOID testProcOID) throws Exception
+	public static void deleteTestProcFromUnit(UserContext context, TestProcOID testProcOID) throws Exception
 	{
 		// see if there are any responses for that form
 		ResponseMasterNew respM = SurveyResponseManager.getLatestResponseMasterForTest(testProcOID);
@@ -1643,28 +1635,28 @@ public class ProjectServiceImpl
 		new TestProcDAO().deleteTestProc(context, testProcOID);
 	}
 
-	public  void removeAllFormsFromUnit(UserContext context, int unitPk, ProjectOID projectOID,
+	public static void removeAllFormsFromUnit(UserContext context, int unitPk, ProjectOID projectOID,
 			WorkstationOID workstationOID) throws Exception
 	{
 		new TestProcDAO().deleteAllTestProcsMatching(context, new UnitOID(unitPk), projectOID, workstationOID);
 	}
 
-	public  UnitObj getUnitByPk(UnitOID unitOID)
+	public static UnitObj getUnitByPk(UnitOID unitOID)
 	{
 		return new UnitDAO().getUnit(unitOID.getPk());
 	}
 
-	public  Car getCarByPk(int carPk) throws Exception
+	public static Car getCarByPk(int carPk) throws Exception
 	{
-		return persistWrapper.readByPrimaryKey(Car.class, carPk);
+		return PersistWrapper.readByPrimaryKey(Car.class, carPk);
 	}
 
-	public  UnitQuery getUnitQueryByPk(int unitPk, ProjectOID projectOID)
+	public static UnitQuery getUnitQueryByPk(int unitPk, ProjectOID projectOID)
 	{
 		List<UnitQuery> list = null;
 		try
 		{
-			list = persistWrapper.readList(UnitQuery.class, UnitQuery.sql + " where 1 = 1 and u.pk=?", projectOID.getPk(),
+			list = PersistWrapper.readList(UnitQuery.class, UnitQuery.sql + " where 1 = 1 and u.pk=?", projectOID.getPk(),
 					projectOID.getPk(), projectOID.getPk(), unitPk);
 		}
 		catch (Exception e)
@@ -1680,13 +1672,13 @@ public class ProjectServiceImpl
 		return null;
 	}
 
-	public  CarQuery getCarQueryByPk(int carPk) throws Exception
+	public static CarQuery getCarQueryByPk(int carPk) throws Exception
 	{
-		return persistWrapper.read(CarQuery.class, CarQuery.select + " where car.pk=?", carPk);
+		return PersistWrapper.read(CarQuery.class, CarQuery.select + " where car.pk=?", carPk);
 
 	}
 
-	public  List<FormQuery> getAllFormsForUnit(UnitOID unitOID, ProjectOID projectOID) throws Exception
+	public static List<FormQuery> getAllFormsForUnit(UnitOID unitOID, ProjectOID projectOID) throws Exception
 	{
 		FormFilter filter = new FormFilter();
 		filter.setStatus(new String[] { Survey.STATUS_OPEN });
@@ -1704,7 +1696,7 @@ public class ProjectServiceImpl
 		return new ArrayList();
 	}
 
-	public  List<FormQuery> getFormsForUnit(UnitOID unitOID, ProjectOID projectOID, WorkstationOID workstationOID)
+	public static List<FormQuery> getFormsForUnit(UnitOID unitOID, ProjectOID projectOID, WorkstationOID workstationOID)
 			throws Exception
 	{
 		FormFilter filter = new FormFilter();
@@ -1723,7 +1715,7 @@ public class ProjectServiceImpl
 		return new ArrayList();
 	}
 
-	public  Workstation createWorkstation(UserContext context, Workstation workstation) throws Exception
+	public static Workstation createWorkstation(UserContext context, Workstation workstation) throws Exception
 	{
 		Account acc = (Account) context.getAccount();
 		User user = (User) context.getUser();
@@ -1740,7 +1732,7 @@ public class ProjectServiceImpl
 		int pk;
 		synchronized (WorkstationOrderNoController.class)
 		{
-			int maxOrderNo = persistWrapper.read(Integer.class, "select ifnull(max(orderNo),0) from TAB_WORKSTATION");
+			int maxOrderNo = PersistWrapper.read(Integer.class, "select ifnull(max(orderNo),0) from TAB_WORKSTATION");
 			workstation.setOrderNo(maxOrderNo + 1);
 			workstation.setAccountPk(acc.getPk());
 			workstation.setCreatedBy(user.getPk());
@@ -1748,15 +1740,15 @@ public class ProjectServiceImpl
 			workstation.setStatus(Workstation.STATUS_OPEN);
 			workstation.setEstatus(EStatusEnum.Active.getValue());
 			workstation.setUpdatedBy(user.getPk());
-			pk = persistWrapper.createEntity(workstation);
+			pk = PersistWrapper.createEntity(workstation);
 		}
 		// fetch the new project back
-		workstation = persistWrapper.readByPrimaryKey(Workstation.class, pk);
+		workstation = PersistWrapper.readByPrimaryKey(Workstation.class, pk);
 		return workstation;
 
 	}
 
-	public  Workstation updateWorkstation(UserContext context, Workstation workstation) throws Exception
+	public static Workstation updateWorkstation(UserContext context, Workstation workstation) throws Exception
 	{
 		Account acc = (Account) context.getAccount();
 		User user = (User) context.getUser();
@@ -1772,10 +1764,10 @@ public class ProjectServiceImpl
 		}
 
 		workstation.setUpdatedBy(context.getUser().getPk());
-		persistWrapper.update(workstation);
+		PersistWrapper.update(workstation);
 
 		// fetch the new project back
-		workstation = persistWrapper.readByPrimaryKey(Workstation.class, workstation.getPk());
+		workstation = PersistWrapper.readByPrimaryKey(Workstation.class, workstation.getPk());
 		return workstation;
 	}
 
@@ -1784,9 +1776,9 @@ public class ProjectServiceImpl
 	 * @param projectName
 	 * @return
 	 */
-	private  boolean isWorkstationNameExist(Account acc, Site site, String workstationName) throws Exception
+	private static boolean isWorkstationNameExist(Account acc, Site site, String workstationName) throws Exception
 	{
-		List list = persistWrapper.readList(Workstation.class,
+		List list = PersistWrapper.readList(Workstation.class,
 				"select * from TAB_WORKSTATION where accountPk=? and sitePk=? and " + "workstationName =?", acc.getPk(),
 				site.getPk(), workstationName);
 		if (list.size() > 0)
@@ -1798,12 +1790,12 @@ public class ProjectServiceImpl
 		}
 	}
 
-	private  boolean isWorkstationNameExistForAnotherWorkstation(Account acc, Site site, String workstationName,
+	private static boolean isWorkstationNameExistForAnotherWorkstation(Account acc, Site site, String workstationName,
 			int workstationPk) throws Exception
 	{
 		try
 		{
-			List list = persistWrapper.readList(Workstation.class,
+			List list = PersistWrapper.readList(Workstation.class,
 					"select * from TAB_WORKSTATION where accountPk=? and sitePk=? and workstationName =?", acc.getPk(),
 					site.getPk(), workstationName);
 			if (list.size() == 0)
@@ -1829,21 +1821,21 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  List<WorkstationQuery> getWorkstationList() throws Exception
+	public static List<WorkstationQuery> getWorkstationList() throws Exception
 	{
 		String sql = WorkstationQuery.sql + " and  ws.workstationName != ? order by site.name, ws.orderNo";
-		persistWrapper p = new persistWrapper();
+		PersistWrapper p = new PersistWrapper();
 		return p.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY);
 	}
 
-	public  Workstation getWorkstation(WorkstationOID workstationOID)
+	public static Workstation getWorkstation(WorkstationOID workstationOID)
 	{
-		return persistWrapper.readByPrimaryKey(Workstation.class, workstationOID.getPk());
+		return PersistWrapper.readByPrimaryKey(Workstation.class, workstationOID.getPk());
 	}
 
-	public  WorkstationQuery getWorkstationQueryByPk(WorkstationOID workstationOID)
+	public static WorkstationQuery getWorkstationQueryByPk(WorkstationOID workstationOID)
 	{
-		List list = persistWrapper.readList(WorkstationQuery.class, WorkstationQuery.sql + " and ws.pk=?",
+		List list = PersistWrapper.readList(WorkstationQuery.class, WorkstationQuery.sql + " and ws.pk=?",
 				workstationOID.getPk());
 
 		if (list != null && list.size() > 0)
@@ -1853,15 +1845,15 @@ public class ProjectServiceImpl
 		return null;
 	}
 
-	public  List<WorkstationQuery> getWorkstationsForProject(int projectPk)
+	public static List<WorkstationQuery> getWorkstationsForProject(int projectPk)
 	{
 		String sql = WorkstationQuery.sql
 				+ " and ws.workstationName != ? and ws.pk in (select workstationPk from TAB_PROJECT_WORKSTATIONS where projectPk=?) order by ws.orderNo";
-		persistWrapper p = new persistWrapper();
+		PersistWrapper p = new PersistWrapper();
 		return p.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, projectPk);
 	}
 
-	public  List<WorkstationQuery> getWorkstations(WorkstationFilter filter)
+	public static List<WorkstationQuery> getWorkstations(WorkstationFilter filter)
 	{
 		StringBuffer sb = new StringBuffer();
 		List params = new ArrayList();
@@ -1907,14 +1899,14 @@ public class ProjectServiceImpl
 			params.add(filter.getProjectOID().getPk());
 		}
 		sb.append(" order by ws.orderNo");
-		return persistWrapper.readList(WorkstationQuery.class, WorkstationQuery.sql + sb.toString(), params.toArray());
+		return PersistWrapper.readList(WorkstationQuery.class, WorkstationQuery.sql + sb.toString(), params.toArray());
 	}
 
-	public  List<WorkstationQuery> getWorkstationsAssignableForProject(ProjectOID projectOID)
+	public static List<WorkstationQuery> getWorkstationsAssignableForProject(ProjectOID projectOID)
 	{
 		String sql = WorkstationQuery.sql
 				+ " and ws.workstationName != ? and ws.sitePk in (select siteFk from project_site_config where projectFk=? and estatus = 1) order by ws.orderNo";
-		persistWrapper p = new persistWrapper();
+		PersistWrapper p = new PersistWrapper();
 		try
 		{
 			return p.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, projectOID.getPk());
@@ -1926,68 +1918,68 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  List<WorkstationQuery> getWorkstationsForSite(int sitePk) throws Exception
+	public static List<WorkstationQuery> getWorkstationsForSite(int sitePk) throws Exception
 	{
 		String sql = WorkstationQuery.sql + " and  ws.workstationName != ? and ws.sitePk=? order by ws.orderNo";
-		persistWrapper p = new persistWrapper();
+		PersistWrapper p = new PersistWrapper();
 		return p.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, sitePk);
 	}
 
-	public  List<WorkstationQuery> getWorkstationsForSiteAndProject(int sitePk, int projectPk) throws Exception
+	public static List<WorkstationQuery> getWorkstationsForSiteAndProject(int sitePk, int projectPk) throws Exception
 	{
 		String sql = WorkstationQuery.sql
 				+ " and  ws.workstationName != ? and ws.sitePk=? and ws.pk in (select workstationPk from TAB_PROJECT_WORKSTATIONS where projectPk=?) order by ws.orderNo";
-		persistWrapper p = new persistWrapper();
+		PersistWrapper p = new PersistWrapper();
 		return p.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, sitePk, projectPk);
 	}
 
-	public  void addWorkstationToProject(UserContext context, int projectPk, WorkstationOID workstationOID)
+	public static void addWorkstationToProject(UserContext context, int projectPk, WorkstationOID workstationOID)
 			throws Exception
 	{
 		ProjectWorkstation pForm = new ProjectWorkstation();
 		pForm.setProjectPk(projectPk);
 		pForm.setWorkstationPk(workstationOID.getPk());
 
-		persistWrapper.createEntity(pForm);
+		PersistWrapper.createEntity(pForm);
 	}
 
-	public  void removeWorkstationFromProject(UserContext context, int projectPk, WorkstationOID workstationOID)
+	public static void removeWorkstationFromProject(UserContext context, int projectPk, WorkstationOID workstationOID)
 			throws Exception
 	{
 		// delete workstation forms
-		persistWrapper.delete("delete from TAB_PROJECT_FORMS where projectPk=? and workstationPk =?", projectPk,
+		PersistWrapper.delete("delete from TAB_PROJECT_FORMS where projectPk=? and workstationPk =?", projectPk,
 				workstationOID.getPk());
 
 		// delete workstation users
-		persistWrapper.delete("delete from TAB_PROJECT_USERS where projectPk = ? and workstationPk = ?", projectPk,
+		PersistWrapper.delete("delete from TAB_PROJECT_USERS where projectPk = ? and workstationPk = ?", projectPk,
 				workstationOID.getPk());
 
 		// now delete workstations
-		persistWrapper.delete("delete from TAB_PROJECT_WORKSTATIONS where projectPk=? and workstationPk = ?", projectPk,
+		PersistWrapper.delete("delete from TAB_PROJECT_WORKSTATIONS where projectPk=? and workstationPk = ?", projectPk,
 				workstationOID.getPk());
 	}
 
-	public  void removeAllWorkstationsFromProject(UserContext context, int projectPk) throws Exception
+	public static void removeAllWorkstationsFromProject(UserContext context, int projectPk) throws Exception
 	{
 		// delete workstation forms
-		persistWrapper.delete(
+		PersistWrapper.delete(
 				"delete from TAB_PROJECT_FORMS where projectPk=? and workstationPk in (select workstationPk from TAB_PROJECT_WORKSTATIONS where projectPk=?)",
 				projectPk, projectPk);
 
 		// delete workstation users
-		persistWrapper.delete(
+		PersistWrapper.delete(
 				"delete from TAB_PROJECT_USERS where projectPk = ? and workstationPk in (select workstationPk from TAB_PROJECT_WORKSTATIONS where projectPk=?)",
 				projectPk, projectPk);
 
 		// now delete workstations
-		persistWrapper.delete("delete from TAB_PROJECT_WORKSTATIONS where projectPk=?", projectPk);
+		PersistWrapper.delete("delete from TAB_PROJECT_WORKSTATIONS where projectPk=?", projectPk);
 	}
 
-	public  List<ProjectFormQuery> getProjectFormsForProject(ProjectOID projectOID)
+	public static List<ProjectFormQuery> getProjectFormsForProject(ProjectOID projectOID)
 	{
 		try
 		{
-			return persistWrapper.readList(ProjectFormQuery.class,
+			return PersistWrapper.readList(ProjectFormQuery.class,
 					ProjectFormQuery.sql + " and form.formType = 1 and pf.projectPk=? ",
 					projectOID.getPk());
 		}
@@ -1998,11 +1990,11 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  List<ProjectFormQuery> getProjectFormsForProject(int projectPk, WorkstationOID workstationOID)
+	public static List<ProjectFormQuery> getProjectFormsForProject(int projectPk, WorkstationOID workstationOID)
 	{
 		try
 		{
-			return persistWrapper.readList(ProjectFormQuery.class,
+			return PersistWrapper.readList(ProjectFormQuery.class,
 					ProjectFormQuery.sql + " and form.formType = 1 and pf.projectPk=? and pf.workstationPk=? ",
 					projectPk, workstationOID.getPk());
 		}
@@ -2013,7 +2005,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  List<FormQuery> getFormsForProject(ProjectOID projectOID) throws Exception
+	public static List<FormQuery> getFormsForProject(ProjectOID projectOID) throws Exception
 	{
 		FormFilter filter = new FormFilter();
 		filter.setStatus(new String[] { Survey.STATUS_OPEN });
@@ -2031,7 +2023,7 @@ public class ProjectServiceImpl
 		return new ArrayList();
 	}
 
-	public  List<FormQuery> getFormsForProject(int projectPk, WorkstationOID workstationOID) throws Exception
+	public static List<FormQuery> getFormsForProject(int projectPk, WorkstationOID workstationOID) throws Exception
 	{
 		FormFilter filter = new FormFilter();
 		filter.setStatus(new String[] { Survey.STATUS_OPEN });
@@ -2049,7 +2041,7 @@ public class ProjectServiceImpl
 		return new ArrayList();
 	}
 
-	public  void addUserToProject(UserContext context, int projectPk, ProjectPartOID projectPartOID,
+	public static void addUserToProject(UserContext context, int projectPk, ProjectPartOID projectPartOID,
 			int workstationPk, int userPk, String role) throws Exception
 	{
 		ProjectUser pUser = new ProjectUser();
@@ -2060,10 +2052,10 @@ public class ProjectServiceImpl
 		pUser.setUserPk(userPk);
 		pUser.setRole(role);
 
-		persistWrapper.createEntity(pUser);
+		PersistWrapper.createEntity(pUser);
 	}
 
-	public  void addUserToProject(UserContext context, int projectPk, WorkstationOID workstationOID, int userPk,
+	public static void addUserToProject(UserContext context, int projectPk, WorkstationOID workstationOID, int userPk,
 			String role) throws Exception
 	{
 		ProjectUser pUser = new ProjectUser();
@@ -2072,10 +2064,10 @@ public class ProjectServiceImpl
 		pUser.setUserPk(userPk);
 		pUser.setRole(role);
 
-		persistWrapper.createEntity(pUser);
+		PersistWrapper.createEntity(pUser);
 	}
 
-	public  void addReadonlyUserToProject(UserContext context, int projectPk, WorkstationOID workstationOID,
+	public static void addReadonlyUserToProject(UserContext context, int projectPk, WorkstationOID workstationOID,
 			int userPk) throws Exception
 	{
 		ProjectUser pUser = new ProjectUser();
@@ -2084,10 +2076,10 @@ public class ProjectServiceImpl
 		pUser.setUserPk(userPk);
 		pUser.setRole(User.ROLE_READONLY);
 
-		persistWrapper.createEntity(pUser);
+		PersistWrapper.createEntity(pUser);
 	}
 
-	public  void updateProjectTeam(UserContext context, ProjectOID projectOID, ProjectPartOID projectPartOID,
+	public static void updateProjectTeam(UserContext context, ProjectOID projectOID, ProjectPartOID projectPartOID,
 			WorkstationOID wsOID, Collection testList, Collection verifyList, Collection approveList) throws Exception
 	{
 		List<User> workstationTesters = new ArrayList();
@@ -2182,11 +2174,11 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  void addTesterToUnit(UserContext context, int unitPk, ProjectOID projectOID,
+	public static void addTesterToUnit(UserContext context, int unitPk, ProjectOID projectOID,
 			WorkstationOID workstationOID, int userPk) throws Exception
 	{
 		// check if the it is already there..
-		UnitUser uu = persistWrapper.read(UnitUser.class,
+		UnitUser uu = PersistWrapper.read(UnitUser.class,
 				"select * from TAB_UNIT_USERS where userPk=? and unitPk=? and projectPk = ? and workstationPk=? and role=?",
 				userPk, unitPk, projectOID.getPk(), workstationOID.getPk(), User.ROLE_TESTER);
 		if (uu == null)
@@ -2198,15 +2190,15 @@ public class ProjectServiceImpl
 			pUser.setUserPk(userPk);
 			pUser.setRole(User.ROLE_TESTER);
 
-			persistWrapper.createEntity(pUser);
+			PersistWrapper.createEntity(pUser);
 		}
 	}
 
-	public  void addVerifierToUnit(UserContext context, int unitPk, ProjectOID projectOID,
+	public static void addVerifierToUnit(UserContext context, int unitPk, ProjectOID projectOID,
 			WorkstationOID workstationOID, int userPk) throws Exception
 	{
 		// check if the it is already there..
-		UnitUser uu = persistWrapper.read(UnitUser.class,
+		UnitUser uu = PersistWrapper.read(UnitUser.class,
 				"select * from TAB_UNIT_USERS where userPk=? and unitPk=? and projectPk = ? and workstationPk=? and role=?",
 				userPk, unitPk, projectOID.getPk(), workstationOID.getPk(), User.ROLE_VERIFY);
 		if (uu == null)
@@ -2218,15 +2210,15 @@ public class ProjectServiceImpl
 			pUser.setUserPk(userPk);
 			pUser.setRole(User.ROLE_VERIFY);
 
-			persistWrapper.createEntity(pUser);
+			PersistWrapper.createEntity(pUser);
 		}
 	}
 
-	public  void addApproverToUnit(UserContext context, int unitPk, ProjectOID projectOID,
+	public static void addApproverToUnit(UserContext context, int unitPk, ProjectOID projectOID,
 			WorkstationOID workstationOID, int userPk) throws Exception
 	{
 		// check if the it is already there..
-		UnitUser uu = persistWrapper.read(UnitUser.class,
+		UnitUser uu = PersistWrapper.read(UnitUser.class,
 				"select * from TAB_UNIT_USERS where userPk=? and unitPk=? and projectPk = ? and workstationPk=? and role=?",
 				userPk, unitPk, projectOID.getPk(), workstationOID.getPk(), User.ROLE_APPROVE);
 		if (uu == null)
@@ -2238,15 +2230,15 @@ public class ProjectServiceImpl
 			pUser.setUserPk(userPk);
 			pUser.setRole(User.ROLE_APPROVE);
 
-			persistWrapper.createEntity(pUser);
+			PersistWrapper.createEntity(pUser);
 		}
 	}
 
-	public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID projectOID,
+	public static void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID projectOID,
 			WorkstationOID workstationOID, int userPk) throws Exception
 	{
 		// check if the it is already there..
-		UnitUser uu = persistWrapper.read(UnitUser.class,
+		UnitUser uu = PersistWrapper.read(UnitUser.class,
 				"select * from TAB_UNIT_USERS where userPk=? and unitPk=? and projectPk = ? and workstationPk=? and role=?",
 				userPk, unitPk, projectOID.getPk(), workstationOID.getPk(), User.ROLE_READONLY);
 		if (uu == null)
@@ -2258,15 +2250,15 @@ public class ProjectServiceImpl
 			pUser.setUserPk(userPk);
 			pUser.setRole(User.ROLE_READONLY);
 
-			persistWrapper.createEntity(pUser);
+			PersistWrapper.createEntity(pUser);
 		}
 	}
 
-	public  List<ProjectUserQuery> getProjectUserQueryList(ProjectOID projectOID, WorkstationOID workstationOID)
+	public static List<ProjectUserQuery> getProjectUserQueryList(ProjectOID projectOID, WorkstationOID workstationOID)
 	{
 		try
 		{
-			return persistWrapper.readList(ProjectUserQuery.class,
+			return PersistWrapper.readList(ProjectUserQuery.class,
 					ProjectUserQuery.sql + " and pu.projectPk=? and pu.workstationPk=? order by u.firstName asc",
 					projectOID.getPk(), workstationOID.getPk());
 		}
@@ -2277,12 +2269,12 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  List<ProjectUserQuery> getProjectUserQueryList(ProjectOID projectOID, ProjectPartOID projectPartOID,
+	public static List<ProjectUserQuery> getProjectUserQueryList(ProjectOID projectOID, ProjectPartOID projectPartOID,
 			WorkstationOID workstationOID)
 	{
 		try
 		{
-			return persistWrapper.readList(ProjectUserQuery.class, ProjectUserQuery.sql
+			return PersistWrapper.readList(ProjectUserQuery.class, ProjectUserQuery.sql
 					+ " and pu.projectPk=? and projectPartPk = ? and pu.workstationPk=? order by u.firstName asc",
 					projectOID.getPk(), projectPartOID.getPk(), workstationOID.getPk());
 		}
@@ -2293,7 +2285,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  List<User> getUsersForProjectPartInRole(int projectPk, ProjectPartOID projectPartOID,
+	public static List<User> getUsersForProjectPartInRole(int projectPk, ProjectPartOID projectPartOID,
 			WorkstationOID workstationOID, String roleName) throws Exception
 	{
 		if (projectPartOID == null) // we need the ones where the projectPartPk
@@ -2302,43 +2294,43 @@ public class ProjectServiceImpl
 			return new ArrayList();
 		} else
 		{
-			return persistWrapper.readList(User.class, "select distinct u.* from TAB_USER u "
+			return PersistWrapper.readList(User.class, "select distinct u.* from TAB_USER u "
 					+ " inner join TAB_PROJECT_USERS tpu on tpu.userPk = u.pk  "
 					+ " where tpu.projectPk=? and tpu.projectPartPk = ? and tpu.workstationPk=? and tpu.role=? order by u.firstName asc",
 					projectPk, projectPartOID.getPk(), workstationOID.getPk(), roleName);
 		}
 	}
 
-	public  List<User> getUsersForProjectInRole(ProjectOID projectOID, String roleName) throws Exception
+	public static List<User> getUsersForProjectInRole(ProjectOID projectOID, String roleName) throws Exception
 	{
-		return persistWrapper.readList(User.class,
+		return PersistWrapper.readList(User.class,
 				"select distinct u.* from TAB_USER u " + " inner join TAB_PROJECT_USERS tpu on tpu.userPk = u.pk  "
 						+ "where tpu.projectPk=? and tpu.projectPartPk is null and tpu.role=? order by u.firstName asc",
 				projectOID.getPk(), roleName);
 	}
 
-	public  List<User> getUsersForProjectInRole(long projectPk, WorkstationOID workstationOID, String roleName)
+	public static List<User> getUsersForProjectInRole(int projectPk, WorkstationOID workstationOID, String roleName)
 			throws Exception
 	{
-		return persistWrapper.readList(User.class, "select distinct u.* from TAB_USER u "
+		return PersistWrapper.readList(User.class, "select distinct u.* from TAB_USER u "
 				+ " inner join TAB_PROJECT_USERS tpu on tpu.userPk = u.pk  "
 				+ "where tpu.projectPk=? and tpu.projectPartPk is null and tpu.workstationPk=? and tpu.role=? order by firstName asc",
 				projectPk, workstationOID.getPk(), roleName);
 	}
 
-	public  List<User> getUsersForProject(int projectPk, WorkstationOID workstationOID) throws Exception
+	public static List<User> getUsersForProject(int projectPk, WorkstationOID workstationOID) throws Exception
 	{
-		return persistWrapper.readList(User.class,
+		return PersistWrapper.readList(User.class,
 				"select distinct u.* from TAB_USER u " + " inner join TAB_PROJECT_USERS tpu on tpu.userPk = u.pk  "
 						+ " where tpu.projectPk=? and tpu.workstationPk=? order by firstName asc",
 				projectPk, workstationOID.getPk());
 	}
 
-	public  List<Project> getProjectsWhereTheUserIsReadOnly(UserContext context)
+	public static List<Project> getProjectsWhereTheUserIsReadOnly(UserContext context)
 	{
 		try
 		{
-			return persistWrapper.readList(Project.class,
+			return PersistWrapper.readList(Project.class,
 					"select distinct p.* from TAB_PROJECT p "
 							+ " inner join TAB_PROJECT_USERS tpu on tpu.projectPk = p.pk "
 							+ " where tpu.userPk=? and tpu.workstationPk=? and tpu.role in (?, ?, ?)",
@@ -2352,17 +2344,17 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  boolean isUserCoordinatorForProject(UserContext userContext, int projectPk)
+	public static boolean isUserCoordinatorForProject(UserContext userContext, int projectPk)
 	{
 		try
 		{
-			Project p = persistWrapper.readByPrimaryKey(Project.class, projectPk);
+			Project p = PersistWrapper.readByPrimaryKey(Project.class, projectPk);
 			if (p != null && p.getManagerPk() != null && p.getManagerPk() == userContext.getUser().getPk())
 			{
 				return true;
 			}
 
-			List<UserPerms> l = persistWrapper.readList(UserPerms.class,
+			List<UserPerms> l = PersistWrapper.readList(UserPerms.class,
 					"select * from TAB_USER_PERMS where objectPk=? and objectType=? " + "and userPk=? ", projectPk,
 					UserPerms.OBJECTTYPE_PROJECT, userContext.getUser().getPk());
 			for (Iterator iterator = l.iterator(); iterator.hasNext();)
@@ -2382,67 +2374,67 @@ public class ProjectServiceImpl
 		return false;
 	}
 
-	public  void removeUserFromProject(UserContext context, int projectPk, int workstationPk, int userPk,
+	public static void removeUserFromProject(UserContext context, int projectPk, int workstationPk, int userPk,
 			String role) throws Exception
 	{
-		persistWrapper.delete(
+		PersistWrapper.delete(
 				"delete from TAB_PROJECT_USERS where projectPk=? and projectPartPk is null and workstationPk=? and userPk = ? and role = ?",
 				projectPk, workstationPk, userPk, role);
 	}
 
-	public  void removeUserFromProject(UserContext context, int projectPk, ProjectPartOID projectPartOID,
+	public static void removeUserFromProject(UserContext context, int projectPk, ProjectPartOID projectPartOID,
 			int workstationPk, int userPk, String role) throws Exception
 	{
-		persistWrapper.delete(
+		PersistWrapper.delete(
 				"delete from TAB_PROJECT_USERS where projectPk=? and projectPartPk = ? and workstationPk=? and userPk = ? and role = ?",
 				projectPk, projectPartOID.getPk(), workstationPk, userPk, role);
 	}
 
-	public  void removeAllUsersFromProject(UserContext context, int projectPk, WorkstationOID workstationOID)
+	public static void removeAllUsersFromProject(UserContext context, int projectPk, WorkstationOID workstationOID)
 			throws Exception
 	{
-		persistWrapper.delete("delete from TAB_PROJECT_USERS where projectPk=? and workstationPk=?", projectPk,
+		PersistWrapper.delete("delete from TAB_PROJECT_USERS where projectPk=? and workstationPk=?", projectPk,
 				workstationOID.getPk());
 	}
 
-	public  void removeUserFromUnit(UnitOID unitOID, WorkstationOID wsOID, UserOID userOID, String role)
+	public static void removeUserFromUnit(UnitOID unitOID, WorkstationOID wsOID, UserOID userOID, String role)
 			throws Exception
 	{
-		persistWrapper.delete(
+		PersistWrapper.delete(
 				"delete from TAB_UNIT_USERS where unitPk=? and workstationPk=? and userPk = ? and role = ?",
 				unitOID.getPk(), wsOID.getPk(), userOID.getPk(), role);
 	}
 
-	public  void removeAllUsersFromUnit(UserContext context, UnitOID unitOID, ProjectOID projectOID,
+	public static void removeAllUsersFromUnit(UserContext context, UnitOID unitOID, ProjectOID projectOID,
 			WorkstationOID workstationOID) throws Exception
 	{
-		persistWrapper.delete("delete from TAB_UNIT_USERS where unitPk=? and projectPk = ? and workstationPk=?",
+		PersistWrapper.delete("delete from TAB_UNIT_USERS where unitPk=? and projectPk = ? and workstationPk=?",
 				unitOID.getPk(), projectOID.getPk(), workstationOID.getPk());
 	}
 
-	public  List<User> getUsersForUnit(int unitPk, ProjectOID projectOID, WorkstationOID workstationOID)
+	public static List<User> getUsersForUnit(int unitPk, ProjectOID projectOID, WorkstationOID workstationOID)
 			throws Exception
 	{
-		return persistWrapper.readList(User.class,
+		return PersistWrapper.readList(User.class,
 				"select distinct u.* from TAB_USER u, TAB_UNIT_USERS uu where uu.userPk = u.pk and uu.unitPk=? and uu.projectPk = ? and uu.workstationPk=? order by firstName",
 				unitPk, projectOID.getPk(), workstationOID.getPk());
 	}
 
-	public  List<User> getUsersForUnitInRole(int unitPk, ProjectOID projectOID, WorkstationOID workstationOID,
+	public static List<User> getUsersForUnitInRole(int unitPk, ProjectOID projectOID, WorkstationOID workstationOID,
 			String roleName) throws Exception
 	{
-		return persistWrapper.readList(User.class,
+		return PersistWrapper.readList(User.class,
 				"select distinct u.* from TAB_USER u, TAB_UNIT_USERS uu where uu.userPk = u.pk and uu.unitPk=? and uu.projectPk = ? and uu.workstationPk=? and uu.role=?",
 				unitPk, projectOID.getPk(), workstationOID.getPk(), roleName);
 	}
 
-	public  boolean isUsersForProjectInRole(int userPk, ProjectOID projectOID, WorkstationOID workstationOID,
+	public static boolean isUsersForProjectInRole(int userPk, ProjectOID projectOID, WorkstationOID workstationOID,
 			String roleName)
 	{
 		List list = null;
 		try
 		{
-			list = persistWrapper.readList(User.class,
+			list = PersistWrapper.readList(User.class,
 					"select distinct u.* from TAB_USER u, TAB_PROJECT_USERS uu where uu.userPk = u.pk and u.pk = ? and uu.projectPk=? and uu.workstationPk=? and uu.role=?",
 					userPk, projectOID.getPk(), workstationOID.getPk(), roleName);
 		}
@@ -2460,13 +2452,13 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  boolean isUsersForUnitInRole(int userPk, int unitPk, ProjectOID projectOID,
+	public static boolean isUsersForUnitInRole(int userPk, int unitPk, ProjectOID projectOID,
 			WorkstationOID workstationOID, String roleName)
 	{
 		List list = null;
 		try
 		{
-			list = persistWrapper.readList(User.class,
+			list = PersistWrapper.readList(User.class,
 					"select distinct u.* from TAB_USER u, TAB_UNIT_USERS uu where uu.userPk = u.pk and u.pk = ? and uu.unitPk=? and uu.projectPk = ? and uu.workstationPk=? and uu.role=?",
 					userPk, unitPk, projectOID.getPk(), workstationOID.getPk(), roleName);
 		}
@@ -2484,11 +2476,11 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  List<WorkstationQuery> getWorkstationsForUnit(UnitOID unitOID, ProjectOID projectOID) throws Exception
+	public static List<WorkstationQuery> getWorkstationsForUnit(UnitOID unitOID, ProjectOID projectOID) throws Exception
 	{
 		String sql = WorkstationQuery.sql + " and "
 				+ "ws.workstationName != ? and ws.pk in (select workstationPk from TAB_UNIT_WORKSTATIONS where unitPk=? and projectPk = ? and estatus = ? ) order by ws.orderNo";
-		persistWrapper p = new persistWrapper();
+		PersistWrapper p = new PersistWrapper();
 		return p.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, unitOID.getPk(), projectOID.getPk(),
 				EStatusEnum.Active.getValue());
 	}
@@ -2501,7 +2493,7 @@ public class ProjectServiceImpl
 	 * @return
 	 * @throws Exception
 	 */
-	public  List<UnitWorkstationQuery> getWorkstationsForUnit(UnitOID unitOID, ProjectOID projectOID,
+	public static List<UnitWorkstationQuery> getWorkstationsForUnit(UnitOID unitOID, ProjectOID projectOID,
 			boolean includeChildUnits) throws Exception
 	{
 		if (includeChildUnits)
@@ -2511,7 +2503,7 @@ public class ProjectServiceImpl
 			String sql = UnitWorkstationQuery.sql + " and " + "w.workstationName != ?  "
 					+ " and ( (u.pk = ?) or (uprh.rootParentPk = ? and uprh.heiCode like ?) )"
 					+ " and uw.projectPk = ? and uw.estatus = ? order by uprh.level, w.orderNo";
-			persistWrapper p = new persistWrapper();
+			PersistWrapper p = new PersistWrapper();
 			return p.readList(UnitWorkstationQuery.class, sql, DummyWorkstation.DUMMY, unitInProject.getUnitPk(),
 					unitInProject.getRootParentPk(), unitInProject.getHeiCode() + ".%", projectOID.getPk(),
 					EStatusEnum.Active.getValue());
@@ -2519,18 +2511,18 @@ public class ProjectServiceImpl
 		{
 			String sql = UnitWorkstationQuery.sql + " and "
 					+ "w.workstationName != ? and uw.unitpk  = ? and uw.projectPk = ? and uw.estatus = ? order by w.orderNo";
-			persistWrapper p = new persistWrapper();
+			PersistWrapper p = new PersistWrapper();
 			return p.readList(UnitWorkstationQuery.class, sql, DummyWorkstation.DUMMY, unitOID.getPk(),
 					projectOID.getPk(), EStatusEnum.Active.getValue());
 		}
 	}
 
-	public  UnitWorkstation addWorkstationToUnit(UserContext context, ProjectOID projectOID, UnitOID unitOID,
+	public static UnitWorkstation addWorkstationToUnit(UserContext context, ProjectOID projectOID, UnitOID unitOID,
 			WorkstationOID workstationOID) throws Exception
 	{
 		int uwPk = 0;
 
-		UnitWorkstation existingOne = persistWrapper.read(UnitWorkstation.class,
+		UnitWorkstation existingOne = PersistWrapper.read(UnitWorkstation.class,
 				"select * from TAB_UNIT_WORKSTATIONS where unitPk=? and projectPk = ? and workstationPk=?",
 				unitOID.getPk(), projectOID.getPk(), workstationOID.getPk());
 		if (existingOne == null)
@@ -2542,7 +2534,7 @@ public class ProjectServiceImpl
 			pForm.setUnitPk(unitOID.getPk());
 			pForm.setWorkstationPk(workstationOID.getPk());
 
-			uwPk = persistWrapper.createEntity(pForm);
+			uwPk = PersistWrapper.createEntity(pForm);
 		} else
 		{
 			uwPk = existingOne.getPk();
@@ -2567,19 +2559,19 @@ public class ProjectServiceImpl
 			}
 		}
 		
-		return persistWrapper.readByPrimaryKey(UnitWorkstation.class, uwPk);
+		return PersistWrapper.readByPrimaryKey(UnitWorkstation.class, uwPk);
 	}
 
-	public  void removeWorkstationFromUnit(UserContext context, UnitOID unitOID, ProjectOID projectOID,
+	public static void removeWorkstationFromUnit(UserContext context, UnitOID unitOID, ProjectOID projectOID,
 			WorkstationOID workstationOID) throws Exception
 	{
 		// if the forms related to workstations have been attempted, the
 		// workstation cannot be removed from the unit
-		// int count = persistWrapper.read(Integer.class, "select count(pk) from
+		// int count = PersistWrapper.read(Integer.class, "select count(pk) from
 		// TAB_RESPONSE where unitPk=? and workstationPk=?", unitPk,
 		// workstationPk);
 
-		int count = persistWrapper.read(Integer.class, "select count(*) from TAB_RESPONSE res "
+		int count = PersistWrapper.read(Integer.class, "select count(*) from TAB_RESPONSE res "
 				+ " join unit_testproc ut on res.testProcPk = ut.pk "
 				+ " join testproc_form_assign tfa on tfa.testProcFk = ut.pk and tfa.formFk = res.surveyPk and tfa.current = 1 "
 				+ " join unit_testproc_h uth on uth.unitTestProcFk = ut.pk and now() between uth.effectiveDateFrom and uth.effectiveDateTo "
@@ -2597,26 +2589,26 @@ public class ProjectServiceImpl
 		removeAllFormsFromUnit(context, unitOID.getPk(), projectOID, workstationOID);
 
 		// delete workstation users
-		persistWrapper.delete("delete from TAB_UNIT_USERS where unitPk = ? and projectPk = ? and workstationPk = ?",
+		PersistWrapper.delete("delete from TAB_UNIT_USERS where unitPk = ? and projectPk = ? and workstationPk = ?",
 				unitOID.getPk(), projectOID.getPk(), workstationOID.getPk());
 
 		// now delete workstations
 		UnitWorkstation uw = getUnitWorkstationSetting(unitOID.getPk(), projectOID, workstationOID);
 		uw.setUpdatedBy(context.getUser().getPk());
 		uw.setEstatus(EStatusEnum.Deleted.getValue());
-		persistWrapper.update(uw);
+		PersistWrapper.update(uw);
 	}
 
 	/*
 	 * Not used anywhere. Please check and remove if so.
 	 */
 	@Deprecated
-	public  List<UnitLocationQuery> getUnitWorkstationStatus(UnitOID unitOID, ProjectOID projectOID)
+	public static List<UnitLocationQuery> getUnitWorkstationStatus(UnitOID unitOID, ProjectOID projectOID)
 			throws Exception
 	{
 		// we only need to get the workstations where the form count is greater
 		// than 0;
-		List<Map<String, Object>> validWs = persistWrapper.readListAsMap(
+		List<Map<String, Object>> validWs = PersistWrapper.readListAsMap(
 				"select count(*) as count, uth.workstationPk as wspk from unit_testproc ut "
 						+ " join testproc_form_assign tfa on tfa.testProcFk = ut.pk and tfa.current = 1 "
 						+ " join unit_testproc_h uth on uth.unitTestProcFk = ut.pk and now() between uth.effectiveDateFrom and uth.effectiveDateTo "
@@ -2639,41 +2631,41 @@ public class ProjectServiceImpl
 		}
 		sb.append(")");
 		sb.append(" and uloc.current = 1");
-		return persistWrapper.readList(UnitLocationQuery.class, sb.toString(), unitOID.getPk(), projectOID.getPk());
+		return PersistWrapper.readList(UnitLocationQuery.class, sb.toString(), unitOID.getPk(), projectOID.getPk());
 	}
 
-	public  UnitLocation getUnitWorkstation(int unitPk, ProjectOID projectOID, WorkstationOID workstationOID)
+	public static UnitLocation getUnitWorkstation(int unitPk, ProjectOID projectOID, WorkstationOID workstationOID)
 			throws Exception
 	{
 		String sql = "select * from TAB_UNIT_LOCATION where  unitPk = ? and projectPk = ? and workstationPk=? and current = 1 ";
-		return persistWrapper.read(UnitLocation.class, sql, unitPk, projectOID.getPk(), workstationOID.getPk());
+		return PersistWrapper.read(UnitLocation.class, sql, unitPk, projectOID.getPk(), workstationOID.getPk());
 	}
 
-	public  UnitLocationQuery getUnitWorkstationStatus(UnitOID unitOID, ProjectOID projectOID,
+	public static UnitLocationQuery getUnitWorkstationStatus(UnitOID unitOID, ProjectOID projectOID,
 			WorkstationOID workstationOID)
 	{
 		String sql = UnitLocationQuery.fetchSQL
 				+ " and uloc.unitPk = ? and uloc.projectPk = ? and uloc.workstationPk=? and uloc.current = 1";
-		return persistWrapper.read(UnitLocationQuery.class, sql, unitOID.getPk(), projectOID.getPk(),
+		return PersistWrapper.read(UnitLocationQuery.class, sql, unitOID.getPk(), projectOID.getPk(),
 				workstationOID.getPk());
 	}
 
-	public  List<UnitLocationQuery> getUnitWorkstationStatusHistory(int unitPk, ProjectOID projectOID,
+	public static List<UnitLocationQuery> getUnitWorkstationStatusHistory(int unitPk, ProjectOID projectOID,
 			WorkstationOID workstationOID) throws Exception
 	{
 		String sql = UnitLocationQuery.fetchSQL
 				+ " and uloc.unitPk = ? and uloc.projectPk = ? and uloc.workstationPk=? order by moveInDate desc";
-		return persistWrapper.readList(UnitLocationQuery.class, sql, unitPk, projectOID.getPk(),
+		return PersistWrapper.readList(UnitLocationQuery.class, sql, unitPk, projectOID.getPk(),
 				workstationOID.getPk());
 	}
 
-	public  List<UnitLocationQuery> getUnitLocationHistory(UnitOID unitOID, ProjectOID projectOID)
+	public static List<UnitLocationQuery> getUnitLocationHistory(UnitOID unitOID, ProjectOID projectOID)
 			throws Exception
 	{
 		return getUnitLocationHistory(unitOID, projectOID, false);
 	}
 
-	public  List<UnitLocationQuery> getUnitLocationHistory(UnitOID unitOID, ProjectOID projectOID,
+	public static List<UnitLocationQuery> getUnitLocationHistory(UnitOID unitOID, ProjectOID projectOID,
 			boolean includeChildUnits) throws Exception
 	{
 		if (includeChildUnits)
@@ -2683,17 +2675,17 @@ public class ProjectServiceImpl
 			String sql = UnitLocationQuery.fetchSQL + " and uloc.unitPk in (select pk from TAB_UNIT where "
 					+ " ( (pk = ?) or (rootParentPk = ? and heiCode like ?) ) " + " ) "
 					+ "and uloc.projectPk = ? and uloc.current = 1";
-			return persistWrapper.readList(UnitLocationQuery.class, sql, unitInProject.getUnitPk(),
+			return PersistWrapper.readList(UnitLocationQuery.class, sql, unitInProject.getUnitPk(),
 					unitInProject.getRootParentPk(), unitInProject.getHeiCode() + ".%", projectOID.getPk());
 		} else
 		{
 			String sql = UnitLocationQuery.fetchSQL
 					+ " and uloc.unitPk = ? and uloc.projectPk = ? and uloc.current = 1";
-			return persistWrapper.readList(UnitLocationQuery.class, sql, unitOID.getPk(), projectOID.getPk());
+			return PersistWrapper.readList(UnitLocationQuery.class, sql, unitOID.getPk(), projectOID.getPk());
 		}
 	}
 
-	public  void setUnitWorkstationStatus(UserContext userContext, int unitPk, ProjectOID projectOID,
+	public static void setUnitWorkstationStatus(UserContext userContext, int unitPk, ProjectOID projectOID,
 			WorkstationOID workstationOID, String status) throws Exception
 	{
 
@@ -2714,7 +2706,7 @@ public class ProjectServiceImpl
 		if (currentRec != null)
 		{
 			currentRec.setCurrent(0);
-			persistWrapper.update(currentRec);
+			PersistWrapper.update(currentRec);
 
 			nuLoc.setFirstFormAccessDate(currentRec.getFirstFormAccessDate());
 			nuLoc.setFirstFormLockDate(currentRec.getFirstFormLockDate());
@@ -2753,7 +2745,7 @@ public class ProjectServiceImpl
 					workstationOID);
 		}
 
-		persistWrapper.createEntity(nuLoc);
+		PersistWrapper.createEntity(nuLoc);
 
 		if (UnitLocation.STATUS_IN_PROGRESS.equals(status) || UnitLocation.STATUS_WAITING.equals(status))
 		{
@@ -2823,7 +2815,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  void recordWorkstationFormAccess(TestProcOID testProcOID)
+	public static void recordWorkstationFormAccess(TestProcOID testProcOID)
 	{
 		try
 		{
@@ -2839,7 +2831,7 @@ public class ProjectServiceImpl
 					currentRec.setFirstFormAccessDate(now);
 				currentRec.setLastFormAccessDate(now);
 
-				persistWrapper.update(currentRec);
+				PersistWrapper.update(currentRec);
 			}
 		}
 		catch (Exception e)
@@ -2848,7 +2840,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  void recordWorkstationSave(TestProcOID testProcOID)
+	public static void recordWorkstationSave(TestProcOID testProcOID)
 	{
 		try
 		{
@@ -2864,7 +2856,7 @@ public class ProjectServiceImpl
 					currentRec.setFirstFormSaveDate(now);
 				currentRec.setLastFormSaveDate(now);
 
-				persistWrapper.update(currentRec);
+				PersistWrapper.update(currentRec);
 			}
 		}
 		catch (Exception e)
@@ -2873,7 +2865,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  void recordWorkstationFormLock(TestProcOID testProcOID)
+	public static void recordWorkstationFormLock(TestProcOID testProcOID)
 	{
 		try
 		{
@@ -2889,7 +2881,7 @@ public class ProjectServiceImpl
 					currentRec.setFirstFormLockDate(now);
 				currentRec.setLastFormLockDate(now);
 
-				persistWrapper.update(currentRec);
+				PersistWrapper.update(currentRec);
 			}
 		}
 		catch (Exception e)
@@ -2898,7 +2890,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  void recordWorkstationFormUnlock(TestProcOID testProcOID)
+	public static void recordWorkstationFormUnlock(TestProcOID testProcOID)
 	{
 		try
 		{
@@ -2912,7 +2904,7 @@ public class ProjectServiceImpl
 				Date now = new Date();
 				currentRec.setLastFormUnlockDate(now);
 
-				persistWrapper.update(currentRec);
+				PersistWrapper.update(currentRec);
 			}
 		}
 		catch (Exception e)
@@ -2921,7 +2913,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  List<AssignedTestsQuery> getAssignedFormsNew(UserOID user, String role) throws Exception
+	public static List<AssignedTestsQuery> getAssignedFormsNew(UserOID user, String role) throws Exception
 	{
 		String lookForTestStatus = "";
 		String workFlowStatus = "";
@@ -2977,14 +2969,14 @@ public class ProjectServiceImpl
 				+ " join TAB_SURVEY f on r.surveyPk = f.pk and f.formType = 1 " + " where "
 				+ " uu.userPk = ? and uu.role = ? and r.status=? " + " order by fwf.date desc";
 
-		List<AssignedTestsQuery> myAssignments = persistWrapper.readList(AssignedTestsQuery.class, sql, user.getPk(),
+		List<AssignedTestsQuery> myAssignments = PersistWrapper.readList(AssignedTestsQuery.class, sql, user.getPk(),
 				role, lookForTestStatus, user.getPk(), role, lookForTestStatus);
 		return myAssignments;
 	}
 
 	@Deprecated
 	/**
-	 * Use method public  List <AssignedTestsQuery>
+	 * Use method public static List <AssignedTestsQuery>
 	 * getAssignedFormsNew(User user, String role)throws Exception
 	 * 
 	 * @param user
@@ -2993,9 +2985,9 @@ public class ProjectServiceImpl
 	 * @throws Exception
 	 */
 
-	public  OElement getFormWorkflowEvents(int testProcPk) throws Exception
+	public static OElement getFormWorkflowEvents(int testProcPk) throws Exception
 	{
-		List<FormWorkflowQuery> workFlows = persistWrapper.readList(FormWorkflowQuery.class,
+		List<FormWorkflowQuery> workFlows = PersistWrapper.readList(FormWorkflowQuery.class,
 				FormWorkflowQuery.sql + " and fwf.testProcPk=? and fwf.action != ? order by fwf.date desc", testProcPk,
 				FormWorkflow.ACTION_START);
 
@@ -3016,17 +3008,17 @@ public class ProjectServiceImpl
 		return root;
 	}
 
-	public  void deleteProject(int projectPk) throws Exception
+	public static void deleteProject(int projectPk) throws Exception
 	{
-		int unitCount = persistWrapper.read(Integer.class,
+		int unitCount = PersistWrapper.read(Integer.class,
 				"select count(u.pk) from TAB_UNIT u join unit_project_ref upr on upr.unitPk = u.pk and upr.projectPk=?",
 				projectPk);
 		if (unitCount == 0)
 		{
-			persistWrapper.delete("delete from TAB_PROJECT_FORMS where projectPk=?", projectPk);
-			persistWrapper.delete("delete from TAB_PROJECT_USERS where projectPk=?", projectPk);
-			persistWrapper.delete("delete from TAB_PROJECT_WORKSTATIONS where projectPk=?", projectPk);
-			persistWrapper.delete("delete from TAB_PROJECT where pk=?", projectPk);
+			PersistWrapper.delete("delete from TAB_PROJECT_FORMS where projectPk=?", projectPk);
+			PersistWrapper.delete("delete from TAB_PROJECT_USERS where projectPk=?", projectPk);
+			PersistWrapper.delete("delete from TAB_PROJECT_WORKSTATIONS where projectPk=?", projectPk);
+			PersistWrapper.delete("delete from TAB_PROJECT where pk=?", projectPk);
 		} else
 		{
 			List errors = new ArrayList();
@@ -3035,23 +3027,23 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  void deleteWorstation(UserContext context, WorkstationOID workstationOID) throws Exception
+	public static void deleteWorstation(UserContext context, WorkstationOID workstationOID) throws Exception
 	{
 		List errors = new ArrayList();
 
 		Account acc = (Account) context.getAccount();
 		User user = (User) context.getUser();
 
-		Workstation workstation = persistWrapper.readByPrimaryKey(Workstation.class, workstationOID.getPk());
+		Workstation workstation = PersistWrapper.readByPrimaryKey(Workstation.class, workstationOID.getPk());
 
-		List pws = persistWrapper.readList(ProjectWorkstation.class,
+		List pws = PersistWrapper.readList(ProjectWorkstation.class,
 				"select * from TAB_PROJECT_WORKSTATIONS where workstationPk=?", workstationOID.getPk());
 		if (pws != null && pws.size() > 0)
 		{
 			errors.add(
 					"Workstation is associated with projects; Please remove workstation from projects and try again.");
 		}
-		pws = persistWrapper.readList(UnitWorkstation.class,
+		pws = PersistWrapper.readList(UnitWorkstation.class,
 				"select * from TAB_UNIT_WORKSTATIONS where workstationPk=?", workstationOID.getPk());
 		if (pws != null && pws.size() > 0)
 		{
@@ -3063,10 +3055,10 @@ public class ProjectServiceImpl
 		// mark the workstation as deleted
 		workstation.setEstatus(EStatusEnum.Deleted.getValue());
 		workstation.setUpdatedBy(context.getUser().getPk());
-		persistWrapper.update(workstation);
+		PersistWrapper.update(workstation);
 	}
 
-	public  void removeUnitFromProject(UserContext context, UnitOID unitOID, ProjectOID projectOID,
+	public static void removeUnitFromProject(UserContext context, UnitOID unitOID, ProjectOID projectOID,
 			DeleteOptionEnum deleteUnitOption) throws Exception
 	{
 		// I have to check in the Response_desc table to see if there are any
@@ -3103,23 +3095,23 @@ public class ProjectServiceImpl
 		{
 			// this means the unit is assigned only to this project
 
-			List<UnitH> unitHRecords = persistWrapper.readList(UnitH.class,
+			List<UnitH> unitHRecords = PersistWrapper.readList(UnitH.class,
 					"select * from tab_unit_h where unitPk = ? ", uprToDelete.getUnitPk());
 			for (Iterator iterator = unitHRecords.iterator(); iterator.hasNext();)
 			{
 				UnitH unitH = (UnitH) iterator.next();
 				unitH.setUnitName(unitH.getUnitName() + "-Del-" + uprToDelete.getUnitPk());
 				unitH.setSerialNo(unitH.getSerialNo() + "-Del-" + uprToDelete.getUnitPk());
-				persistWrapper.update(unitH);
+				PersistWrapper.update(unitH);
 			}
 		}
 
 	}
 
-	private  void removeUnitFromProjectInt(UserContext context, UnitInProjectObj unitInProjectObj)
+	private static void removeUnitFromProjectInt(UserContext context, UnitInProjectObj unitInProjectObj)
 			throws Exception
 	{
-		int count = persistWrapper.read(Integer.class,
+		int count = PersistWrapper.read(Integer.class,
 				"select count(*) from TAB_RESPONSE r " + " join TAB_UNIT_FORMS uf on r.testProcPk = uf.pk " + " where "
 						+ " r.status in (?,?,?,?,?,?) and " + " uf.unitPk=? and uf.projectPk = ? and uf.estatus = 1",
 				ResponseMasterNew.STATUS_COMPLETE, ResponseMasterNew.STATUS_VERIFIED, 
@@ -3129,44 +3121,44 @@ public class ProjectServiceImpl
 		if (count > 0)
 			throw new AppException("Forms have been submitted for this unit, Unit cannot be deleted");
 
-		count = persistWrapper.read(Integer.class, "select count(*) from openitem_v2 where unitPk=? and projectPk = ?",
+		count = PersistWrapper.read(Integer.class, "select count(*) from openitem_v2 where unitPk=? and projectPk = ?",
 				unitInProjectObj.getUnitPk(), unitInProjectObj.getProjectPk());
 		if (count > 0)
 			throw new AppException("Open items have been created for this unit, Unit cannot be deleted");
 
-		count = persistWrapper.read(Integer.class,
+		count = PersistWrapper.read(Integer.class,
 				"select count(*) from ncr_unit_assign nua where nua.unitFk=? and nua.projectFk = ?",
 				unitInProjectObj.getUnitPk(), unitInProjectObj.getProjectPk());
 		if (count > 0)
 			throw new AppException("NCRs have been associated to this unit, Unit cannot be deleted");
 
-		count = persistWrapper.read(Integer.class, "select count(*) from andon where unitPk=? and projectPk = ?",
+		count = PersistWrapper.read(Integer.class, "select count(*) from andon where unitPk=? and projectPk = ?",
 				unitInProjectObj.getUnitPk(), unitInProjectObj.getProjectPk());
 		if (count > 0)
 			throw new AppException("Andons have been raised for this unit, Unit cannot be deleted");
 
-		persistWrapper.delete("delete from TAB_UNIT_USERS where unitPk=? and projectPk = ?",
+		PersistWrapper.delete("delete from TAB_UNIT_USERS where unitPk=? and projectPk = ?",
 				unitInProjectObj.getUnitPk(), unitInProjectObj.getProjectPk());
 		new UnitInProjectDAO().removeUnit(context, unitInProjectObj);
 	}
 
-	public  void closeProject(ProjectQuery projectQuery) throws Exception
+	public static void closeProject(ProjectQuery projectQuery) throws Exception
 	{
 		// TODO some other logic need to be done when a project is closed
-		Project p = persistWrapper.readByPrimaryKey(Project.class, projectQuery.getPk());
+		Project p = PersistWrapper.readByPrimaryKey(Project.class, projectQuery.getPk());
 		p.setStatus(Project.STATUS_CLOSED);
-		persistWrapper.update(p);
+		PersistWrapper.update(p);
 	}
 
-	public  void openProject(ProjectQuery projectQuery) throws Exception
+	public static void openProject(ProjectQuery projectQuery) throws Exception
 	{
 		// TODO some other process need to be done when a project is opened
-		Project p = persistWrapper.readByPrimaryKey(Project.class, projectQuery.getPk());
+		Project p = PersistWrapper.readByPrimaryKey(Project.class, projectQuery.getPk());
 		p.setStatus(Project.STATUS_OPEN);
-		persistWrapper.update(p);
+		PersistWrapper.update(p);
 	}
 
-	public  void openUnit(UserContext context, UnitBean rootUnitToOpen, List<UnitBean> unitBeanAndChildrenList,
+	public static void openUnit(UserContext context, UnitBean rootUnitToOpen, List<UnitBean> unitBeanAndChildrenList,
 			ProjectOID lastOpenProjectOID, ProjectOID destinationProjectOID) throws Exception
 	{
 		UnitInProjectDAO uprDAO = new UnitInProjectDAO();
@@ -3246,7 +3238,7 @@ public class ProjectServiceImpl
 
 	}
 
-	private  void openUnitRec(UserContext context, UnitInProjectDAO uprDAO, UnitBean unitBean,
+	private static void openUnitRec(UserContext context, UnitInProjectDAO uprDAO, UnitBean unitBean,
 			HashMap<UnitOID, UnitBean> unitBeanMap, ProjectOID srcProjectOID, ProjectOID destProjectOID,
 			List<UnitQuery> destProjectUnitList) throws Exception
 	{
@@ -3336,7 +3328,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	private  void setWorkstationsAndTeamsOnUnitOpen(UserContext context, ProjectOID projectOID, UnitOID unitOID,
+	private static void setWorkstationsAndTeamsOnUnitOpen(UserContext context, ProjectOID projectOID, UnitOID unitOID,
 			UnitInProjectObj unitInProject, 
 			boolean copyProjectWorkstationUsersToUnit, boolean copyProjectWorkstationFormsToUnit) throws Exception
 	{
@@ -3380,7 +3372,7 @@ public class ProjectServiceImpl
 			unitWorkstation.setProjectPk(projectOID.getPk());
 			unitWorkstation.setUnitPk(unitOID.getPk());
 			unitWorkstation.setWorkstationPk(workstationQuery.getPk());
-			int unitWorkstationPk = persistWrapper.createEntity(unitWorkstation);
+			int unitWorkstationPk = PersistWrapper.createEntity(unitWorkstation);
 
 			// copy projectUsers to unitusers
 			if(copyProjectWorkstationUsersToUnit)
@@ -3408,7 +3400,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	private  void setPartSpecificSettingsToUnit(UserContext context, ProjectOID projectOID, UnitOID unitOID,
+	private static void setPartSpecificSettingsToUnit(UserContext context, ProjectOID projectOID, UnitOID unitOID,
 			UnitInProjectObj unitInProject, WorkstationOID workstationOID) throws Exception
 	{
 		// if workstation is already added, skip;
@@ -3437,7 +3429,7 @@ public class ProjectServiceImpl
 		unitWorkstation.setProjectPk(projectOID.getPk());
 		unitWorkstation.setUnitPk(unitOID.getPk());
 		unitWorkstation.setWorkstationPk(workstationOID.getPk());
-		int unitWorkstationPk = persistWrapper.createEntity(unitWorkstation);
+		int unitWorkstationPk = PersistWrapper.createEntity(unitWorkstation);
 
 		// copy projectUsers to unitusers
 		copyProjectUsersToUnit(projectOID, unitOID, workstationOID, true);
@@ -3448,7 +3440,7 @@ public class ProjectServiceImpl
 		
 	}
 
-	public  void removeUserFromUnit(int userPk, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID,
+	public static void removeUserFromUnit(int userPk, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID,
 			String role) throws Exception
 	{
 		// I think we need not do any check for this.. the user was there
@@ -3456,21 +3448,21 @@ public class ProjectServiceImpl
 		// now he needs to be removed.. so he does not have access moving
 		// forward. i think this is ok
 
-		UnitUser uu = persistWrapper.read(UnitUser.class,
+		UnitUser uu = PersistWrapper.read(UnitUser.class,
 				"select * from TAB_UNIT_USERS where userPk=? and unitPk=? and projectPk = ? and workstationPk=? and role=?",
 				userPk, unitPk, projectOID.getPk(), workstationOID.getPk(), role);
-		persistWrapper.deleteEntity(uu);
+		PersistWrapper.deleteEntity(uu);
 	}
 
-	public  List<ProjectFormQuery> getProjectFormAssignmentsForForm(FormMainOID formMainOID) throws Exception
+	public static List<ProjectFormQuery> getProjectFormAssignmentsForForm(FormMainOID formMainOID) throws Exception
 	{
-		return persistWrapper.readList(ProjectFormQuery.class, ProjectFormQuery.sql + " and form.formMainPk = ?",
+		return PersistWrapper.readList(ProjectFormQuery.class, ProjectFormQuery.sql + " and form.formMainPk = ?",
 				formMainOID.getPk());
 	}
 
-	public  List<UnitFormQuery> getTestProcsByForm(FormQuery formQuery) throws Exception
+	public static List<UnitFormQuery> getTestProcsByForm(FormQuery formQuery) throws Exception
 	{
-		List<UnitFormQuery> l = persistWrapper.readList(UnitFormQuery.class,
+		List<UnitFormQuery> l = PersistWrapper.readList(UnitFormQuery.class,
 				UnitFormQuery.sql + " and tfa.formFk in "
 						+ "(select pk from TAB_SURVEY where formMainPk=? and formType = 1) order by unitPk desc",
 				formQuery.getFormMainPk());
@@ -3478,7 +3470,7 @@ public class ProjectServiceImpl
 		return l;
 	}
 
-	public  void markUnitAsClosed(UserContext context, UnitOID unitOID, ProjectOID projectOID) throws Exception
+	public static void markUnitAsClosed(UserContext context, UnitOID unitOID, ProjectOID projectOID) throws Exception
 	{
 		UnitInProjectDAO uprDAO = new UnitInProjectDAO();
 
@@ -3562,7 +3554,7 @@ public class ProjectServiceImpl
 
 	}
 
-	private  ResponseMasterNew getFormResponse(FormQuery form, ResponseMasterNew[] responseMasterSet)
+	private static ResponseMasterNew getFormResponse(FormQuery form, ResponseMasterNew[] responseMasterSet)
 	{
 		if (responseMasterSet == null || responseMasterSet.length == 0)
 			return null;
@@ -3576,18 +3568,18 @@ public class ProjectServiceImpl
 		return null;
 	}
 
-	public  ProjectFormQuery upgradeFormForProject(UserContext context, ProjectFormOID projectFormOID,
+	public static ProjectFormQuery upgradeFormForProject(UserContext context, ProjectFormOID projectFormOID,
 			int newSurveyPk) throws Exception
 	{
-		ProjectForm projectForm = persistWrapper.readByPrimaryKey(ProjectForm.class, projectFormOID.getPk());
+		ProjectForm projectForm = PersistWrapper.readByPrimaryKey(ProjectForm.class, projectFormOID.getPk());
 		projectForm.setFormPk(newSurveyPk);
-		persistWrapper.update(projectForm);
+		PersistWrapper.update(projectForm);
 
-		return persistWrapper.read(ProjectFormQuery.class, ProjectFormQuery.sql + " and pf.pk = ?",
+		return PersistWrapper.read(ProjectFormQuery.class, ProjectFormQuery.sql + " and pf.pk = ?",
 				projectForm.getPk());
 	}
 
-	public  TestProcObj upgradeFormForUnit(UserContext context, TestProcOID testProcOID, int surveyPk)
+	public static TestProcObj upgradeFormForUnit(UserContext context, TestProcOID testProcOID, int surveyPk)
 			throws Exception
 	{
 		// we have to delete the responses for the selected projects
@@ -3656,7 +3648,7 @@ public class ProjectServiceImpl
 	 * @param selectedUnits
 	 * @throws Exception
 	 */
-	public  void copyWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
+	public static void copyWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
 			WorkstationQuery workstationQuery, Integer[] selectedUnits) throws Exception
 	{
 		int workstationPk = workstationQuery.getPk();
@@ -3688,7 +3680,7 @@ public class ProjectServiceImpl
 	 * @param selectedUnits
 	 * @throws Exception
 	 */
-	public  void setWorkstationProjectPartTeamSetupToUnits(UserContext context, ProjectQuery projectQuery,
+	public static void setWorkstationProjectPartTeamSetupToUnits(UserContext context, ProjectQuery projectQuery,
 			WorkstationQuery workstationQuery, ProjectPartOID projectPartOID, Integer[] selectedUnits,
 			boolean copyDefaultTeamIfNoProjectPartTeamIsSet) throws Exception
 	{
@@ -3717,7 +3709,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  void cascadeWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
+	public static void cascadeWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
 			WorkstationQuery workstationQuery, Integer[] selectedUnitsForForm, Integer[] selectedUnitsForTeam)
 			throws Exception
 	{
@@ -3867,7 +3859,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  void deleteWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
+	public static void deleteWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
 			WorkstationQuery workstationQuery, UnitObj[] selectedUnits) throws Exception
 	{
 		for (int i = 0; i < selectedUnits.length; i++)
@@ -3920,28 +3912,28 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  List<Project> getProjectsForWorkstation(UserContext context, WorkstationOID workstationOID)
+	public static List<Project> getProjectsForWorkstation(UserContext context, WorkstationOID workstationOID)
 			throws Exception
 	{
-		return persistWrapper.readList(Project.class,
+		return PersistWrapper.readList(Project.class,
 				"select * from TAB_PROJECT where pk in "
 						+ "(select projectPk from TAB_PROJECT_WORKSTATIONS where workstationPk=?)",
 				workstationOID.getPk());
 	}
 
-	public  float getUnitPercentComplete(UserContext context, int unitPk, ProjectOID projectOID,
+	public static float getUnitPercentComplete(UserContext context, int unitPk, ProjectOID projectOID,
 			boolean includeChildren) throws Exception
 	{
 		return getWorkstationPercentCompleteInt(context, unitPk, projectOID, null, includeChildren);
 	}
 
-	public  float getWorkstationPercentComplete(UserContext context, int unitPk, ProjectOID projectOID,
+	public static float getWorkstationPercentComplete(UserContext context, int unitPk, ProjectOID projectOID,
 			WorkstationOID workstationOID, boolean includeChildren) throws Exception
 	{
 		return getWorkstationPercentCompleteInt(context, unitPk, projectOID, workstationOID, includeChildren);
 	}
 
-	private  float getWorkstationPercentCompleteInt(UserContext context, int unitPk, ProjectOID projectOID,
+	private static float getWorkstationPercentCompleteInt(UserContext context, int unitPk, ProjectOID projectOID,
 			WorkstationOID workstationOID, boolean includeChildren) throws Exception
 	{
 		List<UnitFormQuery> fm = null;
@@ -3970,7 +3962,7 @@ public class ProjectServiceImpl
 		return (formCount > 0) ? (percenCompleteAccumulator * 100) / (float) (100 * formCount) : 0;
 	}
 
-	public  List<User> getProjectManagers(ProjectOID projectOID)
+	public static List<User> getProjectManagers(ProjectOID projectOID)
 	{
 		try
 		{
@@ -3978,7 +3970,7 @@ public class ProjectServiceImpl
 			Project proj = getProject(projectOID.getPk());
 			if (proj.getManagerPk() != 0)
 			{
-				User mgr = persistWrapper.readByPrimaryKey(User.class, proj.getManagerPk());
+				User mgr = PersistWrapper.readByPrimaryKey(User.class, proj.getManagerPk());
 				returnList.add(mgr);
 			}
 
@@ -3996,28 +3988,28 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  List<User> getAnnouncers(Account account) throws Exception
+	public static List<User> getAnnouncers(Account account) throws Exception
 	{
 		List<User> existingAnnouncerACList = AccountDelegate.getACLs(account.getPk(), UserPerms.OBJECTTYPE_ACCOUNT,
 				UserPerms.ROLE_ANNOUNCER);
 		return existingAnnouncerACList;
 	}
 
-	public  List<User> getDataClerks(ProjectQuery projectQuery) throws Exception
+	public static List<User> getDataClerks(ProjectQuery projectQuery) throws Exception
 	{
 		List<User> existingDataClerkACList = AccountDelegate.getACLs(projectQuery.getPk(), UserPerms.OBJECTTYPE_PROJECT,
 				UserPerms.ROLE_DATACLERK);
 		return existingDataClerkACList;
 	}
 
-	public  void moveWorkstationOrderUp(UserContext context, WorkstationOID workstationOID)
+	public static void moveWorkstationOrderUp(UserContext context, WorkstationOID workstationOID)
 	{
 		try
 		{
-			Workstation ws = persistWrapper.readByPrimaryKey(Workstation.class, workstationOID.getPk());
+			Workstation ws = PersistWrapper.readByPrimaryKey(Workstation.class, workstationOID.getPk());
 			if (ws != null)
 			{
-				Workstation previousOne = persistWrapper.read(Workstation.class,
+				Workstation previousOne = PersistWrapper.read(Workstation.class,
 						"select * from TAB_WORKSTATION where orderNo < ? order by orderNo desc limit 0, 1",
 						ws.getOrderNo());
 				if (previousOne != null)
@@ -4025,8 +4017,8 @@ public class ProjectServiceImpl
 					int orderNoTemp = previousOne.getOrderNo();
 					previousOne.setOrderNo(ws.getOrderNo());
 					ws.setOrderNo(orderNoTemp);
-					persistWrapper.update(previousOne);
-					persistWrapper.update(ws);
+					PersistWrapper.update(previousOne);
+					PersistWrapper.update(ws);
 				}
 			}
 		}
@@ -4037,22 +4029,22 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  void moveWorkstationOrderDown(UserContext context, WorkstationOID workstationOID)
+	public static void moveWorkstationOrderDown(UserContext context, WorkstationOID workstationOID)
 	{
 		try
 		{
-			Workstation ws = persistWrapper.readByPrimaryKey(Workstation.class, workstationOID.getPk());
+			Workstation ws = PersistWrapper.readByPrimaryKey(Workstation.class, workstationOID.getPk());
 			if (ws != null)
 			{
-				Workstation nextOne = persistWrapper.read(Workstation.class,
+				Workstation nextOne = PersistWrapper.read(Workstation.class,
 						"select * from TAB_WORKSTATION where orderNo > ? order by orderNo limit 0, 1", ws.getOrderNo());
 				if (nextOne != null)
 				{
 					int orderNoTemp = nextOne.getOrderNo();
 					nextOne.setOrderNo(ws.getOrderNo());
 					ws.setOrderNo(orderNoTemp);
-					persistWrapper.update(nextOne);
-					persistWrapper.update(ws);
+					PersistWrapper.update(nextOne);
+					PersistWrapper.update(ws);
 				}
 			}
 		}
@@ -4063,7 +4055,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  Comment addComment(UserContext userContext, int objectPk, int objectType, String commentText,
+	public static Comment addComment(UserContext userContext, int objectPk, int objectType, String commentText,
 			String commentContext) throws Exception
 	{
 		Comment comm = new Comment();
@@ -4073,61 +4065,61 @@ public class ProjectServiceImpl
 		comm.setObjectType(objectType);
 		comm.setCreatedBy(userContext.getUser().getPk());
 		comm.setCommentContext(commentContext);
-		int pk = persistWrapper.createEntity(comm);
-		return persistWrapper.readByPrimaryKey(Comment.class, pk);
+		int pk = PersistWrapper.createEntity(comm);
+		return PersistWrapper.readByPrimaryKey(Comment.class, pk);
 	}
 
-	public  Comment updateComment(UserContext userContext, Comment comment) throws Exception
+	public static Comment updateComment(UserContext userContext, Comment comment) throws Exception
 	{
-		persistWrapper.update(userContext,comment);
-		return persistWrapper.readByPrimaryKey(Comment.class, comment.getPk());
+		PersistWrapper.update(userContext,comment);
+		return PersistWrapper.readByPrimaryKey(Comment.class, comment.getPk());
 	}
 
-	public  void deleteComment(UserContext userContext, int pk) throws Exception
+	public static void deleteComment(UserContext userContext, int pk) throws Exception
 	{
-		Comment comm = persistWrapper.readByPrimaryKey(Comment.class, pk);
+		Comment comm = PersistWrapper.readByPrimaryKey(Comment.class, pk);
 		comm.setEstatus(EStatusEnum.Deleted.getValue());
-		persistWrapper.update(userContext, comm);
+		PersistWrapper.update(userContext, comm);
 	}
 
-	public  Comment getComment(int pk) throws Exception
+	public static Comment getComment(int pk) throws Exception
 	{
-		return persistWrapper.read(Comment.class, "select * from TAB_COMMENT where pk=? ", pk);
+		return PersistWrapper.read(Comment.class, "select * from TAB_COMMENT where pk=? ", pk);
 	}
 
-	public  List<Comment> getComments(int objectPk, EntityType objectType) throws Exception
+	public static List<Comment> getComments(int objectPk, EntityType objectType) throws Exception
 	{
-		return persistWrapper.readList(Comment.class,
+		return PersistWrapper.readList(Comment.class,
 				"select * from TAB_COMMENT where objectPk=? and objectType=? and estatus != 9 order by createdDate",
 				objectPk, objectType.getValue());
 	}
 
-	public  List<Comment> getComments(Integer[] objectPks, EntityType objectType)
+	public static List<Comment> getComments(Integer[] objectPks, EntityType objectType)
 	{
 		String pks = Arrays.deepToString(objectPks);
 		pks = pks.replace('[', '(');
 		pks = pks.replace(']', ')');
-		return persistWrapper.readList(Comment.class,
+		return PersistWrapper.readList(Comment.class,
 				"select * from TAB_COMMENT where objectPk in " + pks + " and objectType=? order by createdDate",
 				objectType.getValue());
 	}
 
-	public  List<Comment> getComments(int objectPk, EntityTypeEnum objectType, String commentContext)
+	public static List<Comment> getComments(int objectPk, EntityTypeEnum objectType, String commentContext)
 			throws Exception
 	{
-		return persistWrapper.readList(Comment.class,
+		return PersistWrapper.readList(Comment.class,
 				"select * from TAB_COMMENT where objectPk=? and objectType=? and commentContext = ?  and estatus != 9 order by createdDate",
 				objectPk, objectType.getValue(), commentContext);
 	}
 
-	public  Comment getLatestComment(int objectPk, EntityTypeEnum objectType) throws Exception
+	public static Comment getLatestComment(int objectPk, EntityTypeEnum objectType) throws Exception
 	{
-		return persistWrapper.read(Comment.class,
+		return PersistWrapper.read(Comment.class,
 				"select * from TAB_COMMENT where objectPk=? and objectType=?  and estatus != 9 order by createdDate desc limit 0,1",
 				objectPk, objectType.getValue());
 	}
 
-	public  HashMap<ProjectOID, Integer> getUnitCount(List<Integer> projectPks, boolean includeChildren)
+	public static HashMap<ProjectOID, Integer> getUnitCount(List<Integer> projectPks, boolean includeChildren)
 	{
 		HashMap<ProjectOID, Integer> result = new HashMap<ProjectOID, Integer>();
 		List<Object> params = new ArrayList<Object>();
@@ -4158,7 +4150,7 @@ public class ProjectServiceImpl
 			sql.append(" and uprh.parentPk is null ");
 		}
 		sql.append("group by upr.projectPk");
-		List<Map<String, Object>> fetchedData = persistWrapper.readListAsMap(sql.toString(), params.toArray());
+		List<Map<String, Object>> fetchedData = PersistWrapper.readListAsMap(sql.toString(), params.toArray());
 		if (fetchedData != null)
 		{
 			for (Map<String, Object> mapData : fetchedData)
@@ -4177,11 +4169,11 @@ public class ProjectServiceImpl
 
 	}
 
-	public  int getUnitCount(int projectPk, boolean includeChildren) throws Exception
+	public static int getUnitCount(int projectPk, boolean includeChildren) throws Exception
 	{
 		if (includeChildren)
 		{
-			return persistWrapper.read(Integer.class, "select count(*) from TAB_UNIT u "
+			return PersistWrapper.read(Integer.class, "select count(*) from TAB_UNIT u "
 					+ " join unit_project_ref upr on upr.unitPk = u.pk and upr.projectPk = ? "
 					+ " join unit_project_ref_h uprh on uprh.unitInProjectPk = upr.pk and now() between uprh.effectiveDateFrom and uprh.effectiveDateTo"
 					+ " where upr.unitOriginType = ? and uprh.status != 'Removed' ", projectPk,
@@ -4189,7 +4181,7 @@ public class ProjectServiceImpl
 		} else
 		{
 			// look for top level units only
-			return persistWrapper.read(Integer.class, "select count(*) from TAB_UNIT u "
+			return PersistWrapper.read(Integer.class, "select count(*) from TAB_UNIT u "
 					+ " join unit_project_ref upr on upr.unitPk = u.pk and upr.projectPk = ? "
 					+ " join unit_project_ref_h uprh on uprh.unitInProjectPk = upr.pk and now() between uprh.effectiveDateFrom and uprh.effectiveDateTo "
 					+ " where upr.unitOriginType = ?  and uprh.status != 'Removed' and uprh.parentPk is null",
@@ -4197,37 +4189,37 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  UnitWorkstation getUnitWorkstationSetting(int unitPk, ProjectOID projectOID,
+	public static UnitWorkstation getUnitWorkstationSetting(int unitPk, ProjectOID projectOID,
 			WorkstationOID workstationOID)
 	{
-		return persistWrapper.read(UnitWorkstation.class,
+		return PersistWrapper.read(UnitWorkstation.class,
 				"select * from TAB_UNIT_WORKSTATIONS where unitPk=? and projectPk = ? and workstationPk=?", unitPk,
 				projectOID.getPk(), workstationOID.getPk());
 	}
 
-	public  UnitWorkstation updateUnitWorkstationSetting(UnitWorkstation unitWorkstation) throws Exception
+	public static UnitWorkstation updateUnitWorkstationSetting(UnitWorkstation unitWorkstation) throws Exception
 	{
-		persistWrapper.update(unitWorkstation);
-		return persistWrapper.readByPrimaryKey(UnitWorkstation.class, unitWorkstation.getPk());
+		PersistWrapper.update(unitWorkstation);
+		return PersistWrapper.readByPrimaryKey(UnitWorkstation.class, unitWorkstation.getPk());
 	}
 
-	public  ProjectSiteConfig getProjectSiteConfig(int pk)
+	public static ProjectSiteConfig getProjectSiteConfig(int pk)
 	{
-		return persistWrapper.readByPrimaryKey(ProjectSiteConfig.class, pk);
+		return PersistWrapper.readByPrimaryKey(ProjectSiteConfig.class, pk);
 	}
 
-	public  ProjectSiteConfig getProjectSiteConfig(ProjectOID projectOID, SiteOID siteOID)
+	public static ProjectSiteConfig getProjectSiteConfig(ProjectOID projectOID, SiteOID siteOID)
 	{
-		return persistWrapper.read(ProjectSiteConfig.class,
+		return PersistWrapper.read(ProjectSiteConfig.class,
 				"select * from project_site_config where projectFk = ? and siteFk = ?", projectOID.getPk(),
 				siteOID.getPk());
 	}
 
-	public  List<Site> getSitesForProject(ProjectOID projectOID)
+	public static List<Site> getSitesForProject(ProjectOID projectOID)
 	{
 		try
 		{
-			return persistWrapper.readList(Site.class,
+			return PersistWrapper.readList(Site.class,
 					"select site.* from site inner join project_site_config psc on psc.siteFk = site.pk where psc.projectFk = ? and psc.estatus = 1 and site.estatus = 1",
 					projectOID.getPk());
 		}
@@ -4238,11 +4230,11 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  List<ProjectSiteConfig> getProjectSiteConfigs(ProjectOID projectOID)
+	public static List<ProjectSiteConfig> getProjectSiteConfigs(ProjectOID projectOID)
 	{
 		try
 		{
-			return persistWrapper.readList(ProjectSiteConfig.class,
+			return PersistWrapper.readList(ProjectSiteConfig.class,
 					"select * from project_site_config where projectFk = ?", projectOID.getPk());
 		}
 		catch (Exception e)
@@ -4252,16 +4244,16 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  ProjectStage getProjectStage(ProjectStageOID projectStageOID)
+	public static ProjectStage getProjectStage(ProjectStageOID projectStageOID)
 	{
-		return persistWrapper.readByPrimaryKey(ProjectStage.class, projectStageOID.getPk());
+		return PersistWrapper.readByPrimaryKey(ProjectStage.class, projectStageOID.getPk());
 	}
 	
-	public  List<ProjectStage> getProjectStages(ProjectOID projectOID)
+	public static List<ProjectStage> getProjectStages(ProjectOID projectOID)
 	{
 		try
 		{
-			return persistWrapper.readList(ProjectStage.class,
+			return PersistWrapper.readList(ProjectStage.class,
 					"select * from project_stage where projectFk = ? and estatus = 1", projectOID.getPk());
 		}
 		catch (Exception e)
@@ -4271,7 +4263,7 @@ public class ProjectServiceImpl
 		}
 	}
 	
-	public  ProjectStage addProjectStage(ProjectStage projectStage) throws Exception
+	public static ProjectStage addProjectStage(ProjectStage projectStage) throws Exception
 	{
 		if(projectStage.getProjectFk() == 0)
 			throw new AppException("Project not specified; Cannot add stage");
@@ -4280,14 +4272,14 @@ public class ProjectServiceImpl
 			throw new AppException("Invalid Project; Cannot add stage");
 			
 		projectStage.setEstatus(EStatusEnum.Active.getValue());
-		int newPk = persistWrapper.createEntity(projectStage);
+		int newPk = PersistWrapper.createEntity(projectStage);
 		
-		return persistWrapper.readByPrimaryKey(ProjectStage.class, newPk);
+		return PersistWrapper.readByPrimaryKey(ProjectStage.class, newPk);
 	}
 
-	public  ProjectStage updateProjectStage(ProjectStage projectStage) throws Exception
+	public static ProjectStage updateProjectStage(ProjectStage projectStage) throws Exception
 	{
-		ProjectStage ps = persistWrapper.readByPrimaryKey(ProjectStage.class, projectStage.getPk());
+		ProjectStage ps = PersistWrapper.readByPrimaryKey(ProjectStage.class, projectStage.getPk());
 		if(ps == null)
 			throw new AppException("Inalid Project stage; remove failed");
 		
@@ -4302,35 +4294,35 @@ public class ProjectServiceImpl
 		ps.setProjectFk(projectStage.getProjectFk());
 		ps.setEstatus(EStatusEnum.Active.getValue());
 
-		persistWrapper.update(ps);
-		return persistWrapper.readByPrimaryKey(ProjectStage.class, projectStage.getPk());
+		PersistWrapper.update(ps);
+		return PersistWrapper.readByPrimaryKey(ProjectStage.class, projectStage.getPk());
 	}
 
-	public  void removeProjectStage(int projectStagePk) throws Exception
+	public static void removeProjectStage(int projectStagePk) throws Exception
 	{
-		ProjectStage ps = persistWrapper.readByPrimaryKey(ProjectStage.class, projectStagePk);
+		ProjectStage ps = PersistWrapper.readByPrimaryKey(ProjectStage.class, projectStagePk);
 		if(ps == null)
 			throw new AppException("Inalid Project stage; remove failed");
 		
 		ps.setEstatus(EStatusEnum.Deleted.getValue());
-		persistWrapper.update(ps);
+		PersistWrapper.update(ps);
 	}
 
 	
 // //////////////////////////// Project signatory functions	
 	
-	public  ProjectSignatorySetBean getProjectSignatorySet(ProjectSignatorySetOID sigSetOID)
+	public static ProjectSignatorySetBean getProjectSignatorySet(ProjectSignatorySetOID sigSetOID)
 	{
-		ProjectSignatorySet set = persistWrapper.readByPrimaryKey(ProjectSignatorySet.class, sigSetOID.getPk());
+		ProjectSignatorySet set = PersistWrapper.readByPrimaryKey(ProjectSignatorySet.class, sigSetOID.getPk());
 		if(set != null)
 			return set.getBean();
 		
 		return null;
 	}
 	
-	public  List<ProjectSignatorySetBean> getProjectSignatorySets(ProjectOID projectOID)
+	public static List<ProjectSignatorySetBean> getProjectSignatorySets(ProjectOID projectOID)
 	{
-		List<ProjectSignatorySet> list = persistWrapper.readList(ProjectSignatorySet.class,
+		List<ProjectSignatorySet> list = PersistWrapper.readList(ProjectSignatorySet.class,
 				"select * from project_signatory_set where projectFk = ? and estatus = 1", projectOID.getPk());
 		
 		List<ProjectSignatorySetBean> returnList = new ArrayList<>();
@@ -4342,7 +4334,7 @@ public class ProjectServiceImpl
 		return returnList;
 	}
 	
-	public  ProjectSignatorySetBean addProjectSignatorySet(ProjectSignatorySetBean sBean) throws Exception
+	public static ProjectSignatorySetBean addProjectSignatorySet(ProjectSignatorySetBean sBean) throws Exception
 	{
 		if(sBean.getProjectFk() == 0)
 			throw new AppException("Project not specified; Cannot add signatory");
@@ -4355,7 +4347,7 @@ public class ProjectServiceImpl
 		set.setEstatus(EStatusEnum.Active.getValue());
 		set.setName(sBean.getName());
 		set.setProjectFk(sBean.getProjectFk());
-		int pk = persistWrapper.createEntity(set);
+		int pk = PersistWrapper.createEntity(set);
 		
 		for (Iterator iterator = sBean.getSigatoryItems().iterator(); iterator.hasNext();)
 		{
@@ -4364,20 +4356,20 @@ public class ProjectServiceImpl
 			item.setOrderNo(aItemBean.getOrderNo());
 			item.setProjectSignatorySetFk(pk);
 			item.setRoleId(aItemBean.getRoleId());
-			persistWrapper.createEntity(item);
+			PersistWrapper.createEntity(item);
 		}
 		
 		return getProjectSignatorySet(new ProjectSignatorySetOID(pk));
 	}
 
-	public  ProjectSignatorySetBean updateProjectSignatorySet(ProjectSignatorySetBean sBean) throws Exception
+	public static ProjectSignatorySetBean updateProjectSignatorySet(ProjectSignatorySetBean sBean) throws Exception
 	{
 		if(sBean.getPk() == 0)
 		{
 			logger.error("Pk cannot be 0 when updating");
 			throw new AppException("Invalid request.");
 		}
-		ProjectSignatorySet set = persistWrapper.readByPrimaryKey(ProjectSignatorySet.class, sBean.getPk());
+		ProjectSignatorySet set = PersistWrapper.readByPrimaryKey(ProjectSignatorySet.class, sBean.getPk());
 		if(set == null)
 		{
 			logger.error("Invalid SignatorySet Pk: " + sBean.getPk());
@@ -4394,7 +4386,7 @@ public class ProjectServiceImpl
 			throw new AppException("Invalid Project; Cannot update signatory");
 			
 		
-		List<ProjectSignatoryItem> currentItems = persistWrapper.readList(ProjectSignatoryItem.class, 
+		List<ProjectSignatoryItem> currentItems = PersistWrapper.readList(ProjectSignatoryItem.class, 
 				"select * from project_signatory_item where projectSignatorySetFk = ? ", sBean.getPk());
 		HashMap<Integer, ProjectSignatoryItem> currentItemsMap = new HashMap<>();
 		for (Iterator iterator = currentItems.iterator(); iterator.hasNext();)
@@ -4405,7 +4397,7 @@ public class ProjectServiceImpl
 		
 		set.setDescription(sBean.getDescription());
 		set.setName(sBean.getName());
-		persistWrapper.update(set);
+		PersistWrapper.update(set);
 		
 		for (Iterator iterator = sBean.getSigatoryItems().iterator(); iterator.hasNext();)
 		{
@@ -4420,7 +4412,7 @@ public class ProjectServiceImpl
 				}
 				theItem.setOrderNo(aItemBean.getOrderNo());
 				theItem.setRoleId(aItemBean.getRoleId());
-				persistWrapper.update(theItem);
+				PersistWrapper.update(theItem);
 			}
 			else
 			{
@@ -4428,7 +4420,7 @@ public class ProjectServiceImpl
 				theItem.setProjectSignatorySetFk(set.getPk());
 				theItem.setOrderNo(aItemBean.getOrderNo());
 				theItem.setRoleId(aItemBean.getRoleId());
-				persistWrapper.createEntity(theItem);
+				PersistWrapper.createEntity(theItem);
 			}
 		}
 		
@@ -4436,15 +4428,15 @@ public class ProjectServiceImpl
 		for (Iterator iterator = currentItemsMap.values().iterator(); iterator.hasNext();)
 		{
 			ProjectSignatoryItem projectSignatoryItem = (ProjectSignatoryItem) iterator.next();
-			persistWrapper.deleteEntity(projectSignatoryItem);
+			PersistWrapper.deleteEntity(projectSignatoryItem);
 		}
 		
 		return getProjectSignatorySet(new ProjectSignatorySetOID(23));
 	}
 
-	public  void removeProjectSignatorySet(ProjectSignatorySetOID setOID) throws Exception
+	public static void removeProjectSignatorySet(ProjectSignatorySetOID setOID) throws Exception
 	{
-		ProjectSignatorySet set = persistWrapper.readByPrimaryKey(ProjectSignatorySet.class, setOID.getPk());
+		ProjectSignatorySet set = PersistWrapper.readByPrimaryKey(ProjectSignatorySet.class, setOID.getPk());
 		if(set == null)
 		{
 			logger.error("Invalid SignatorySet Pk: " + setOID.getPk());
@@ -4452,7 +4444,7 @@ public class ProjectServiceImpl
 		}
 		
 		set.setEstatus(EStatusEnum.Deleted.getValue());
-		persistWrapper.update(set);
+		PersistWrapper.update(set);
 	}
 	
 // ///////////////////////////////////////////////////////////////////////////////
@@ -4467,7 +4459,7 @@ public class ProjectServiceImpl
 	 * @return
 	 * @throws Exception
 	 */
-	public  int saveSitesForProject(ProjectOID projectOID, Collection<Site> siteList) throws Exception
+	public static int saveSitesForProject(ProjectOID projectOID, Collection<Site> siteList) throws Exception
 	{
 		List<Site> existingSites = getSitesForProject(projectOID);
 
@@ -4482,7 +4474,7 @@ public class ProjectServiceImpl
 				c.setProjectFk(projectOID.getPk());
 				c.setSiteFk(aNewSite.getPk());
 				c.setEstatus(EStatusEnum.Active.getValue());
-				persistWrapper.createEntity(c);
+				PersistWrapper.createEntity(c);
 			}
 		}
 
@@ -4492,7 +4484,7 @@ public class ProjectServiceImpl
 		{
 			Site site = (Site) iterator.next();
 			// check if any workstation in this site is part of the project.
-			int count = persistWrapper.read(Integer.class,
+			int count = PersistWrapper.read(Integer.class,
 					"select count(w.pk) from TAB_WORKSTATION w, TAB_PROJECT_WORKSTATIONS pw where w.pk = pw.workstationPk and pw.projectPk = ? and w.sitePk = ?",
 					projectOID.getPk(), site.getPk());
 			if (count > 0)
@@ -4505,7 +4497,7 @@ public class ProjectServiceImpl
 			// TODO:: we should not allow workstations which are not part of the
 			// project to be added to a unit. if that is implemented
 			// we can remove this check.
-			count = persistWrapper.read(Integer.class,
+			count = PersistWrapper.read(Integer.class,
 					"select count(distinct(w.pk)) from TAB_WORKSTATION w, TAB_UNIT_WORKSTATIONS uw "
 							+ "where w.pk = uw.workstationPk and uw.projectPk = ? and w.sitePk = ?",
 					projectOID.getPk(), site.getPk());
@@ -4517,10 +4509,10 @@ public class ProjectServiceImpl
 			}
 
 			// delete
-			ProjectSiteConfig config = persistWrapper.read(ProjectSiteConfig.class,
+			ProjectSiteConfig config = PersistWrapper.read(ProjectSiteConfig.class,
 					"select * from project_site_config where projectFk = ? and siteFk = ?",
 					new Object[] { projectOID.getPk(), site.getPk() });
-			persistWrapper.deleteEntity(config);
+			PersistWrapper.deleteEntity(config);
 		}
 
 		if (couldNotReportAll == true)
@@ -4529,11 +4521,11 @@ public class ProjectServiceImpl
 			return 0;
 	}
 
-	public  List<Project> getProjectsForPart(PartOID partOID)
+	public static List<Project> getProjectsForPart(PartOID partOID)
 	{
 		try
 		{
-			return persistWrapper.readList(Project.class,
+			return PersistWrapper.readList(Project.class,
 					"select * from TAB_PROJECT where pk in (select projectPk from project_part where partPk = ? and estatus = 1)",
 					partOID.getPk());
 		}
@@ -4544,9 +4536,9 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  ProjectPart getProjectPart(ProjectPartOID projectpartOID)
+	public static ProjectPart getProjectPart(ProjectPartOID projectpartOID)
 	{
-		return persistWrapper.readByPrimaryKey(ProjectPart.class, projectpartOID.getPk());
+		return PersistWrapper.readByPrimaryKey(ProjectPart.class, projectpartOID.getPk());
 	}
 
 	/**
@@ -4557,11 +4549,11 @@ public class ProjectServiceImpl
 	 * @param workstationOID
 	 * @return
 	 */
-	public  List<ProjectPartQuery> getProjectPartsWithTeams(ProjectOID projectOID, WorkstationOID workstationOID)
+	public static List<ProjectPartQuery> getProjectPartsWithTeams(ProjectOID projectOID, WorkstationOID workstationOID)
 	{
 		try
 		{
-			return persistWrapper.readList(ProjectPartQuery.class, ProjectPartQuery.sql
+			return PersistWrapper.readList(ProjectPartQuery.class, ProjectPartQuery.sql
 					+ " and pp.pk in (select distinct projectPartPk from TAB_PROJECT_USERS where projectPk = ? and workstationPk = ? )",
 					projectOID.getPk(), workstationOID.getPk());
 		}
@@ -4572,7 +4564,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  void copyWorkstationSettings(UserContext context, ProjectOID copyFromProjectOID,
+	public static void copyWorkstationSettings(UserContext context, ProjectOID copyFromProjectOID,
 			ProjectOID destinationProjectOID, boolean copySites, boolean copyProjectFunctionTeams, boolean copyParts,
 			boolean copyOpenItemTeam, boolean copyProjectCoordinators, List<Object[]> workstationsToCopy)
 			throws Exception
@@ -4613,7 +4605,7 @@ public class ProjectServiceImpl
 							dAcl.setObjectType(projectSiteConfig.getOID().getEntityType().getValue());
 							dAcl.setRoleId(sAcl.getRoleId());
 							dAcl.setUserPk(sAcl.getUserPk());
-							persistWrapper.createEntity(dAcl);
+							PersistWrapper.createEntity(dAcl);
 
 						}
 					}
@@ -4623,16 +4615,16 @@ public class ProjectServiceImpl
 			if (copyParts)
 			{
 				// delete existing
-				List<ProjectPart> projectPartsCurrent = persistWrapper.readList(ProjectPart.class,
+				List<ProjectPart> projectPartsCurrent = PersistWrapper.readList(ProjectPart.class,
 						"select * from project_part where projectPk = ? and project_part.estatus=1",
 						destinationProjectOID.getPk());
 				for (Iterator iterator = projectPartsCurrent.iterator(); iterator.hasNext();)
 				{
 					ProjectPart projectPart = (ProjectPart) iterator.next();
-					persistWrapper.deleteEntity(projectPart);
+					PersistWrapper.deleteEntity(projectPart);
 				}
 
-				List<ProjectPart> projectParts = persistWrapper.readList(ProjectPart.class,
+				List<ProjectPart> projectParts = PersistWrapper.readList(ProjectPart.class,
 						"select * from project_part where projectPk = ? and project_part.estatus=1",
 						copyFromProjectOID.getPk());
 				for (Iterator iterator = projectParts.iterator(); iterator.hasNext();)
@@ -4652,8 +4644,8 @@ public class ProjectServiceImpl
 					newPart.setWbs(sourcePart.getWbs());
 					newPart.setCreatedDate(new Date());
 
-					int pk = persistWrapper.createEntity(newPart);
-					newPart = persistWrapper.readByPrimaryKey(ProjectPart.class, pk);
+					int pk = PersistWrapper.createEntity(newPart);
+					newPart = PersistWrapper.readByPrimaryKey(ProjectPart.class, pk);
 
 					projectPartMap.put(sourcePart, newPart);
 					allProjectPartMap.put(pk, newPart);
@@ -4672,7 +4664,7 @@ public class ProjectServiceImpl
 					ProjectPart sourceParent = allProjectPartMap.get(sourcePart.getParentPk());
 					ProjectPart destParent = projectPartMap.get(sourceParent);
 					destPart.setParentPk(destParent.getPk());
-					persistWrapper.update(destPart);
+					PersistWrapper.update(destPart);
 				}
 			}
 
@@ -4752,7 +4744,7 @@ public class ProjectServiceImpl
 						{
 							ProjectFormQuery projectFormQuery = (ProjectFormQuery) iterator2.next();
 
-							ProjectPart sourcePart = persistWrapper.readByPrimaryKey(ProjectPart.class,
+							ProjectPart sourcePart = PersistWrapper.readByPrimaryKey(ProjectPart.class,
 									projectFormQuery.getProjectPartPk());
 							ProjectPart destPart = projectPartMap.get(sourcePart);
 
@@ -4763,7 +4755,7 @@ public class ProjectServiceImpl
 							newPForm.setProjectPartPk(destPart.getPk());
 							newPForm.setProjectPk(destinationProjectOID.getPk());
 							newPForm.setWorkstationPk(wsOID.getPk());
-							persistWrapper.createEntity(newPForm);
+							PersistWrapper.createEntity(newPForm);
 						}
 					}
 
@@ -4778,7 +4770,7 @@ public class ProjectServiceImpl
 							ProjectPart destPart = null;
 							if (projectUserQuery.getProjectPartPk() != 0)
 							{
-								sourcePart = persistWrapper.readByPrimaryKey(ProjectPart.class,
+								sourcePart = PersistWrapper.readByPrimaryKey(ProjectPart.class,
 										projectUserQuery.getProjectPartPk());
 								destPart = projectPartMap.get(sourcePart);
 							}
@@ -4790,7 +4782,7 @@ public class ProjectServiceImpl
 							pUser.setRole(projectUserQuery.getRole());
 							pUser.setUserPk(projectUserQuery.getUserPk());
 							pUser.setWorkstationPk(wsOID.getPk());
-							persistWrapper.createEntity(pUser);
+							PersistWrapper.createEntity(pUser);
 						}
 					}
 				}
@@ -4804,7 +4796,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  void addUnitToProject(UserContext context, ProjectOID sourceProjectOID,
+	public static void addUnitToProject(UserContext context, ProjectOID sourceProjectOID,
 			ProjectOID destinationProjectOID, UnitBean rootUnitBean, List<UnitBean> unitBeanAndChildrenList,
 			boolean addAsPlannedUnit) throws Exception
 	{
@@ -4854,7 +4846,7 @@ public class ProjectServiceImpl
 				addAsPlannedUnit, copyUserConfig, copyFormConfig);
 	}
 
-	private  void addUnitToProjectRec(UserContext context, UnitInProjectDAO uprDAO, ProjectOID sourceProjectOID,
+	private static void addUnitToProjectRec(UserContext context, UnitInProjectDAO uprDAO, ProjectOID sourceProjectOID,
 			ProjectOID destinationProjectOID, UnitBean unitBeanToAdd, HashMap<UnitOID, UnitBean> unitBeanMap,
 			boolean addAsPlannedUnit, boolean copyUserConfig, boolean copyFormConfig) throws Exception
 	{
@@ -4939,7 +4931,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  void saveTestProcSchedule(UserContext context, TestProcOID testProcOID,
+	public static void saveTestProcSchedule(UserContext context, TestProcOID testProcOID,
 			ObjectScheduleRequestBean objectScheduleRequestBean) throws Exception
 	{
 		Date now = DateUtils.getNowDateForEffectiveDateFrom();
@@ -4952,7 +4944,7 @@ public class ProjectServiceImpl
 			return;
 		} else
 		{
-			EntitySchedule es = persistWrapper.read(EntitySchedule.class,
+			EntitySchedule es = PersistWrapper.read(EntitySchedule.class,
 					"select * from entity_schedule where objectPk = ? and objectType = ? and now() between effectiveDateFrom and effectiveDateTo",
 					objectScheduleRequestBean.getObjectOID().getPk(),
 					objectScheduleRequestBean.getObjectOID().getEntityType().getValue());
@@ -4969,7 +4961,7 @@ public class ProjectServiceImpl
 				es.setEstimateHours(objectScheduleRequestBean.getHoursEstimate());
 				es.setEffectiveDateFrom(now);
 				es.setEffectiveDateTo(DateUtils.getMaxDate());
-				persistWrapper.createEntity(es);
+				PersistWrapper.createEntity(es);
 			} else
 			{
 				Calendar calEx = new GregorianCalendar();
@@ -4990,12 +4982,12 @@ public class ProjectServiceImpl
 					es.setForecastStartDate(objectScheduleRequestBean.getStartForecast());
 					es.setForecastEndDate(objectScheduleRequestBean.getEndForecast());
 					es.setEstimateHours(objectScheduleRequestBean.getHoursEstimate());
-					persistWrapper.update(es);
+					PersistWrapper.update(es);
 				} else
 				{
 					// invalidate old and create new
 					es.setEffectiveDateTo(new Date(now.getTime() - 1000));
-					persistWrapper.update(es);
+					PersistWrapper.update(es);
 
 					EntitySchedule esNew = new EntitySchedule();
 					esNew.setObjectPk(objectScheduleRequestBean.getObjectOID().getPk());
@@ -5007,14 +4999,14 @@ public class ProjectServiceImpl
 					esNew.setEstimateHours(objectScheduleRequestBean.getHoursEstimate());
 					esNew.setEffectiveDateFrom(now);
 					esNew.setEffectiveDateTo(DateUtils.getMaxDate());
-					persistWrapper.createEntity(esNew);
+					PersistWrapper.createEntity(esNew);
 				}
 			}
 		}
 
 	}
 
-	public  void saveTestProcSchedules(UserContext context, ProjectOID projectOID, UnitOID rootUnitOID,
+	public static void saveTestProcSchedules(UserContext context, ProjectOID projectOID, UnitOID rootUnitOID,
 			List<ObjectScheduleRequestBean> scheduleList) throws Exception
 	{
 		Date now = DateUtils.getNowDateForEffectiveDateFrom();
@@ -5120,7 +5112,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  void moveTestProcsToUnit(UserContext userContext, List<TestProcOID> testProcsToMove,
+	public static void moveTestProcsToUnit(UserContext userContext, List<TestProcOID> testProcsToMove,
 			UnitOID unitOIDToMoveTo, ProjectOID projectOIDToMoveTo) throws Exception
 	{
 		List<WorkstationOID> workstations = new ArrayList<WorkstationOID>();
@@ -5176,7 +5168,7 @@ public class ProjectServiceImpl
 			if (!(workstations.contains(new WorkstationOID(testProc.getWorkstationPk()))))
 			{
 				// if the workstation is not there on the unit, add it
-				UnitWorkstation existingOne = persistWrapper.read(UnitWorkstation.class,
+				UnitWorkstation existingOne = PersistWrapper.read(UnitWorkstation.class,
 						"select * from TAB_UNIT_WORKSTATIONS where unitPk=? and projectPk = ? and workstationPk=?",
 						unitOIDToMoveTo.getPk(), projectOIDToMoveTo.getPk(), testProc.getWorkstationPk());
 				if (existingOne == null)
@@ -5188,7 +5180,7 @@ public class ProjectServiceImpl
 					pForm.setUnitPk(unitOIDToMoveTo.getPk());
 					pForm.setWorkstationPk(testProc.getWorkstationPk());
 
-					persistWrapper.createEntity(pForm);
+					PersistWrapper.createEntity(pForm);
 				}
 				workstations.add(new WorkstationOID(testProc.getWorkstationPk()));
 			}
@@ -5246,7 +5238,7 @@ public class ProjectServiceImpl
 		}
 	}
 
-	public  void renameTestForms(UserContext userContext, List<TestProcOID> selectedTestProcs,
+	public static void renameTestForms(UserContext userContext, List<TestProcOID> selectedTestProcs,
 			List<OID> referencesToAdd, String nameChangeText, String renameOption) throws Exception
 	{
 		// the best option is to get one testproc and get the root unit and
@@ -5334,11 +5326,11 @@ public class ProjectServiceImpl
 	 * @param projectPartOID
 	 * @return
 	 */
-	public  List<ProjectFormQuery> getProjectPartAssignedForms(ProjectOID projectOID)
+	public static List<ProjectFormQuery> getProjectPartAssignedForms(ProjectOID projectOID)
 	{
 		try
 		{
-			return persistWrapper.readList(ProjectFormQuery.class,
+			return PersistWrapper.readList(ProjectFormQuery.class,
 					ProjectFormQuery.sql + " and form.formType = 1 and pf.projectPk=? and pf.workstationPk is null  ",
 					projectOID.getPk());
 		}
@@ -5356,12 +5348,12 @@ public class ProjectServiceImpl
 	 * @param projectPartOID
 	 * @return
 	 */
-	public  List<ProjectFormQuery> getProjectPartAssignedForms(ProjectOID projectOID,
+	public static List<ProjectFormQuery> getProjectPartAssignedForms(ProjectOID projectOID,
 			ProjectPartOID projectPartOID)
 	{
 		try
 		{
-			return persistWrapper.readList(ProjectFormQuery.class,
+			return PersistWrapper.readList(ProjectFormQuery.class,
 					ProjectFormQuery.sql + " and form.formType = 1 and pf.projectPk=? and projectPartPk = ? and pf.workstationPk is null  ",
 					projectOID.getPk(), projectPartOID.getPk());
 		}
@@ -5372,9 +5364,9 @@ public class ProjectServiceImpl
 		}
 	}
 	
-	public  List<ProjectWorkstation> getProjectWorkstations(ProjectOID projectOID)
+	public static List<ProjectWorkstation> getProjectWorkstations(ProjectOID projectOID)
 	{
-		return persistWrapper.readList(ProjectWorkstation.class,
+		return PersistWrapper.readList(ProjectWorkstation.class,
 				"select * from TAB_PROJECT_WORKSTATIONS where projectPk = ?", 
 				projectOID.getPk());
 		
