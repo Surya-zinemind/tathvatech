@@ -197,8 +197,7 @@ public abstract class PlanSecurityManager implements SecurityManagerBase, Serial
 	public abstract boolean checkAccess(int action, SecurityContext sContext);
 
 	
-	public static PlanSecurityManager getSecurityManager(User user)throws Exception
-	{
+	public static PlanSecurityManager getSecurityManager(User user) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		PlanSecurityManager psManager;
 		
 		String cName = null;
@@ -276,41 +275,41 @@ public abstract class PlanSecurityManager implements SecurityManagerBase, Serial
 	}
 
 
-	/**
-	 * This is common for all User types so the method is called from the children
-	 * @param action
-	 * @param objectType
-	 * @param objectPk
-	 * @param params
-	 * @return
-	 */
-	public boolean checkAccessCommon(int action, SecurityContext sContext)
-	{
-		if(action == PlanSecurityManager.MOD_DELETE_FROM_UNIIT)
-		{
-			try
-			{
-				Mode mode = ModDelegate.getMode(sContext.getModeOID().getPk());
-				if(mode == null)
-					return false;
-				if(userContext.getUser().getPk() == mode.getOwnerPk())
-					return true;
-				
-	 			List<User> coordinators = ProjectDelegate.getProjectManagers(new ProjectOID(mode.getProjectPk()));
-	 			if(coordinators.contains(userContext.getUser()))
-	 			{
-	 				return true;
-	 			}
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-				return false;	
-			}
-			return false;	
-		}
-		return false;
-	}
-	
+//	/**
+//	 * This is common for all User types so the method is called from the children
+//	 * @param action
+//	 * @param objectType
+//	 * @param objectPk
+//	 * @param params
+//	 * @return
+//	 */
+//	public boolean checkAccessCommon(int action, SecurityContext sContext)
+//	{
+//		if(action == PlanSecurityManager.MOD_DELETE_FROM_UNIIT)
+//		{
+//			try
+//			{
+//				Mode mode = ModDelegate.getMode(sContext.getModeOID().getPk());
+//				if(mode == null)
+//					return false;
+//				if(userContext.getUser().getPk() == mode.getOwnerPk())
+//					return true;
+//
+//	 			List<User> coordinators = ProjectDelegate.getProjectManagers(new ProjectOID(mode.getProjectPk()));
+//	 			if(coordinators.contains(userContext.getUser()))
+//	 			{
+//	 				return true;
+//	 			}
+//			}
+//			catch (Exception e)
+//			{
+//				e.printStackTrace();
+//				return false;
+//			}
+//			return false;
+//		}
+//		return false;
+//	}
+//
 	
 }
