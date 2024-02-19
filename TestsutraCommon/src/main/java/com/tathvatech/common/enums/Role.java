@@ -1,4 +1,4 @@
-package com.tathvatech.user.OID;
+package com.tathvatech.common.enums;
 
 import java.util.List;
 

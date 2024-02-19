@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.tathvatech.common.enums.EntityTypeEnum;
-import com.tathvatech.user.OID.Action;
-import com.tathvatech.user.OID.Role;
+import com.tathvatech.common.enums.Action;
+import com.tathvatech.common.enums.Role;
 import com.tathvatech.user.common.RoleRepository;
 import com.tathvatech.user.entity.User;
 
