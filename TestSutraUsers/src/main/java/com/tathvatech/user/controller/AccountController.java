@@ -9,9 +9,7 @@ package com.tathvatech.user.controller;
 
 import com.tathvatech.common.common.ApplicationConstants;
 import com.tathvatech.common.common.ApplicationProperties;
-import com.tathvatech.common.common.ServiceLocator;
 import com.tathvatech.common.email.EmailMessageInfo;
-import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.common.exception.LoginFailedException;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.user.Asynch.AsyncProcessor;
@@ -22,9 +20,9 @@ import com.tathvatech.user.service.AccountService;
 import com.tathvatech.user.service.EmailServiceManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Connection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -45,13 +43,13 @@ public class AccountController
     private final  PersistWrapper persistWrapper;
     
 
-	public User createNewAccount(UserContext context, Account accVal, User uVal)throws Exception
+    @PostMapping("/newAccount")
+	public ResponseEntity<User> createNewAccount(@RequestBody CreateNewAccountRequest createNewAccountRequest)throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            Account account = accountService.createNewAccount(accVal);
 
+            UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Account account = accountService.createNewAccount(createNewAccountRequest.getAccount());
+            User uVal = createNewAccountRequest.getUser();
             uVal.setAccountPk(account.getPk());
             uVal.setStatus(User.STATUS_ACTIVE);
 
@@ -67,97 +65,46 @@ public class AccountController
             //create the default Guest Device for this account
             accountService.createGuestUserForAccount(account);
 
-            con.commit();
-
             AsyncProcessor.scheduleEmail(new EmailMessageInfo(ApplicationConstants.SERVICE_EMAIL_ADDRESS,
             		new String[]{user.getEmail()}, "New account created subject",
             		"New account created message body"));
 
-            return user;
+            return ResponseEntity.ok(user);
 
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
 	}
 
-	public  void createAddonUser(UserContext context, User userVal, AttachmentIntf profilePicAttachment, boolean sendWelcomeKit)throws Exception
+    @PostMapping("/createAddonUser")
+	public  void createAddonUser(@RequestBody CreateAndonUserRequest createAndonUserRequest)throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+            UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
             Account account = (Account)context.getAccount();
 
-	        User user = accountService.createAddonUser(context, userVal, profilePicAttachment, sendWelcomeKit);
+	        User user = accountService.createAddonUser(context, createAndonUserRequest.getUser(), createAndonUserRequest.getProfilePicAttachment(), createAndonUserRequest.isSendWelcomeKit());
 
-	        con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
+
 	}
 
-	public  User updateCurrentUserProfile(UserContext context, User userVal)throws Exception
+    @PutMapping("/updateCurrentUserProfile")
+	public  ResponseEntity<User> updateCurrentUserProfile(@RequestBody User userVal)throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+            UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
             User user = accountService.updateCurrentUserProfile(context, userVal);
+            return ResponseEntity.ok(user);
 
-            con.commit();
-
-            return user;
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
 	}
 
-	public  void saveAddonUser(UserContext context, User userVal, AttachmentIntf profilePicAttachment)throws Exception
+    @PostMapping("/saveAddonUser")
+	public  void saveAddonUser( @RequestBody CreateAndonUserRequest createAndonUserRequest)throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+          UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
             Account account = (Account)context.getAccount();
-
+            User userVal = createAndonUserRequest.getUser();
             userVal.setStatus(User.STATUS_ACTIVE);
 
-            User user = accountService.saveAddonUser(context, userVal, profilePicAttachment);
-
-            con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
+            User user = accountService.saveAddonUser(context, userVal, createAndonUserRequest.getProfilePicAttachment());
 	}
 
     @DeleteMapping("/andonUser")
@@ -207,8 +154,8 @@ public class AccountController
     /**
      * All users including operator users are allowed to login using this call. 
      * this is called by timetracker checkin and checkout to validate the user.
-     * @param userName
-     * @param password could be passPin or the password
+     * @param
+     * @param
      * @return
      */
     @PostMapping("/loginFromDevice")
@@ -321,80 +268,58 @@ public class AccountController
 		return ResponseEntity.ok(user);
 	}
 
-	public  List getAllUserPermissionsOnSurvey(UserContext context, String surveyPk)throws Exception
+    @GetMapping("/getAllUserPermissionsOnSurvey")
+	public ResponseEntity<List>  getAllUserPermissionsOnSurvey(String surveyPk)throws Exception
 	{
-		return accountService.getAllUserPermissionsOnSurvey(context, surveyPk);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List userList = accountService.getAllUserPermissionsOnSurvey(context, surveyPk);
+		return ResponseEntity.ok(userList);
 	}
 
-	public  SurveyPerms getUserPermissionsOnSurvey(UserContext context, int userPk, int surveyPk)throws Exception
+    @GetMapping("/getUserPermissionsOnSurvey")
+	public ResponseEntity<SurveyPerms>  getUserPermissionsOnSurvey( int userPk, int surveyPk)throws Exception
 	{
-		return accountService.getUserPermissionsOnSurvey(context, userPk, surveyPk);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        SurveyPerms surveyPerms = accountService.getUserPermissionsOnSurvey(context, userPk, surveyPk);
+		return ResponseEntity.ok(surveyPerms);
 	}
 
-	public  void removeAllPermissionsOnSurvey(UserContext context, int surveyPk)throws Exception
+    @DeleteMapping("/removeAllPermissionsOnSurvey")
+	public  void removeAllPermissionsOnSurvey( int surveyPk)throws Exception
 	{
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         accountService.removeAllPermissionsOnSurvey(context, surveyPk);
 	}
 
-	public  List getAllUserPermissions(UserContext context, int userPk)throws Exception
+    @GetMapping("/getAllUserPermissions")
+	public  ResponseEntity<List> getAllUserPermissions( int userPk)throws Exception
 	{
-		// TODO Auto-generated method stub
-		return accountService.getAllUserPermissions(context, userPk);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		List surveyPerms = accountService.getAllUserPermissions(context, userPk);
+		return ResponseEntity.ok(surveyPerms);
 	}
 
-	public  void setUserPermissions(UserContext context, int userPk, List permsList)throws Exception
+    @PostMapping("/setUserPermissionsByUser")
+	public  void setUserPermissions(@RequestBody UserPermissionRequest userPermissionRequest )throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        accountService.setUserPermissions(context, userPermissionRequest.getUserPk(), userPermissionRequest.getPermsList());
 
-            accountService.setUserPermissions(context, userPk, permsList);
+	}
+    @PostMapping("/setSurveyPermissions")
+	public  void setSurveyPermissions( @RequestBody SurveyPermissionRequest surveyPermissionRequest)throws Exception
+	{
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        accountService.setSurveyPermissions(context, surveyPermissionRequest.getSurveyPk(), surveyPermissionRequest.getPermsList());
 
-            con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
+
 	}
 
-	public  void setSurveyPermissions(UserContext context, int surveyPk, List permsList)throws Exception
-	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-            accountService.setSurveyPermissions(context, surveyPk, permsList);
-
-            con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
-	}
-
-    public  void setUserDevices(UserContext context, int managerPk, Integer[] userPks)throws Exception
+    @PostMapping("/setUserDevices")
+    public  void setUserDevices(@RequestBody UserDevicesRequest userDevicesRequest)throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-            User user = (User) persistWrapper.readByPrimaryKey(User.class, managerPk);
+            UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User user = (User) persistWrapper.readByPrimaryKey(User.class, userDevicesRequest.getManagerPk());
 
             if(user == null)
             	throw new Exception();
@@ -405,19 +330,9 @@ public class AccountController
             	throw new Exception();
             }
 
-            accountService.removeUsersFromManager(context, managerPk);
-            accountService.addUsersToManager(context, managerPk, userPks);
+            accountService.removeUsersFromManager(context,  userDevicesRequest.getManagerPk());
+            accountService.addUsersToManager(context,  userDevicesRequest.getManagerPk(),  userDevicesRequest.getUserPks());
 
-            con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
 	}
 
 
@@ -444,26 +359,12 @@ public class AccountController
     /**
      * @param userId
      */
-    public  void sendPassword(UserContext context, String userId)throws Exception
+    @PostMapping("/sendPassword")
+    public  void sendPassword( String userId)throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        accountService.sendPassword(context, userId);
 
-            accountService.sendPassword(context, userId);
-
-            con.commit();
-	    }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-	    finally
-	    {
-	    }
     }
 
 
@@ -498,26 +399,14 @@ public class AccountController
         accountService.markAccountAsPaymentPending(account);
 	}
 
-	public  void addAccountNote(UserContext context, AccountNote noteValue)throws Exception
+    @PostMapping("/addAccountNote")
+	public  void addAccountNote(@RequestBody AccountNote noteValue)throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-    		accountService.addAccountNote(context, noteValue);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        accountService.addAccountNote(context, noteValue);
 
-            con.commit();
-	    }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-	    finally
-	    {
-	    }
+
 	}
 
 
@@ -529,112 +418,57 @@ public class AccountController
 	}
 
 
-	public  void changePassword(UserContext context, String currentPassword, String newPassword)throws Exception
+    @PostMapping("/changePassword")
+	public  void changePassword( @RequestBody ChangePasswordRequest changePasswordRequest)throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        accountService.changePassword(context, changePasswordRequest.getCurrentPassword(), changePasswordRequest.getNewPassword());
 
-    		accountService.changePassword(context, currentPassword, newPassword);
 
-            con.commit();
-	    }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-	    finally
-	    {
-	    }
 	}
 
-	public  void changePassPin(UserContext context, String currentPassPin, String newPassPin)throws Exception
+    @PostMapping("/changePassPin")
+	public  void changePassPin( @RequestBody ChangePassPinRequest changePassPinRequest)throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        accountService.changePassPin(context, changePassPinRequest.getCurrentPassPin(), changePassPinRequest.getNewPassPin());
 
-    		accountService.changePassPin(context, currentPassPin, newPassPin);
 
-            con.commit();
-	    }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-	    finally
-	    {
-	    }
 	}
 
-
-
-	public  void adminChangePassword(UserContext context, User user, String password, boolean notifyUser)throws Exception
+    @PostMapping("/adminChangePassword")
+	public  void adminChangePassword(@RequestBody AdminChangePasswordRequest adminChangePasswordRequest)throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+            UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    		accountService.adminChangePassword(context, adminChangePasswordRequest.getUser(), adminChangePasswordRequest.getPassword());
 
-    		accountService.adminChangePassword(context, user, password);
-
-            con.commit();
-            
-            if(notifyUser)
+            if(adminChangePasswordRequest.isNotifyUser())
             {
-            	user = accountService.getUser(user.getPk());
-            	NotificationsDelegate.notifyPasswordReset(user, password);
+            	User user = accountService.getUser(adminChangePasswordRequest.getUser().getPk());
+            	NotificationsDelegate.notifyPasswordReset(user, adminChangePasswordRequest.getPassword());
             }
-	    }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-	    finally
-	    {
-	    }
+
 	}
 
 
-	public  void adminChangePassPin(UserContext context, User user, String passPin, boolean notifyUser)throws Exception
+    @PostMapping("/adminChangePassPin")
+	public  void adminChangePassPin(@RequestBody AdminChangePassPinRequest adminChangePassPinRequest)throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-    		accountService.adminChangePassPin(context, user, passPin);
-
-            con.commit();
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    		accountService.adminChangePassPin(context, adminChangePassPinRequest.getUser(), adminChangePassPinRequest.getPassPin());
             
-            if(notifyUser)
+            if(adminChangePassPinRequest.isNotifyUser())
             {
-            	user = accountService.getUser(user.getPk());
-            	NotificationsDelegate.notifyPinReset(user, passPin);
+            	User user = accountService.getUser(adminChangePassPinRequest.getUser().getPk());
+            	NotificationsDelegate.notifyPinReset(user, adminChangePassPinRequest.getPassPin());
             }
-	    }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-	    finally
-	    {
-	    }
+
 	}
 
-
-	public  void dismissAlert(UserContext context, String alertPk) throws Exception
+    @PutMapping("/dismissAlert")
+	public  void dismissAlert( String alertPk) throws Exception
 	{
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		accountService.dismissAlert(context, Long.parseLong(alertPk));
 	}
 
@@ -659,8 +493,10 @@ public class AccountController
     	return ResponseEntity.ok(users);
     }
 
-    public  List getUserAssignableUsers(UserContext context)throws Exception
+    @GetMapping("/getUserAssignableUsers")
+    public  List getUserAssignableUsers()throws Exception
     {
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     	return accountService.getUserAssignableUsers(context);
     }
 
@@ -673,7 +509,7 @@ public class AccountController
 	 * This method used for assignment management permissions, so it will return only the valid assignments.
 	 * Method with the same name with no userPk as the argument is used by individual users for selecting devices
 	 * for running reports etc. In that function, if no assignments are found, all devices for the account is returned
-	 * @param context
+	 * @param
 	 * @param
 	 * @return
 	 * @throws Exception
@@ -683,15 +519,20 @@ public class AccountController
 //		return AccountManager.getUserAssignedUsers(context, userPk);
 //	}
 
-    public  long getCurrentAccountUserCount(UserContext context)throws Exception
+    @GetMapping("/getCurrentAccountUserCount")
+    public ResponseEntity<Long>  getCurrentAccountUserCount()throws Exception
     {
-        return accountService.getCurrentAccountUserCount(context);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userCount = accountService.getCurrentAccountUserCount(context);
+        return ResponseEntity.ok(userCount);
     }
 
-	public  void changeAddonUserPassword(UserContext context,
-			User user, String password)throws Exception
+    @PostMapping("/changeAddonUserPassword")
+	public  void changeAddonUserPassword(@RequestBody ChangeAddonUserPasswordRequest changeAddonUserPasswordRequest
+			)throws Exception
 	{
-		accountService.changeAddonUserPassword(context, user, password);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		accountService.changeAddonUserPassword(context, changeAddonUserPasswordRequest.getUser(), changeAddonUserPasswordRequest.getPassword());
 	}
 
     @PutMapping("/updateAccount")
@@ -747,8 +588,8 @@ public class AccountController
 	
 	/**
 	 * To get the count of users with pirticular type and status.
-	 * @param userType
-	 * @param status
+	 * @param
+	 * @param
 	 * @return int
 	 * @throws Exception
 	 */
@@ -823,27 +664,13 @@ public class AccountController
 		//transaction managed inside the manager
     	accountService.resetUserPasswordWithVerificationCode(resetUserPasswordRequest.getUser(), resetUserPasswordRequest.getVerificationKey(), resetUserPasswordRequest.getNewPassword());
 	}
-	
-	public  User updateUserEmail(UserContext context, String newEmail) throws Exception
+
+    @PostMapping("/updateUserEmail")
+	public ResponseEntity<User>  updateUserEmail( String newEmail) throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-    		User user = accountService.updateUserEmail(context, newEmail);
-
-            con.commit();
-            
-            return user;
-            
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = accountService.updateUserEmail(context, newEmail);
+        return  ResponseEntity.ok(user);
 	}
 	
 }
