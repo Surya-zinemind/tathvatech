@@ -1,5 +1,11 @@
 package com.tathvatech.user.security.config;
 
+import com.tathvatech.common.exception.AppException;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.service.AccountService;
+import com.tathvatech.user.service.DeviceService;
+import com.tathvatech.user.service.PlanSecurityManager;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +30,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtService jwtService;
   private final UserDetailsService userDetailsService;
+  private final DeviceService deviceService;
+  private final AccountService accountService;
 //  private final TokenRepository tokenRepository;
   private final HandlerExceptionResolver handlerExceptionResolver;
 
@@ -58,9 +66,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         authToken.setDetails(
             new WebAuthenticationDetailsSource().buildDetails(request)
         );
+        UserContext userContext = validateToken(token);
         SecurityContextHolder.getContext().setAuthentication(authToken);
+        SecurityContextHolder.setContext();
       }
     }
     filterChain.doFilter(request, response);
+  }
+  private UserContext validateToken(long userPk) throws Exception
+  {
+    // Check if it was issued by the server and if it's not expired
+    // Throw an Exception if the token is invalid
+    if (userPk ==0)
+    {
+      throw new AppException("MSG-Session expired");
+    }
+    User user = accountService.getUser(userPk);
+    if (user == null)
+    {
+      throw new AppException("MSG-UserNotAuthorized");
+    }
+    if (!(User.STATUS_ACTIVE.equals(user.getStatus())))
+    {
+      throw new AppException("MSG-UserNotAuthorized");
+    }
+    UserContext context = DeviceContextCreator.createContext(user);
+    PlanSecurityManager sManager = (PlanSecurityManager) context.getSecurityManager();
+    boolean hasAccess = sManager.checkAccess(PlanSecurityManager.DEVICE_ACCESS,
+            new com.tathvatech.ts.core.SecurityContext(null, null, null, null, null));
+    if (!hasAccess)
+      throw new AppException("Access denied");
+    return context;
+
   }
 }
