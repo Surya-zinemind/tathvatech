@@ -1,24 +1,25 @@
 package com.tathvatech.user.service;
 
 import java.io.Serializable;
-import java.util.List;
 
 import com.tathvatech.common.common.SecurityManagerBase;
-import com.tathvatech.common.wrapper.PersistWrapper;
-import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.common.SecurityContext;
 import com.tathvatech.user.common.UserContext;
-import com.tathvatech.user.entity.Mode;
 import com.tathvatech.user.entity.SurveyPerms;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.user.security.config.SecurityCredential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public abstract class PlanSecurityManager implements SecurityManagerBase, Serializable
 {
 	private static final Logger logger = LoggerFactory.getLogger(PlanSecurityManager.class);
-	private final AccountService accountService;
+
+	@Autowired
+	AccountService accountService;
 	
 	public static final String ID_ADMINPLAN = "admin";
 
@@ -184,9 +185,6 @@ public abstract class PlanSecurityManager implements SecurityManagerBase, Serial
 
 	protected UserContext userContext;
 
-    protected PlanSecurityManager(AccountService accountService) {
-        this.accountService = accountService;
-    }
 
     public void setUserContext(UserContext userContext)
 	{
@@ -205,27 +203,27 @@ public abstract class PlanSecurityManager implements SecurityManagerBase, Serial
 		//user will be null when survey is accessed by external parties
 		if(user!= null && User.USER_PRIMARY.equals(user.getUserType()))
 		{
-			cName = "com.thirdi.surveyside.security.AdminUserSecurityManager";
+			cName = "com.tathvatech.user.security.manager.AdminUserSecurityManager";
 		}
 		else if(user!= null && User.USER_MANAGER.equals(user.getUserType()))
 		{
-			cName = "com.thirdi.surveyside.security.ManagerUserSecurityManager";
+			cName = "com.tathvatech.user.security.manager.ManagerUserSecurityManager";
 		}
 		else if(user!= null && User.USER_ENGINEER.equals(user.getUserType()))
 		{
-			cName = "com.thirdi.surveyside.security.EngineerUserSecurityManager";
+			cName = "com.tathvatech.user.security.manager.EngineerUserSecurityManager";
 		}
 		else if(user!= null && User.USER_TECHNICIAN.equals(user.getUserType()))
 		{
-			cName = "com.thirdi.surveyside.security.TechnicianUserSecurityManager";
+			cName = "com.tathvatech.user.security.manager.TechnicianUserSecurityManager";
 		}
 		else if(user!= null && User.USER_GUEST.equals(user.getUserType()))
 		{
-			cName = "com.thirdi.surveyside.security.GuestUserSecurityManager";
+			cName = "com.tathvatech.user.security.manager.GuestUserSecurityManager";
 		}
 		else
 		{
-			cName = "com.thirdi.surveyside.security.NoPlanSecurityManager";
+			cName = "com.tathvatech.user.security.manager.NoPlanSecurityManager";
 		}
 		
 		try
