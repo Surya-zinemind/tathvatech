@@ -2,9 +2,7 @@ package com.tathvatech.user.OID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.tathvatech.common.enums.Action;
 import com.tathvatech.common.enums.EntityTypeEnum;
-import com.tathvatech.common.enums.Role;
 import com.tathvatech.user.enums.ProjectRolesEnum;
 
 import java.util.ArrayList;
@@ -44,13 +42,13 @@ public class ProjectOID extends OID{
 	}
 
 	@Override
-	public List<? extends Role> getSupportedRoles()
+	public List<? extends Role> getSupportedRoles() 
 	{
 		return Arrays.asList(ProjectRolesEnum.values());
 	}
 
 	@Override
-	public List<? extends Action> getSupportedActions()
+	public List<? extends Action> getSupportedActions() 
 	{
 		return new ArrayList();
 	}

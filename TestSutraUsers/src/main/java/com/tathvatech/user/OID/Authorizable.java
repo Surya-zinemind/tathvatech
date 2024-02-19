@@ -3,9 +3,7 @@ package com.tathvatech.user.OID;
 import java.util.List;
 
 
-import com.tathvatech.common.enums.Action;
 import com.tathvatech.common.enums.EntityType;
-import com.tathvatech.common.enums.Role;
 
 public interface Authorizable 
 {

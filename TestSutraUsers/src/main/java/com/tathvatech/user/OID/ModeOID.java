@@ -3,9 +3,7 @@ package com.tathvatech.user.OID;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.tathvatech.common.enums.Action;
 import com.tathvatech.common.enums.EntityTypeEnum;
-import com.tathvatech.common.enums.Role;
 
 public class ModeOID extends OID{
 
@@ -28,13 +26,13 @@ public class ModeOID extends OID{
 	}
 
 	@Override
-	public List<? extends Role> getSupportedRoles()
+	public List<? extends Role> getSupportedRoles() 
 	{
 		return new ArrayList();
 	}
 
 	@Override
-	public List<? extends Action> getSupportedActions()
+	public List<? extends Action> getSupportedActions() 
 	{
 		return new ArrayList();
 	}

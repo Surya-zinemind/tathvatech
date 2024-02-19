@@ -3,7 +3,7 @@ package com.tathvatech.user.enums;
 import java.util.List;
 
 
-import com.tathvatech.common.enums.Action;
+import com.tathvatech.user.OID.Action;
 
 public enum SiteActionsEnum implements Action
 {

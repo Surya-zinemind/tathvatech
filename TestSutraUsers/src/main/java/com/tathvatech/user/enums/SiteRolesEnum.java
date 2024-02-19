@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.tathvatech.common.enums.EntityTypeEnum;
-import com.tathvatech.common.enums.Action;
-import com.tathvatech.common.enums.Role;
+import com.tathvatech.user.OID.Action;
+import com.tathvatech.user.OID.Role;
 import com.tathvatech.user.common.RoleRepository;
 
 public enum SiteRolesEnum implements Role

@@ -2,7 +2,7 @@ package com.tathvatech.user.common;
 
 
 import com.tathvatech.common.enums.EntityTypeEnum;
-import com.tathvatech.common.enums.Role;
+import com.tathvatech.user.OID.Role;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
