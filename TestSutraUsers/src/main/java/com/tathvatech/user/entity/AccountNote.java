@@ -6,13 +6,13 @@
  */
 package com.tathvatech.user.entity;
 
-import java.io.Serializable;
-import java.util.Date;
-
 import com.tathvatech.common.entity.AbstractEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
+import java.io.Serializable;
+import java.util.Date;
 
 
 /**
@@ -30,8 +30,8 @@ public class AccountNote  extends AbstractEntity implements Serializable
 	private int accountPk;
 	private Date submitTime;
 	private String noteText;
-	private String submitedBy;
-	private String lastUpdated;
+	private String submittedBy;
+	private Date lastUpdated;
 
 	public long getPk() {
 		return pk;
@@ -65,21 +65,20 @@ public class AccountNote  extends AbstractEntity implements Serializable
 	{
 		this.noteText = noteText;
 	}
-	public String getSubmitedBy()
-	{
-		return submitedBy;
-	}
-	public void setSubmitedBy(String submitedBy)
-	{
-		this.submitedBy = submitedBy;
+
+	public String getSubmittedBy() {
+		return submittedBy;
 	}
 
-	public String getLastUpdated()
-	{
+	public void setSubmittedBy(String submittedBy) {
+		this.submittedBy = submittedBy;
+	}
+
+	public Date getLastUpdated() {
 		return lastUpdated;
 	}
-	public void setLastUpdated(String lastUpdated)
-	{
+
+	public void setLastUpdated(Date lastUpdated) {
 		this.lastUpdated = lastUpdated;
 	}
 }

@@ -108,10 +108,10 @@ public class AccountController
 	}
 
     @DeleteMapping("/andonUser")
-	public  ResponseEntity<?> deleteAddonUser(int userPk)throws Exception
+	public  void deleteAddonUser(int userPk)throws Exception
 	{
             accountService.deleteAddonUser(userPk);
-            return (ResponseEntity<?>) ResponseEntity.noContent();
+
 
 	}
     @PutMapping("/activateUser")

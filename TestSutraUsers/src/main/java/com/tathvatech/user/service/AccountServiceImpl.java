@@ -52,6 +52,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
 
+	@Transactional
     @Override
 	public  Account createNewAccount(Account account)throws Exception
 	{
@@ -282,6 +283,7 @@ public class AccountServiceImpl implements AccountService {
 
 	}
 
+	@Transactional
 	@Override
 	public  User updateCurrentUserProfile(UserContext context, User uVal)throws Exception
 	{
@@ -302,6 +304,7 @@ public class AccountServiceImpl implements AccountService {
         return user;
 	}
 
+	@Transactional
 	@Override
 	public  void activateUser(int userPk)throws Exception
     {
@@ -323,6 +326,7 @@ public class AccountServiceImpl implements AccountService {
 	 * @param userPk
 	 * @throws Exception
 	 */
+	@Transactional
     @Override
 	public  void deleteAddonUser(int userPk)throws Exception
     {
@@ -747,6 +751,7 @@ public class AccountServiceImpl implements AccountService {
     /**
      * @param acc
      */
+	@Transactional
     @Override
 	public  void cancelAccount(Account acc)throws Exception
     {
@@ -758,6 +763,7 @@ public class AccountServiceImpl implements AccountService {
     /**
      * @param acc
      */
+	@Transactional
     @Override
 	public  void activateAccount(Account acc)throws Exception
     {
@@ -769,6 +775,7 @@ public class AccountServiceImpl implements AccountService {
 	/**
 	 * @param userName
 	 */
+	@Transactional
 	@Override
 	public  void sendPassword(UserContext context, String userName)throws Exception
 	{
@@ -794,6 +801,7 @@ public class AccountServiceImpl implements AccountService {
 	    }
 	}
 
+	@Transactional
 	@Override
 	public  void markAccountAsPaymentPending(Account account)throws Exception
 	{
@@ -801,14 +809,16 @@ public class AccountServiceImpl implements AccountService {
         persistWrapper.update(account);
 	}
 
+	@Transactional
 	@Override
 	public  void addAccountNote(UserContext context, AccountNote aNote)throws Exception
 	{
 		aNote.setSubmitTime(new Date());
-		aNote.setSubmitedBy(((User)context.getUser()).getUserName());
+		aNote.setSubmittedBy(((User)context.getUser()).getUserName());
 		persistWrapper.createEntity(aNote);
 	}
 
+	@Transactional
 	@Override
 	public  void changePassword(UserContext context, String currentPassword, String newPassword) throws Exception
 	{
@@ -825,6 +835,7 @@ public class AccountServiceImpl implements AccountService {
         }
 	}
 
+	@Transactional
 	@Override
 	public  void changePassPin(UserContext context, String currentPassPin, String newPassPin) throws Exception
 	{
@@ -852,6 +863,7 @@ public class AccountServiceImpl implements AccountService {
         }
 	}
 
+	@Transactional
 	@Override
 	public  void adminChangePassword(UserContext context, User user, String password) throws Exception
 	{
@@ -859,6 +871,7 @@ public class AccountServiceImpl implements AccountService {
         persistWrapper.update(user);
 	}
 
+	@Transactional
 	@Override
 	public  void adminChangePassPin(UserContext context, User user, String pin) throws Exception
 	{
@@ -866,6 +879,7 @@ public class AccountServiceImpl implements AccountService {
         persistWrapper.update(user);
 	}
 
+	@Transactional
 	@Override
 	public  void addAccountAlert(Account account, String alertString)throws Exception
 	{
@@ -878,6 +892,7 @@ public class AccountServiceImpl implements AccountService {
 		persistWrapper.createEntity(alert);
 	}
 
+	@Transactional
 	@Override
 	public  void dismissAlert(UserContext context, long alertPk)throws Exception
 	{
@@ -887,6 +902,7 @@ public class AccountServiceImpl implements AccountService {
 		persistWrapper.update(alert);
 	}
 
+	@Transactional
 	@Override
 	public  void changeAddonUserPassword(UserContext context,
 										 User user, String password)throws Exception
@@ -895,6 +911,7 @@ public class AccountServiceImpl implements AccountService {
         persistWrapper.update(user);
 	}
 
+	@Transactional
 	@Override
 	public  void updateAccount(Account account) throws Exception {
 		persistWrapper.update(account);
@@ -1168,7 +1185,8 @@ public class AccountServiceImpl implements AccountService {
 			throw ex;
         }
 	}
-	
+
+	@Transactional
 	@Override
 	public  User updateUserEmail(UserContext context, String newEmail) throws Exception {
 		User user = (User)persistWrapper.readByPrimaryKey(User.class, context.getUser().getPk());
