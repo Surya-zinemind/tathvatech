@@ -46,9 +46,12 @@ public class AccountServiceImpl implements AccountService {
 
 	private  final UserPasswordResetKeyDAO userPasswordResetKeyDAO;
 
-    public AccountServiceImpl(PersistWrapper persistWrapper, UserPasswordResetKeyDAO userPasswordResetKeyDAO) {
+	private final SequenceIdGenerator sequenceIdGenerator;
+
+    public AccountServiceImpl(PersistWrapper persistWrapper, UserPasswordResetKeyDAO userPasswordResetKeyDAO, SequenceIdGenerator sequenceIdGenerator) {
         this.persistWrapper = persistWrapper;
         this.userPasswordResetKeyDAO = userPasswordResetKeyDAO;
+        this.sequenceIdGenerator = sequenceIdGenerator;
     }
 
 
@@ -57,7 +60,7 @@ public class AccountServiceImpl implements AccountService {
 	public  Account createNewAccount(Account account)throws Exception
 	{
 
-        String nextNo = SequenceIdGenerator.getNext("Account");
+        String nextNo = sequenceIdGenerator.getNext("Account");
         account.setAccountNo(nextNo);
 
         //new Account Created

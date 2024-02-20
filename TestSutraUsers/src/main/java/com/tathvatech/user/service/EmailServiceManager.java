@@ -7,7 +7,8 @@ import com.tathvatech.common.email.EmailSenderConfig;
 import com.tathvatech.common.entity.EmailQueue;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.user.entity.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
@@ -15,15 +16,23 @@ import java.sql.Connection;
 import java.util.Date;
 
 
+@Service
 public class EmailServiceManager
 {
-	@Autowired
-	static PersistWrapper persistWrapper;
 
-	@Autowired
-	static AccountService accountServiceImpl;
 
-	public static void scheduleEmail(EmailMessageInfo emailMessage) throws Exception
+	private final PersistWrapper persistWrapper;
+
+
+	private final AccountService accountServiceImpl;
+
+    public EmailServiceManager(PersistWrapper persistWrapper, AccountService accountServiceImpl) {
+        this.persistWrapper = persistWrapper;
+        this.accountServiceImpl = accountServiceImpl;
+    }
+
+	@Transactional
+    public  void scheduleEmail(EmailMessageInfo emailMessage) throws Exception
 	{
 		Date nowDate = new Date();
 		Date expiryDate = new Date(nowDate.getTime() + EmailSenderConfig.emailExpiryWindowMilliseconds);
@@ -82,7 +91,7 @@ public class EmailServiceManager
 		
 	}
 	
-	public static void noteEmailSuccess(int emailQueueItemPk)
+	public  void noteEmailSuccess(int emailQueueItemPk)
 	{
         try
         {
@@ -101,7 +110,7 @@ public class EmailServiceManager
         }
 	}
 
-	public static void noteEmailFailure(int emailQueueItemPk)
+	public  void noteEmailFailure(int emailQueueItemPk)
 	{
         try
         {

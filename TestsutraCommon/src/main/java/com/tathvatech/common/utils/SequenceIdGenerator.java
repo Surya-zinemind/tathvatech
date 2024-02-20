@@ -9,7 +9,7 @@ package com.tathvatech.common.utils;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Hari
@@ -17,12 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
+@Service
 public class SequenceIdGenerator
 {
-    @Autowired
-    private static  PersistWrapper persistWrapper;
-
     private static final Logger logger = LoggerFactory.getLogger(SequenceIdGenerator.class);
+    private final  PersistWrapper persistWrapper;
+
+
 
     public static final String ACCOUNT = "Account";
     public static final String SUPPORT_TICKET = "Ticket";
@@ -37,6 +38,7 @@ public class SequenceIdGenerator
     private static String[] validKeys = new String[]{"Account", "Ticket", "Device", "Survey", "SurveyFile", "Question", "Response", "Logic", "ReportFile"};
 
     public SequenceIdGenerator(PersistWrapper persistWrapper) {
+
         this.persistWrapper = persistWrapper;
     }
 
@@ -47,7 +49,7 @@ public class SequenceIdGenerator
      * @param sequenceKey
      * @return
      */
-    public static String getNext(String sequenceKey)throws Exception
+    public  String getNext(String sequenceKey)throws Exception
     {
         return getNext(sequenceKey, false);
     }
@@ -59,7 +61,7 @@ public class SequenceIdGenerator
      * @param encrypt specifies if the id should be encrypted
      * @return
      */
-    public static String getNext(String sequenceKey, boolean encrypt)throws Exception
+    public  String getNext(String sequenceKey, boolean encrypt)throws Exception
     {
         long id ;
 
@@ -112,7 +114,7 @@ public class SequenceIdGenerator
      * @return
      * @throws Exception
      */
-    public static synchronized int getNextSequence(String sequenceKey, String param1, String param2, String param3, String param4) throws Exception
+    public  synchronized int getNextSequence(String sequenceKey, String param1, String param2, String param3, String param4) throws Exception
     {
         try
         {

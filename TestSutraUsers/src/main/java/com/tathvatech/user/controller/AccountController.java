@@ -41,6 +41,8 @@ public class AccountController
     private final  AccountService accountService;
 
     private final  PersistWrapper persistWrapper;
+
+    private final EmailServiceManager emailServiceManager;
     
 
     @PostMapping("/newAccount")
@@ -654,7 +656,7 @@ public class AccountController
             EmailMessageInfo info = new EmailMessageInfo(ApplicationProperties.getEmailFromAddress(), null, new String[]{verificationCodeRequest.getSendEmailTo().getEmail()},
     				"Password reset request", messageText, messageHtml, null);
 
-            EmailServiceManager.scheduleEmail(info);
+            emailServiceManager.scheduleEmail(info);
 
 	}
 
