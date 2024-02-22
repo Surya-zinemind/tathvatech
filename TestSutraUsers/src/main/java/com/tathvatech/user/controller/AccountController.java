@@ -97,6 +97,8 @@ public class AccountController
 
 	}
 
+    @Deprecated
+    // we are not using context.getAccount(), need to remove it
     @PostMapping("/saveAddonUser")
 	public  void saveAddonUser( @RequestBody CreateAndonUserRequest createAndonUserRequest)throws Exception
 	{
@@ -317,6 +319,8 @@ public class AccountController
 
 	}
 
+    @Deprecated
+    // we are not using context.getAccount(), need to remove it
     @PostMapping("/setUserDevices")
     public  void setUserDevices(@RequestBody UserDevicesRequest userDevicesRequest)throws Exception
     {
@@ -494,6 +498,7 @@ public class AccountController
         List<User> users = accountService.getFormAssignableUsers();
     	return ResponseEntity.ok(users);
     }
+
 
     @GetMapping("/getUserAssignableUsers")
     public  List getUserAssignableUsers()throws Exception

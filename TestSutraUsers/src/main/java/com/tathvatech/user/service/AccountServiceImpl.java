@@ -208,7 +208,9 @@ public class AccountServiceImpl implements AccountService {
         return user;
 	}
 
-	@Override
+	@Deprecated
+	// we are not using context.getAccount(), need to remove it
+    @Override
 	public  User saveAddonUser(UserContext context, User user, AttachmentIntf profilePicAttachment)throws Exception
 	{
 		Account account = (Account)context.getAccount();
@@ -404,6 +406,9 @@ public class AccountServiceImpl implements AccountService {
      * @param
      * @return
      */
+
+	@Deprecated
+     // we are not using context.getAccount(), need to remove it
     @Override
 	public  long getCurrentAccountUserCount(UserContext context)throws Exception
     {
@@ -473,6 +478,8 @@ public class AccountServiceImpl implements AccountService {
 	 * @return
 	 * @throws Exception
 	 */
+	@Deprecated
+	// we are not using context.getAccount(), need to remove it
     @Override
 	public  List getUserAssignableUsers(UserContext context)throws Exception
     {
