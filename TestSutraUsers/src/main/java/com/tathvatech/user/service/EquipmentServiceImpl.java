@@ -58,7 +58,7 @@ public class EquipmentServiceImpl implements EquipmentService{
 	public void deleteEquipment() throws Exception
 	{
 		Equipment eq = getEquipment(2741);
-		persistWrapper.delete(eq);
+		persistWrapper.deleteEntity(eq);
 	}
 
 }

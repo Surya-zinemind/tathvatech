@@ -26,4 +26,5 @@ public interface PersistWrapper {
 
 	int delete(String whereClause, Object... parameters) throws Exception;
 
+
 }
