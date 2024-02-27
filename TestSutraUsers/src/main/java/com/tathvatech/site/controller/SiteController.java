@@ -1,27 +1,39 @@
 package com.tathvatech.site.controller;
 
+import com.tathvatech.common.common.ServiceLocator;
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.site.entity.SiteFilter;
+import com.tathvatech.site.processor.SiteQuerySecurityProcessor;
+import com.tathvatech.site.service.SiteService;
+import com.tathvatech.user.OID.SiteOID;
+import com.tathvatech.user.OID.SupplierOID;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.Site;
+import com.tathvatech.user.service.EmailServiceManager;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import java.sql.Connection;
 import java.util.List;
 
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.caf.util.ServiceLocator;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.part.SupplierOID;
-import com.tathvatech.ts.core.sites.Site;
-import com.tathvatech.ts.core.sites.SiteGroup;
-import com.tathvatech.ts.core.sites.SiteOID;
-import com.tathvatech.ts.core.sites.SiteQuery;
-
+@RequestMapping("/site")
+@RestController
+@RequiredArgsConstructor
 public class SiteController {
+	private  final  SiteService siteService;
 
-	public static void createSite(UserContext context, Site site) throws Exception{
+	private final  PersistWrapper persistWrapper;
+
+	private final EmailServiceManager emailServiceManager;
+	public  void createSite(UserContext context, Site site) throws Exception{
         Connection con = null;
         try
         {
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-            SiteManager.createSite(context, site);
+			siteService.createSite(context, site);
             con.commit();
         }
         catch(Exception ex)
@@ -34,14 +46,14 @@ public class SiteController {
         }
 	}
 
-	public static void updateSite(UserContext context, Site site) throws Exception{
+	public void updateSite(UserContext context, Site site) throws Exception{
         Connection con = null;
         try
         {
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-            SiteManager.updateSite(context, site);
+			siteService.updateSite(context, site);
             con.commit();
         }
         catch(Exception ex)
@@ -54,14 +66,14 @@ public class SiteController {
         }
 	}
 
-	public static void deleteSite(UserContext context, int sitePk) throws Exception{
+	public  void deleteSite(UserContext context, int sitePk) throws Exception{
         Connection con = null;
         try
         {
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-            SiteManager.deleteSite(context, sitePk);
+			siteService.deleteSite(context, sitePk);
             con.commit();
         }
         catch(Exception ex)
@@ -81,11 +93,11 @@ public class SiteController {
 	 * @param siteFilter
 	 * @return
 	 */
-	public static List<Site> getAllSites(SiteFilter siteFilter)
+	public  List<Site> getAllSites(SiteFilter siteFilter)
 	{
 		try 
 		{
-			return SiteManager.getSites(siteFilter);
+			return siteService.getSites(siteFilter);
 		}
 		catch (Exception e) 
 		{
@@ -94,12 +106,26 @@ public class SiteController {
 		}
 	}
 
-	public static List<Site> getSites(UserContext context, SiteFilter siteFilter)
+	public  List<Site> getSites(UserContext context, SiteFilter siteFilter)
+	{
+		try 
+		{
+			new SiteQuerySecurityProcessor().addAuthorizationFilterParams( context,siteFilter);
+			return siteService.getSites(siteFilter);
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public  List<SiteQuery> getSiteList(UserContext context, SiteFilter siteFilter)
 	{
 		try 
 		{
 			new SiteQuerySecurityProcessor().addAuthorizationFilterParams(context, siteFilter);
-			return SiteManager.getSites(siteFilter);
+			return siteService.getSiteList(siteFilter);
 		}
 		catch (Exception e) 
 		{
@@ -108,21 +134,7 @@ public class SiteController {
 		}
 	}
 
-	public static List<SiteQuery> getSiteList(UserContext context, SiteFilter siteFilter)
-	{
-		try 
-		{
-			new SiteQuerySecurityProcessor().addAuthorizationFilterParams(context, siteFilter);
-			return SiteManager.getSiteList(siteFilter);
-		}
-		catch (Exception e) 
-		{
-			e.printStackTrace();
-			return null;
-		}
-	}
-
-	public static Site getSite(int sitePk)
+	public  Site getSite(int sitePk)
 	{
 		try {
 			return PersistWrapper.readByPrimaryKey(Site.class, sitePk);
@@ -134,8 +146,7 @@ public class SiteController {
 	
 	public static SiteGroup getSiteGroup(Integer siteGroupFk)
 	{
-		try {
-			return PersistWrapper.readByPrimaryKey(SiteGroup.class, siteGroupFk);
+		try {return PersistWrapper.readByPrimaryKey(SiteGroup.class, siteGroupFk);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -166,7 +177,7 @@ public class SiteController {
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-            SiteManager.setLinkedSupplier(userContext,
+			SiteService.setLinkedSupplier(userContext,
         			siteOID, supplierOID);
             con.commit();
         }
@@ -188,7 +199,7 @@ public class SiteController {
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-            siteGroup = SiteManager.saveSiteGroup(context, siteGroup);
+            siteGroup =SiteService.saveSiteGroup(context, siteGroup);
             con.commit();
             
             return siteGroup;
@@ -205,6 +216,6 @@ public class SiteController {
 
 	public static List<SiteGroup> getSiteGroupList()
 	{
-		return SiteManager.getSiteGroupList();
+		return SiteService.getSiteGroupList();
 	}
 }

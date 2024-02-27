@@ -1,18 +1,19 @@
 package com.tathvatech.site.service;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import com.tathvatech.site.entity.SiteFilter;
+import com.tathvatech.user.entity.Site;
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.user.common.UserContext;
+import org.springframework.stereotype.Service;
+import com.tathvatech.common.enums.EStatusEnum;
+import com.tathvatech.user.OID.SiteOID;
+import com.tathvatech.user.OID.SupplierOID;
 
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.common.EStatusEnum;
-import com.tathvatech.ts.core.part.SupplierOID;
-import com.tathvatech.ts.core.sites.Site;
-import com.tathvatech.ts.core.sites.SiteGroup;
-import com.tathvatech.ts.core.sites.SiteOID;
-import com.tathvatech.ts.core.sites.SiteQuery;
 
+
+@Service
 public class SiteServiceImpl implements SiteService {
 	@Override
     public  void createSite(UserContext context, Site site) throws Exception

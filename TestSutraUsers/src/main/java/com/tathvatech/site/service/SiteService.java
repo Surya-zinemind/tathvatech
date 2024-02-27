@@ -1,5 +1,11 @@
 package com.tathvatech.site.service;
 
+import com.tathvatech.site.entity.SiteFilter;
+import com.tathvatech.user.OID.SiteOID;
+import com.tathvatech.user.OID.SupplierOID;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.Site;
+
 import java.util.List;
 
 public interface SiteService {

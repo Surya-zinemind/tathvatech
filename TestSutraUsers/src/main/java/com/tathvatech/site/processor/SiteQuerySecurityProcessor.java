@@ -3,17 +3,16 @@ package com.tathvatech.site.processor;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.user.OID.Role;
+import com.tathvatech.user.common.RoleRepository;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.enums.SiteRolesEnum;
+import com.tathvatech.user.service.CommonServicesDelegate;
 import org.apache.commons.lang3.ArrayUtils;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.site.entity.SiteFilter;
 
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.authorization.AuthorizationDelegate;
-import com.tathvatech.ts.core.authorization.Role;
-import com.tathvatech.ts.core.authorization.RoleRepository;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.service.CommonServicesDelegate;
-import com.tathvatech.ts.core.sites.SiteRolesEnum;
 
 public class SiteQuerySecurityProcessor {
 
