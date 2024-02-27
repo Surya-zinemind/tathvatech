@@ -1,8 +1,6 @@
 package com.tathvatech.user.controller;
 
-import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.entity.Equipment;
-import com.tathvatech.user.entity.Project;
 import com.tathvatech.user.service.EquipmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
