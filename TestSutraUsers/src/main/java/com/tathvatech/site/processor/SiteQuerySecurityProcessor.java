@@ -53,7 +53,7 @@ public class SiteQuerySecurityProcessor {
 				for (Iterator iterator = projectSitePks.iterator(); iterator.hasNext();)
 				{
 					Integer aProjectSitePk = (Integer) iterator.next();
-					ProjectSiteConfig aPConfig = (ProjectSiteConfig)new CommonServicesDelegate().getObjectByPk(ProjectSiteConfig.class, aProjectSitePk);
+					ProjectSiteConfig  aPConfig = (ProjectSiteConfig)new CommonServicesDelegate().getObjectByPk(ProjectSiteConfig.class, aProjectSitePk);
 					if(aPConfig != null)
 					{
 						if(!(returnList.contains(aPConfig.getSiteFk())))

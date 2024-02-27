@@ -1,6 +1,8 @@
 package com.tathvatech.site.service;
 
+import com.tathvatech.site.common.SiteQuery;
 import com.tathvatech.site.entity.SiteFilter;
+import com.tathvatech.site.entity.SiteGroup;
 import com.tathvatech.user.OID.SiteOID;
 import com.tathvatech.user.OID.SupplierOID;
 import com.tathvatech.user.common.UserContext;
@@ -24,7 +26,7 @@ public interface SiteService {
     List<SiteQuery> getSiteList(SiteFilter siteFilter);
 
     void setLinkedSupplier(UserContext userContext, SiteOID siteOID,
-                           SupplierOID supplierOID);
+                           SupplierOID supplierOID) throws Exception;
 
     SiteGroup saveSiteGroup(UserContext context, SiteGroup siteGroup) throws Exception;
 

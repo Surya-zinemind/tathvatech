@@ -6,36 +6,47 @@ import com.tathvatech.site.entity.SiteFilter;
 import com.tathvatech.user.entity.Site;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.user.common.UserContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.tathvatech.common.enums.EStatusEnum;
 import com.tathvatech.user.OID.SiteOID;
 import com.tathvatech.user.OID.SupplierOID;
+import com.tathvatech.site.common.SiteQuery;
+import com.tathvatech.site.entity.SiteGroup;
 
 
 
 @Service
 public class SiteServiceImpl implements SiteService {
-	@Override
+	private static final Logger logger = LoggerFactory.getLogger(SiteServiceImpl.class);
+	private final PersistWrapper persistWrapper;
+
+    public SiteServiceImpl(PersistWrapper persistWrapper) {
+        this.persistWrapper = persistWrapper;
+    }
+
+    @Override
     public  void createSite(UserContext context, Site site) throws Exception
 	{
 		site.setCreatedBy(context.getUser().getPk());
 		site.setCreatedDate(new Date());
 		site.setEstatus(EStatusEnum.Active.getValue());
-		PersistWrapper.createEntity(site);
+		persistWrapper.createEntity(site);
 	}
 
 	@Override
     public  void updateSite(UserContext context, Site site) throws Exception
 	{
-		PersistWrapper.update(site);
+		persistWrapper.update(site);
 	}
 
 	@Override
     public  void deleteSite(UserContext context, int sitePk) throws Exception
 	{
-		Site site = PersistWrapper.readByPrimaryKey(Site.class, sitePk);
+		Site site = (Site) persistWrapper.readByPrimaryKey(Site.class, sitePk);
 		site.setEstatus(EStatusEnum.Deleted.getValue());
-		PersistWrapper.update(site);
+		persistWrapper.update(site);
 	}
 
 	@Override
@@ -43,7 +54,7 @@ public class SiteServiceImpl implements SiteService {
 	{
 		try
 		{
-			return PersistWrapper.readByPrimaryKey(Site.class, sitePk);
+			return (Site) persistWrapper.readByPrimaryKey(Site.class, sitePk);
 		}
 		catch (Exception e)
 		{
@@ -54,7 +65,7 @@ public class SiteServiceImpl implements SiteService {
 	@Override
     public  Site getSiteByName(String siteName)
 	{
-		return PersistWrapper.read(Site.class, "select * from site where name = ? and estatus != 9 ", siteName);
+		return persistWrapper.read(Site.class, "select * from site where name = ? and estatus != 9 ", siteName);
 	}
 
 	@Override
@@ -95,7 +106,7 @@ public class SiteServiceImpl implements SiteService {
 		try
 		{
 			sql.append(" order by site.name ");
-			return PersistWrapper.readList(Site.class, sql.toString(), params.toArray());
+			return persistWrapper.readList(Site.class, sql.toString(), params.toArray());
 		}
 		catch (Exception e)
 		{
@@ -163,7 +174,7 @@ public class SiteServiceImpl implements SiteService {
 		try
 		{
 			sql.append(" order by site.name ");
-			return PersistWrapper.readList(SiteQuery.class, sql.toString(), params.toArray());
+			return persistWrapper.readList(SiteQuery.class, sql.toString(), params.toArray());
 		}
 		catch (Exception e)
 		{
@@ -174,11 +185,10 @@ public class SiteServiceImpl implements SiteService {
 
 	@Override
     public  void setLinkedSupplier(UserContext userContext, SiteOID siteOID,
-                                   SupplierOID supplierOID)
-	{
+                                   SupplierOID supplierOID) throws Exception {
 		Site site = getSite(siteOID.getPk());
 		site.setDefaultSupplierFk(supplierOID.getPk());
-		PersistWrapper.update(site);
+		persistWrapper.update(site);
 	}
 
 	@Override
@@ -188,19 +198,19 @@ public class SiteServiceImpl implements SiteService {
 		{
 			siteGroup.setCreatedBy(context.getUser().getPk());
 			siteGroup.setCreatedDate(new Date());
-			int pk = PersistWrapper.createEntity(siteGroup);
-			return PersistWrapper.readByPrimaryKey(SiteGroup.class, pk);
+			int pk = Math.toIntExact(persistWrapper.createEntity(siteGroup));
+			return (SiteGroup) persistWrapper.readByPrimaryKey(SiteGroup.class, pk);
 		}
 		else
 		{
-			PersistWrapper.update(siteGroup);
-			return PersistWrapper.readByPrimaryKey(SiteGroup.class, siteGroup.getPk());
+			persistWrapper.update(siteGroup);
+			return (SiteGroup) persistWrapper.readByPrimaryKey(SiteGroup.class, siteGroup.getPk());
 		}
 	}
 
 	@Override
     public  List<SiteGroup> getSiteGroupList()
 	{
-		return PersistWrapper.readList(SiteGroup.class, "select * from site_group");
+		return persistWrapper.readList(SiteGroup.class, "select * from site_group");
 	}
 }

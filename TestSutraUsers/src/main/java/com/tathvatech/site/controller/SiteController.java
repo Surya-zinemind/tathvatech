@@ -2,7 +2,9 @@ package com.tathvatech.site.controller;
 
 import com.tathvatech.common.common.ServiceLocator;
 import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.site.common.SiteQuery;
 import com.tathvatech.site.entity.SiteFilter;
+import com.tathvatech.site.entity.SiteGroup;
 import com.tathvatech.site.processor.SiteQuerySecurityProcessor;
 import com.tathvatech.site.service.SiteService;
 import com.tathvatech.user.OID.SiteOID;
@@ -13,7 +15,6 @@ import com.tathvatech.user.service.EmailServiceManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.sql.Connection;
 import java.util.List;
 
@@ -137,16 +138,16 @@ public class SiteController {
 	public  Site getSite(int sitePk)
 	{
 		try {
-			return PersistWrapper.readByPrimaryKey(Site.class, sitePk);
+			return (Site) persistWrapper.readByPrimaryKey(Site.class, sitePk);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
-	public static SiteGroup getSiteGroup(Integer siteGroupFk)
+	public SiteGroup getSiteGroup(Integer siteGroupFk)
 	{
-		try {return PersistWrapper.readByPrimaryKey(SiteGroup.class, siteGroupFk);
+		try {return (SiteGroup) persistWrapper.readByPrimaryKey(SiteGroup.class, siteGroupFk);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -154,11 +155,11 @@ public class SiteController {
 	}
 	
 
-	public static SiteGroup getSiteGroup(SiteOID siteOID)
+	public  SiteGroup getSiteGroup(SiteOID siteOID)
 	{
 		try 
 		{
-			return PersistWrapper.read(SiteGroup.class, "select sg.* from site_group sg, site where site.siteGroupFk = sg.pk and site.pk = ? ", siteOID.getPk());
+			return persistWrapper.read(SiteGroup.class, "select sg.* from site_group sg, site where site.siteGroupFk = sg.pk and site.pk = ? ", siteOID.getPk());
 		}
 		catch (Exception e) 
 		{
@@ -168,7 +169,7 @@ public class SiteController {
 	}
 	
 
-	public static void setLinkedSupplier(UserContext userContext,
+	public  void setLinkedSupplier(UserContext userContext,
 			SiteOID siteOID, SupplierOID supplierOID) throws Exception
 	{
         Connection con = null;
@@ -177,7 +178,7 @@ public class SiteController {
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-			SiteService.setLinkedSupplier(userContext,
+			siteService.setLinkedSupplier(userContext,
         			siteOID, supplierOID);
             con.commit();
         }
@@ -191,7 +192,7 @@ public class SiteController {
         }
 	}
 
-	public static SiteGroup saveSiteGroup(UserContext context, SiteGroup siteGroup)throws Exception
+	public  SiteGroup saveSiteGroup(UserContext context, SiteGroup siteGroup)throws Exception
 	{
         Connection con = null;
         try
@@ -199,7 +200,7 @@ public class SiteController {
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-            siteGroup =SiteService.saveSiteGroup(context, siteGroup);
+            siteGroup =siteService.saveSiteGroup(context, siteGroup);
             con.commit();
             
             return siteGroup;
@@ -214,8 +215,8 @@ public class SiteController {
         }
 	}
 
-	public static List<SiteGroup> getSiteGroupList()
+	public  List<SiteGroup> getSiteGroupList()
 	{
-		return SiteService.getSiteGroupList();
+		return siteService.getSiteGroupList();
 	}
 }

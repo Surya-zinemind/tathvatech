@@ -8,7 +8,8 @@ package com.tathvatech.site.common;
 
 import java.util.Date;
 
-import net.sf.persist.annotations.NoTable;
+import com.tathvatech.user.OID.SiteOID;
+
 
 /**
  * @author Hari
@@ -16,7 +17,7 @@ import net.sf.persist.annotations.NoTable;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-@NoTable
+
 public class SiteQuery
 {
 	private int pk;
@@ -212,7 +213,7 @@ public class SiteQuery
 		return false;
 	}
 
-	public SiteOID getOID() 
+	public SiteOID getOID()
 	{
 		return new SiteOID(pk, getDisplayText());
 	}

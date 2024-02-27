@@ -1,8 +1,8 @@
 package com.tathvatech.site.entity;
 
-import com.tathvatech.ts.core.authorization.Role;
-import com.tathvatech.ts.core.project.ProjectOID;
 
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.Role;
 
 public class SiteFilter
 {

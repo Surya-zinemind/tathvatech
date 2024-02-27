@@ -8,8 +8,6 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.tathvatech.common.enums.EntityType;
 import com.tathvatech.common.enums.EntityTypeEnum;
-import com.tathvatech.common.enums.EntityType;
-import com.tathvatech.common.enums.EntityTypeEnum;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
@@ -61,7 +59,7 @@ public abstract class OID extends TSBeanBase implements Authorizable{
 	}
 
 	@Override
-	public long getPk() {
+	public int getPk() {
 		return pk;
 	}
 

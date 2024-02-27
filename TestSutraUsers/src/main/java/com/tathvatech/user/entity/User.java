@@ -68,7 +68,7 @@ public class User extends AbstractEntity implements UserBase, Serializable, Enti
 
 
 	@Override
-	public long getPk() {
+	public int getPk() {
 		return pk;
 	}
 
