@@ -5,7 +5,7 @@ import com.tathvatech.ts.core.common.OID;
 
 public class ProjectSiteConfigOID extends OID{
 
-	public ProjectSiteConfigOID(long pk, String displayText)
+	public ProjectSiteConfigOID(int pk, String displayText)
 	{
 		super(pk, EntityTypeEnum.ProjectSiteConfig, displayText);
 	}

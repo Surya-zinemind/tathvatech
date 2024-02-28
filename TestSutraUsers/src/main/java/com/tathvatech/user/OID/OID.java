@@ -8,8 +8,6 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.tathvatech.common.enums.EntityType;
 import com.tathvatech.common.enums.EntityTypeEnum;
-import com.tathvatech.user.enums.SiteActionsEnum;
-import com.tathvatech.user.enums.SiteRolesEnum;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
@@ -91,14 +89,14 @@ public abstract class OID extends TSBeanBase implements Authorizable{
 	
 	@Override
 	@JsonIgnore
-	public List<SiteRolesEnum> getSupportedRoles()
+	public List<? extends Role> getSupportedRoles() 
 	{
 		return null;
 	}
 
 	@Override
 	@JsonIgnore
-	public List<SiteActionsEnum> getSupportedActions()
+	public List<? extends Action> getSupportedActions() 
 	{
 		return null;
 	}

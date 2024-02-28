@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.tathvatech.common.enums.EntityTypeEnum;
-import com.tathvatech.user.enums.SiteActionsEnum;
-import com.tathvatech.user.enums.SiteRolesEnum;
 
 public class ModeOID extends OID{
 
@@ -28,13 +26,13 @@ public class ModeOID extends OID{
 	}
 
 	@Override
-	public List<SiteRolesEnum> getSupportedRoles()
+	public List<? extends Role> getSupportedRoles() 
 	{
 		return new ArrayList();
 	}
 
 	@Override
-	public List<SiteActionsEnum> getSupportedActions()
+	public List<? extends Action> getSupportedActions() 
 	{
 		return new ArrayList();
 	}

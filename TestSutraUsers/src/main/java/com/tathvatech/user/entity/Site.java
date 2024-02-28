@@ -9,7 +9,9 @@ package com.tathvatech.user.entity;
 import com.tathvatech.common.entity.AbstractEntity;
 import com.tathvatech.common.enums.EntityType;
 import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.user.OID.Action;
 import com.tathvatech.user.OID.Authorizable;
+import com.tathvatech.user.OID.Role;
 import com.tathvatech.user.OID.SiteOID;
 import com.tathvatech.user.enums.SiteActionsEnum;
 import com.tathvatech.user.enums.SiteRolesEnum;
@@ -166,13 +168,13 @@ public class Site extends AbstractEntity implements Authorizable, Serializable
 	}
 
 	@Override
-	public List<SiteRolesEnum> getSupportedRoles()
+	public List<? extends Role> getSupportedRoles()
 	{
 		return Arrays.asList(SiteRolesEnum.values());
 	}
 
 	@Override
-	public List<SiteActionsEnum> getSupportedActions()
+	public List<? extends Action> getSupportedActions()
 	{
 		return Arrays.asList(SiteActionsEnum.values());
 	}
