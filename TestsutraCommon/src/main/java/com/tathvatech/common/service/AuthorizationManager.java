@@ -1,13 +1,5 @@
 package com.tathvatech.common.service;
 
-import com.tathvatech.common.enums.EntityTypeEnum;
-import com.tathvatech.user.OID.Authorizable;
-import com.tathvatech.user.OID.OID;
-import com.tathvatech.user.OID.UserOID;
-import com.tathvatech.user.common.RoleRepository;
-import com.tathvatech.user.entity.User;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -16,13 +8,14 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import com.tathvatech.common.wrapper.PersistWrapper;
-import com.tathvatech.user.common.UserContext;
-import javax.management.relation.Role;
-import javax.swing.*;
+import com.tathvatech.ts.caf.db.PersistWrapper;
+import com.tathvatech.ts.core.UserContext;
+import com.tathvatech.ts.core.accounts.User;
+import com.tathvatech.ts.core.accounts.UserOID;
+import com.tathvatech.ts.core.common.EntityTypeEnum;
+import com.tathvatech.ts.core.common.OID;
 
-
-public class AuthorizationManager
+public class AuthorizationManager 
 {
 	/**
 	 * Method which checks if the user is assigned the roleId on any object.
@@ -36,7 +29,7 @@ public class AuthorizationManager
 		if(userContext.getUser().getUserType().equals(User.USER_PRIMARY))
 			return true;
 		
-		SecurityProperties.User user = (SecurityProperties.User) userContext.getUser();
+		User user = (User) userContext.getUser();
 		List<ACL> acls = PersistWrapper.readList(ACL.class, "select * from ACL where userPk=? and roleId = ?", 
 				user.getPk(), roleId);
 		if(acls.size() > 0)
@@ -200,7 +193,7 @@ public class AuthorizationManager
 	
 	/**
 	 * Checks if a role is assigned to any user on an object
-	 * @param objectOid
+	 * @param userContext
 	 * @param roleId
 	 * @return
 	 * @throws Exception
@@ -233,7 +226,7 @@ public class AuthorizationManager
 		{
 			ACL acl = (ACL) iterator.next();
 			Role role = RoleRepository.getInstance().fromRoleId(acl.getRoleId());
-			returnList.addAll(((com.tathvatech.user.OID.Role) role).getAllowedActions());
+			returnList.addAll(role.getAllowedActions());
 		}
 		
 		return returnList;
@@ -258,7 +251,7 @@ public class AuthorizationManager
 	public void removeAcl(UserOID userOID, OID objectOid, Role role)throws Exception
 	{
 		PersistWrapper.delete("delete from ACL where objectPk = ? and objectType=? and userPk=? and roleId = ?", 
-				objectOid.getPk(), objectOid.getEntityType().getValue(), userOID.getPk(), role.getClass());
+				objectOid.getPk(), objectOid.getEntityType().getValue(), userOID.getPk(), role.getId());
 	}
 
 	public void removeAllAcls(OID objectOid)throws Exception
@@ -318,7 +311,7 @@ public class AuthorizationManager
 
 	/**
 	 * get the users who have the specified role configured on the entity type.
-	 * @param entityType
+	 * @param authorizableOID
 	 * @param role
 	 * @return
 	 * @throws Exception

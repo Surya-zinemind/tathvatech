@@ -1,14 +1,13 @@
 package com.tathvatech.user.enums;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.user.OID.Action;
 import com.tathvatech.user.OID.Role;
 import com.tathvatech.user.common.RoleRepository;
 import com.tathvatech.user.entity.User;
-
-import javax.swing.*;
 
 public enum ProjectRolesEnum implements Role
 {
@@ -56,7 +55,7 @@ public enum ProjectRolesEnum implements Role
 		RoleRepository.getInstance().registerSystemRole(this, EntityTypeEnum.Project);
 	}
 	
-	public Collection<? extends Action> getAllowedActions()
+	public List<Action> getAllowedActions()
 	{
 		return new ArrayList();
 	}

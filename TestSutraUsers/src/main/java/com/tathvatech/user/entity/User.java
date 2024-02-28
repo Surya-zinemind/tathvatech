@@ -67,7 +67,8 @@ public class User extends AbstractEntity implements UserBase, Serializable, Enti
 	private HashMap accountData = new HashMap();
 
 
-	public long getPk() {
+	@Override
+	public int getPk() {
 		return pk;
 	}
 
