@@ -186,8 +186,8 @@ public class SiteServiceImpl implements SiteService {
 	@Override
     public  void setLinkedSupplier(UserContext userContext, SiteOID siteOID,
                                    SupplierOID supplierOID) throws Exception {
-		Site site = getSite(siteOID.getPk());
-		site.setDefaultSupplierFk(supplierOID.getPk());
+		Site site = getSite((int) siteOID.getPk());
+		site.setDefaultSupplierFk((int) supplierOID.getPk());
 		persistWrapper.update(site);
 	}
 
@@ -196,7 +196,7 @@ public class SiteServiceImpl implements SiteService {
 	{
 		if(siteGroup.getPk() == 0)
 		{
-			siteGroup.setCreatedBy(context.getUser().getPk());
+			siteGroup.setCreatedBy((int) context.getUser().getPk());
 			siteGroup.setCreatedDate(new Date());
 			int pk = Math.toIntExact(persistWrapper.createEntity(siteGroup));
 			return (SiteGroup) persistWrapper.readByPrimaryKey(SiteGroup.class, pk);

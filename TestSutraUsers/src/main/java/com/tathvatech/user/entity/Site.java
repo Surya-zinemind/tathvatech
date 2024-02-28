@@ -43,7 +43,7 @@ public class Site extends AbstractEntity implements Authorizable, Serializable
 	private String address;
 	private String timeZone;
 	private Integer defaultSupplierFk;
-	private int createdBy;
+	private long createdBy;
 	private Date createdDate;
 	private int estatus;
 	private Date lastUpdated;
@@ -105,13 +105,11 @@ public class Site extends AbstractEntity implements Authorizable, Serializable
 		this.defaultSupplierFk = defaultSupplierFk;
 	}
 
-	public int getCreatedBy()
-	{
+	public long getCreatedBy() {
 		return createdBy;
 	}
 
-	public void setCreatedBy(int createdBy)
-	{
+	public void setCreatedBy(long createdBy) {
 		this.createdBy = createdBy;
 	}
 

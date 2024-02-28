@@ -8,12 +8,8 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.accounts.UserOID;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.OID;
+import com.tathvatech.common.wrapper.PersistWrapper;
+
 
 public class AuthorizationManager 
 {
@@ -24,13 +20,19 @@ public class AuthorizationManager
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean isUserInRole(UserContext userContext, String roleId)
+	private final PersistWrapper persistWrapper;
+
+    public AuthorizationManager(PersistWrapper persistWrapper) {
+        this.persistWrapper = persistWrapper;
+    }
+
+    public boolean isUserInRole(UserContext userContext, String roleId)
 	{
 		if(userContext.getUser().getUserType().equals(User.USER_PRIMARY))
 			return true;
 		
 		User user = (User) userContext.getUser();
-		List<ACL> acls = PersistWrapper.readList(ACL.class, "select * from ACL where userPk=? and roleId = ?", 
+		List<ACL> acls = persistWrapper.readList(ACL.class, "select * from ACL where userPk=? and roleId = ?",
 				user.getPk(), roleId);
 		if(acls.size() > 0)
 		{

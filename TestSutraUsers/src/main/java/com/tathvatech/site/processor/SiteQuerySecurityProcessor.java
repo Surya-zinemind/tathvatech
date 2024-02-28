@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.site.entity.ProjectSiteConfig;
 import com.tathvatech.user.OID.Role;
 import com.tathvatech.user.common.RoleRepository;
 import com.tathvatech.user.entity.User;
@@ -53,7 +54,7 @@ public class SiteQuerySecurityProcessor {
 				for (Iterator iterator = projectSitePks.iterator(); iterator.hasNext();)
 				{
 					Integer aProjectSitePk = (Integer) iterator.next();
-					ProjectSiteConfig  aPConfig = (ProjectSiteConfig)new CommonServicesDelegate().getObjectByPk(ProjectSiteConfig.class, aProjectSitePk);
+					ProjectSiteConfig aPConfig = (ProjectSiteConfig)new CommonServicesDelegate().getObjectByPk(ProjectSiteConfig.class, aProjectSitePk);
 					if(aPConfig != null)
 					{
 						if(!(returnList.contains(aPConfig.getSiteFk())))
