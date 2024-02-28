@@ -12,14 +12,13 @@ import java.util.Date;
 import java.util.List;
 
 import com.tathvatech.common.entity.AbstractEntity;
+import com.tathvatech.site.oid.SiteGroupOID;
 import com.tathvatech.user.enums.SiteRolesEnum;
 
 
 import com.tathvatech.common.enums.EntityType;
 import com.tathvatech.common.enums.EntityTypeEnum;
-import com.tathvatech.user.OID.Action;
 import com.tathvatech.user.OID.Authorizable;
-import com.tathvatech.user.OID.Role;
 import com.tathvatech.user.enums.SiteActionsEnum;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -125,21 +124,21 @@ public class SiteGroup extends AbstractEntity implements Serializable, Authoriza
 
 	@Override
 
-	public List<? extends Role> getSupportedRoles()
+	public List<SiteRolesEnum> getSupportedRoles()
 	{
 		return Arrays.asList(SiteRolesEnum.values());
 	}
 
 	@Override
 
-	public List<? extends Action> getSupportedActions()
+	public List<SiteActionsEnum> getSupportedActions()
 	{
 		return Arrays.asList(SiteActionsEnum.values());
 	}
 
-	public SiteGroupOID getOID() 
+	public SiteGroupOID getOID()
 	{
-		return new SiteGroupOID(pk, name);
+		return new SiteGroupOID((int) pk, name);
 	}
 
 	@Override

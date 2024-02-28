@@ -2,7 +2,7 @@ package com.tathvatech.user.enums;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 
 import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.user.OID.Action;
@@ -44,7 +44,7 @@ public enum SiteRolesEnum implements Role
 		RoleRepository.getInstance().registerSystemRole(this, EntityTypeEnum.Site);
 	}
 
-	public List<Action> getAllowedActions()
+	public Collection<? extends javax.swing.Action> getAllowedActions()
 	{
 		if(this == SiteRolesEnum.SiteAdmin)
 			return Arrays.asList(new Action[]{SiteActionsEnum.ResetUserPassword});
