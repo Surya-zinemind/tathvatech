@@ -8,9 +8,9 @@ public interface PersistWrapper {
 
 	AbstractEntity readByPrimaryKey(final Class <? extends AbstractEntity> objectClass, long id);
 
-	<T> List<T> readList(final Class<T> objectClass, final String sql, final Object...parameters);
+	static <T> List<T> readList(final Class<T> objectClass, final String sql, final Object... parameters);
 
-	<T> T read(final Class<T> objectClass, final String sql, final Object...parameters);
+	static <T> T read(final Class<T> objectClass, final String sql, final Object... parameters);
 
 	List<? extends AbstractEntity> readAll(final Class<? extends AbstractEntity> objectClass);
 
@@ -24,7 +24,7 @@ public interface PersistWrapper {
 
 	void deleteEntity(Class objClass, long pk) throws Exception;
 
-	int delete(String whereClause, Object... parameters) throws Exception;
+	static int delete(String whereClause, Object... parameters) throws Exception;
 
 
 }
