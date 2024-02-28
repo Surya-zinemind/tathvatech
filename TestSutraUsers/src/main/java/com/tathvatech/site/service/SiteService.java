@@ -17,7 +17,7 @@ public interface SiteService {
 
     void deleteSite(UserContext context, int sitePk) throws Exception;
 
-    Site getSite(int sitePk);
+    static Site getSite(int sitePk);
 
     Site getSiteByName(String siteName);
 
