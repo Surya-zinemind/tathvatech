@@ -13,8 +13,8 @@ import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.Site;
 import com.tathvatech.user.service.EmailServiceManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import java.sql.Connection;
 import java.util.List;
 
@@ -27,64 +27,19 @@ public class SiteController {
 	private final  PersistWrapper persistWrapper;
 
 	private final EmailServiceManager emailServiceManager;
-	public  void createSite(UserContext context, Site site) throws Exception{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-			siteService.createSite(context, site);
-            con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
+	@PostMapping("/createSite")
+	public  void createSite(UserContext context, @RequestBody Site site) throws Exception{
+		siteService.createSite(context, site);
 	}
 
-	public void updateSite(UserContext context, Site site) throws Exception{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-			siteService.updateSite(context, site);
-            con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
+	@PutMapping("/updateSite")
+	public void updateSite(UserContext context, @RequestBody Site site) throws Exception{
+		siteService.updateSite(context, site);
 	}
 
-	public  void deleteSite(UserContext context, int sitePk) throws Exception{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-			siteService.deleteSite(context, sitePk);
-            con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
+	@DeleteMapping("/deleteSite/{sitePk}")
+	public  void deleteSite(UserContext context,@PathVariable("sitePk") int sitePk) throws Exception{
+		siteService.deleteSite(context, sitePk);
 	}
 
 	/**
@@ -94,127 +49,60 @@ public class SiteController {
 	 * @param siteFilter
 	 * @return
 	 */
-	public  List<Site> getAllSites(SiteFilter siteFilter)
+	@GetMapping("/getAllSites")
+	public  List<Site> getAllSites(@RequestBody SiteFilter siteFilter)
 	{
-		try 
-		{
 			return siteService.getSites(siteFilter);
-		}
-		catch (Exception e) 
-		{
-			e.printStackTrace();
-			return null;
-		}
 	}
 
-	public  List<Site> getSites(UserContext context, SiteFilter siteFilter)
+	@GetMapping("/getSites")
+	public  List<Site> getSites(UserContext context, @RequestBody SiteFilter siteFilter)
 	{
-		try 
-		{
-			new SiteQuerySecurityProcessor().addAuthorizationFilterParams( context,siteFilter);
-			return siteService.getSites(siteFilter);
-		}
-		catch (Exception e) 
-		{
-			e.printStackTrace();
-			return null;
-		}
+		return siteService.getSites(siteFilter);
 	}
 
-	public  List<SiteQuery> getSiteList(UserContext context, SiteFilter siteFilter)
+	@GetMapping("/getSiteList")
+	public  List<SiteQuery> getSiteList(UserContext context, @RequestBody SiteFilter siteFilter)
 	{
-		try 
-		{
-			new SiteQuerySecurityProcessor().addAuthorizationFilterParams(context, siteFilter);
-			return siteService.getSiteList(siteFilter);
-		}
-		catch (Exception e) 
-		{
-			e.printStackTrace();
-			return null;
-		}
+		return siteService.getSiteList(siteFilter);
 	}
 
-	public  Site getSite(int sitePk)
+	@GetMapping("/getSite/{sitePk}")
+	public  Site getSite(@PathVariable("sitePk") int sitePk)
 	{
-		try {
-			return (Site) persistWrapper.readByPrimaryKey(Site.class, sitePk);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
+		return (Site) persistWrapper.readByPrimaryKey(Site.class, sitePk);
 	}
-	
-	public SiteGroup getSiteGroup(Integer siteGroupFk)
+
+	@GetMapping("/getSiteGroup/{siteGroupFk}")
+	public SiteGroup getSiteGroup(@PathVariable("siteGroupFk") Integer siteGroupFk)
 	{
-		try {return (SiteGroup) persistWrapper.readByPrimaryKey(SiteGroup.class, siteGroupFk);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
+		return (SiteGroup) persistWrapper.readByPrimaryKey(SiteGroup.class, siteGroupFk);
 	}
 	
 
-	public  SiteGroup getSiteGroup(SiteOID siteOID)
+	@GetMapping("/getSiteGroup")
+	public  SiteGroup getSiteGroup( @RequestBody SiteOID siteOID)
 	{
-		try 
-		{
-			return persistWrapper.read(SiteGroup.class, "select sg.* from site_group sg, site where site.siteGroupFk = sg.pk and site.pk = ? ", siteOID.getPk());
-		}
-		catch (Exception e) 
-		{
-			e.printStackTrace();
-		}
-		return null;
+		return persistWrapper.read(SiteGroup.class, "select sg.* from site_group sg, site where site.siteGroupFk = sg.pk and site.pk = ? ", siteOID.getPk());
 	}
 	
 
+	@PutMapping("/setLinkedSupplier")
 	public  void setLinkedSupplier(UserContext userContext,
-			SiteOID siteOID, SupplierOID supplierOID) throws Exception
+			@RequestBody SiteOID siteOID,@RequestBody SupplierOID supplierOID) throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-			siteService.setLinkedSupplier(userContext,
+		siteService.setLinkedSupplier(userContext,
         			siteOID, supplierOID);
-            con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
 	}
 
-	public  SiteGroup saveSiteGroup(UserContext context, SiteGroup siteGroup)throws Exception
+	@PostMapping("/saveSiteGroup")
+	public  SiteGroup saveSiteGroup(UserContext context, @RequestBody SiteGroup siteGroup)throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-            siteGroup =siteService.saveSiteGroup(context, siteGroup);
-            con.commit();
-            
-            return siteGroup;
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
+		siteGroup =siteService.saveSiteGroup(context, siteGroup);
+		return siteGroup;
 	}
 
+	@GetMapping("/getSiteGroupList")
 	public  List<SiteGroup> getSiteGroupList()
 	{
 		return siteService.getSiteGroupList();
