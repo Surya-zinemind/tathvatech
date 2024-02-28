@@ -6,6 +6,7 @@ import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.site.enums.ProjectSiteConfigActionsEnum;
 import com.tathvatech.site.enums.ProjectSiteConfigRolesEnum;
 import com.tathvatech.site.oid.ProjectSiteConfigOID;
+import com.tathvatech.site.service.SiteService;
 import com.tathvatech.user.OID.Action;
 import com.tathvatech.user.OID.Authorizable;
 import com.tathvatech.user.OID.OID;
@@ -28,6 +29,7 @@ import java.util.List;
 @Table(name="project_site_config")
 public class ProjectSiteConfig extends AbstractEntity implements Serializable,Authorizable
 {
+	private final SiteService siteService;
 	@Id
 	private long pk;
 	private int projectFk;
@@ -36,7 +38,11 @@ public class ProjectSiteConfig extends AbstractEntity implements Serializable,Au
 	private int estatus;
 	private Date lastUpdated;
 
-	@Override
+    public ProjectSiteConfig(SiteService siteService) {
+        this.siteService = siteService;
+    }
+
+    @Override
 	public long getPk() {
 		return pk;
 	}
@@ -79,13 +85,14 @@ public class ProjectSiteConfig extends AbstractEntity implements Serializable,Au
 
 	public OID getOID()
 	{
-		Site site = SiteDelegate.getSite(siteFk);
-		return new ProjectSiteConfigOID(pk, site.getName());
+		Site site = siteService.getSite(siteFk);
+		return new ProjectSiteConfigOID((int) pk, site.getName());
 	}
 	@Override
 
 	public List<? extends Role> getSupportedRoles()
 	{
+
 		return Arrays.asList(ProjectSiteConfigRolesEnum.values());
 	}
 
@@ -103,7 +110,7 @@ public class ProjectSiteConfig extends AbstractEntity implements Serializable,Au
 	@Override
 	public String getDisplayText()
 	{
-		Site site = SiteDelegate.getSite(siteFk);
+		Site site = siteService.getSite(siteFk);
 		return site.getName();
 	}
 

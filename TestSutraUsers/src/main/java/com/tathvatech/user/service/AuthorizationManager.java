@@ -1,4 +1,4 @@
-package com.tathvatech.common.service;
+package com.tathvatech.user.service;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,9 +8,17 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.site.entity.ACL;
+import com.tathvatech.user.OID.*;
+import com.tathvatech.user.common.RoleRepository;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.User;
+import org.springframework.stereotype.Service;
 
 
+@Service
 public class AuthorizationManager 
 {
 	/**
@@ -57,7 +65,7 @@ public class AuthorizationManager
 			return true;
 		
 		User user = (User) userContext.getUser();
-		List<ACL> acls = PersistWrapper.readList(ACL.class, "select * from ACL where userPk=? and objectType=? and roleId = ?", 
+		List<ACL> acls = persistWrapper.readList(ACL.class, "select * from ACL where userPk=? and objectType=? and roleId = ?", 
 				user.getPk(), entityType.getValue(), roleId);
 		if(acls.size() > 0)
 		{
@@ -94,7 +102,7 @@ public class AuthorizationManager
 		sb.append(")");
 		
 		User user = (User) userContext.getUser();
-		List<ACL> acls = PersistWrapper.readList(ACL.class, sb.toString(), 
+		List<ACL> acls = persistWrapper.readList(ACL.class, sb.toString(), 
 				user.getPk());
 		if(acls.size() > 0)
 		{
@@ -113,7 +121,7 @@ public class AuthorizationManager
 		LinkedHashSet<Action> returnList = new LinkedHashSet<>();
 		
 		User user = (User) userContext.getUser();
-		List<ACL> acls = PersistWrapper.readList(ACL.class, "select * from ACL where objectPk = ? and objectType=? "
+		List<ACL> acls = persistWrapper.readList(ACL.class, "select * from ACL where objectPk = ? and objectType=? "
 				+ "and userPk=? and roleId = ?", 
 				objectOid.getPk(), objectOid.getEntityType().getValue(), user.getPk(), roleId);
 		
@@ -154,7 +162,7 @@ public class AuthorizationManager
 		sb.append(")");
 		
 		User user = (User) userContext.getUser();
-		List<ACL> acls = PersistWrapper.readList(ACL.class, sb.toString(), 
+		List<ACL> acls = persistWrapper.readList(ACL.class, sb.toString(), 
 				objectOid.getPk(), objectOid.getEntityType().getValue(), user.getPk());
 		if(acls.size() > 0)
 		{
@@ -173,7 +181,7 @@ public class AuthorizationManager
 	 */
 	public List<String> getAssignedRoleAssignedIds(OID objectOid)
 	{
-		return  PersistWrapper.readList(String.class, 
+		return  persistWrapper.readList(String.class, 
 				"select distinct roleId from ACL where objectPk = ? and objectType=? ", 
 				objectOid.getPk(), objectOid.getEntityType().getValue());
 		
@@ -187,7 +195,7 @@ public class AuthorizationManager
 	 */
 	public List<String> getAssignedRoleAssignedIds(UserContext context, OID objectOid)
 	{
-		return  PersistWrapper.readList(String.class, 
+		return  persistWrapper.readList(String.class, 
 				"select distinct roleId from ACL where objectPk = ? and objectType=? and userPk=? ", 
 				objectOid.getPk(), objectOid.getEntityType().getValue(), context.getUser().getPk());
 		
@@ -195,14 +203,14 @@ public class AuthorizationManager
 	
 	/**
 	 * Checks if a role is assigned to any user on an object
-	 * @param userContext
+	 * @param
 	 * @param roleId
 	 * @return
 	 * @throws Exception
 	 */
 	public boolean isRoleAssigned(OID objectOid, String roleId)
 	{
-		int count = PersistWrapper.read(Integer.class, "select count(*) from ACL where objectPk = ? and objectType=? "
+		int count = persistWrapper.read(Integer.class, "select count(*) from ACL where objectPk = ? and objectType=? "
 				+ "and roleId = ?", 
 				objectOid.getPk(), objectOid.getEntityType().getValue(), roleId);
 		
@@ -221,7 +229,7 @@ public class AuthorizationManager
 		LinkedHashSet<Action> returnList = new LinkedHashSet<>();
 		
 		User user = (User) userContext.getUser();
-		List<ACL> acls = PersistWrapper.readList(ACL.class, "select * from ACL where objectPk = ? and objectType=? and userPk=?", 
+		List<ACL> acls = persistWrapper.readList(ACL.class, "select * from ACL where objectPk = ? and objectType=? and userPk=?", 
 				objectOid.getPk(), objectOid.getEntityType().getValue(), user.getPk());
 		
 		for (Iterator iterator = acls.iterator(); iterator.hasNext();) 
@@ -236,35 +244,35 @@ public class AuthorizationManager
 	
 	public void setAcl(UserOID userOID, OID objectOid, Role role)throws Exception
 	{
-		List<ACL> acls = PersistWrapper.readList(ACL.class, "select * from ACL where objectPk = ? and objectType=? and userPk=?", 
+		List<ACL> acls = persistWrapper.readList(ACL.class, "select * from ACL where objectPk = ? and objectType=? and userPk=?", 
 				objectOid.getPk(), objectOid.getEntityType().getValue(), userOID.getPk());
 		if(acls.size() > 0)
 			return;
 		
 		ACL acl = new ACL();
 		acl.setCreatedDate(new Date());
-		acl.setObjectPk(objectOid.getPk());
+		acl.setObjectPk((int) objectOid.getPk());
 		acl.setObjectType(objectOid.getEntityType().getValue());
 		acl.setRoleId(role.getId());
-		acl.setUserPk(userOID.getPk());
-		PersistWrapper.createEntity(acl);
+		acl.setUserPk((int) userOID.getPk());
+		persistWrapper.createEntity(acl);
 	}
 	
 	public void removeAcl(UserOID userOID, OID objectOid, Role role)throws Exception
 	{
-		PersistWrapper.delete("delete from ACL where objectPk = ? and objectType=? and userPk=? and roleId = ?", 
+		persistWrapper.delete("delete from ACL where objectPk = ? and objectType=? and userPk=? and roleId = ?", 
 				objectOid.getPk(), objectOid.getEntityType().getValue(), userOID.getPk(), role.getId());
 	}
 
 	public void removeAllAcls(OID objectOid)throws Exception
 	{
-		PersistWrapper.delete("delete from ACL where objectPk = ? and objectType=?", 
+		persistWrapper.delete("delete from ACL where objectPk = ? and objectType=?", 
 				objectOid.getPk(), objectOid.getEntityType().getValue());
 	}
 
 	public void setAcl(Authorizable object, Role role, List<User> users)throws Exception
 	{
-		List<ACL> acls = PersistWrapper.readList(ACL.class, "select * from ACL where objectPk = ? and objectType=? and roleId = ?", 
+		List<ACL> acls = persistWrapper.readList(ACL.class, "select * from ACL where objectPk = ? and objectType=? and roleId = ?", 
 				object.getPk(), object.getEntityType().getValue(), role.getId());
 		
 		HashMap<Integer, ACL> userAclMap = new HashMap<>();
@@ -281,11 +289,11 @@ public class AuthorizationManager
 			{
 				ACL nAcl = new ACL();
 				nAcl.setCreatedDate(new Date());
-				nAcl.setObjectPk(object.getPk());
+				nAcl.setObjectPk((int) object.getPk());
 				nAcl.setObjectType(object.getEntityType().getValue());
 				nAcl.setRoleId(role.getId());
-				nAcl.setUserPk(aUser.getPk());
-				PersistWrapper.createEntity(nAcl);
+				nAcl.setUserPk((int) aUser.getPk());
+				persistWrapper.createEntity(nAcl);
 			}
 		}
 		
@@ -293,7 +301,7 @@ public class AuthorizationManager
 		for (Iterator iterator = userAclMap.values().iterator(); iterator.hasNext();) 
 		{
 			ACL acl = (ACL) iterator.next();
-			PersistWrapper.deleteEntity(acl);
+			persistWrapper.deleteEntity(acl);
 		}
 	}
 
@@ -306,28 +314,28 @@ public class AuthorizationManager
 	 */
 	public List<User> getUsersInRole(Authorizable authorizableOID, Role role) 
 	{
-		return PersistWrapper.readList(User.class, "select * from TAB_USER where pk in (select userPk from "
+		return persistWrapper.readList(User.class, "select * from TAB_USER where pk in (select userPk from "
 				+ "ACL where objectPk=? and objectType = ? and roleId = ?) order by firstName ", 
 				authorizableOID.getPk(), authorizableOID.getEntityType().getValue(), role.getId());
 	}
 
 	/**
 	 * get the users who have the specified role configured on the entity type.
-	 * @param authorizableOID
+	 * @param
 	 * @param role
 	 * @return
 	 * @throws Exception
 	 */
 	public List<User> getUsersInRole(EntityTypeEnum entityType, Role role) 
 	{
-		return PersistWrapper.readList(User.class, "select * from TAB_USER where pk in (select userPk from "
+		return persistWrapper.readList(User.class, "select * from TAB_USER where pk in (select userPk from "
 				+ "ACL where objectType = ? and roleId = ?) order by firstName ", 
 				entityType.getValue(), role.getId());
 	}
 
 	public List<Integer> getEntitiesWithRole(UserContext context, EntityTypeEnum entityType, Role role) 
 	{
-		return PersistWrapper.readList(Integer.class, "select objectPk from "
+		return persistWrapper.readList(Integer.class, "select objectPk from "
 				+ "ACL where objectType = ? and userPk=? and roleId = ?", 
 				entityType.getValue(), context.getUser().getPk(), role.getId());
 	}
@@ -353,11 +361,11 @@ public class AuthorizationManager
 		}
 		sb.append(")");
 		
-		return PersistWrapper.readList(Integer.class, sb.toString(),params.toArray());
+		return persistWrapper.readList(Integer.class, sb.toString(),params.toArray());
 	}
 
 	public List<ACL> getAcls(OID objectOID)
 	{
-		return PersistWrapper.readList(ACL.class, "select * from ACL where objectPk=? and objectType=?", objectOID.getPk(), objectOID.getEntityType().getValue());
+		return persistWrapper.readList(ACL.class, "select * from ACL where objectPk=? and objectType=?", objectOID.getPk(), objectOID.getEntityType().getValue());
 	}
 }

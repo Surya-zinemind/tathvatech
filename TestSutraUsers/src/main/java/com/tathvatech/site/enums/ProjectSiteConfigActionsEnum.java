@@ -2,9 +2,9 @@ package com.tathvatech.site.enums;
 
 import java.util.List;
 
-import com.tathvatech.ts.core.authorization.Action;
+import com.tathvatech.user.OID.Action;
 
-public enum ProjectSiteConfigActionsEnum implements Action 
+public enum ProjectSiteConfigActionsEnum implements Action
 {
 	ApproveNCRDisposition("ApproveNCRDisposition", "Approve NCR Disposition"),
 	RejectNCRDisposition("RejectNCRDisposition", "Reject NCR Disposition");

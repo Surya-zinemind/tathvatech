@@ -1,9 +1,9 @@
 package com.tathvatech.site.oid;
 
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.OID;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.user.OID.OID;
 
-public class ProjectSiteConfigOID extends OID{
+public class ProjectSiteConfigOID extends OID {
 
 	public ProjectSiteConfigOID(int pk, String displayText)
 	{
@@ -12,7 +12,7 @@ public class ProjectSiteConfigOID extends OID{
 
 	@Override
 	public int hashCode() {
-		return getPk();
+		return (int) getPk();
 	}
 
 	@Override

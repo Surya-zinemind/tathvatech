@@ -9,15 +9,22 @@ import com.tathvatech.user.OID.Role;
 import com.tathvatech.user.common.RoleRepository;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.user.enums.SiteRolesEnum;
+import com.tathvatech.user.service.AuthorizationManager;
 import com.tathvatech.user.service.CommonServicesDelegate;
 import org.apache.commons.lang3.ArrayUtils;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.site.entity.SiteFilter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 
+@Service
 public class SiteQuerySecurityProcessor {
 
-	public void addAuthorizationFilterParams(UserContext context, SiteFilter siteFilter) throws Exception 
+	@Autowired
+	private  AuthorizationManager authorizationManager;
+
+	public void addAuthorizationFilterParams(UserContext context, SiteFilter siteFilter) throws Exception
 	{
 		if(User.USER_PRIMARY.equals(context.getUser().getUserType()))
 		{
@@ -45,12 +52,12 @@ public class SiteQuerySecurityProcessor {
 			}
 			if(siteLevelRoles.size() > 0)
 			{
-				List<Integer> sitePks = new AuthorizationDelegate().getEntitiesWithRole(context, EntityTypeEnum.Site, siteLevelRoles.toArray(new Role[siteLevelRoles.size()]));
+				List<Integer> sitePks = authorizationManager.getEntitiesWithRole(context, EntityTypeEnum.Site, siteLevelRoles.toArray(new Role[siteLevelRoles.size()]));
 				returnList.addAll(sitePks);
 			}
 			if(projectSiteLevelRoles.size() > 0)
 			{
-				List<Integer> projectSitePks = new AuthorizationDelegate().getEntitiesWithRole(context, EntityTypeEnum.ProjectSiteConfig, projectSiteLevelRoles.toArray(new Role[projectSiteLevelRoles.size()]));
+				List<Integer> projectSitePks = authorizationManager.getEntitiesWithRole(context, EntityTypeEnum.ProjectSiteConfig, projectSiteLevelRoles.toArray(new Role[projectSiteLevelRoles.size()]));
 				for (Iterator iterator = projectSitePks.iterator(); iterator.hasNext();)
 				{
 					Integer aProjectSitePk = (Integer) iterator.next();
@@ -71,10 +78,10 @@ public class SiteQuerySecurityProcessor {
 		else
 		{
 			// this is kept here for backward compatability.. All calls to getSites should use the validRoles to get the sites with those roles.
-			List<Integer> list = new AuthorizationDelegate().getEntitiesWithRole(context, EntityTypeEnum.Site, SiteRolesEnum.HSECoordinator);
-			list.addAll(new AuthorizationDelegate().getEntitiesWithRole(context, EntityTypeEnum.Site, SiteRolesEnum.HSEDirector));
-			list.addAll(new AuthorizationDelegate().getEntitiesWithRole(context, EntityTypeEnum.Site, SiteRolesEnum.NCRUser));
-			list.addAll(new AuthorizationDelegate().getEntitiesWithRole(context, EntityTypeEnum.Site, SiteRolesEnum.SiteAdmin));
+			List<Integer> list = authorizationManager.getEntitiesWithRole(context, EntityTypeEnum.Site, SiteRolesEnum.HSECoordinator);
+			list.addAll(authorizationManager.getEntitiesWithRole(context, EntityTypeEnum.Site, SiteRolesEnum.HSEDirector));
+			list.addAll(authorizationManager.getEntitiesWithRole(context, EntityTypeEnum.Site, SiteRolesEnum.NCRUser));
+			list.addAll(authorizationManager.getEntitiesWithRole(context, EntityTypeEnum.Site, SiteRolesEnum.SiteAdmin));
 			if(list == null || list.size() == 0)
 			{
 				siteFilter.setSitePks(new int[]{((User)context.getUser()).getSitePk()});

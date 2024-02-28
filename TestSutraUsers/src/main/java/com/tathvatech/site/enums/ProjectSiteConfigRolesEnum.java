@@ -3,12 +3,12 @@ package com.tathvatech.site.enums;
 import java.util.Arrays;
 import java.util.List;
 
-import com.tathvatech.ts.core.authorization.Action;
-import com.tathvatech.ts.core.authorization.Role;
-import com.tathvatech.ts.core.authorization.RoleRepository;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.user.OID.Action;
+import com.tathvatech.user.OID.Role;
+import com.tathvatech.user.common.RoleRepository;
 
-public enum ProjectSiteConfigRolesEnum implements Role 
+public enum ProjectSiteConfigRolesEnum implements Role
 {
 	ProjectProductManagement("ProjectProductManagement","Project / Product Management","Project / Product Management", "FunctionRole"),
 	Engineering("Engineering","Engineering","Engineering", "FunctionRole"),

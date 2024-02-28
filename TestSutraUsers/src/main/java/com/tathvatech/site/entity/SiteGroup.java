@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.tathvatech.common.entity.AbstractEntity;
+import com.tathvatech.site.oid.SiteGroupOID;
 import com.tathvatech.user.enums.SiteRolesEnum;
 
 
@@ -137,9 +138,9 @@ public class SiteGroup extends AbstractEntity implements Serializable, Authoriza
 		return Arrays.asList(SiteActionsEnum.values());
 	}
 
-	public SiteGroupOID getOID() 
+	public SiteGroupOID getOID()
 	{
-		return new SiteGroupOID(pk, name);
+		return new SiteGroupOID((int) pk, name);
 	}
 
 	@Override
