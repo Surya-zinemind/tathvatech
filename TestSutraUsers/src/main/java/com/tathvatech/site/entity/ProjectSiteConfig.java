@@ -15,6 +15,8 @@ import com.tathvatech.user.entity.Site;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -29,7 +31,7 @@ import java.util.List;
 @Table(name="project_site_config")
 public class ProjectSiteConfig extends AbstractEntity implements Serializable,Authorizable
 {
-	private final SiteService siteService;
+
 	@Id
 	private long pk;
 	private int projectFk;
@@ -38,9 +40,6 @@ public class ProjectSiteConfig extends AbstractEntity implements Serializable,Au
 	private int estatus;
 	private Date lastUpdated;
 
-    public ProjectSiteConfig(SiteService siteService) {
-        this.siteService = siteService;
-    }
 
     @Override
 	public long getPk() {
@@ -83,6 +82,9 @@ public class ProjectSiteConfig extends AbstractEntity implements Serializable,Au
 		this.lastUpdated = lastUpdated;
 	}
 
+	@Transient
+	@Autowired
+	private  SiteService siteService;
 	public OID getOID()
 	{
 		Site site = siteService.getSite(siteFk);
@@ -95,6 +97,7 @@ public class ProjectSiteConfig extends AbstractEntity implements Serializable,Au
 
 		return Arrays.asList(ProjectSiteConfigRolesEnum.values());
 	}
+
 
 	@Override
 
