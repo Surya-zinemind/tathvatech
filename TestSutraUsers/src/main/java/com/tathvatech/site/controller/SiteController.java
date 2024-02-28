@@ -6,6 +6,7 @@ import com.tathvatech.site.common.SiteQuery;
 import com.tathvatech.site.entity.SiteFilter;
 import com.tathvatech.site.entity.SiteGroup;
 import com.tathvatech.site.processor.SiteQuerySecurityProcessor;
+import com.tathvatech.site.request.LinkedSupplierRequest;
 import com.tathvatech.site.service.SiteService;
 import com.tathvatech.user.OID.SiteOID;
 import com.tathvatech.user.OID.SupplierOID;
@@ -89,10 +90,10 @@ public class SiteController {
 
 	@PutMapping("/setLinkedSupplier")
 	public  void setLinkedSupplier(UserContext userContext,
-			@RequestBody SiteOID siteOID,@RequestBody SupplierOID supplierOID) throws Exception
+								   @RequestBody LinkedSupplierRequest linkedSupplierRequest) throws Exception
 	{
 		siteService.setLinkedSupplier(userContext,
-        			siteOID, supplierOID);
+				linkedSupplierRequest.getSiteOID(), linkedSupplierRequest.getSupplierOID());
 	}
 
 	@PostMapping("/saveSiteGroup")
