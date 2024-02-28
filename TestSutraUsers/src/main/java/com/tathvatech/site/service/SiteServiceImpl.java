@@ -65,7 +65,7 @@ public class SiteServiceImpl implements SiteService {
 	@Override
     public  Site getSiteByName(String siteName)
 	{
-		return PersistWrapper.read(Site.class, "select * from site where name = ? and estatus != 9 ", siteName);
+		return persistWrapper.read(Site.class, "select * from site where name = ? and estatus != 9 ", siteName);
 	}
 
 	@Override
@@ -106,7 +106,7 @@ public class SiteServiceImpl implements SiteService {
 		try
 		{
 			sql.append(" order by site.name ");
-			return PersistWrapper.readList(Site.class, sql.toString(), params.toArray());
+			return persistWrapper.readList(Site.class, sql.toString(), params.toArray());
 		}
 		catch (Exception e)
 		{
@@ -174,7 +174,7 @@ public class SiteServiceImpl implements SiteService {
 		try
 		{
 			sql.append(" order by site.name ");
-			return PersistWrapper.readList(SiteQuery.class, sql.toString(), params.toArray());
+			return persistWrapper.readList(SiteQuery.class, sql.toString(), params.toArray());
 		}
 		catch (Exception e)
 		{
@@ -211,6 +211,6 @@ public class SiteServiceImpl implements SiteService {
 	@Override
     public  List<SiteGroup> getSiteGroupList()
 	{
-		return PersistWrapper.readList(SiteGroup.class, "select * from site_group");
+		return persistWrapper.readList(SiteGroup.class, "select * from site_group");
 	}
 }

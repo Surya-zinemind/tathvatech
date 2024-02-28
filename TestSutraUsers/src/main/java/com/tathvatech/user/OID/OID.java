@@ -59,7 +59,7 @@ public abstract class OID extends TSBeanBase implements Authorizable{
 	}
 
 	@Override
-	public int getPk() {
+	public long getPk() {
 		return (int) pk;
 	}
 
