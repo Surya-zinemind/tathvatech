@@ -14,6 +14,7 @@ import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.Site;
 import com.tathvatech.user.service.EmailServiceManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Connection;
@@ -29,17 +30,20 @@ public class SiteController {
 
 	private final EmailServiceManager emailServiceManager;
 	@PostMapping("/createSite")
-	public  void createSite(UserContext context, @RequestBody Site site) throws Exception{
+	public  void createSite(@RequestBody Site site) throws Exception{
+		UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		siteService.createSite(context, site);
 	}
 
 	@PutMapping("/updateSite")
-	public void updateSite(UserContext context, @RequestBody Site site) throws Exception{
+	public void updateSite(@RequestBody Site site) throws Exception{
+		UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		siteService.updateSite(context, site);
 	}
 
 	@DeleteMapping("/deleteSite/{sitePk}")
-	public  void deleteSite(UserContext context,@PathVariable("sitePk") int sitePk) throws Exception{
+	public  void deleteSite(@PathVariable("sitePk") int sitePk) throws Exception{
+		UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		siteService.deleteSite(context, sitePk);
 	}
 
@@ -57,14 +61,16 @@ public class SiteController {
 	}
 
 	@GetMapping("/getSites")
-	public  List<Site> getSites(UserContext context, @RequestBody SiteFilter siteFilter)
+	public  List<Site> getSites(@RequestBody SiteFilter siteFilter)
 	{
+		UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		return siteService.getSites(siteFilter);
 	}
 
 	@GetMapping("/getSiteList")
-	public  List<SiteQuery> getSiteList(UserContext context, @RequestBody SiteFilter siteFilter)
+	public  List<SiteQuery> getSiteList(@RequestBody SiteFilter siteFilter)
 	{
+		UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		return siteService.getSiteList(siteFilter);
 	}
 
@@ -89,16 +95,18 @@ public class SiteController {
 	
 
 	@PutMapping("/setLinkedSupplier")
-	public  void setLinkedSupplier(UserContext userContext,
+	public  void setLinkedSupplier(
 								   @RequestBody LinkedSupplierRequest linkedSupplierRequest) throws Exception
 	{
-		siteService.setLinkedSupplier(userContext,
+		UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		siteService.setLinkedSupplier(context,
 				linkedSupplierRequest.getSiteOID(), linkedSupplierRequest.getSupplierOID());
 	}
 
 	@PostMapping("/saveSiteGroup")
-	public  SiteGroup saveSiteGroup(UserContext context, @RequestBody SiteGroup siteGroup)throws Exception
+	public  SiteGroup saveSiteGroup(@RequestBody SiteGroup siteGroup)throws Exception
 	{
+		UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		siteGroup =siteService.saveSiteGroup(context, siteGroup);
 		return siteGroup;
 	}

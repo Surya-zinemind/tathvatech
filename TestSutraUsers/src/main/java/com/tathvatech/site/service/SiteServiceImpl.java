@@ -14,7 +14,7 @@ import com.tathvatech.user.OID.SiteOID;
 import com.tathvatech.user.OID.SupplierOID;
 import com.tathvatech.site.common.SiteQuery;
 import com.tathvatech.site.entity.SiteGroup;
-
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -26,7 +26,8 @@ public class SiteServiceImpl implements SiteService {
         this.persistWrapper = persistWrapper;
     }
 
-    @Override
+	@Transactional
+	@Override
     public  void createSite(UserContext context, Site site) throws Exception
 	{
 		site.setCreatedBy(context.getUser().getPk());
@@ -35,12 +36,14 @@ public class SiteServiceImpl implements SiteService {
 		persistWrapper.createEntity(site);
 	}
 
+	@Transactional
 	@Override
     public  void updateSite(UserContext context, Site site) throws Exception
 	{
 		persistWrapper.update(site);
 	}
 
+	@Transactional
 	@Override
     public  void deleteSite(UserContext context, int sitePk) throws Exception
 	{
@@ -183,6 +186,7 @@ public class SiteServiceImpl implements SiteService {
 		return new ArrayList();
 	}
 
+	@Transactional
 	@Override
     public  void setLinkedSupplier(UserContext userContext, SiteOID siteOID,
                                    SupplierOID supplierOID) throws Exception {
@@ -191,6 +195,7 @@ public class SiteServiceImpl implements SiteService {
 		persistWrapper.update(site);
 	}
 
+	@Transactional
 	@Override
     public  SiteGroup saveSiteGroup(UserContext context, SiteGroup siteGroup)throws Exception
 	{
