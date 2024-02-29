@@ -1,15 +1,12 @@
 package com.tathvatech.site.controller;
 
-import com.tathvatech.common.common.ServiceLocator;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.site.common.SiteQuery;
-import com.tathvatech.site.entity.SiteFilter;
+import com.tathvatech.site.common.SiteFilter;
 import com.tathvatech.site.entity.SiteGroup;
-import com.tathvatech.site.processor.SiteQuerySecurityProcessor;
 import com.tathvatech.site.request.LinkedSupplierRequest;
 import com.tathvatech.site.service.SiteService;
 import com.tathvatech.user.OID.SiteOID;
-import com.tathvatech.user.OID.SupplierOID;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.Site;
 import com.tathvatech.user.service.EmailServiceManager;
@@ -17,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Connection;
 import java.util.List;
 
 @RequestMapping("/site")

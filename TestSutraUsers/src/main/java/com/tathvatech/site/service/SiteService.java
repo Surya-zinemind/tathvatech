@@ -1,7 +1,7 @@
 package com.tathvatech.site.service;
 
 import com.tathvatech.site.common.SiteQuery;
-import com.tathvatech.site.entity.SiteFilter;
+import com.tathvatech.site.common.SiteFilter;
 import com.tathvatech.site.entity.SiteGroup;
 import com.tathvatech.user.OID.SiteOID;
 import com.tathvatech.user.OID.SupplierOID;

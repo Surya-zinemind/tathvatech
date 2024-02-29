@@ -2,7 +2,7 @@ package com.tathvatech.site.service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import com.tathvatech.site.entity.SiteFilter;
+import com.tathvatech.site.common.SiteFilter;
 import com.tathvatech.user.entity.Site;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.user.common.UserContext;

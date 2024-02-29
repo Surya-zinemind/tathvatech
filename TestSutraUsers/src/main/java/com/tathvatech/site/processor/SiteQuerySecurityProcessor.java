@@ -13,7 +13,7 @@ import com.tathvatech.user.service.AuthorizationManager;
 import com.tathvatech.user.service.CommonServicesDelegate;
 import org.apache.commons.lang3.ArrayUtils;
 import com.tathvatech.user.common.UserContext;
-import com.tathvatech.site.entity.SiteFilter;
+import com.tathvatech.site.common.SiteFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
