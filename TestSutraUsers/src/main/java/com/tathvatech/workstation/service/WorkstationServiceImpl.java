@@ -1,13 +1,20 @@
 package com.tathvatech.workstation.service;
 
+import com.tathvatech.common.enums.EStatusEnum;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.TestProcOID;
 import com.tathvatech.user.OID.UnitOID;
 import com.tathvatech.user.OID.WorkstationOID;
 import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.security.manager.ManagerUserSecurityManager;
+import com.tathvatech.workstation.common.UnitInProjectObj;
 import com.tathvatech.workstation.common.UnitWorkstationQuery;
+import com.tathvatech.workstation.entity.UnitWorkstation;
 import com.tathvatech.workstation.entity.Workstation;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,6 +22,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class WorkstationServiceImpl implements WorkstationService{
+    private static final Logger logger = LoggerFactory.getLogger(WorkstationServiceImpl.class);
     
     private final PersistWrapper persistWrapper;
 
@@ -709,7 +717,7 @@ public class WorkstationServiceImpl implements WorkstationService{
         workstation.setUpdatedBy(context.getUser().getPk());
         persistWrapper.update(workstation);
     }
-    private  void setWorkstationsAndTeamsOnUnitOpen(UserContext context, ProjectOID projectOID, UnitOID unitOID,
+    public  void setWorkstationsAndTeamsOnUnitOpen(UserContext context, ProjectOID projectOID, UnitOID unitOID,
                                                           UnitInProjectObj unitInProject,
                                                           boolean copyProjectWorkstationUsersToUnit, boolean copyProjectWorkstationFormsToUnit) throws Exception
     {
