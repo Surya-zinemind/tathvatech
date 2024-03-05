@@ -1,9 +1,10 @@
 package com.tathvatech.unit.oid;
 
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.OID;
 
-public class UnitInProjectOID extends OID{
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.user.OID.OID;
+
+public class UnitInProjectOID extends OID {
 
 	public UnitInProjectOID(int pk)
 	{
@@ -37,7 +38,7 @@ public class UnitInProjectOID extends OID{
 	
 	@Override
 	public int hashCode() {
-		return super.getPk();
+		return (int) super.getPk();
 	}
 
 }

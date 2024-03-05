@@ -4,18 +4,18 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.tathvatech.ts.core.common.TSBeanBase;
-import com.tathvatech.ts.core.sites.Site;
-import com.tathvatech.ts.core.sites.SiteCache;
-import com.tathvatech.ts.core.sites.SiteOID;
+import com.tathvatech.user.OID.SiteOID;
+import com.tathvatech.user.OID.TSBeanBase;
+import com.tathvatech.user.OID.WorkstationOID;
+import com.tathvatech.user.entity.Site;
+import com.tathvatech.user.entity.SiteCache;
 
-import net.sf.persist.annotations.NoTable;
 
-@NoTable
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WorkstationQuery extends TSBeanBase implements WorkstationOrderComparable, Serializable
 {
-	private int pk;
+	private long pk;
 	private int sitePk;
 	private String siteName;
 	private String timeZone;
@@ -27,14 +27,16 @@ public class WorkstationQuery extends TSBeanBase implements WorkstationOrderComp
 	private String createdByLastName;
 	private int createdByPk;
 	private Date createdDate;
-	public int getPk()
-	{
+
+	@Override
+	public long getPk() {
 		return pk;
 	}
-	public void setPk(int pk)
-	{
+
+	public void setPk(long pk) {
 		this.pk = pk;
 	}
+
 	public int getSitePk() {
 		return sitePk;
 	}
@@ -116,7 +118,7 @@ public class WorkstationQuery extends TSBeanBase implements WorkstationOrderComp
 	
 	public WorkstationOID getOID()
 	{
-		return new WorkstationOID(pk, getDisplayString());
+		return new WorkstationOID((int) pk, getDisplayString());
 	}
 	
 	@Override
@@ -135,7 +137,7 @@ public class WorkstationQuery extends TSBeanBase implements WorkstationOrderComp
 	@Override
 	public int hashCode()
 	{
-		return pk;
+		return (int) pk;
 	}
 	@Override
 	public String toString() {

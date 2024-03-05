@@ -1,5 +1,9 @@
 package com.tathvatech.workstation.service;
 
+import com.tathvatech.project.common.ProjectQuery;
+import com.tathvatech.project.oid.ProjectPartOID;
+import com.tathvatech.unit.common.UnitLocationQuery;
+import com.tathvatech.unit.common.UnitObj;
 import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.TestProcOID;
 import com.tathvatech.user.OID.UnitOID;
@@ -8,9 +12,11 @@ import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.Project;
 import com.tathvatech.workstation.common.UnitInProjectObj;
 import com.tathvatech.workstation.common.UnitWorkstationQuery;
+import com.tathvatech.workstation.common.WorkstationQuery;
 import com.tathvatech.workstation.entity.ProjectWorkstation;
 import com.tathvatech.workstation.entity.UnitWorkstation;
 import com.tathvatech.workstation.entity.Workstation;
+import com.tathvatech.workstation.request.WorkstationFilter;
 
 import java.util.List;
 
@@ -40,7 +46,7 @@ public interface WorkstationService {
 
     void removeWorkstationFromProject(UserContext context, int projectPk, WorkstationOID workstationOID) throws Exception;
 
-    void removeAllWorkstationsFromProject(UserContext context, int projectPk) throws Exception
+    void removeAllWorkstationsFromProject(UserContext context, int projectPk) throws Exception;
     List<WorkstationQuery> getWorkstationsForUnit(UnitOID unitOID, ProjectOID projectOID) throws Exception;
 
     List<UnitWorkstationQuery> getWorkstationsForUnit(UnitOID unitOID, ProjectOID projectOID, boolean includeChildUnits) throws Exception;

@@ -1,6 +1,10 @@
 package com.tathvatech.workstation.controller;
 
 import ch.qos.logback.classic.Logger;
+import com.tathvatech.project.common.ProjectQuery;
+import com.tathvatech.project.oid.ProjectPartOID;
+import com.tathvatech.unit.common.UnitLocationQuery;
+import com.tathvatech.unit.common.UnitObj;
 import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.TestProcOID;
 import com.tathvatech.user.OID.UnitOID;
@@ -8,11 +12,15 @@ import com.tathvatech.user.OID.WorkstationOID;
 import com.tathvatech.user.common.ServiceLocator;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.Project;
+import com.tathvatech.user.service.DeviceServiceImpl;
 import com.tathvatech.workstation.common.UnitWorkstationQuery;
+import com.tathvatech.workstation.common.WorkstationQuery;
 import com.tathvatech.workstation.entity.UnitWorkstation;
 import com.tathvatech.workstation.entity.Workstation;
+import com.tathvatech.workstation.request.WorkstationFilter;
 import com.tathvatech.workstation.service.WorkstationService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,6 +35,7 @@ import java.util.List;
 public class WorkstationController {
     
     private final WorkstationService workstationService;
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(WorkstationController.class);
 
     public  void createWorkstation(UserContext context, Workstation workstation) throws Exception
     {
@@ -425,7 +434,7 @@ public class WorkstationController {
         }
     }
     public  void copyWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
-                                              WorkstationQuery workstationQuery, Integer[] selectedUnits) throws Exception
+                                        WorkstationQuery workstationQuery, Integer[] selectedUnits) throws Exception
     {
         Connection con = null;
         try
@@ -447,8 +456,8 @@ public class WorkstationController {
     }
 
     public  void setWorkstationProjectPartTeamSetupToUnits(UserContext context, ProjectQuery projectQuery,
-                                                                 WorkstationQuery workstationQuery, ProjectPartOID projectPartOID, Integer[] selectedUnits,
-                                                                 boolean copyDefaultTeamIfNoProjectPartTeamIsSet) throws Exception
+                                                           WorkstationQuery workstationQuery, ProjectPartOID projectPartOID, Integer[] selectedUnits,
+                                                           boolean copyDefaultTeamIfNoProjectPartTeamIsSet) throws Exception
     {
         Connection con = null;
         try

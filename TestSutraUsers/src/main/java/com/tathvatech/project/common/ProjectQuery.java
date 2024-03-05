@@ -3,13 +3,12 @@ package com.tathvatech.project.common;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.tathvatech.user.OID.ProjectOID;
 import org.apache.commons.lang3.StringUtils;
 
-import com.tathvatech.ts.core.project.ProjectOID;
 
-import net.sf.persist.annotations.NoTable;
 
-@NoTable
+
 public class ProjectQuery implements Serializable
 {
 	private int pk;

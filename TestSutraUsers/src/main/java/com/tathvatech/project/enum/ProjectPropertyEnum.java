@@ -1,14 +1,16 @@
 package com.tathvatech.project;
 
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.user.OID.Action;
+import com.tathvatech.user.OID.Role;
+import com.tathvatech.user.common.RoleRepository;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import com.tathvatech.ts.core.authorization.Action;
-import com.tathvatech.ts.core.authorization.Role;
-import com.tathvatech.ts.core.authorization.RoleRepository;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
 
-public enum ProjectPropertyEnum implements Role 
+
+public enum ProjectPropertyEnum implements Role
 {
 	//TODO Change the name of this enum here and in the DB at the same time.. search in the code base and change the comment where ever it is mentioned 
 	SetNewWorkstationsDefaultStatusTo("SetNewWorkstationsDefaultStatusTo", "Change the worksation status to this status set in the DB when a workstation is created under a unit.", 
@@ -67,19 +69,19 @@ public enum ProjectPropertyEnum implements Role
 		return description;
 	}
 
-	@Override
+
 	public String getRoleType()
 	{
 		return null;
 	}
 
-	@Override
+
 	public String[] getAllowedUserTypes()
 	{
 		return null;
 	}
 	
-	@Override
+
 	public boolean getUsersWithEmailOnly()
 	{
 		return false;

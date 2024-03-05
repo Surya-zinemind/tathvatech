@@ -6,13 +6,14 @@
  */
 package com.tathvatech.unit.common;
 
+import com.tathvatech.site.oid.SiteGroupOID;
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.SupplierOID;
+import com.tathvatech.user.OID.UnitOID;
+
 import java.util.Date;
 
-import com.tathvatech.ts.core.common.TestableEntity;
-import com.tathvatech.ts.core.part.SupplierOID;
-import com.tathvatech.ts.core.sites.SiteGroupOID;
 
-import net.sf.persist.annotations.NoTable;
 
 /**
  * @author Hari
@@ -20,7 +21,7 @@ import net.sf.persist.annotations.NoTable;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-@NoTable
+
 public class UnitObj implements TestableEntity
 {
 	private int pk;
@@ -228,7 +229,7 @@ public class UnitObj implements TestableEntity
 		return unitBean;
 	}
     
-	@Override
+
 	public UnitOID getOID() {
 		return new UnitOID(pk, unitName);
 	}

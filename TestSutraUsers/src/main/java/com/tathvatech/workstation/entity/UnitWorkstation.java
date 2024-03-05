@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.tathvatech.common.entity.AbstractEntity;
+import com.tathvatech.workstation.oid.UnitWorkstationOID;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -100,9 +101,9 @@ public class UnitWorkstation extends AbstractEntity implements Serializable
 		this.lastUpdated = lastUpdated;
 	}
 
-	public UnitWorkstationOID getOID() 
+	public UnitWorkstationOID getOID()
 	{
-		return new UnitWorkstationOID(pk, null);
+		return new UnitWorkstationOID((int) pk, null);
 	}
 	
 	public static String STATUS_OPEN = "Open";

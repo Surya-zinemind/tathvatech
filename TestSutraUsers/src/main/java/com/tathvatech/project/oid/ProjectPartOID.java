@@ -1,7 +1,8 @@
 package com.tathvatech.project.oid;
 
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.OID;
+import com.tathvatech.common.enums.EntityTypeEnum;
+
+import com.tathvatech.user.OID.OID;
 
 public class ProjectPartOID extends OID {
 
@@ -17,7 +18,7 @@ public class ProjectPartOID extends OID {
 
 	@Override
 	public int hashCode() {
-		return getPk();
+		return (int) getPk();
 	}
 
 	@Override

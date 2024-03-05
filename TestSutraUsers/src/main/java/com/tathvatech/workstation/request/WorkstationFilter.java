@@ -2,7 +2,10 @@ package com.tathvatech.workstation.request;
 
 import java.util.List;
 
-import com.tathvatech.ts.core.sites.SiteOID;
+
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.SiteOID;
+import com.tathvatech.user.OID.UnitOID;
 
 public class WorkstationFilter
 {

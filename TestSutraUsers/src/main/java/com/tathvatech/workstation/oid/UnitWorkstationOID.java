@@ -2,10 +2,11 @@ package com.tathvatech.workstation.oid;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.OID;
+import com.tathvatech.common.enums.EntityTypeEnum;
 
-public class UnitWorkstationOID extends OID{
+import com.tathvatech.user.OID.OID;
+
+public class UnitWorkstationOID extends OID {
 
 	@JsonCreator
 	public UnitWorkstationOID(@JsonProperty("pk") int pk)
@@ -40,7 +41,7 @@ public class UnitWorkstationOID extends OID{
 	
 	@Override
 	public int hashCode() {
-		return super.getPk();
+		return (int) super.getPk();
 	}
 
 }
