@@ -1,12 +1,18 @@
 package com.tathvatech.workstation.service;
 
 import com.tathvatech.common.enums.EStatusEnum;
+import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.site.service.SiteService;
 import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.TestProcOID;
 import com.tathvatech.user.OID.UnitOID;
 import com.tathvatech.user.OID.WorkstationOID;
 import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.Account;
+import com.tathvatech.user.entity.Project;
+import com.tathvatech.user.entity.Site;
+import com.tathvatech.user.entity.User;
 import com.tathvatech.user.security.manager.ManagerUserSecurityManager;
 import com.tathvatech.workstation.common.UnitInProjectObj;
 import com.tathvatech.workstation.common.UnitWorkstationQuery;
@@ -17,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -26,12 +34,14 @@ public class WorkstationServiceImpl implements WorkstationService{
     
     private final PersistWrapper persistWrapper;
 
+    private final SiteService siteService;
+
     public Workstation createWorkstation(UserContext context, Workstation workstation) throws Exception
     {
         Account acc = (Account) context.getAccount();
         User user = (User) context.getUser();
 
-        Site site = SiteManager.getSite(workstation.getSitePk());
+        Site site = siteService.getSite(workstation.getSitePk());
         if (site == null)
             throw new AppException("Invalid Site selected.");
 
@@ -51,10 +61,10 @@ public class WorkstationServiceImpl implements WorkstationService{
             workstation.setStatus(Workstation.STATUS_OPEN);
             workstation.setEstatus(EStatusEnum.Active.getValue());
             workstation.setUpdatedBy(user.getPk());
-            pk = persistWrapper.createEntity(workstation);
+            pk = (int) persistWrapper.createEntity(workstation);
         }
         // fetch the new project back
-        workstation = persistWrapper.readByPrimaryKey(Workstation.class, pk);
+        workstation = (Workstation) persistWrapper.readByPrimaryKey(Workstation.class, pk);
         return workstation;
 
     }
@@ -63,12 +73,12 @@ public class WorkstationServiceImpl implements WorkstationService{
         Account acc = (Account) context.getAccount();
         User user = (User) context.getUser();
 
-        Site site = SiteManager.getSite(workstation.getSitePk());
+        Site site = siteService.getSite(workstation.getSitePk());
         if (site == null)
             throw new AppException("Invalid Site selected.");
 
         if (isWorkstationNameExistForAnotherWorkstation(acc, site, workstation.getWorkstationName(),
-                workstation.getPk()))
+                (int) workstation.getPk()))
         {
             throw new AppException("Another workstation with the name specified exists, Please choose another name.");
         }
@@ -77,7 +87,7 @@ public class WorkstationServiceImpl implements WorkstationService{
         persistWrapper.update(workstation);
 
         // fetch the new project back
-        workstation = persistWrapper.readByPrimaryKey(Workstation.class, workstation.getPk());
+        workstation = (Workstation) persistWrapper.readByPrimaryKey(Workstation.class, workstation.getPk());
         return workstation;
     }
     private  boolean isWorkstationNameExist(Account acc, Site site, String workstationName) throws Exception
@@ -128,8 +138,7 @@ public class WorkstationServiceImpl implements WorkstationService{
     public  List<WorkstationQuery> getWorkstationList() throws Exception
     {
         String sql = WorkstationQuery.sql + " and  ws.workstationName != ? order by site.name, ws.orderNo";
-        persistWrapper p = new persistWrapper();
-        return p.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY);
+        return persistWrapper.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY);
     }
 
     public  Workstation getWorkstation(WorkstationOID workstationOID)
@@ -153,8 +162,8 @@ public class WorkstationServiceImpl implements WorkstationService{
     {
         String sql = WorkstationQuery.sql
                 + " and ws.workstationName != ? and ws.pk in (select workstationPk from TAB_PROJECT_WORKSTATIONS where projectPk=?) order by ws.orderNo";
-        persistWrapper p = new persistWrapper();
-        return p.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, projectPk);
+
+        return persistWrapper.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, projectPk);
     }
 
     public  List<WorkstationQuery> getWorkstations(WorkstationFilter filter)
@@ -210,10 +219,9 @@ public class WorkstationServiceImpl implements WorkstationService{
     {
         String sql = WorkstationQuery.sql
                 + " and ws.workstationName != ? and ws.sitePk in (select siteFk from project_site_config where projectFk=? and estatus = 1) order by ws.orderNo";
-        persistWrapper p = new persistWrapper();
         try
         {
-            return p.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, projectOID.getPk());
+            return persistWrapper.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, projectOID.getPk());
         }
         catch (Exception e)
         {
@@ -225,16 +233,14 @@ public class WorkstationServiceImpl implements WorkstationService{
     public  List<WorkstationQuery> getWorkstationsForSite(int sitePk) throws Exception
     {
         String sql = WorkstationQuery.sql + " and  ws.workstationName != ? and ws.sitePk=? order by ws.orderNo";
-        persistWrapper p = new persistWrapper();
-        return p.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, sitePk);
+        return persistWrapper.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, sitePk);
     }
 
     public  List<WorkstationQuery> getWorkstationsForSiteAndProject(int sitePk, int projectPk) throws Exception
     {
         String sql = WorkstationQuery.sql
                 + " and  ws.workstationName != ? and ws.sitePk=? and ws.pk in (select workstationPk from TAB_PROJECT_WORKSTATIONS where projectPk=?) order by ws.orderNo";
-        persistWrapper p = new persistWrapper();
-        return p.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, sitePk, projectPk);
+        return persistWrapper.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, sitePk, projectPk);
     }
 
     public  void addWorkstationToProject(UserContext context, int projectPk, WorkstationOID workstationOID)
@@ -282,8 +288,7 @@ public class WorkstationServiceImpl implements WorkstationService{
     {
         String sql = WorkstationQuery.sql + " and "
                 + "ws.workstationName != ? and ws.pk in (select workstationPk from TAB_UNIT_WORKSTATIONS where unitPk=? and projectPk = ? and estatus = ? ) order by ws.orderNo";
-        persistWrapper p = new persistWrapper();
-        return p.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, unitOID.getPk(), projectOID.getPk(),
+        return persistWrapper.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, unitOID.getPk(), projectOID.getPk(),
                 EStatusEnum.Active.getValue());
     }
 
@@ -305,16 +310,16 @@ public class WorkstationServiceImpl implements WorkstationService{
             String sql = UnitWorkstationQuery.sql + " and " + "w.workstationName != ?  "
                     + " and ( (u.pk = ?) or (uprh.rootParentPk = ? and uprh.heiCode like ?) )"
                     + " and uw.projectPk = ? and uw.estatus = ? order by uprh.level, w.orderNo";
-            persistWrapper p = new persistWrapper();
-            return p.readList(UnitWorkstationQuery.class, sql, DummyWorkstation.DUMMY, unitInProject.getUnitPk(),
+
+            return persistWrapper.readList(UnitWorkstationQuery.class, sql, DummyWorkstation.DUMMY, unitInProject.getUnitPk(),
                     unitInProject.getRootParentPk(), unitInProject.getHeiCode() + ".%", projectOID.getPk(),
                     EStatusEnum.Active.getValue());
         } else
         {
             String sql = UnitWorkstationQuery.sql + " and "
                     + "w.workstationName != ? and uw.unitpk  = ? and uw.projectPk = ? and uw.estatus = ? order by w.orderNo";
-            persistWrapper p = new persistWrapper();
-            return p.readList(UnitWorkstationQuery.class, sql, DummyWorkstation.DUMMY, unitOID.getPk(),
+
+            return persistWrapper.readList(UnitWorkstationQuery.class, sql, DummyWorkstation.DUMMY, unitOID.getPk(),
                     projectOID.getPk(), EStatusEnum.Active.getValue());
         }
     }
