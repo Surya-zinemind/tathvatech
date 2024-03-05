@@ -9,6 +9,7 @@ import com.tathvatech.user.common.ServiceLocator;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.Project;
 import com.tathvatech.workstation.common.UnitWorkstationQuery;
+import com.tathvatech.workstation.entity.UnitWorkstation;
 import com.tathvatech.workstation.entity.Workstation;
 import com.tathvatech.workstation.service.WorkstationService;
 import lombok.RequiredArgsConstructor;
