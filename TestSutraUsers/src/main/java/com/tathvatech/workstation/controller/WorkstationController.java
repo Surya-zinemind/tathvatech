@@ -1,9 +1,24 @@
 package com.tathvatech.workstation.controller;
 
+import ch.qos.logback.classic.Logger;
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.TestProcOID;
+import com.tathvatech.user.OID.UnitOID;
+import com.tathvatech.user.OID.WorkstationOID;
+import com.tathvatech.user.common.ServiceLocator;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.Project;
+import com.tathvatech.workstation.common.UnitWorkstationQuery;
+import com.tathvatech.workstation.entity.Workstation;
 import com.tathvatech.workstation.service.WorkstationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 @RequestMapping("/workstation")
 @RestController
@@ -163,8 +178,8 @@ public class WorkstationController {
             con.commit();
         }
     }
-    public  List<UnitWorkstationQuery> getWorkstationsForUnit(int unitPk, ProjectOID projectOID,
-                                                                    boolean includeChildUnits) throws Exception
+    public List<UnitWorkstationQuery> getWorkstationsForUnit(int unitPk, ProjectOID projectOID,
+                                                             boolean includeChildUnits) throws Exception
     {
         return workstationService.getWorkstationsForUnit(new UnitOID(unitPk, null), projectOID, includeChildUnits);
     }
@@ -548,6 +563,7 @@ public class WorkstationController {
             }
             catch (SQLException e)
             {
+                Logger logger = null;
                 logger.error("Count not rollback transaction", ex);
             }
         }
@@ -575,6 +591,7 @@ public class WorkstationController {
             }
             catch (SQLException e)
             {
+
                 logger.error("Count not rollback transaction", ex);
             }
         }
@@ -608,6 +625,7 @@ public class WorkstationController {
             }
             catch (SQLException e)
             {
+
                 logger.error("Count not rollback transaction", ex);
             }
             throw ex;
@@ -640,6 +658,7 @@ public class WorkstationController {
             }
             catch (SQLException e)
             {
+
                 logger.error("Count not rollback transaction", ex);
             }
             throw ex;
