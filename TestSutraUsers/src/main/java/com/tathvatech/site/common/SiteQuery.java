@@ -4,25 +4,11 @@
  * TODO To change the template for this generated file go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-package com.tathvatech.user.entity;
+package com.tathvatech.site.common;
 
-import com.tathvatech.common.entity.AbstractEntity;
-import com.tathvatech.common.enums.EntityType;
-import com.tathvatech.common.enums.EntityTypeEnum;
-import com.tathvatech.user.OID.Action;
-import com.tathvatech.user.OID.Authorizable;
-import com.tathvatech.user.OID.Role;
-import com.tathvatech.user.OID.SiteOID;
-import com.tathvatech.user.enums.SiteActionsEnum;
-import com.tathvatech.user.enums.SiteRolesEnum;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
-import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
+
+import com.tathvatech.user.OID.SiteOID;
 
 
 /**
@@ -31,38 +17,35 @@ import java.util.List;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-@Entity
-@Table(name="site")
-public class Site extends AbstractEntity implements Authorizable, Serializable
+
+public class SiteQuery
 {
-	@Id
-	private long pk;
-	private Integer siteGroupFk;
+	private int pk;
 	private String name;
 	private String description;
 	private String address;
 	private String timeZone;
 	private Integer defaultSupplierFk;
-	private long createdBy;
+	private int createdBy;
 	private Date createdDate;
+	private long purchasedLicenseCount;
+	private long purchasedReadOnlyCount;
+	private long activeLicenseCount;
+	private long activeReadOnlyCount;
 	private int estatus;
+	private int siteGroupPk;
+	private String siteGroupName;
+	private String siteGroupDescription;
 	private Date lastUpdated;
-
-	@Override
-	public long getPk() {
+	
+	public int getPk()
+	{
 		return pk;
 	}
 
-	public void setPk(long pk) {
+	public void setPk(int pk)
+	{
 		this.pk = pk;
-	}
-
-	public Integer getSiteGroupFk() {
-		return siteGroupFk;
-	}
-
-	public void setSiteGroupFk(Integer siteGroupFk) {
-		this.siteGroupFk = siteGroupFk;
 	}
 
 	public String getName() {
@@ -105,11 +88,13 @@ public class Site extends AbstractEntity implements Authorizable, Serializable
 		this.defaultSupplierFk = defaultSupplierFk;
 	}
 
-	public long getCreatedBy() {
+	public int getCreatedBy()
+	{
 		return createdBy;
 	}
 
-	public void setCreatedBy(long createdBy) {
+	public void setCreatedBy(int createdBy)
+	{
 		this.createdBy = createdBy;
 	}
 
@@ -123,6 +108,46 @@ public class Site extends AbstractEntity implements Authorizable, Serializable
 		this.createdDate = createdDate;
 	}
 
+	public long getPurchasedLicenseCount()
+	{
+		return purchasedLicenseCount;
+	}
+
+	public void setPurchasedLicenseCount(long purchasedLicenseCount)
+	{
+		this.purchasedLicenseCount = purchasedLicenseCount;
+	}
+
+	public long getPurchasedReadOnlyCount()
+	{
+		return purchasedReadOnlyCount;
+	}
+
+	public void setPurchasedReadOnlyCount(long purchasedReadOnlyCount)
+	{
+		this.purchasedReadOnlyCount = purchasedReadOnlyCount;
+	}
+
+	public long getActiveLicenseCount()
+	{
+		return activeLicenseCount;
+	}
+
+	public void setActiveLicenseCount(long activeLicenseCount)
+	{
+		this.activeLicenseCount = activeLicenseCount;
+	}
+
+	public long getActiveReadOnlyCount()
+	{
+		return activeReadOnlyCount;
+	}
+
+	public void setActiveReadOnlyCount(long activeReadOnlyCount)
+	{
+		this.activeReadOnlyCount = activeReadOnlyCount;
+	}
+
 	public int getEstatus() {
 		return estatus;
 	}
@@ -131,6 +156,29 @@ public class Site extends AbstractEntity implements Authorizable, Serializable
 		this.estatus = estatus;
 	}
 
+	public int getSiteGroupPk() {
+		return siteGroupPk;
+	}
+
+	public void setSiteGroupPk(int siteGroupPk) {
+		this.siteGroupPk = siteGroupPk;
+	}
+
+	public String getSiteGroupName() {
+		return siteGroupName;
+	}
+
+	public void setSiteGroupName(String siteGroupName) {
+		this.siteGroupName = siteGroupName;
+	}
+
+	public String getSiteGroupDescription() {
+		return siteGroupDescription;
+	}
+
+	public void setSiteGroupDescription(String siteGroupDescription) {
+		this.siteGroupDescription = siteGroupDescription;
+	}
 
 	public Date getLastUpdated()
 	{
@@ -145,7 +193,7 @@ public class Site extends AbstractEntity implements Authorizable, Serializable
 	/**
      * 
      */
-    public Site()
+    public SiteQuery()
     {
     }
     
@@ -154,27 +202,15 @@ public class Site extends AbstractEntity implements Authorizable, Serializable
 	@Override
 	public int hashCode() 
 	{
-		return (int) pk;
+		return pk;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof Site && ((Site)obj).getPk() == pk)
+		if(obj instanceof SiteQuery && ((SiteQuery)obj).getPk() == pk)
 			return true;
 		
 		return false;
-	}
-
-	@Override
-	public List<? extends Role> getSupportedRoles()
-	{
-		return Arrays.asList(SiteRolesEnum.values());
-	}
-
-	@Override
-	public List<? extends Action> getSupportedActions()
-	{
-		return Arrays.asList(SiteActionsEnum.values());
 	}
 
 	public SiteOID getOID()
@@ -193,11 +229,5 @@ public class Site extends AbstractEntity implements Authorizable, Serializable
 			return name + " (" + description + ")";
 		else
 			return name;
-	}
-
-	@Override
-	public EntityType getEntityType()
-	{
-		return EntityTypeEnum.Site;
 	}
 }
