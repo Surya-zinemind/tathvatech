@@ -40,6 +40,7 @@ public interface WorkstationService {
 
     void removeWorkstationFromProject(UserContext context, int projectPk, WorkstationOID workstationOID) throws Exception;
 
+    void removeAllWorkstationsFromProject(UserContext context, int projectPk) throws Exception
     List<WorkstationQuery> getWorkstationsForUnit(UnitOID unitOID, ProjectOID projectOID) throws Exception;
 
     List<UnitWorkstationQuery> getWorkstationsForUnit(UnitOID unitOID, ProjectOID projectOID, boolean includeChildUnits) throws Exception;
