@@ -1,6 +1,9 @@
 package com.tathvatech.workstation.service;
 
 import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.user.OID.WorkstationOID;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.workstation.entity.Workstation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -10,7 +13,7 @@ public class WorkstationServiceImpl implements WorkstationService{
     
     private final PersistWrapper persistWrapper;
 
-    public  Workstation createWorkstation(UserContext context, Workstation workstation) throws Exception
+    public Workstation createWorkstation(UserContext context, Workstation workstation) throws Exception
     {
         Account acc = (Account) context.getAccount();
         User user = (User) context.getUser();
@@ -118,7 +121,7 @@ public class WorkstationServiceImpl implements WorkstationService{
 
     public  Workstation getWorkstation(WorkstationOID workstationOID)
     {
-        return persistWrapper.readByPrimaryKey(Workstation.class, workstationOID.getPk());
+        return (Workstation) persistWrapper.readByPrimaryKey(Workstation.class, workstationOID.getPk());
     }
 
     public  WorkstationQuery getWorkstationQueryByPk(WorkstationOID workstationOID)
