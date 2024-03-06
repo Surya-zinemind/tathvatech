@@ -6,11 +6,15 @@
  */
 package com.tathvatech.unit.common;
 
+import com.tathvatech.site.oid.SiteGroupOID;
+import com.tathvatech.unit.enums.UnitOriginType;
+import com.tathvatech.user.OID.SupplierOID;
+import com.tathvatech.user.OID.UnitOID;
+
 import java.util.Date;
 import java.util.List;
 
-import com.tathvatech.ts.core.part.SupplierOID;
-import com.tathvatech.ts.core.sites.SiteGroupOID;
+
 
 /**
  * @author Hari

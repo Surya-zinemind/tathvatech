@@ -1,6 +1,8 @@
 package com.tathvatech.unit.common;
 
-public interface TestableEntity 
+import com.tathvatech.user.OID.OID;
+
+public interface TestableEntity
 {
 	public OID getOID();
 

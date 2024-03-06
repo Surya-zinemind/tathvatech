@@ -1,35 +1,24 @@
 package com.tathvatech.forms.dao;
 
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.user.OID.*;
+import com.tathvatech.user.common.TestProcObj;
+import com.tathvatech.user.common.UserContext;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
-
-import com.sarvasutra.etest.EntitySchedule;
-import com.sarvasutra.etest.EntityScheduleDAO;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.project.FormOID;
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.project.TestProcOID;
-import com.tathvatech.ts.core.project.TestProcObj;
-import com.tathvatech.ts.core.project.UnitOID;
-import com.tathvatech.ts.core.project.UnitTestProc;
-import com.tathvatech.ts.core.project.UnitTestProcH;
-import com.tathvatech.ts.core.project.WorkstationOID;
-import com.tathvatech.ts.core.survey.Survey;
-import com.thirdi.surveyside.survey.FormSection;
-import com.thirdi.surveyside.survey.SurveyMaster;
-import com.thirdi.surveyside.utils.DateUtils;
 
 public class TestProcDAO
 {
-	Logger logger = Logger.getLogger(TestProcDAO.class);
+	private PersistWrapper persistWrapper;
+	Logger logger = Logger.getLogger(String.valueOf(TestProcDAO.class));
 	Date now;
 	
 	public TestProcDAO()
@@ -39,7 +28,7 @@ public class TestProcDAO
 
 	public TestProcObj getTestProc(int testProcPk)
 	{
-		return PersistWrapper.read(TestProcObj.class, fetchSql + " and ut.pk = ?", testProcPk);
+		return persistWrapper.read(TestProcObj.class, fetchSql + " and ut.pk = ?", testProcPk);
 	}
 
 	public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
@@ -49,9 +38,9 @@ public class TestProcDAO
 		return currentTestProcFormEntity;
 	}
 	
-	public TestProcFormAssign getTestProcFormEntity(TestProcOID testProcOID, FormOID formOID)
+	public  TestProcFormAssign getTestProcFormEntity(TestProcOID testProcOID, FormOID formOID)
 	{
-		TestProcFormAssign currentTestProcFormEntity = PersistWrapper.read(TestProcFormAssign.class, 
+		TestProcFormAssign currentTestProcFormEntity = persistWrapper.read(TestProcFormAssign.class,
 				"select * from testproc_form_assign where testProcFk = ? and formFk = ? ", testProcOID.getPk(), formOID.getPk());
 		return currentTestProcFormEntity;
 	}
@@ -67,7 +56,7 @@ public class TestProcDAO
 		
 		Survey currentForm = SurveyMaster.getSurveyByPk((int) currentTestProcFormEntity.getFormFk());
 
-		List<TestProcFormAssign> allFormList = PersistWrapper.readList(TestProcFormAssign.class, 
+		List<TestProcFormAssign> allFormList = persistWrapper.readList(TestProcFormAssign.class,
 				"select tfa.* from testproc_form_assign  tfa "
 						+ " join tab_survey form on tfa.formFk = form.pk "
 						+ " where tfa.testProcFk = ? "
@@ -97,7 +86,7 @@ public class TestProcDAO
 			unitForm.setCreatedBy(context.getUser().getPk());
 			unitForm.setCreatedDate(now);
 			unitForm.setEstatus(obj.getEstatus());
-			int pk = PersistWrapper.createEntity(unitForm);
+			int pk = (int) persistWrapper.createEntity(unitForm);
 			unitForm.setPk(pk);
 			
 			TestProcFormAssign testProcFormAssign = new TestProcFormAssign();
@@ -107,8 +96,8 @@ public class TestProcDAO
 			testProcFormAssign.setCurrent(1);
 			testProcFormAssign.setFormFk(obj.getFormPk());
 			testProcFormAssign.setTestProcFk(unitForm.getPk());
-			int testProcFormAssignPk = PersistWrapper.createEntity(testProcFormAssign);
-			testProcFormAssign = PersistWrapper.readByPrimaryKey(TestProcFormAssign.class, testProcFormAssignPk);
+			int testProcFormAssignPk = (int) persistWrapper.createEntity(testProcFormAssign);
+			testProcFormAssign = persistWrapper.readByPrimaryKey(TestProcFormAssign.class, testProcFormAssignPk);
 			
 
 			UnitTestProcH uHNew = new UnitTestProcH();
@@ -123,7 +112,7 @@ public class TestProcDAO
 			uHNew.setEffectiveDateFrom(now);
 			uHNew.setEffectiveDateTo(DateUtils.getMaxDate());
 			uHNew.setUpdatedBy(context.getUser().getPk());
-			PersistWrapper.createEntity(uHNew);
+			persistWrapper.createEntity(uHNew);
 			
 			obj = getTestProc(pk);
 			//when creating a unitForm we need to create the TestProcSection Entries
@@ -133,7 +122,7 @@ public class TestProcDAO
 		} 
 		else
 		{
-			unitForm = PersistWrapper.readByPrimaryKey(UnitTestProc.class, obj.getPk());
+			unitForm = persistWrapper.readByPrimaryKey(UnitTestProc.class, obj.getPk());
 			TestProcFormAssign currentTestProcFormEntity = getCurrentTestProcFormEntity(unitForm.getOID());
 			
 			
@@ -142,7 +131,7 @@ public class TestProcDAO
 			if(currentFormPk != obj.getFormPk())
 			{
 				currentTestProcFormEntity.setCurrent(0);
-				PersistWrapper.update(currentTestProcFormEntity);
+				persistWrapper.update(currentTestProcFormEntity);
 				
 				TestProcFormAssign newTestProcFormEntity = new TestProcFormAssign();
 				newTestProcFormEntity.setAppliedByUserFk(obj.getAppliedByUserFk());
@@ -151,8 +140,8 @@ public class TestProcDAO
 				newTestProcFormEntity.setCurrent(1);
 				newTestProcFormEntity.setFormFk(obj.getFormPk());
 				newTestProcFormEntity.setTestProcFk(unitForm.getPk());
-				int testProcFormAssignPk = PersistWrapper.createEntity(newTestProcFormEntity);
-				newTestProcFormEntity = PersistWrapper.readByPrimaryKey(TestProcFormAssign.class, testProcFormAssignPk);
+				int testProcFormAssignPk = persistWrapper.createEntity(newTestProcFormEntity);
+				newTestProcFormEntity = persistWrapper.readByPrimaryKey(TestProcFormAssign.class, testProcFormAssignPk);
 
 				
 				//we need to create the TestProcSection Entries
@@ -188,12 +177,12 @@ public class TestProcDAO
 					uHCurrent.setEffectiveDateFrom(now);
 					uHCurrent.setEffectiveDateTo(DateUtils.getMaxDate());
 					uHCurrent.setUpdatedBy(context.getUser().getPk());
-					PersistWrapper.update(uHCurrent);
+					persistWrapper.update(uHCurrent);
 				}
 				else
 				{
 					uHCurrent.setEffectiveDateTo(new Date(now.getTime() - 1000));
-					PersistWrapper.update(uHCurrent);
+					persistWrapper.update(uHCurrent);
 					
 
 					UnitTestProcH uHNew = new UnitTestProcH();
@@ -209,7 +198,7 @@ public class TestProcDAO
 					uHNew.setEffectiveDateFrom(now);
 					uHNew.setEffectiveDateTo(DateUtils.getMaxDate());
 					uHNew.setUpdatedBy(context.getUser().getPk());
-					PersistWrapper.createEntity(uHNew);
+					persistWrapper.createEntity(uHNew);
 				}
 			}
 			
@@ -292,7 +281,7 @@ public class TestProcDAO
 					newSchedule.setForecastStartDate(secSchedule.getForecastStartDate());
 					newSchedule.setObjectPk(newTPSection.getPk());
 					newSchedule.setObjectType(EntityTypeEnum.TestProcSection.getValue());
-					PersistWrapper.createEntity(newSchedule);
+					persistWrapper.createEntity(newSchedule);
 				}
 				
 			}
@@ -307,7 +296,7 @@ public class TestProcDAO
 		if(tpForm != null)
 		{
 			tpForm.setCurrent(0);
-			PersistWrapper.update(tpForm);
+			persistWrapper.update(tpForm);
 		}
 		
 		UnitTestProcH uHCurrent = PersistWrapper.read(UnitTestProcH.class, 
@@ -317,12 +306,12 @@ public class TestProcDAO
 		{
 			uHCurrent.setUpdatedBy(context.getUser().getPk());
 			uHCurrent.setEffectiveDateTo(new Date(now.getTime() - 1000));
-			PersistWrapper.update(uHCurrent);
+			persistWrapper.update(uHCurrent);
 		}
 	}
 
 	public void deleteAllTestProcsMatching(UserContext context, UnitOID unitOID, ProjectOID projectOID,
-			WorkstationOID workstationOID) throws Exception
+										   WorkstationOID workstationOID) throws Exception
 	{
 		logger.info("deleteAllTestProcsMatching:: unitOID:" + unitOID.getLoggingString() + ", projectOID:" + projectOID.getLoggingString());
 
@@ -331,10 +320,10 @@ public class TestProcDAO
 				+ " set tfa.current = 0 where tfa.testprocFk = ut.pk and tfa.current = 1 "
 				+ " and uth.unitTestProcFk = ut.pk and "
 				+ " uth.unitPk=? and uth.projectPk = ? and uth.workstationPk=? and now() between uth.effectiveDateFrom and uth.effectiveDateTo ";
-		PersistWrapper.executeUpdate(sql1, unitOID.getPk(), projectOID.getPk(), workstationOID.getPk());
+		persistWrapper.executeUpdate(sql1, unitOID.getPk(), projectOID.getPk(), workstationOID.getPk());
 		
 		// change the effectiveToDate in the h records
-		List<UnitTestProcH> uHCurrentList = PersistWrapper.readList(UnitTestProcH.class, 
+		List<UnitTestProcH> uHCurrentList = persistWrapper.readList(UnitTestProcH.class,
 				"select * from unit_testproc_h where unitPk=? and projectPk = ? and workstationPk=? and now() between effectiveDateFrom and effectiveDateTo", 
 				unitOID.getPk(), projectOID.getPk(), workstationOID.getPk());
 
@@ -343,7 +332,7 @@ public class TestProcDAO
 			UnitTestProcH uHCurrent = (UnitTestProcH) iterator.next();
 			uHCurrent.setUpdatedBy(context.getUser().getPk());
 			uHCurrent.setEffectiveDateTo(new Date(now.getTime() - 1000));
-			PersistWrapper.update(uHCurrent);
+			persistWrapper.update(uHCurrent);
 		}
 	}
 
@@ -366,7 +355,7 @@ public class TestProcDAO
 			tSec.setCreatedDate(now);
 			tSec.setFormSectionFk(formSection.getPk());
 			tSec.setTestProcFormAssignFk(newTestProcFormEntity.getPk());
-			PersistWrapper.createEntity(tSec);
+			persistWrapper.createEntity(tSec);
 		}
 	}
 	

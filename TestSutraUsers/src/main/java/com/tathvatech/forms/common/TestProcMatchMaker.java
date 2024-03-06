@@ -1,10 +1,11 @@
 package com.tathvatech.forms.common;
 
+import com.tathvatech.unit.common.UnitFormQuery;
+
 import java.util.Iterator;
 import java.util.List;
 
-import com.tathvatech.ts.core.project.ProjectFormQuery;
-import com.tathvatech.ts.core.project.UnitFormQuery;
+
 
 /*
  * The match is made based on if the form used in the projectForm is the same as the one in the unitForm and
@@ -29,7 +30,7 @@ public class TestProcMatchMaker {
 		return null;
 	}
 
-	public static UnitFormQuery getMatchingLowerVersionOfForm(ProjectFormQuery aPForm, List<UnitFormQuery> uForms) 
+	public static UnitFormQuery getMatchingLowerVersionOfForm(ProjectFormQuery aPForm, List<UnitFormQuery> uForms)
 	{
 		String pName = aPForm.getName(); // easy way to check for null also for the name is the assign it something if it is null.
 		if(pName == null)

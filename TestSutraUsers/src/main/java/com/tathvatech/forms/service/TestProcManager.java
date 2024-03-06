@@ -6,33 +6,23 @@
  */
 package com.tathvatech.forms.service;
 
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.forms.dao.TestProcDAO;
+import com.tathvatech.forms.response.ResponseMasterNew;
+import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.service.SurveyDefFactory;
+import com.tathvatech.survey.service.SurveyResponseManager;
+import com.tathvatech.unit.common.UnitFormQuery;
+import com.tathvatech.unit.entity.UnitLocation;
+import com.tathvatech.user.OID.*;
+import com.tathvatech.user.common.TestProcObj;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.User;
+
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-
-import org.apache.log4j.Logger;
-
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.project.FormOID;
-import com.tathvatech.ts.core.project.FormSectionOID;
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.project.TestProcOID;
-import com.tathvatech.ts.core.project.TestProcObj;
-import com.tathvatech.ts.core.project.TestProcSectionOID;
-import com.tathvatech.ts.core.project.TestProcSectionObj;
-import com.tathvatech.ts.core.project.UnitFormQuery;
-import com.tathvatech.ts.core.project.UnitLocation;
-import com.tathvatech.ts.core.project.UnitOID;
-import com.tathvatech.ts.core.project.WorkstationOID;
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.response.ResponseMasterNew;
-import com.tathvatech.ts.core.survey.response.SurveyResponse;
-import com.thirdi.surveyside.project.testproclistreport.TestProcListReport;
-import com.thirdi.surveyside.survey.SurveyForm;
-import com.thirdi.surveyside.survey.response.SurveyResponseManager;
-import com.thirdi.surveyside.wizard.xml.SurveyDefFactory;
+import java.util.logging.Logger;
 
 
 /**
@@ -43,10 +33,10 @@ import com.thirdi.surveyside.wizard.xml.SurveyDefFactory;
  */
 public class TestProcManager
 {
-    private static final Logger logger = Logger.getLogger(TestProcManager.class);
-
+    private static final Logger logger = Logger.getLogger(String.valueOf(TestProcManager.class));
+    private PersistWrapper persistWrapper;
 	public static void activateTestProcs(UserContext userContext,
-			List<UnitFormQuery> formsToActivate) throws Exception 
+										 List<UnitFormQuery> formsToActivate) throws Exception
 	{
 		//if there is no response for this form already, create response placeholder..this is needed when opening for the first time 
 		//this is required since when filling up responses from
@@ -91,9 +81,9 @@ public class TestProcManager
 	}
 
 
-	private static void notifyWorkstationFormActivated(UserContext userContext, UnitFormQuery unitFormQuery) throws Exception 
+	private  void notifyWorkstationFormActivated(UserContext userContext, UnitFormQuery unitFormQuery) throws Exception
 	{
-		UnitLocation currentRec = ProjectManager.getUnitWorkstation(unitFormQuery.getUnitPk(), 
+		UnitLocation currentRec = ProjectManager.getUnitWorkstation(unitFormQuery.getUnitPk(),
 				new ProjectOID(unitFormQuery.getProjectPk(), null), new WorkstationOID(unitFormQuery.getWorkstationPk(), null));
 		if(currentRec != null && UnitLocation.STATUS_IN_PROGRESS.equals(currentRec.getStatus()))
 		{
@@ -104,7 +94,7 @@ public class TestProcManager
 	    //create the new unit location on any change, so we have a history of all activities.
 		UnitLocation nuLoc = new UnitLocation();
 		nuLoc.setProjectPk(unitFormQuery.getProjectPk());
-	    nuLoc.setMovedInBy(userContext.getUser().getPk());
+	    nuLoc.setMovedInBy((int) userContext.getUser().getPk());
 	    nuLoc.setMoveInDate(new Date());
 	    nuLoc.setUnitPk(unitFormQuery.getUnitPk());
 	    nuLoc.setWorkstationPk(unitFormQuery.getWorkstationPk());
@@ -115,7 +105,7 @@ public class TestProcManager
 	    if(currentRec != null)
 		{
 	    	currentRec.setCurrent(0);
-	    	PersistWrapper.update(currentRec);
+	    	persistWrapper.update(currentRec);
 	    	
 	    	nuLoc.setFirstFormAccessDate(currentRec.getFirstFormAccessDate());
 	    	nuLoc.setFirstFormLockDate(currentRec.getFirstFormLockDate());
@@ -126,7 +116,7 @@ public class TestProcManager
 	    	nuLoc.setLastFormSaveDate(currentRec.getLastFormSaveDate());
 	    	nuLoc.setCompletedDate(currentRec.getCompletedDate());
 		}
-	    PersistWrapper.createEntity(nuLoc);
+	    persistWrapper.createEntity(nuLoc);
 	}
 
 
@@ -135,11 +125,11 @@ public class TestProcManager
 		return new TestProcDAO().getTestProc(testProcPk);
 	}
 	
-	public static UnitFormQuery getTestProcQuery(int testProcPk) 
+	public  UnitFormQuery getTestProcQuery(int testProcPk)
 	{
 		try 
 		{
-			return PersistWrapper.read(UnitFormQuery.class, UnitFormQuery.sql + " and ut.pk=?", testProcPk);
+			return persistWrapper.read(UnitFormQuery.class, UnitFormQuery.sql + " and ut.pk=?", testProcPk);
 		} 
 		catch (Exception e) 
 		{
@@ -206,7 +196,7 @@ public class TestProcManager
 	public TestProcObj getTestProc(TestProcSectionOID testProcSectionOID) throws Exception
 	{
 		TestProcSectionObj sectionObj = getTestProcSection(testProcSectionOID);
-		TestProcFormAssign tpFormAssign = PersistWrapper.readByPrimaryKey(TestProcFormAssign.class, sectionObj.getTestProcFormAssignFk());
+		TestProcFormAssign tpFormAssign = persistWrapper.readByPrimaryKey(TestProcFormAssign.class, sectionObj.getTestProcFormAssignFk());
 		return getTestProc(tpFormAssign.getTestProcFk());
 	}
 	

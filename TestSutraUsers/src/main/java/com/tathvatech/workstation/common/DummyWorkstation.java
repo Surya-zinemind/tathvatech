@@ -15,7 +15,7 @@ public class DummyWorkstation {
     	{
 			try 
 			{
-				pk =  persistWrapper.read(Integer.class, "select pk from TAB_WORKSTATION where workstationName = ?", DUMMY);
+				pk =  PersistWrapper.read(Integer.class, "select pk from TAB_WORKSTATION where workstationName = ?", DUMMY);
 			} catch (Exception e) 
 			{
 				// TODO Auto-generated catch block

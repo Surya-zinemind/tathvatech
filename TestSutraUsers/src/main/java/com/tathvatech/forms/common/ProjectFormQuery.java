@@ -6,9 +6,11 @@
  */
 package com.tathvatech.forms.common;
 
+import com.tathvatech.user.OID.ProjectFormOID;
+
 import java.util.Date;
 
-import net.sf.persist.annotations.NoTable;
+
 
 /**
  * @author Hari
@@ -16,7 +18,7 @@ import net.sf.persist.annotations.NoTable;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-@NoTable
+
 public class ProjectFormQuery
 {
 	private int pk;
@@ -269,7 +271,7 @@ public class ProjectFormQuery
 	+ " left join TAB_WORKSTATION ws on pf.workstationPk = ws.pk "
 	+"  where  1 = 1  ";
 
-	public ProjectFormOID getOID() 
+	public ProjectFormOID getOID()
 	{
 		return new ProjectFormOID(pk, "");
 	}

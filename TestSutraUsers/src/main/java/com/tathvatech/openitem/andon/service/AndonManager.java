@@ -8,60 +8,41 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.logging.Logger;
 
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.workstation.entity.Workstation;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.apache.log4j.Logger;
 
-import com.sarvasutra.etest.oil.OILStats;
-import com.tathvatech.testsutra.equipment.service.LocationOID;
-import com.tathvatech.testsutra.hazardMaintenance.common.HazardReferenceBean;
-import com.tathvatech.testsutra.hazardMaintenance.service.HazardMaintanenceManager;
-import com.tathvatech.testsutra.mrf.service.Mrf;
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.MRFOID;
-import com.tathvatech.ts.core.common.service.CommonServiceManager;
-import com.tathvatech.ts.core.common.service.CommonServicesDelegate;
-import com.tathvatech.ts.core.common.utils.AttachmentIntf;
-import com.tathvatech.ts.core.common.utils.NameValuePair;
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.project.UnitOID;
-import com.tathvatech.ts.core.project.UnitObj;
-import com.tathvatech.ts.core.project.WorkstationOID;
-import com.thirdi.surveyside.project.Project;
-import com.thirdi.surveyside.project.ProjectManager;
-import com.thirdi.surveyside.project.ProjectQuery;
-import com.thirdi.surveyside.workstation.Workstation;
 
 public class AndonManager
 {
-	static Logger logger = Logger.getLogger(AndonManager.class);
-
-	public static Terminal getTerminal(int terminalPk) throws Exception
+	static Logger logger = Logger.getLogger(String.valueOf(AndonManager.class));
+   private PersistWrapper persistWrapper;
+	public  Terminal getTerminal(int terminalPk) throws Exception
 	{
-		return PersistWrapper.readByPrimaryKey(Terminal.class, terminalPk);
+		return persistWrapper.readByPrimaryKey(Terminal.class, terminalPk);
 	}
 
-	public static List<Workstation> getWorkstationsForTerminal(int terminalPk) throws Exception
+	public  List<Workstation> getWorkstationsForTerminal(int terminalPk) throws Exception
 	{
-		return PersistWrapper.readList(Workstation.class, "select * from TAB_WORKSTATION where pk in "
+		return persistWrapper.readList(Workstation.class, "select * from TAB_WORKSTATION where pk in "
 				+ "(select workstationPk from TERMINAL_WORKSTATION where terminalPk = ? )  order by TAB_WORKSTATION.orderNo",
 				terminalPk);
 	}
 
-	public static List<Workstation> getWorkstationsForTerminal(int terminalPk, int projectPk) throws Exception
+	public  List<Workstation> getWorkstationsForTerminal(int terminalPk, int projectPk) throws Exception
 	{
 
-		return PersistWrapper.readList(Workstation.class, "select ws.* from TAB_WORKSTATION ws,  "
+		return persistWrapper.readList(Workstation.class, "select ws.* from TAB_WORKSTATION ws,  "
 				+ "TERMINAL_WORKSTATION tw where ws.pk = tw.workstationPk and tw.terminalPk=? and tw.projectPk = ? order by ws.orderNo",
 				terminalPk, projectPk);
 	}
 
 	public static List<AndonQuery> getAndonListForWorkstationTerminal(UserContext context, Terminal terminal,
-			int projectPk, Workstation workstation)
+																	  int projectPk, Workstation workstation)
 	{
 		try
 		{

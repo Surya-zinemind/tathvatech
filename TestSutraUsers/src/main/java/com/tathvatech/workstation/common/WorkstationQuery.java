@@ -9,7 +9,7 @@ import com.tathvatech.user.OID.TSBeanBase;
 import com.tathvatech.user.OID.WorkstationOID;
 import com.tathvatech.user.entity.Site;
 import com.tathvatech.user.entity.SiteCache;
-
+import com.tathvatech.workstation.inf.WorkstationOrderComparable;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)

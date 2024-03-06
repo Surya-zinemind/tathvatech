@@ -3,17 +3,17 @@ package com.tathvatech.unit.dao;
 import java.util.Date;
 import java.util.List;
 
-import com.sarvasutra.etest.EntityActions;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.project.UnitInProject;
-import com.tathvatech.ts.core.project.UnitInProjectH;
-import com.tathvatech.ts.core.project.UnitInProjectOID;
-import com.tathvatech.ts.core.project.UnitOID;
-import com.tathvatech.ts.core.project.UnitOriginType;
-import com.thirdi.surveyside.security.Actions;
-import com.thirdi.surveyside.utils.DateUtils;
+
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.unit.entity.UnitInProject;
+import com.tathvatech.unit.entity.UnitInProjectH;
+import com.tathvatech.unit.enums.UnitOriginType;
+import com.tathvatech.unit.oid.UnitInProjectOID;
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.UnitOID;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.workstation.common.UnitInProjectObj;
+
 
 public class UnitInProjectDAO
 {
@@ -76,7 +76,7 @@ public class UnitInProjectDAO
 	{
 		UnitInProject upr = null;
 		if(obj.getPk() > 0)
-			upr = PersistWrapper.readByPrimaryKey(UnitInProject.class, obj.getPk());
+			upr = (UnitInProject) PersistWrapper.readByPrimaryKey(UnitInProject.class, obj.getPk());
 		
 		if(upr == null)
 			upr = PersistWrapper.read(UnitInProject.class, 
@@ -91,7 +91,7 @@ public class UnitInProjectDAO
 			upr.setProjectPk(obj.getProjectPk());
 			upr.setUnitOriginType(obj.getUnitOriginType());
 			upr.setUnitPk(obj.getUnitPk());
-			int pk = PersistWrapper.createEntity(upr);
+			int pk = (int) PersistWrapper.createEntity(upr);
 			upr.setPk(pk);
 			
 			
@@ -102,7 +102,7 @@ public class UnitInProjectDAO
 			UnitInProjectH uprhNew = new UnitInProjectH();
 			if(act != null)
 				uprhNew.setActionPk(act.getPk());
-			uprhNew.setCreatedBy(context.getUser().getPk());
+			uprhNew.setCreatedBy((int) context.getUser().getPk());
 			uprhNew.setCreatedDate(new Date());
 			uprhNew.setEffectiveDateFrom(now);
 			uprhNew.setEffectiveDateTo(DateUtils.getMaxDate());
@@ -114,7 +114,7 @@ public class UnitInProjectDAO
 			uprhNew.setProjectPartPk(obj.getProjectPartPk());
 			uprhNew.setRootParentPk(obj.getRootParentPk());
 			uprhNew.setStatus(obj.getStatus());
-			uprhNew.setUnitInProjectPk(upr.getPk());
+			uprhNew.setUnitInProjectPk((int) upr.getPk());
 			PersistWrapper.createEntity(uprhNew);
 		}
 		else
@@ -136,7 +136,7 @@ public class UnitInProjectDAO
 				uprhCurrent.setProjectPartPk(obj.getProjectPartPk());
 				uprhCurrent.setRootParentPk(obj.getRootParentPk());
 				uprhCurrent.setStatus(obj.getStatus());
-				uprhCurrent.setUnitInProjectPk(upr.getPk());
+				uprhCurrent.setUnitInProjectPk((int) upr.getPk());
 				PersistWrapper.update(uprhCurrent); 
 			}
 			else
@@ -151,7 +151,7 @@ public class UnitInProjectDAO
 				UnitInProjectH uprhNew = new UnitInProjectH();
 				if(act != null)
 					uprhNew.setActionPk(act.getPk());
-				uprhNew.setCreatedBy(context.getUser().getPk());
+				uprhNew.setCreatedBy((int) context.getUser().getPk());
 				uprhNew.setCreatedDate(new Date());
 				uprhNew.setEffectiveDateFrom(now);
 				uprhNew.setEffectiveDateTo(DateUtils.getMaxDate());
@@ -163,7 +163,7 @@ public class UnitInProjectDAO
 				uprhNew.setProjectPartPk(obj.getProjectPartPk());
 				uprhNew.setRootParentPk(obj.getRootParentPk());
 				uprhNew.setStatus(obj.getStatus());
-				uprhNew.setUnitInProjectPk(upr.getPk());
+				uprhNew.setUnitInProjectPk((int) upr.getPk());
 				PersistWrapper.createEntity(uprhNew); 
 			}
 		}
@@ -183,7 +183,7 @@ public class UnitInProjectDAO
 		hRecNew.setPk(0);
 		hRecNew.setStatus(UnitInProject.STATUS_REMOVED);
 		hRecNew.setActionPk(act.getPk());
-		hRecNew.setCreatedBy(context.getUser().getPk());
+		hRecNew.setCreatedBy((int) context.getUser().getPk());
 		hRecNew.setCreatedDate(new Date());
 		hRecNew.setEffectiveDateFrom(now);
 		hRecNew.setEffectiveDateTo(DateUtils.getMaxDate());

@@ -4,15 +4,32 @@ import com.tathvatech.common.enums.EStatusEnum;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.exception.FormApprovedException;
 import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.forms.common.ProjectFormQuery;
+import com.tathvatech.forms.common.TestProcMatchMaker;
+import com.tathvatech.forms.dao.TestProcDAO;
+import com.tathvatech.forms.response.ResponseMasterNew;
+import com.tathvatech.forms.service.TestProcManager;
+import com.tathvatech.openitem.andon.service.AndonManager;
+import com.tathvatech.project.common.ProjectUserQuery;
+import com.tathvatech.project.entity.ProjectPart;
+import com.tathvatech.project.entity.ProjectUser;
 import com.tathvatech.project.enums.ProjectPropertyEnum;
 import com.tathvatech.project.common.ProjectQuery;
 import com.tathvatech.project.oid.ProjectPartOID;
+import com.tathvatech.project.service.ProjectTemplateManager;
 import com.tathvatech.site.entity.ACL;
 import com.tathvatech.site.entity.ProjectSiteConfig;
 import com.tathvatech.site.service.SiteService;
+import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.controller.SurveyResponseDelegate;
+import com.tathvatech.survey.service.SurveyDefFactory;
 import com.tathvatech.survey.service.SurveyResponseManager;
+import com.tathvatech.unit.common.UnitFormQuery;
 import com.tathvatech.unit.common.UnitLocationQuery;
 import com.tathvatech.unit.common.UnitObj;
+import com.tathvatech.unit.dao.UnitInProjectDAO;
+import com.tathvatech.unit.entity.UnitLocation;
+import com.tathvatech.unit.service.UnitManager;
 import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
@@ -67,12 +84,12 @@ public class WorkstationServiceImpl implements WorkstationService{
         {
             int maxOrderNo = persistWrapper.read(Integer.class, "select ifnull(max(orderNo),0) from TAB_WORKSTATION");
             workstation.setOrderNo(maxOrderNo + 1);
-            workstation.setAccountPk(acc.getPk());
-            workstation.setCreatedBy(user.getPk());
+            workstation.setAccountPk((int) acc.getPk());
+            workstation.setCreatedBy((int) user.getPk());
             workstation.setCreatedDate(new Date());
             workstation.setStatus(Workstation.STATUS_OPEN);
             workstation.setEstatus(EStatusEnum.Active.getValue());
-            workstation.setUpdatedBy(user.getPk());
+            workstation.setUpdatedBy((int) user.getPk());
             pk = (int) persistWrapper.createEntity(workstation);
         }
         // fetch the new project back
@@ -95,7 +112,7 @@ public class WorkstationServiceImpl implements WorkstationService{
             throw new AppException("Another workstation with the name specified exists, Please choose another name.");
         }
 
-        workstation.setUpdatedBy(context.getUser().getPk());
+        workstation.setUpdatedBy((int) context.getUser().getPk());
         persistWrapper.update(workstation);
 
         // fetch the new project back
@@ -260,7 +277,7 @@ public class WorkstationServiceImpl implements WorkstationService{
     {
         ProjectWorkstation pForm = new ProjectWorkstation();
         pForm.setProjectPk(projectPk);
-        pForm.setWorkstationPk(workstationOID.getPk());
+        pForm.setWorkstationPk((int) workstationOID.getPk());
 
         persistWrapper.createEntity(pForm);
     }
@@ -348,15 +365,15 @@ public class WorkstationServiceImpl implements WorkstationService{
         {
             UnitWorkstation pForm = new UnitWorkstation();
             pForm.setEstatus(EStatusEnum.Active.getValue());
-            pForm.setUpdatedBy(context.getUser().getPk());
-            pForm.setProjectPk(projectOID.getPk());
-            pForm.setUnitPk(unitOID.getPk());
-            pForm.setWorkstationPk(workstationOID.getPk());
+            pForm.setUpdatedBy((int) context.getUser().getPk());
+            pForm.setProjectPk((int) projectOID.getPk());
+            pForm.setUnitPk((int) unitOID.getPk());
+            pForm.setWorkstationPk((int) workstationOID.getPk());
 
-            uwPk = persistWrapper.createEntity(pForm);
+            uwPk = (int) persistWrapper.createEntity(pForm);
         } else
         {
-            uwPk = existingOne.getPk();
+            uwPk = (int) existingOne.getPk();
         }
         Project proj = getProject(projectOID.getPk());
 
@@ -369,7 +386,7 @@ public class WorkstationServiceImpl implements WorkstationService{
             if(UnitLocation.STATUS_WAITING.equals(defaultWorkstationStatusValue) || UnitLocation.STATUS_IN_PROGRESS.equals(defaultWorkstationStatusValue)
                     || UnitLocation.STATUS_COMPLETED.equals(defaultWorkstationStatusValue))
             {
-                setUnitWorkstationStatus(context, unitOID.getPk(), projectOID, workstationOID,
+                setUnitWorkstationStatus(context, (int) unitOID.getPk(), projectOID, workstationOID,
                         defaultWorkstationStatusValue);
             }
             else
@@ -378,7 +395,7 @@ public class WorkstationServiceImpl implements WorkstationService{
             }
         }
 
-        return persistWrapper.readByPrimaryKey(UnitWorkstation.class, uwPk);
+        return (UnitWorkstation) persistWrapper.readByPrimaryKey(UnitWorkstation.class, uwPk);
     }
 
     public  void removeWorkstationFromUnit(UserContext context, UnitOID unitOID, ProjectOID projectOID,
@@ -412,8 +429,8 @@ public class WorkstationServiceImpl implements WorkstationService{
                 unitOID.getPk(), projectOID.getPk(), workstationOID.getPk());
 
         // now delete workstations
-        UnitWorkstation uw = getUnitWorkstationSetting(unitOID.getPk(), projectOID, workstationOID);
-        uw.setUpdatedBy(context.getUser().getPk());
+        UnitWorkstation uw = getUnitWorkstationSetting((int) unitOID.getPk(), projectOID, workstationOID);
+        uw.setUpdatedBy((int) context.getUser().getPk());
         uw.setEstatus(EStatusEnum.Deleted.getValue());
         persistWrapper.update(uw);
     }
@@ -484,11 +501,11 @@ public class WorkstationServiceImpl implements WorkstationService{
         // create the new unit location on any change, so we have a history of
         // all activities.
         UnitLocation nuLoc = new UnitLocation();
-        nuLoc.setProjectPk(projectOID.getPk());
-        nuLoc.setMovedInBy(userContext.getUser().getPk());
+        nuLoc.setProjectPk((int) projectOID.getPk());
+        nuLoc.setMovedInBy((int) userContext.getUser().getPk());
         nuLoc.setMoveInDate(new Date());
         nuLoc.setUnitPk(unitPk);
-        nuLoc.setWorkstationPk(workstationOID.getPk());
+        nuLoc.setWorkstationPk((int) workstationOID.getPk());
         nuLoc.setStatus(status);
         nuLoc.setCurrent(1);
 
@@ -612,7 +629,7 @@ public class WorkstationServiceImpl implements WorkstationService{
         try
         {
             TestProcDAO dao = new TestProcDAO();
-            TestProcObj testProc = dao.getTestProc(testProcOID.getPk());
+            TestProcObj testProc = dao.getTestProc((int) testProcOID.getPk());
             UnitLocation currentRec = getUnitWorkstation(testProc.getUnitPk(),
                     new ProjectOID(testProc.getProjectPk(), null),
                     new WorkstationOID(testProc.getWorkstationPk(), null));
@@ -637,7 +654,7 @@ public class WorkstationServiceImpl implements WorkstationService{
         try
         {
             TestProcDAO dao = new TestProcDAO();
-            TestProcObj testProc = dao.getTestProc(testProcOID.getPk());
+            TestProcObj testProc = dao.getTestProc((int) testProcOID.getPk());
             UnitLocation currentRec = getUnitWorkstation(testProc.getUnitPk(),
                     new ProjectOID(testProc.getProjectPk(), null),
                     new WorkstationOID(testProc.getWorkstationPk(), null));
@@ -662,7 +679,7 @@ public class WorkstationServiceImpl implements WorkstationService{
         try
         {
             TestProcDAO dao = new TestProcDAO();
-            TestProcObj testProc = dao.getTestProc(testProcOID.getPk());
+            TestProcObj testProc = dao.getTestProc((int) testProcOID.getPk());
             UnitLocation currentRec = getUnitWorkstation(testProc.getUnitPk(),
                     new ProjectOID(testProc.getProjectPk(), null),
                     new WorkstationOID(testProc.getWorkstationPk(), null));
@@ -687,7 +704,7 @@ public class WorkstationServiceImpl implements WorkstationService{
         try
         {
             TestProcDAO dao = new TestProcDAO();
-            TestProcObj testProc = dao.getTestProc(testProcOID.getPk());
+            TestProcObj testProc = dao.getTestProc((int) testProcOID.getPk());
             UnitLocation currentRec = getUnitWorkstation(testProc.getUnitPk(),
                     new ProjectOID(testProc.getProjectPk(), null),
                     new WorkstationOID(testProc.getWorkstationPk(), null));
@@ -711,7 +728,7 @@ public class WorkstationServiceImpl implements WorkstationService{
         Account acc = (Account) context.getAccount();
         User user = (User) context.getUser();
 
-        Workstation workstation = persistWrapper.readByPrimaryKey(Workstation.class, workstationOID.getPk());
+        Workstation workstation = (Workstation) persistWrapper.readByPrimaryKey(Workstation.class, workstationOID.getPk());
 
         List pws = persistWrapper.readList(ProjectWorkstation.class,
                 "select * from TAB_PROJECT_WORKSTATIONS where workstationPk=?", workstationOID.getPk());
@@ -731,7 +748,7 @@ public class WorkstationServiceImpl implements WorkstationService{
 
         // mark the workstation as deleted
         workstation.setEstatus(EStatusEnum.Deleted.getValue());
-        workstation.setUpdatedBy(context.getUser().getPk());
+        workstation.setUpdatedBy((int) context.getUser().getPk());
         persistWrapper.update(workstation);
     }
     public  void setWorkstationsAndTeamsOnUnitOpen(UserContext context, ProjectOID projectOID, UnitOID unitOID,
@@ -760,7 +777,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                 continue;
 
             List<ProjectFormQuery> pForms = ProjectTemplateManager.getTestProcsForProjectPart(projectOID,
-                    new ProjectPartOID(unitInProject.getProjectPartPk(), null), workstationQuery.getPk());
+                    new ProjectPartOID(unitInProject.getProjectPartPk(), null), (int) workstationQuery.getPk());
 
             // check if there are any users defined for that workstation
             List<ProjectUserQuery> pUsers = ProjectManager.getProjectUserQueryList(projectOID,
@@ -774,11 +791,11 @@ public class WorkstationServiceImpl implements WorkstationService{
             // create unit workstation
             UnitWorkstation unitWorkstation = new UnitWorkstation();
             unitWorkstation.setEstatus(EStatusEnum.Active.getValue());
-            unitWorkstation.setUpdatedBy(context.getUser().getPk());
-            unitWorkstation.setProjectPk(projectOID.getPk());
-            unitWorkstation.setUnitPk(unitOID.getPk());
-            unitWorkstation.setWorkstationPk(workstationQuery.getPk());
-            int unitWorkstationPk = persistWrapper.createEntity(unitWorkstation);
+            unitWorkstation.setUpdatedBy((int) context.getUser().getPk());
+            unitWorkstation.setProjectPk((int) projectOID.getPk());
+            unitWorkstation.setUnitPk((int) unitOID.getPk());
+            unitWorkstation.setWorkstationPk((int) workstationQuery.getPk());
+            int unitWorkstationPk = (int) persistWrapper.createEntity(unitWorkstation);
 
             // copy projectUsers to unitusers
             if(copyProjectWorkstationUsersToUnit)
@@ -794,7 +811,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                 if(UnitLocation.STATUS_WAITING.equals(defaultWorkstationStatusValue) || UnitLocation.STATUS_IN_PROGRESS.equals(defaultWorkstationStatusValue)
                         || UnitLocation.STATUS_COMPLETED.equals(defaultWorkstationStatusValue))
                 {
-                    setUnitWorkstationStatus(context, unitOID.getPk(), projectOID, workstationQuery.getOID(),
+                    setUnitWorkstationStatus(context, (int) unitOID.getPk(), projectOID, workstationQuery.getOID(),
                             defaultWorkstationStatusValue);
                 }
                 else
@@ -959,7 +976,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                             // upgrade the testproc with the new form version
                             TestProcObj testProc = new TestProcDAO().getTestProc(previousRevTestProc.getPk());
                             testProc.setFormPk(aPForm.getFormPk());
-                            testProc.setAppliedByUserFk(context.getUser().getPk());
+                            testProc.setAppliedByUserFk((int) context.getUser().getPk());
 
                             testProcDAO.saveTestProc(context, testProc);
                         } else
@@ -968,7 +985,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                             TestProcObj testProc = new TestProcObj();
                             testProc.setProjectPk(projectQuery.getPk());
                             testProc.setUnitPk(unitPk);
-                            testProc.setWorkstationPk(workstationQuery.getPk());
+                            testProc.setWorkstationPk((int) workstationQuery.getPk());
                             testProc.setFormPk(aPForm.getFormPk());
                             testProc.setProjectTestProcPk(aPForm.getPk());
                             testProc.setName(aPForm.getName());
@@ -1125,7 +1142,7 @@ public class WorkstationServiceImpl implements WorkstationService{
     {
         try
         {
-            Workstation ws = persistWrapper.readByPrimaryKey(Workstation.class, workstationOID.getPk());
+            Workstation ws = (Workstation) persistWrapper.readByPrimaryKey(Workstation.class, workstationOID.getPk());
             if (ws != null)
             {
                 Workstation previousOne = persistWrapper.read(Workstation.class,
@@ -1152,7 +1169,7 @@ public class WorkstationServiceImpl implements WorkstationService{
     {
         try
         {
-            Workstation ws = persistWrapper.readByPrimaryKey(Workstation.class, workstationOID.getPk());
+            Workstation ws = (Workstation) persistWrapper.readByPrimaryKey(Workstation.class, workstationOID.getPk());
             if (ws != null)
             {
                 Workstation nextOne = persistWrapper.read(Workstation.class,
@@ -1185,7 +1202,7 @@ public class WorkstationServiceImpl implements WorkstationService{
     public  UnitWorkstation updateUnitWorkstationSetting(UnitWorkstation unitWorkstation) throws Exception
     {
         persistWrapper.update(unitWorkstation);
-        return persistWrapper.readByPrimaryKey(UnitWorkstation.class, unitWorkstation.getPk());
+        return (UnitWorkstation) persistWrapper.readByPrimaryKey(UnitWorkstation.class, unitWorkstation.getPk());
     }
     public  void copyWorkstationSettings(UserContext context, ProjectOID copyFromProjectOID,
                                                ProjectOID destinationProjectOID, boolean copySites, boolean copyProjectFunctionTeams, boolean copyParts,
@@ -1224,7 +1241,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                             ACL sAcl = (ACL) iterator2.next();
                             ACL dAcl = new ACL();
                             dAcl.setCreatedDate(new Date());
-                            dAcl.setObjectPk(projectSiteConfig.getPk());
+                            dAcl.setObjectPk((int) projectSiteConfig.getPk());
                             dAcl.setObjectType(projectSiteConfig.getOID().getEntityType().getValue());
                             dAcl.setRoleId(sAcl.getRoleId());
                             dAcl.setUserPk(sAcl.getUserPk());
@@ -1263,16 +1280,16 @@ public class WorkstationServiceImpl implements WorkstationService{
                     newPart.setPartNo(sourcePart.getPartNo());
                     newPart.setPartPk(sourcePart.getPartPk());
                     newPart.setPartTypePk(sourcePart.getPartTypePk());
-                    newPart.setProjectPk(destinationProjectOID.getPk());
+                    newPart.setProjectPk((int) destinationProjectOID.getPk());
                     newPart.setWbs(sourcePart.getWbs());
                     newPart.setCreatedDate(new Date());
 
-                    int pk = persistWrapper.createEntity(newPart);
-                    newPart = persistWrapper.readByPrimaryKey(ProjectPart.class, pk);
+                    int pk = (int) persistWrapper.createEntity(newPart);
+                    newPart = (ProjectPart) persistWrapper.readByPrimaryKey(ProjectPart.class, pk);
 
                     projectPartMap.put(sourcePart, newPart);
                     allProjectPartMap.put(pk, newPart);
-                    allProjectPartMap.put(sourcePart.getPk(), sourcePart);
+                    allProjectPartMap.put((int) sourcePart.getPk(), sourcePart);
                 }
 
                 // now the parent heirarchy has to be set for the newly created
@@ -1286,7 +1303,7 @@ public class WorkstationServiceImpl implements WorkstationService{
 
                     ProjectPart sourceParent = allProjectPartMap.get(sourcePart.getParentPk());
                     ProjectPart destParent = projectPartMap.get(sourceParent);
-                    destPart.setParentPk(destParent.getPk());
+                    destPart.setParentPk((int) destParent.getPk());
                     persistWrapper.update(destPart);
                 }
             }
@@ -1335,21 +1352,21 @@ public class WorkstationServiceImpl implements WorkstationService{
 
             if (copyProjectCoordinators)
             {
-                List<User> existingMgrACList = accountService.getACLs(copyFromProjectOID.getPk(),
+                List<User> existingMgrACList = accountService.getACLs((int) copyFromProjectOID.getPk(),
                         UserPerms.OBJECTTYPE_PROJECT, UserPerms.ROLE_MANAGER);
-                List<User> existingReadonlyACList = accountService.getACLs(copyFromProjectOID.getPk(),
+                List<User> existingReadonlyACList = accountService.getACLs((int) copyFromProjectOID.getPk(),
                         UserPerms.OBJECTTYPE_PROJECT, UserPerms.ROLE_READONLY);
-                List<User> existingDataClerkACList = accountService.getACLs(copyFromProjectOID.getPk(),
+                List<User> existingDataClerkACList = accountService.getACLs((int) copyFromProjectOID.getPk(),
                         UserPerms.OBJECTTYPE_PROJECT, UserPerms.ROLE_DATACLERK);
 
-                accountService.setUserPermissions(destinationProjectOID.getPk(),
+                accountService.setUserPermissions((int) destinationProjectOID.getPk(),
                         new List[] { existingMgrACList, existingReadonlyACList, existingDataClerkACList },
                         new String[] { UserPerms.ROLE_MANAGER, UserPerms.ROLE_READONLY, UserPerms.ROLE_DATACLERK });
             }
 
             if (workstationsToCopy != null && workstationsToCopy.size() > 0)
             {
-                removeAllWorkstationsFromProject(context, destinationProjectOID.getPk());
+                removeAllWorkstationsFromProject(context, (int) destinationProjectOID.getPk());
 
                 for (Iterator iterator = workstationsToCopy.iterator(); iterator.hasNext();)
                 {
@@ -1358,7 +1375,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                     Boolean copyForms = (Boolean) objects[1];
                     Boolean copyTeam = (Boolean) objects[2];
 
-                    addWorkstationToProject(context, destinationProjectOID.getPk(), wsOID);
+                    addWorkstationToProject(context, (int) destinationProjectOID.getPk(), wsOID);
 
                     if (copyForms != null && copyForms == true)
                     {
@@ -1367,7 +1384,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                         {
                             ProjectFormQuery projectFormQuery = (ProjectFormQuery) iterator2.next();
 
-                            ProjectPart sourcePart = persistWrapper.readByPrimaryKey(ProjectPart.class,
+                            ProjectPart sourcePart = (ProjectPart) persistWrapper.readByPrimaryKey(ProjectPart.class,
                                     projectFormQuery.getProjectPartPk());
                             ProjectPart destPart = projectPartMap.get(sourcePart);
 
@@ -1393,18 +1410,18 @@ public class WorkstationServiceImpl implements WorkstationService{
                             ProjectPart destPart = null;
                             if (projectUserQuery.getProjectPartPk() != 0)
                             {
-                                sourcePart = persistWrapper.readByPrimaryKey(ProjectPart.class,
+                                sourcePart = (ProjectPart) persistWrapper.readByPrimaryKey(ProjectPart.class,
                                         projectUserQuery.getProjectPartPk());
                                 destPart = projectPartMap.get(sourcePart);
                             }
 
                             ProjectUser pUser = new ProjectUser();
                             if (destPart != null)
-                                pUser.setProjectPartPk(destPart.getPk());
-                            pUser.setProjectPk(destinationProjectOID.getPk());
+                                pUser.setProjectPartPk((int) destPart.getPk());
+                            pUser.setProjectPk((int) destinationProjectOID.getPk());
                             pUser.setRole(projectUserQuery.getRole());
                             pUser.setUserPk(projectUserQuery.getUserPk());
-                            pUser.setWorkstationPk(wsOID.getPk());
+                            pUser.setWorkstationPk((int) wsOID.getPk());
                             persistWrapper.createEntity(pUser);
                         }
                     }

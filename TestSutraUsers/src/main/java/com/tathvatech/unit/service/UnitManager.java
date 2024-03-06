@@ -1,35 +1,29 @@
 package com.tathvatech.unit.service;
 
+import com.tathvatech.common.exception.AppException;
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.project.common.ProjectQuery;
+import com.tathvatech.unit.dao.UnitInProjectDAO;
+import com.tathvatech.unit.entity.UnitInProject;
+import com.tathvatech.unit.oid.UnitInProjectOID;
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.UnitOID;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.workstation.common.UnitInProjectObj;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
 
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.project.SerialNumberFilter;
-import com.tathvatech.ts.core.project.Unit;
-import com.tathvatech.ts.core.project.UnitEntityQuery;
-import com.tathvatech.ts.core.project.UnitInProject;
-import com.tathvatech.ts.core.project.UnitInProjectOID;
-import com.tathvatech.ts.core.project.UnitInProjectQuery;
-import com.tathvatech.ts.core.project.UnitOID;
-import com.tathvatech.ts.core.project.UnitQuery;
-import com.tathvatech.ts.core.utils.Base62Util;
-import com.thirdi.surveyside.project.UnitBookmark.BookmarkModeEnum;
-import com.thirdi.surveyside.project.unitlist.UnitEntityListReport;
-import com.thirdi.surveyside.project.unitlist.UnitEntityListReportRequest;
-import com.thirdi.surveyside.security.Actions;
-
-public class UnitManager 
+public class UnitManager
 {
-	static Logger logger = Logger.getLogger(UnitManager.class);
-	
+	static
+	Logger logger = Logger.getLogger(String.valueOf(UnitManager.class));
+	private PersistWrapper persistWrapper;
 	public static int getRootUnitPk(UnitOID unitOID, ProjectOID projectOID) throws Exception
 	{
 		String sql = " select rootupr.unitPk " 
@@ -419,7 +413,7 @@ public class UnitManager
 		return PersistWrapper.readList(UnitInProjectQuery.class, UnitInProjectQuery.sql + " and u.pk = ? order by addedDate ", unitOID.getPk());
 	}
 
-	public static UnitQuery addUnitBookMark(UserContext context, int unitPk, int projectPk, BookmarkModeEnum mode)throws Exception
+	public  UnitQuery addUnitBookMark(UserContext context, int unitPk, int projectPk, BookmarkModeEnum mode)throws Exception
 	{
 		UnitBookmark bookmark = PersistWrapper.read(UnitBookmark.class, 
 				"select * from unit_bookmark where userFk= ? and unitFk = ? and projectFk = ?", 
@@ -440,13 +434,13 @@ public class UnitManager
 				{
 					// upgrade to an ByUser bookmark
 					bookmark.setMode(mode.name());
-					PersistWrapper.update(bookmark);
+					persistWrapper.update(bookmark);
 				}
 				else
 				{
 					// set the createdDate to now so that it comes in front in the queue
 					bookmark.setCreatedDate(new Date());
-					PersistWrapper.update(bookmark);
+					persistWrapper.update(bookmark);
 				}
 			}
 		}
@@ -461,7 +455,7 @@ public class UnitManager
 				bookmarkNew.setProjectFk(projectPk);
 				bookmarkNew.setUnitFk(unitPk);
 				bookmarkNew.setUserFk(context.getUser().getPk());
-				pk=PersistWrapper.createEntity(bookmarkNew);
+				pk= (int) persistWrapper.createEntity(bookmarkNew);
 			}
 			else
 			{
@@ -474,7 +468,7 @@ public class UnitManager
 					//remove the first one and add the new one
 					
 					UnitBookmark first = currentList.get(0);
-					PersistWrapper.deleteEntity(first);		
+					persistWrapper.deleteEntity(first);
 				}	
 					
 				//now add a new one, adding happens without removal if the current list is still not 10
@@ -484,7 +478,7 @@ public class UnitManager
 				bookmarkNew.setProjectFk(projectPk);
 				bookmarkNew.setUnitFk(unitPk);
 				bookmarkNew.setUserFk(context.getUser().getPk());
-				pk=PersistWrapper.createEntity(bookmarkNew);
+				pk= (int) persistWrapper.createEntity(bookmarkNew);
 			}
 		}
 		return getBookmarkedUnit(pk);
@@ -560,14 +554,14 @@ public class UnitManager
 		
 	}
 	
-	public static void removeUnitBookmark(UserContext context, int unitPk, int projectPk)
+	public  void removeUnitBookmark(UserContext context, int unitPk, int projectPk)
 	{
 		UnitBookmark bookmark = PersistWrapper.read(UnitBookmark.class, 
 				"select * from unit_bookmark where userFk= ? and unitFk = ? and projectFk = ?", 
 				context.getUser().getPk(), unitPk, projectPk);
 		
 		if(bookmark != null)
-			PersistWrapper.deleteEntity(bookmark);
+			persistWrapper.deleteEntity(bookmark);
 	}
 	
 }

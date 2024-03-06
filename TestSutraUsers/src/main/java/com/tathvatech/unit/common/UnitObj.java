@@ -7,6 +7,11 @@
 package com.tathvatech.unit.common;
 
 import com.tathvatech.site.oid.SiteGroupOID;
+import com.tathvatech.unit.entity.UnitH;
+import com.tathvatech.unit.entity.UnitInProject;
+import com.tathvatech.unit.entity.UnitInProjectH;
+import com.tathvatech.unit.enums.UnitOriginType;
+import com.tathvatech.unit.service.UnitManagerCore;
 import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.SupplierOID;
 import com.tathvatech.user.OID.UnitOID;
@@ -187,9 +192,9 @@ public class UnitObj implements TestableEntity
 		this.setPartPk(unitBean.getPartPk());
 		this.setPartRevisionPk(unitBean.getPartRevisionPk());
 		if(unitBean.getSupplierOID() != null)
-			this.setSupplierFk(unitBean.getSupplierOID().getPk());
+			this.setSupplierFk((int) unitBean.getSupplierOID().getPk());
 		if(unitBean.getSiteGroupOID() != null)
-			this.setSiteGroupFk(unitBean.getSiteGroupOID().getPk());
+			this.setSiteGroupFk((int) unitBean.getSiteGroupOID().getPk());
 		this.setCreatedBy(unitBean.getCreatedBy());
 		this.setCreatedDate(unitBean.getCreatedDate());
 		this.setLastUpdated(unitBean.getLastUpdated());

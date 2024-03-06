@@ -1,18 +1,20 @@
 package com.tathvatech.project.service;
 
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.forms.common.ProjectFormQuery;
+import com.tathvatech.project.oid.ProjectPartOID;
+import com.tathvatech.user.OID.ProjectOID;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.part.ProjectPartOID;
-import com.tathvatech.ts.core.project.ProjectFormQuery;
-import com.tathvatech.ts.core.project.ProjectOID;
+
 
 public class ProjectTemplateManager {
 
 	public static List<ProjectFormQuery> getTestProcsForProjectPart(ProjectOID projectOID,
-			ProjectPartOID projectPartOID) throws Exception
+																	ProjectPartOID projectPartOID) throws Exception
 	{
 		List<ProjectFormQuery> pForms = PersistWrapper.readList(ProjectFormQuery.class, ProjectFormQuery.sql + " and project.pk =? and "
 				+ "project_part.pk = ? order by ws.orderNo, form.identityNumber", 

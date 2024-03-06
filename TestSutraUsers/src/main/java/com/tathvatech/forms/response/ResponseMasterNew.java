@@ -11,7 +11,7 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import net.sf.persist.annotations.NoTable;
+
 
 /**
  * @author Hari
@@ -20,7 +20,7 @@ import net.sf.persist.annotations.NoTable;
  *         Window - Preferences - Java - Code Style - Code Templates
  */
 
-@NoTable
+
 public class ResponseMasterNew implements Serializable
 {
 	private int		responseId;
