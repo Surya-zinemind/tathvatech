@@ -35,6 +35,7 @@ import com.tathvatech.user.common.TestProcObj;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.User;
 import com.tathvatech.workstation.common.DummyWorkstation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

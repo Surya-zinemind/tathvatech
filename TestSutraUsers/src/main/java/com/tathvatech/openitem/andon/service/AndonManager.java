@@ -8,18 +8,32 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.logging.Logger;
 
+import com.tathvatech.common.entity.AttachmentIntf;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.project.common.ProjectQuery;
+import com.tathvatech.unit.common.UnitObj;
+import com.tathvatech.unit.service.UnitManager;
+import com.tathvatech.user.OID.MRFOID;
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.UnitOID;
+import com.tathvatech.user.OID.WorkstationOID;
 import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.Project;
+import com.tathvatech.user.service.CommonServiceManager;
 import com.tathvatech.workstation.entity.Workstation;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.aspectj.apache.bcel.classfile.annotation.NameValuePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class AndonManager
 {
-	static Logger logger = Logger.getLogger(String.valueOf(AndonManager.class));
+	private static final Logger logger = LoggerFactory.getLogger(AndonManager.class);
    private PersistWrapper persistWrapper;
 	public  Terminal getTerminal(int terminalPk) throws Exception
 	{
@@ -41,7 +55,7 @@ public class AndonManager
 				terminalPk, projectPk);
 	}
 
-	public static List<AndonQuery> getAndonListForWorkstationTerminal(UserContext context, Terminal terminal,
+	public  List<AndonQuery> getAndonListForWorkstationTerminal(UserContext context, Terminal terminal,
 																	  int projectPk, Workstation workstation)
 	{
 		try
@@ -50,7 +64,7 @@ public class AndonManager
 					+ " join TERMINAL_WORKSTATION tw on tw.projectPk = andon.projectPk and tw.workstationPk = andon.workstationPk "
 					+ " where 1 = 1 " + " and tw.terminalPk=? and tw.projectPk = ? and tw.workstationPk=? "
 					+ " and ANDON.status in (?,?) " + " order by ANDON.createdDate desc";
-			return PersistWrapper.readList(AndonQuery.class, sql, terminal.getPk(), projectPk, workstation.getPk(),
+			return persistWrapper.readList(AndonQuery.class, sql, terminal.getPk(), projectPk, workstation.getPk(),
 					Andon.STATUS_OPEN, Andon.STATUS_ATTENDED);
 		}
 		catch (Exception e)
@@ -60,7 +74,7 @@ public class AndonManager
 		}
 	}
 
-	public static List<AndonQuery> getAndonListForDisplayBoard(UserContext context, Terminal terminal)
+	public  List<AndonQuery> getAndonListForDisplayBoard(UserContext context, Terminal terminal)
 	{
 		try
 		{
@@ -69,7 +83,7 @@ public class AndonManager
 					+ " where 1 = 1 " + " and tw.terminalPk=? " + " and ANDON.status = ? "
 					+ " order by ANDON.createdDate desc ";
 
-			return PersistWrapper.readList(AndonQuery.class, sql, terminal.getPk(), Andon.STATUS_OPEN);
+			return persistWrapper.readList(AndonQuery.class, sql, terminal.getPk(), Andon.STATUS_OPEN);
 		}
 		catch (Exception e)
 		{
@@ -78,11 +92,11 @@ public class AndonManager
 		}
 	}
 
-	public static List<AndonQuery> getAndonListForProject(UserContext context, int projectPk) throws Exception
+	public  List<AndonQuery> getAndonListForProject(UserContext context, int projectPk) throws Exception
 	{
 		String sql = AndonQuery.sql
 				+ " where 1 = 1 and ANDON.projectPk = ? and ANDON.status not in ('Deleted') order by ANDON.createdDate desc";
-		return PersistWrapper.readList(AndonQuery.class, sql, projectPk);
+		return persistWrapper.readList(AndonQuery.class, sql, projectPk);
 	}
 
 	public static List<AndonQuery> getAndonList(UserContext context, AndonListFilter filter) throws Exception
@@ -99,13 +113,13 @@ public class AndonManager
 		return PersistWrapper.readList(AndonQuery.class, sql.toString(), params.toArray(new Object[params.size()]));
 	}
 
-	public static OILStats getAndonOpenCompletedClosedCountForUnit(int unitPk) throws Exception
+	public  OILStats getAndonOpenCompletedClosedCountForUnit(int unitPk) throws Exception
 	{
 		Long closedCount = 0l;
 		Long completedCount = 0l;
 		Long openCount = 0l;
 
-		List<NameValuePair> list = PersistWrapper.readList(NameValuePair.class,
+		List<NameValuePair> list = persistWrapper.readList(NameValuePair.class,
 				"select status as name, count(*)  as value from ANDON where unitPk = ? and status != 'Deleted' group by status",
 				unitPk);
 
@@ -114,7 +128,7 @@ public class AndonManager
 			NameValuePair aStatus = (NameValuePair) iterator.next();
 			if (Andon.STATUS_OPEN.equals(aStatus.getName().toString()))
 			{
-				openCount = (Long) aStatus.getValue();
+				openCount =  (Long)aStatus.getValue();
 			} else if (Andon.STATUS_ATTENDED.equals(aStatus.getName().toString()))
 			{
 				completedCount = (Long) aStatus.getValue();
@@ -131,14 +145,14 @@ public class AndonManager
 		// return new long[]{openCount, completedCount, closedCount};
 	}
 
-	public static OILStats getAndonOpenCompletedClosedCountForUnit(int unitPk, WorkstationOID workstationOID)
+	public  OILStats getAndonOpenCompletedClosedCountForUnit(int unitPk, WorkstationOID workstationOID)
 			throws Exception
 	{
 		Long closedCount = 0l;
 		Long completedCount = 0l;
 		Long openCount = 0l;
 
-		List<NameValuePair> list = PersistWrapper.readList(NameValuePair.class,
+		List<NameValuePair> list = persistWrapper.readList(NameValuePair.class,
 				"select status as name, count(*)  as value from ANDON where unitPk = ? and workstationPk = ? and status != 'Deleted' group by status",
 				unitPk, workstationOID.getPk());
 
@@ -164,7 +178,7 @@ public class AndonManager
 		// return new long[]{openCount, completedCount, closedCount};
 	}
 
-	public static OILStats getProjectAndonStatusASOnDate(int projectPk, Date time) throws Exception
+	public  OILStats getProjectAndonStatusASOnDate(int projectPk, Date time) throws Exception
 	{
 		// add one day to toDate. as the values till end of toDate should be
 		// picked.. the query runs <
@@ -173,13 +187,13 @@ public class AndonManager
 		cal.add(Calendar.DATE, 1);
 		time = cal.getTime();
 
-		Integer openCount = PersistWrapper.read(Integer.class,
+		Integer openCount = persistWrapper.read(Integer.class,
 				"select count(*) from ANDON where " + "projectPk =? and status != 'Deleted' and (createdDate < ?)",
 				projectPk, time);
-		Integer completedCount = PersistWrapper.read(Integer.class,
+		Integer completedCount = persistWrapper.read(Integer.class,
 				"select count(*) from ANDON where " + "projectPk =? and status != 'Deleted' and attendedDate < ?",
 				projectPk, time);
-		Integer closedCount = PersistWrapper.read(Integer.class,
+		Integer closedCount = persistWrapper.read(Integer.class,
 				"select count(*) from ANDON where " + "projectPk =? and status != 'Deleted' and closedDate < ? ",
 				projectPk, time);
 
@@ -191,7 +205,7 @@ public class AndonManager
 		return s;
 	}
 
-	public static OILStats getAndonStatusASOnDate(int unitPk, Date time) throws Exception
+	public  OILStats getAndonStatusASOnDate(int unitPk, Date time) throws Exception
 	{
 		// add one day to toDate. as the values till end of toDate should be
 		// picked.. the query runs <
@@ -200,13 +214,13 @@ public class AndonManager
 		cal.add(Calendar.DATE, 1);
 		time = cal.getTime();
 
-		Integer openCount = PersistWrapper.read(Integer.class,
+		Integer openCount = persistWrapper.read(Integer.class,
 				"select count(*) from ANDON where " + "unitPk=? and status != 'Deleted' and " + "(createdDate < ?)",
 				unitPk, time);
-		Integer completedCount = PersistWrapper.read(Integer.class,
+		Integer completedCount = persistWrapper.read(Integer.class,
 				"select count(*) from ANDON where " + "unitPk=? and status != 'Deleted' and attendedDate < ?", unitPk,
 				time);
-		Integer closedCount = PersistWrapper.read(Integer.class,
+		Integer closedCount = persistWrapper.read(Integer.class,
 				"select count(*) from ANDON where " + "unitPk=? and status != 'Deleted' and closedDate < ? ", unitPk,
 				time);
 
@@ -218,14 +232,14 @@ public class AndonManager
 		return s;
 	}
 
-	public static Andon saveAndon(UserContext context, ProjectQuery projectQuery, Andon andon,
-			List<AttachmentIntf> attachments) throws Exception
+	public  Andon saveAndon(UserContext context, ProjectQuery projectQuery, Andon andon,
+								  List<AttachmentIntf> attachments) throws Exception
 	{
 		if (projectQuery == null)
 			throw new AppException("Invalid Project");
 		Workstation ws = null;
 		if (andon.getWorkstationPk() != null)
-			ws = PersistWrapper.readByPrimaryKey(Workstation.class, andon.getWorkstationPk());
+			ws = persistWrapper.readByPrimaryKey(Workstation.class, andon.getWorkstationPk());
 		UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(andon.getUnitPk()));
 		if (ws == null)
 			throw new AppException("Andon should be associated to a valid workstation");
@@ -237,7 +251,7 @@ public class AndonManager
 			synchronized (AndonNoController.class)
 			{
 				int andonNoPart = 0;
-				String lastAndonNo = PersistWrapper.read(String.class,
+				String lastAndonNo = persistWrapper.read(String.class,
 						"select andonNo from ANDON where andonNo like ? order by pk desc limit 0,1",
 						ws.getWorkstationName() + "-" + unit.getUnitName() + "-%");
 				try
@@ -252,7 +266,7 @@ public class AndonManager
 				andon.setProjectPk(projectQuery.getPk());
 				andon.setCreatedDate(new Date());
 				andon.setStatus(Andon.STATUS_OPEN);
-				pk = PersistWrapper.createEntity(andon);
+				pk = persistWrapper.createEntity(andon);
 				List<AttachmentIntf> attachmentlist = new ArrayList<AttachmentIntf>();
 
 				if (attachments != null && attachments.size() > 0)
@@ -269,7 +283,7 @@ public class AndonManager
 			return getAndon(pk);
 		} else
 		{
-			PersistWrapper.update(andon);
+			persistWrapper.update(andon);
 			List<AttachmentIntf> attachmentlist = new ArrayList<AttachmentIntf>();
 
 			if (attachments != null && attachments.size() > 0)
@@ -286,15 +300,15 @@ public class AndonManager
 		}
 	}
 
-	public static Andon getAndon(int andonPk) throws Exception
+	public  Andon getAndon(int andonPk) throws Exception
 	{
-		return PersistWrapper.readByPrimaryKey(Andon.class, andonPk);
+		return persistWrapper.readByPrimaryKey(Andon.class, andonPk);
 	}
 
-	public static AndonBean getAndonBean(int andonPk) throws Exception
+	public  AndonBean getAndonBean(int andonPk) throws Exception
 	{
 		AndonBean andonBean = null;
-		Andon andon = PersistWrapper.readByPrimaryKey(Andon.class, andonPk);
+		Andon andon = persistWrapper.readByPrimaryKey(Andon.class, andonPk);
 		if (andon != null && andon.getPk() > 0)
 		{
 			andonBean = new AndonBean();
@@ -357,7 +371,7 @@ public class AndonManager
 				{
 					mrfFk = mrfReference.get(0).getReferenceToPk();
 				}
-				Mrf mrf = PersistWrapper.readByPrimaryKey(Mrf.class, mrfFk);
+				Mrf mrf = persistWrapper.readByPrimaryKey(Mrf.class, mrfFk);
 				andonBean.setMrfOID(new MRFOID(mrf.getPk(), mrf.getMrfno()));
 			}
 		}
@@ -365,13 +379,13 @@ public class AndonManager
 
 	}
 
-	public static Andon markAndonAsAttended(UserContext context, Andon andon, List<AttachmentIntf> attachments)
+	public  Andon markAndonAsAttended(UserContext context, Andon andon, List<AttachmentIntf> attachments)
 			throws Exception
 	{
 		andon.setAttendedDate(new Date());
 		andon.setStatus(Andon.STATUS_ATTENDED);
 		andon.setAttendedBy(context.getUser().getPk());
-		PersistWrapper.update(andon);
+		persistWrapper.update(andon);
 		List<AttachmentIntf> attachmentlist = new ArrayList<AttachmentIntf>();
 
 		if (attachments != null && attachments.size() > 0)
@@ -387,7 +401,7 @@ public class AndonManager
 		return getAndon(andon.getPk());
 	}
 
-	public static Andon markAndonAsClosed(UserContext context, Andon andon, List<AttachmentIntf> attachments)
+	public  Andon markAndonAsClosed(UserContext context, Andon andon, List<AttachmentIntf> attachments)
 			throws Exception
 	{
 		if (andon.getSource() == null || andon.getSource().trim().length() < 1)
@@ -405,7 +419,7 @@ public class AndonManager
 		andon.setClosedBy(context.getUser().getPk());
 		andon.setStatus(Andon.STATUS_CLOSED);
 
-		PersistWrapper.update(andon);
+		persistWrapper.update(andon);
 		List<AttachmentIntf> attachmentlist = new ArrayList<AttachmentIntf>();
 
 		if (attachments != null && attachments.size() > 0)
@@ -421,13 +435,13 @@ public class AndonManager
 		return getAndon(andon.getPk());
 	}
 
-	public static void markAllAndonsForUnitOnWorkstationAsClosed(UserContext context, UnitOID unitOID,
-			ProjectOID projectOID, WorkstationOID workstationOID) throws Exception
+	public  void markAllAndonsForUnitOnWorkstationAsClosed(UserContext context, UnitOID unitOID,
+																 ProjectOID projectOID, WorkstationOID workstationOID) throws Exception
 	{
 		// load tehe list of andons on that unit and workstation and project
 		StringBuilder sb = new StringBuilder(
 				"select * from ANDON where unitPk = ? and projectPk = ? and workstationPk = ? and status in ( ?, ?) ");
-		List<Andon> andonList = PersistWrapper.readList(Andon.class, sb.toString(), unitOID.getPk(), projectOID.getPk(),
+		List<Andon> andonList = persistWrapper.readList(Andon.class, sb.toString(), unitOID.getPk(), projectOID.getPk(),
 				workstationOID.getPk(), Andon.STATUS_OPEN, Andon.STATUS_ATTENDED);
 		for (Iterator iterator = andonList.iterator(); iterator.hasNext();)
 		{
@@ -444,16 +458,16 @@ public class AndonManager
 		}
 	}
 
-	public static List<AndonType> getAndonTypesForWorkstation(int projectPk, int workstationPk) throws Exception
+	public  List<AndonType> getAndonTypesForWorkstation(int projectPk, int workstationPk) throws Exception
 	{
-		return PersistWrapper.readList(AndonType.class, "select * from ANDON_TYPE where pk in "
+		return persistWrapper.readList(AndonType.class, "select * from ANDON_TYPE where pk in "
 				+ "(select andonTypePk from WORKSTATION_ANDON_TYPE where projectPk = ? and workstationPk=?) and status = ?",
 				projectPk, workstationPk, AndonType.STATUS_ACTIVE);
 	}
 
-	public static List<AndonType> getAndonTypesForProject(int projectPk) throws Exception
+	public  List<AndonType> getAndonTypesForProject(int projectPk) throws Exception
 	{
-		return PersistWrapper.readList(AndonType.class,
+		return persistWrapper.readList(AndonType.class,
 				"select * from ANDON_TYPE where pk in "
 						+ "(select andonTypePk from WORKSTATION_ANDON_TYPE where projectPk = ?) and status = ?",
 				projectPk, AndonType.STATUS_ACTIVE);
@@ -468,7 +482,7 @@ public class AndonManager
 	{
 		return PersistWrapper.read(Terminal.class, "select * from TERMINAL where sessionKey = ?", sessionKey);
 	}
-	public static String createTerminalSessionKey(UserContext context, Terminal terminal)
+	public  String createTerminalSessionKey(UserContext context, Terminal terminal)
 	{
 		String sessionKey = null;
 		if (terminal.getSessionKey() == null || terminal.getSessionKey().trim().length() == 0)
@@ -477,7 +491,7 @@ public class AndonManager
 			sessionKey = new Integer(rnd).toString();
 
 			terminal.setSessionKey(sessionKey);
-			PersistWrapper.update(terminal);
+			persistWrapper.update(terminal);
 		} else
 		{
 			// we are allowing one terminal to be logged in from multiple
@@ -488,23 +502,23 @@ public class AndonManager
 		return sessionKey;
 	}
 
-	public static List<Terminal> getTerminalList() throws Exception
+	public  List<Terminal> getTerminalList() throws Exception
 	{
-		return PersistWrapper.readList(Terminal.class, "select * from TERMINAL order by createdDate desc",
+		return persistWrapper.readList(Terminal.class, "select * from TERMINAL order by createdDate desc",
 				new Object[] {});
 	}
 
-	public static void saveTerminal(UserContext context, Terminal terminal) throws Exception
+	public  void saveTerminal(UserContext context, Terminal terminal) throws Exception
 	{
 		terminal.setStatus(Terminal.STATUS_ACTIVE);
 		if (terminal.getPk() == 0)
 		{
 			terminal.setCreatedDate(new Date());
 			terminal.setCreatedBy(context.getUser().getPk());
-			PersistWrapper.createEntity(terminal);
+			persistWrapper.createEntity(terminal);
 		} else
 		{
-			PersistWrapper.update(terminal);
+			persistWrapper.update(terminal);
 		}
 	}
 
@@ -514,40 +528,40 @@ public class AndonManager
 				new Object[] {});
 	}
 
-	public static AndonType getAndonType(int pk) throws Exception
+	public  AndonType getAndonType(int pk) throws Exception
 	{
-		return PersistWrapper.readByPrimaryKey(AndonType.class, pk);
+		return persistWrapper.readByPrimaryKey(AndonType.class, pk);
 	}
 
-	public static void saveAndonType(UserContext context, AndonType andonType) throws Exception
+	public  void saveAndonType(UserContext context, AndonType andonType) throws Exception
 	{
 		andonType.setStatus(AndonType.STATUS_ACTIVE);
 		if (andonType.getPk() == 0)
 		{
 			andonType.setCreatedBy(context.getUser().getPk());
 			andonType.setCreatedDate(new Date());
-			PersistWrapper.createEntity(andonType);
+			persistWrapper.createEntity(andonType);
 		} else
 		{
-			PersistWrapper.update(andonType);
+			persistWrapper.update(andonType);
 		}
 
 	}
 
-	public static List<TerminalWorkstation> getTerminalWorkstationList(int terminalPk) throws Exception
+	public  List<TerminalWorkstation> getTerminalWorkstationList(int terminalPk) throws Exception
 	{
-		return PersistWrapper.readList(TerminalWorkstation.class,
+		return persistWrapper.readList(TerminalWorkstation.class,
 				"select * from TERMINAL_WORKSTATION where terminalPk=? ", terminalPk);
 	}
 
-	public static List<Terminal> getTerminalListForWorkstation(int projectPk, int workstationPk) throws Exception
+	public  List<Terminal> getTerminalListForWorkstation(int projectPk, int workstationPk) throws Exception
 	{
-		return PersistWrapper.readList(Terminal.class, "select * from TERMINAL where pk in "
+		return persistWrapper.readList(Terminal.class, "select * from TERMINAL where pk in "
 				+ "(select terminalPk from TERMINAL_WORKSTATION where projectPk = ? and workstationPk=?) and status = ?",
 				projectPk, workstationPk, Terminal.STATUS_ACTIVE);
 	}
 
-	public static void setAndonTypesForWorkstation(ProjectQuery projectQuery, int workstationPk,
+	public  void setAndonTypesForWorkstation(ProjectQuery projectQuery, int workstationPk,
 			Collection andonTypePks) throws Exception
 	{
 		List<WorkstationAndonType> wTs = PersistWrapper.readList(WorkstationAndonType.class,
@@ -577,7 +591,7 @@ public class AndonManager
 				newT.setProjectPk(projectQuery.getPk());
 				newT.setAndonTypePk(aTypePk);
 				newT.setWorkstationPk(workstationPk);
-				PersistWrapper.createEntity(newT);
+				persistWrapper.createEntity(newT);
 			}
 		}
 
@@ -585,11 +599,11 @@ public class AndonManager
 		for (Iterator iterator = wTs.iterator(); iterator.hasNext();)
 		{
 			WorkstationAndonType workstationAndonType = (WorkstationAndonType) iterator.next();
-			PersistWrapper.deleteEntity(workstationAndonType);
+			persistWrapper.deleteEntity(workstationAndonType);
 		}
 	}
 
-	public static void setTerminalsForWorkstation(ProjectQuery projectQuery, int workstationPk, Collection terminalPks)
+	public  void setTerminalsForWorkstation(ProjectQuery projectQuery, int workstationPk, Collection terminalPks)
 			throws Exception
 	{
 		List<TerminalWorkstation> wTs = PersistWrapper.readList(TerminalWorkstation.class,
@@ -619,7 +633,7 @@ public class AndonManager
 				newT.setTerminalPk(aTerminalPk);
 				newT.setProjectPk(projectQuery.getPk());
 				newT.setWorkstationPk(workstationPk);
-				PersistWrapper.createEntity(newT);
+				persistWrapper.createEntity(newT);
 			}
 		}
 
@@ -627,11 +641,11 @@ public class AndonManager
 		for (Iterator iterator = wTs.iterator(); iterator.hasNext();)
 		{
 			TerminalWorkstation workstationTerminal = (TerminalWorkstation) iterator.next();
-			PersistWrapper.deleteEntity(workstationTerminal);
+			persistWrapper.deleteEntity(workstationTerminal);
 		}
 	}
 
-	public static void setWorkstationsForTerminal(Project project, Collection workstationPks, int terminalPk)
+	public  void setWorkstationsForTerminal(Project project, Collection workstationPks, int terminalPk)
 			throws Exception
 	{
 		List<TerminalWorkstation> wTs = PersistWrapper.readList(TerminalWorkstation.class,
@@ -661,7 +675,7 @@ public class AndonManager
 				newT.setWorkstationPk(aWorkstationPk);
 				newT.setProjectPk(project.getPk());
 				newT.setTerminalPk(terminalPk);
-				PersistWrapper.createEntity(newT);
+				persistWrapper.createEntity(newT);
 			}
 		}
 
@@ -669,22 +683,22 @@ public class AndonManager
 		for (Iterator iterator = wTs.iterator(); iterator.hasNext();)
 		{
 			TerminalWorkstation workstationTerminal = (TerminalWorkstation) iterator.next();
-			PersistWrapper.deleteEntity(workstationTerminal);
+			persistWrapper.deleteEntity(workstationTerminal);
 		}
 	}
 
-	public static void deleteAndon(int andonPk) throws Exception
+	public  void deleteAndon(int andonPk) throws Exception
 	{
-		Andon andon = PersistWrapper.readByPrimaryKey(Andon.class, andonPk);
+		Andon andon = persistWrapper.readByPrimaryKey(Andon.class, andonPk);
 		if (andon == null)
 			throw new AppException("Invalid Andon, Delete failed");
 		if (Andon.STATUS_CLOSED.equals(andon.getStatus()) || Andon.STATUS_ATTENDED.equals(andon.getStatus()))
 			throw new AppException("An andon which is in Attended or Closed status cannot be deleted");
 		andon.setStatus(Andon.STATUS_DELETED);
-		PersistWrapper.update(andon);
+		persistWrapper.update(andon);
 	}
 
-	public static List<Project> getProjectsAssignedForTerminal(int terminalPk)
+	public  List<Project> getProjectsAssignedForTerminal(int terminalPk)
 	{
 		// we have to makesure that if ther are any project - workstation
 		// combinations in the TERMINAL_WORKSTATION is
@@ -693,7 +707,7 @@ public class AndonManager
 		// that is any the join with TAB_PROJECT_WORKSTATIONS is also there.
 		try
 		{
-			return PersistWrapper.readList(Project.class,
+			return persistWrapper.readList(Project.class,
 					"select * from TAB_PROJECT where TAB_PROJECT.status = ? and pk in "
 							+ "(select distinct(p.pk) from TAB_PROJECT p, TAB_PROJECT_WORKSTATIONS pw, "
 							+ "TERMINAL_WORKSTATION tw where p.pk = pw.projectPk and pw.projectPk = tw.projectPk "
@@ -726,7 +740,7 @@ public class AndonManager
 		return null;
 	}
 
-	public static List<AndonQuery> getAndonListByPk(UserContext context, AndonListFilter filter, StringBuffer sbText)
+	public  List<AndonQuery> getAndonListByPk(UserContext context, AndonListFilter filter, StringBuffer sbText)
 			throws Exception
 	{
 		AndonListFilterProcessor p = new AndonListFilterProcessor(filter);
@@ -746,10 +760,10 @@ public class AndonManager
 
 		sql.append(" order by ANDON.createdDate desc");
 
-		return PersistWrapper.readList(AndonQuery.class, sql.toString(), params.toArray(new Object[params.size()]));
+		return persistWrapper.readList(AndonQuery.class, sql.toString(), params.toArray(new Object[params.size()]));
 	}
 
-	public static List<AndonQuery> getTopThreeRPNAndon(List<ProjectOID> projectOIDs,
+	public  List<AndonQuery> getTopThreeRPNAndon(List<ProjectOID> projectOIDs,
 			List<WorkstationOID> workstationOIDs, Date createdFrom, Date createdTo, List<Integer> unitPks)
 			throws Exception
 	{
@@ -817,7 +831,7 @@ public class AndonManager
 		sql.append(" order by RPN desc ");
 		sql.append(" LIMIT 3 ");
 
-		return PersistWrapper.readList(AndonQuery.class, sql.toString(),
+		return persistWrapper.readList(AndonQuery.class, sql.toString(),
 				(params.size() > 0) ? params.toArray(new Object[params.size()]) : null);
 	}
 

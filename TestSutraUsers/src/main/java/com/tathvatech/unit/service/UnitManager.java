@@ -10,28 +10,29 @@ import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.UnitOID;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.workstation.common.UnitInProjectObj;
+import com.tathvatech.workstation.service.WorkstationServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.logging.Logger;
 
 
 public class UnitManager
 {
-	static
-	Logger logger = Logger.getLogger(String.valueOf(UnitManager.class));
+	private static final Logger logger = LoggerFactory.getLogger(UnitManager.class);
 	private PersistWrapper persistWrapper;
-	public static int getRootUnitPk(UnitOID unitOID, ProjectOID projectOID) throws Exception
+	public  int getRootUnitPk(UnitOID unitOID, ProjectOID projectOID) throws Exception
 	{
 		String sql = " select rootupr.unitPk " 
 				+ " from unit_project_ref rootupr " 
 				+ " join unit_project_ref_h uprh on uprh.rootParentPk = rootupr.pk and now() between uprh.effectiveDateFrom and uprh.effectiveDateTo "
 				+ " join unit_project_ref upr on upr.pk = uprh.unitInProjectPk "
 				+ " where upr.unitPk = ? and upr.projectPk = ? " ;
-		Integer val = PersistWrapper.read(Integer.class, sql, unitOID.getPk(), projectOID.getPk());
+		Integer val = persistWrapper.read(Integer.class, sql, unitOID.getPk(), projectOID.getPk());
 		if(val == null)
 			logger.error("Unable to find root unit Pk for unitOID:" + unitOID.getPk() + " on project:" + projectOID.getPk());
 		
@@ -48,9 +49,9 @@ public class UnitManager
 		return new UnitInProjectDAO().getUnitInProject(unitOID, projectOID);
 	}
 	
-	public static boolean isUnitPartOfAnyProjects(UnitOID unitOID)
+	public  boolean isUnitPartOfAnyProjects(UnitOID unitOID)
 	{
-		int count = PersistWrapper.read(Integer.class, "select count(*) from unit_project_ref where unitPk = ?", unitOID.getPk());
+		int count = persistWrapper.read(Integer.class, "select count(*) from unit_project_ref where unitPk = ?", unitOID.getPk());
 		if(count == 0)
 			return false;
 		else
@@ -58,9 +59,9 @@ public class UnitManager
 		
 	}
 
-	public static boolean isUnitOpenInAnyProjects(UnitOID unitOID)
+	public  boolean isUnitOpenInAnyProjects(UnitOID unitOID)
 	{
-		int count = PersistWrapper.read(Integer.class, "select count(*) from unit_project_ref upr join unit_project_ref_h uprh on uprh.unitInProjectPk = upr.pk and now() between uprh.effectiveDateFrom and uprh.effectiveDateTo"
+		int count = persistWrapper.read(Integer.class, "select count(*) from unit_project_ref upr join unit_project_ref_h uprh on uprh.unitInProjectPk = upr.pk and now() between uprh.effectiveDateFrom and uprh.effectiveDateTo"
 				+ " where upr.unitPk = ? and uprh.status = ?", unitOID.getPk(), UnitInProject.STATUS_OPEN);
 		if(count == 0)
 			return false;
@@ -84,7 +85,7 @@ public class UnitManager
 					int orderNoTemp = previousOne.getOrderNo();
 					previousOne.setOrderNo(unitInProjectToMove.getOrderNo());
 					unitInProjectToMove.setOrderNo(orderNoTemp);
-					uprDAO.saveUnitInProject(context, unitInProjectToMove, new Actions[]{Actions.changeUnitOrder});
+					uprDAO.saveUnitInProject(context, unitInProjectToMove, new Actions[][]{Actions.changeUnitOrder});
 					uprDAO.saveUnitInProject(context, previousOne, null);
 				}
 			}
@@ -121,11 +122,11 @@ public class UnitManager
 		}
 	}
 	
-	public static List<UnitQuery> getChildrenUnits(ProjectOID projectOID, UnitOID parentUnitOID)
+	public  List<UnitQuery> getChildrenUnits(ProjectOID projectOID, UnitOID parentUnitOID)
 	{
 		if(parentUnitOID == null)
 		{
-			return PersistWrapper.readList(UnitQuery.class, UnitQuery.sql + " where 1 = 1 and uprh.parentPk is null"
+			return persistWrapper.readList(UnitQuery.class, UnitQuery.sql + " where 1 = 1 and uprh.parentPk is null"
 					, projectOID.getPk()
 					, projectOID.getPk()
 					, projectOID.getPk()
@@ -134,7 +135,7 @@ public class UnitManager
 		else
 		{
 			UnitInProjectObj parentUpr = getUnitInProject(parentUnitOID, projectOID);
-			return PersistWrapper.readList(UnitQuery.class, UnitQuery.sql + " where 1 = 1 and uprh.parentPk = ?"
+			return persistWrapper.readList(UnitQuery.class, UnitQuery.sql + " where 1 = 1 and uprh.parentPk = ?"
 					, projectOID.getPk()
 					, projectOID.getPk()
 					, projectOID.getPk()
@@ -164,14 +165,14 @@ public class UnitManager
 		return null;
 	}
 
-	public static List<UnitQuery> getAllChildrenUnitsRecursive(UnitOID parentUnitOID, ProjectOID projectOID)
+	public  List<UnitQuery> getAllChildrenUnitsRecursive(UnitOID parentUnitOID, ProjectOID projectOID)
 	{
 		try
 		{
 			UnitInProjectObj unitInProject = UnitManager.getUnitInProject(parentUnitOID, projectOID);
 
 			String sql = UnitQuery.sql + " where 1 = 1 and ( (u.pk = ?) or (uprh.rootParentPk = ? and uprh.heiCode like ?) ) ";
-			List<UnitQuery> children = PersistWrapper.readList(UnitQuery.class, 
+			List<UnitQuery> children = persistWrapper.readList(UnitQuery.class,
 					sql, 
 					projectOID.getPk(), 
 					projectOID.getPk(), 
@@ -401,11 +402,11 @@ public class UnitManager
 	 * @param unitOID
 	 * @return
 	 */
-	public static List<ProjectQuery> getUnitAssignedProjects(UnitOID unitOID)
+	public  List<ProjectQuery> getUnitAssignedProjects(UnitOID unitOID)
 	{
 		String sql = ProjectQuery.fetchSQL 
 				+ " join unit_project_ref upr on upr.projectPk = project.pk and upr.unitPk = ?";
-		return PersistWrapper.readList(ProjectQuery.class, sql, unitOID.getPk());
+		return persistWrapper.readList(ProjectQuery.class, sql, unitOID.getPk());
 	}
 
 	public static List<UnitInProjectQuery> getProjectAssignmentsForUnit(UnitOID unitOID)
@@ -415,7 +416,7 @@ public class UnitManager
 
 	public  UnitQuery addUnitBookMark(UserContext context, int unitPk, int projectPk, BookmarkModeEnum mode)throws Exception
 	{
-		UnitBookmark bookmark = PersistWrapper.read(UnitBookmark.class, 
+		UnitBookmark bookmark = persistWrapper.read(UnitBookmark.class,
 				"select * from unit_bookmark where userFk= ? and unitFk = ? and projectFk = ?", 
 				context.getUser().getPk(), unitPk, projectPk);
 		
@@ -460,7 +461,7 @@ public class UnitManager
 			else
 			{
 				// a new bookmark is getting auto added. 
-				List<UnitBookmark> currentList = PersistWrapper.readList(UnitBookmark.class, 
+				List<UnitBookmark> currentList = persistWrapper.readList(UnitBookmark.class,
 						"select * from unit_bookmark where userFk = ? and mode = ? order by createdDate", 
 						context.getUser().getPk(), BookmarkModeEnum.Auto.name());
 				if(currentList != null && currentList.size() > 9) // keep 10 auto bookmarks per user
@@ -518,7 +519,7 @@ public class UnitManager
 	}
 	
 	
-	public static List<UnitQuery> getBookmarkedUnits(UserContext context, UnitBookmark.BookmarkModeEnum mode)
+	public  List<UnitQuery> getBookmarkedUnits(UserContext context, UnitBookmark.BookmarkModeEnum mode)
 	{
 		StringBuffer sb = new StringBuffer("select u.pk as unitPk, upr.unitOriginType as unitOriginTypeString, "
 				+ " part_revision.pk as partRevisionPk, part_revision.revision as partRevision, "
@@ -547,7 +548,7 @@ public class UnitManager
 				+ " left outer join part_type on project_part.partTypePk = part_type.pk "
 				+ " where ubkm.userFk = ? and ubkm.mode = ? ");
 		
-		List<UnitQuery> list = PersistWrapper.readList(UnitQuery.class, sb.toString(), 
+		List<UnitQuery> list = persistWrapper.readList(UnitQuery.class, sb.toString(),
 				context.getUser().getPk(), mode.name());
 		
 		return list;
@@ -556,7 +557,7 @@ public class UnitManager
 	
 	public  void removeUnitBookmark(UserContext context, int unitPk, int projectPk)
 	{
-		UnitBookmark bookmark = PersistWrapper.read(UnitBookmark.class, 
+		UnitBookmark bookmark = persistWrapper.read(UnitBookmark.class,
 				"select * from unit_bookmark where userFk= ? and unitFk = ? and projectFk = ?", 
 				context.getUser().getPk(), unitPk, projectPk);
 		

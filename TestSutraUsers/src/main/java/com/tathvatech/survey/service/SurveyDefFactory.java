@@ -6,6 +6,17 @@
  */
 package com.tathvatech.survey.service;
 
+import com.tathvatech.common.common.ApplicationProperties;
+import com.tathvatech.common.common.ServiceLocator;
+import com.tathvatech.common.exception.AppException;
+import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.unit.service.UnitManager;
+import com.tathvatech.user.OID.FormOID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.text.Document;
+import javax.swing.text.Element;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -16,20 +27,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.apache.log4j.Logger;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
 
-import com.tathvatech.ts.caf.ApplicationProperties;
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.caf.util.ServiceLocator;
-import com.tathvatech.ts.core.project.FormOID;
-import com.tathvatech.ts.core.survey.Survey;
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.thirdi.surveyside.survey.SurveyMaster;
+
 
 /**
  * @author Hari
@@ -39,7 +38,7 @@ import com.thirdi.surveyside.survey.SurveyMaster;
  */
 public class SurveyDefFactory
 {
-    private static final Logger logger = Logger.getLogger(SurveyDefFactory.class);
+    private static final Logger logger = LoggerFactory.getLogger(SurveyDefFactory.class);
 
 //    private static ReferenceMap defMap = new ReferenceMap(ReferenceMap.SOFT, ReferenceMap.SOFT);
     
@@ -149,7 +148,7 @@ public class SurveyDefFactory
     		FileInputStream inStream = new FileInputStream(new File(surveyDefFile));
     		InputStreamReader reader = new InputStreamReader(inStream, "UTF-8");
             SAXBuilder   builder = new SAXBuilder();
-    		Document     doc = builder.build(reader);
+    		Document doc = builder.build(reader);
     		reader.close();
     		inStream.close();
 
