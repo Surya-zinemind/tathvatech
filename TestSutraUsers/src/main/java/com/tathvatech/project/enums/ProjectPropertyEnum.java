@@ -1,4 +1,4 @@
-package com.tathvatech.project;
+package com.tathvatech.project.enums;
 
 import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.user.OID.Action;

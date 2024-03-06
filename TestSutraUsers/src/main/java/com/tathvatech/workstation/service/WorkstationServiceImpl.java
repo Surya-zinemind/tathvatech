@@ -2,9 +2,11 @@ package com.tathvatech.workstation.service;
 
 import com.tathvatech.common.enums.EStatusEnum;
 import com.tathvatech.common.exception.AppException;
+import com.tathvatech.common.exception.FormApprovedException;
 import com.tathvatech.common.wrapper.PersistWrapper;
-import com.tathvatech.project.ProjectPropertyEnum;
+import com.tathvatech.project.enums.ProjectPropertyEnum;
 import com.tathvatech.project.common.ProjectQuery;
+import com.tathvatech.project.enums.ProjectPropertyEnum;
 import com.tathvatech.project.oid.ProjectPartOID;
 import com.tathvatech.site.entity.ACL;
 import com.tathvatech.site.entity.ProjectSiteConfig;
@@ -16,17 +18,20 @@ import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.*;
 import com.tathvatech.user.security.manager.ManagerUserSecurityManager;
+import com.tathvatech.user.service.AccountService;
 import com.tathvatech.user.service.AuthorizationManager;
 import com.tathvatech.user.service.CommonServicesDelegate;
 import com.tathvatech.workstation.common.DummyWorkstation;
 import com.tathvatech.workstation.common.UnitInProjectObj;
 import com.tathvatech.workstation.common.UnitWorkstationQuery;
 import com.tathvatech.workstation.common.WorkstationQuery;
+import com.tathvatech.workstation.controller.WorkstationOrderNoController;
 import com.tathvatech.workstation.entity.ProjectWorkstation;
 import com.tathvatech.workstation.entity.UnitWorkstation;
 import com.tathvatech.workstation.entity.Workstation;
 import com.tathvatech.workstation.request.WorkstationFilter;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -41,6 +46,8 @@ public class WorkstationServiceImpl implements WorkstationService{
     private final PersistWrapper persistWrapper;
 
     private final SiteService siteService;
+    
+    private final AccountService accountService;
 
     public Workstation createWorkstation(UserContext context, Workstation workstation) throws Exception
     {
@@ -812,7 +819,7 @@ public class WorkstationServiceImpl implements WorkstationService{
     public  void copyWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
                                               WorkstationQuery workstationQuery, Integer[] selectedUnits) throws Exception
     {
-        int workstationPk = workstationQuery.getPk();
+        long workstationPk = workstationQuery.getPk();
 
         // teams
         for (int i = 0; i < selectedUnits.length; i++)
@@ -1014,7 +1021,7 @@ public class WorkstationServiceImpl implements WorkstationService{
             }
             if (uLocationQ != null && UnitLocation.STATUS_IN_PROGRESS.equals(uLocationQ.getStatus()))
             {
-                ProjectManager.setUnitWorkstationStatus(context, unitPk, projectQuery.getOID(),
+                setUnitWorkstationStatus(context, unitPk, projectQuery.getOID(),
                         workstationQuery.getOID(), UnitLocation.STATUS_IN_PROGRESS);
             }
         }
@@ -1329,14 +1336,14 @@ public class WorkstationServiceImpl implements WorkstationService{
 
             if (copyProjectCoordinators)
             {
-                List<User> existingMgrACList = AccountManager.getACLs(copyFromProjectOID.getPk(),
+                List<User> existingMgrACList = accountService.getACLs(copyFromProjectOID.getPk(),
                         UserPerms.OBJECTTYPE_PROJECT, UserPerms.ROLE_MANAGER);
-                List<User> existingReadonlyACList = AccountManager.getACLs(copyFromProjectOID.getPk(),
+                List<User> existingReadonlyACList = accountService.getACLs(copyFromProjectOID.getPk(),
                         UserPerms.OBJECTTYPE_PROJECT, UserPerms.ROLE_READONLY);
-                List<User> existingDataClerkACList = AccountManager.getACLs(copyFromProjectOID.getPk(),
+                List<User> existingDataClerkACList = accountService.getACLs(copyFromProjectOID.getPk(),
                         UserPerms.OBJECTTYPE_PROJECT, UserPerms.ROLE_DATACLERK);
 
-                AccountManager.setUserPermissions(destinationProjectOID.getPk(),
+                accountService.setUserPermissions(destinationProjectOID.getPk(),
                         new List[] { existingMgrACList, existingReadonlyACList, existingDataClerkACList },
                         new String[] { UserPerms.ROLE_MANAGER, UserPerms.ROLE_READONLY, UserPerms.ROLE_DATACLERK });
             }
@@ -1419,5 +1426,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                 projectOID.getPk());
 
     }
+
+
 
 }
