@@ -6,6 +6,7 @@ import com.tathvatech.project.oid.ProjectPartOID;
 import com.tathvatech.unit.common.UnitLocationQuery;
 import com.tathvatech.unit.common.UnitObj;
 import com.tathvatech.unit.entity.UnitLocation;
+import com.tathvatech.unit.service.UnitService;
 import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.TestProcOID;
 import com.tathvatech.user.OID.UnitOID;
@@ -13,7 +14,6 @@ import com.tathvatech.user.OID.WorkstationOID;
 import com.tathvatech.user.common.ServiceLocator;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.Project;
-import com.tathvatech.user.service.DeviceServiceImpl;
 import com.tathvatech.workstation.common.UnitWorkstationQuery;
 import com.tathvatech.workstation.common.WorkstationQuery;
 import com.tathvatech.workstation.entity.UnitWorkstation;
@@ -35,6 +35,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WorkstationController {
     
+    private final UnitService unitService;
+
     private final WorkstationService workstationService;
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(WorkstationController.class);
 
@@ -522,7 +524,7 @@ public class WorkstationController {
             List<UnitObj> units = new ArrayList();
             for (int x = 0; x < selectedUnits.length; x++)
             {
-                UnitObj unit = workstationService.getUnitByPk(new UnitOID(selectedUnits[x]));
+                UnitObj unit = unitService.getUnitByPk(new UnitOID(selectedUnits[x]));
                 if (unit != null)
                 {
                     units.add(unit);

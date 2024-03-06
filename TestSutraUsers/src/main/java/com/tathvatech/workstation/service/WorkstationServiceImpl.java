@@ -16,6 +16,7 @@ import com.tathvatech.project.entity.ProjectUser;
 import com.tathvatech.project.enums.ProjectPropertyEnum;
 import com.tathvatech.project.common.ProjectQuery;
 import com.tathvatech.project.oid.ProjectPartOID;
+import com.tathvatech.project.service.ProjectService;
 import com.tathvatech.project.service.ProjectTemplateManager;
 import com.tathvatech.site.entity.ACL;
 import com.tathvatech.site.entity.ProjectSiteConfig;
@@ -64,6 +65,14 @@ public class WorkstationServiceImpl implements WorkstationService{
     private final SiteService siteService;
     
     private final AccountService accountService;
+
+    private final ProjectService projectService;
+
+    private final SurveyResponseManager surveyResponseManager;
+
+    private final ProjectTemplateManager projectTemplateManager;
+
+    private final DummyWorkstation dummyWorkstation;
 
     public Workstation createWorkstation(UserContext context, Workstation workstation) throws Exception
     {
@@ -167,7 +176,7 @@ public class WorkstationServiceImpl implements WorkstationService{
     public  List<WorkstationQuery> getWorkstationList() throws Exception
     {
         String sql = WorkstationQuery.sql + " and  ws.workstationName != ? order by site.name, ws.orderNo";
-        return persistWrapper.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY);
+        return persistWrapper.readList(WorkstationQuery.class, sql, dummyWorkstation.DUMMY);
     }
 
     public  Workstation getWorkstation(WorkstationOID workstationOID)
@@ -187,12 +196,12 @@ public class WorkstationServiceImpl implements WorkstationService{
         return null;
     }
 
-    public  List<WorkstationQuery> getWorkstationsForProject(int projectPk)
+    public  List<WorkstationQuery> getWorkstationsForProject(long projectPk)
     {
         String sql = WorkstationQuery.sql
                 + " and ws.workstationName != ? and ws.pk in (select workstationPk from TAB_PROJECT_WORKSTATIONS where projectPk=?) order by ws.orderNo";
 
-        return persistWrapper.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, projectPk);
+        return persistWrapper.readList(WorkstationQuery.class, sql, dummyWorkstation.DUMMY, projectPk);
     }
 
     public  List<WorkstationQuery> getWorkstations(WorkstationFilter filter)
@@ -201,7 +210,7 @@ public class WorkstationServiceImpl implements WorkstationService{
         List params = new ArrayList();
 
         sb.append(" and ws.workstationName != ? and ws.estatus = 1 ");
-        params.add(DummyWorkstation.DUMMY);
+        params.add(dummyWorkstation.DUMMY);
 
         if (StringUtils.isNotBlank(filter.getFilterString()))
         {
@@ -250,7 +259,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                 + " and ws.workstationName != ? and ws.sitePk in (select siteFk from project_site_config where projectFk=? and estatus = 1) order by ws.orderNo";
         try
         {
-            return persistWrapper.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, projectOID.getPk());
+            return persistWrapper.readList(WorkstationQuery.class, sql, dummyWorkstation.DUMMY, projectOID.getPk());
         }
         catch (Exception e)
         {
@@ -262,14 +271,14 @@ public class WorkstationServiceImpl implements WorkstationService{
     public  List<WorkstationQuery> getWorkstationsForSite(int sitePk) throws Exception
     {
         String sql = WorkstationQuery.sql + " and  ws.workstationName != ? and ws.sitePk=? order by ws.orderNo";
-        return persistWrapper.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, sitePk);
+        return persistWrapper.readList(WorkstationQuery.class, sql, dummyWorkstation.DUMMY, sitePk);
     }
 
     public  List<WorkstationQuery> getWorkstationsForSiteAndProject(int sitePk, int projectPk) throws Exception
     {
         String sql = WorkstationQuery.sql
                 + " and  ws.workstationName != ? and ws.sitePk=? and ws.pk in (select workstationPk from TAB_PROJECT_WORKSTATIONS where projectPk=?) order by ws.orderNo";
-        return persistWrapper.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, sitePk, projectPk);
+        return persistWrapper.readList(WorkstationQuery.class, sql, dummyWorkstation.DUMMY, sitePk, projectPk);
     }
 
     public  void addWorkstationToProject(UserContext context, int projectPk, WorkstationOID workstationOID)
@@ -317,14 +326,14 @@ public class WorkstationServiceImpl implements WorkstationService{
     {
         String sql = WorkstationQuery.sql + " and "
                 + "ws.workstationName != ? and ws.pk in (select workstationPk from TAB_UNIT_WORKSTATIONS where unitPk=? and projectPk = ? and estatus = ? ) order by ws.orderNo";
-        return persistWrapper.readList(WorkstationQuery.class, sql, DummyWorkstation.DUMMY, unitOID.getPk(), projectOID.getPk(),
+        return persistWrapper.readList(WorkstationQuery.class, sql, dummyWorkstation.DUMMY, unitOID.getPk(), projectOID.getPk(),
                 EStatusEnum.Active.getValue());
     }
 
     /**
      * returns the list of UnitWorkstationQuery for a unit and its children.
      *
-     * @param unitPk
+     * @param
      * @param includeChildUnits
      * @return
      * @throws Exception
@@ -340,7 +349,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                     + " and ( (u.pk = ?) or (uprh.rootParentPk = ? and uprh.heiCode like ?) )"
                     + " and uw.projectPk = ? and uw.estatus = ? order by uprh.level, w.orderNo";
 
-            return persistWrapper.readList(UnitWorkstationQuery.class, sql, DummyWorkstation.DUMMY, unitInProject.getUnitPk(),
+            return persistWrapper.readList(UnitWorkstationQuery.class, sql, dummyWorkstation.DUMMY, unitInProject.getUnitPk(),
                     unitInProject.getRootParentPk(), unitInProject.getHeiCode() + ".%", projectOID.getPk(),
                     EStatusEnum.Active.getValue());
         } else
@@ -348,7 +357,7 @@ public class WorkstationServiceImpl implements WorkstationService{
             String sql = UnitWorkstationQuery.sql + " and "
                     + "w.workstationName != ? and uw.unitpk  = ? and uw.projectPk = ? and uw.estatus = ? order by w.orderNo";
 
-            return persistWrapper.readList(UnitWorkstationQuery.class, sql, DummyWorkstation.DUMMY, unitOID.getPk(),
+            return persistWrapper.readList(UnitWorkstationQuery.class, sql, dummyWorkstation.DUMMY, unitOID.getPk(),
                     projectOID.getPk(), EStatusEnum.Active.getValue());
         }
     }
@@ -375,7 +384,7 @@ public class WorkstationServiceImpl implements WorkstationService{
         {
             uwPk = (int) existingOne.getPk();
         }
-        Project proj = getProject(projectOID.getPk());
+        Project proj = projectService.getProject(projectOID.getPk());
 
 
 
@@ -449,7 +458,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                         + " join testproc_form_assign tfa on tfa.testProcFk = ut.pk and tfa.current = 1 "
                         + " join unit_testproc_h uth on uth.unitTestProcFk = ut.pk and now() between uth.effectiveDateFrom and uth.effectiveDateTo "
                         + " where uth.unitPk = ? and uth.projectPk = ? and uth.workstationPk != ? group by uth.workstationPk having count(*) > 0 ;",
-                unitOID.getPk(), projectOID.getPk(), DummyWorkstation.getPk());
+                unitOID.getPk(), projectOID.getPk(), dummyWorkstation.getPk());
 
         if (validWs == null || validWs.size() == 0)
             return new ArrayList<UnitLocationQuery>();
@@ -539,11 +548,11 @@ public class WorkstationServiceImpl implements WorkstationService{
             for (Iterator iterator = currentLocationTestList.iterator(); iterator.hasNext();)
             {
                 UnitFormQuery testProc = (UnitFormQuery) iterator.next();
-                ResponseMasterNew response = SurveyResponseDelegate
+                ResponseMasterNew response = surveyResponseManager
                         .getLatestResponseMasterForTest(new TestProcOID(testProc.getPk(), null));
                 if (response != null && ResponseMasterNew.STATUS_INPROGRESS.equals(response.getStatus()))
                 {
-                    SurveyResponseManager.changeResponseStatus(userContext, response.getResponseId(),
+                    surveyResponseManager.changeResponseStatus(userContext, response.getResponseId(),
                             ResponseMasterNew.STATUS_PAUSED);
                 }
             }
@@ -578,7 +587,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                     // response id. so a placeholder is created as soon as the
                     // form is opened..
 
-                    ResponseMasterNew response = SurveyResponseManager
+                    ResponseMasterNew response = surveyResponseManager
                             .getLatestResponseMasterForTest(unitFormQuery.getOID());
                     if (response == null)
                     {
@@ -593,7 +602,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                         sResponse.setIpaddress("0.0.0.0");
                         sResponse.setResponseMode(SurveyForm.RESPONSEMODE_NORMAL);
                         sResponse.setUser((User) userContext.getUser());
-                        sResponse = SurveyResponseManager.ceateDummyResponse(userContext, sResponse);
+                        sResponse = surveyResponseManager.ceateDummyResponse(userContext, sResponse);
                         // the save pageresponse automatically creates a new
                         // workflow entry for you..
                         // so we need not create another one.. so commenting the
@@ -604,7 +613,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                         // we need to change it to InProgress
                         if (response != null && ResponseMasterNew.STATUS_PAUSED.equals(response.getStatus()))
                         {
-                            SurveyResponseManager.changeResponseStatus(userContext, response.getResponseId(),
+                            surveyResponseManager.changeResponseStatus(userContext, response.getResponseId(),
                                     ResponseMasterNew.STATUS_INPROGRESS);
                         }
                     }
@@ -612,11 +621,11 @@ public class WorkstationServiceImpl implements WorkstationService{
                 {
                     // if response is in inprogress status, we need to change it
                     // to paused status
-                    ResponseMasterNew response = SurveyResponseDelegate
+                    ResponseMasterNew response = surveyResponseManager
                             .getLatestResponseMasterForTest(unitFormQuery.getOID());
                     if (response != null && ResponseMasterNew.STATUS_INPROGRESS.equals(response.getStatus()))
                     {
-                        SurveyResponseManager.changeResponseStatus(userContext, response.getResponseId(),
+                        surveyResponseManager.changeResponseStatus(userContext, response.getResponseId(),
                                 ResponseMasterNew.STATUS_PAUSED);
                     }
                 }
@@ -758,7 +767,7 @@ public class WorkstationServiceImpl implements WorkstationService{
         // the status is being changed from planned to open, so copy the
         // workstation, users, forms etc.
         // copy project workstations to unitworkstations
-        List<WorkstationQuery> workstations = ProjectManager.getWorkstationsForProject(projectOID.getPk());
+        List<WorkstationQuery> workstations = getWorkstationsForProject(projectOID.getPk());
         for (Iterator iterator = workstations.iterator(); iterator.hasNext();)
         {
             if(copyProjectWorkstationFormsToUnit == false && copyProjectWorkstationUsersToUnit == false)
@@ -767,7 +776,7 @@ public class WorkstationServiceImpl implements WorkstationService{
             WorkstationQuery workstationQuery = (WorkstationQuery) iterator.next();
 
             // if workstation is already added, skip;
-            UnitWorkstation uw = ProjectDelegate.getUnitWorkstationSetting(unitOID.getPk(), projectOID,
+            UnitWorkstation uw = getUnitWorkstationSetting(unitOID.getPk(), projectOID,
                     workstationQuery.getOID());
             if (uw != null)
                 continue;
@@ -776,11 +785,11 @@ public class WorkstationServiceImpl implements WorkstationService{
             if (unitInProject.getProjectPartPk() == null)
                 continue;
 
-            List<ProjectFormQuery> pForms = ProjectTemplateManager.getTestProcsForProjectPart(projectOID,
+            List<ProjectFormQuery> pForms = projectTemplateManager.getTestProcsForProjectPart(projectOID,
                     new ProjectPartOID(unitInProject.getProjectPartPk(), null), (int) workstationQuery.getPk());
 
             // check if there are any users defined for that workstation
-            List<ProjectUserQuery> pUsers = ProjectManager.getProjectUserQueryList(projectOID,
+            List<ProjectUserQuery> pUsers = projectService.getProjectUserQueryList(projectOID,
                     new ProjectPartOID(unitInProject.getProjectPartPk(), null), workstationQuery.getOID());
 
             if (pForms.size() == 0 && pUsers.size() == 0)
@@ -958,7 +967,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                 // copy the forms which are not there,
                 // if the form is getting upgraded, then we should upgrade the
                 // form inside the testproc.
-                List<ProjectFormQuery> pForms = ProjectTemplateManager.getTestProcsForProjectPart(projectQuery.getOID(),
+                List<ProjectFormQuery> pForms = projectTemplateManager.getTestProcsForProjectPart(projectQuery.getOID(),
                         new ProjectPartOID(unitInProject.getProjectPartPk(), null), workstationQuery.getPk());
                 List<UnitFormQuery> uForms = TestProcManager.getTestProcsForItem(context, unitPk, projectQuery.getOID(),
                         workstationQuery.getOID(), false);
@@ -1028,7 +1037,7 @@ public class WorkstationServiceImpl implements WorkstationService{
             {
                 // unit does not contain that workstation
 
-                List<ProjectFormQuery> pForms = ProjectTemplateManager.getTestProcsForProjectPart(projectQuery.getOID(),
+                List<ProjectFormQuery> pForms = projectTemplateManager.getTestProcsForProjectPart(projectQuery.getOID(),
                         new ProjectPartOID(unitInProject.getProjectPartPk(), null), workstationQuery.getPk());
 
                 addWorkstationToUnit(context, projectQuery.getOID(), unit.getOID(), workstationQuery.getOID());
@@ -1110,7 +1119,7 @@ public class WorkstationServiceImpl implements WorkstationService{
         return getWorkstationPercentCompleteInt(context, unitPk, projectOID, workstationOID, includeChildren);
     }
 
-    private  float getWorkstationPercentCompleteInt(UserContext context, int unitPk, ProjectOID projectOID,
+    public  float getWorkstationPercentCompleteInt(UserContext context, int unitPk, ProjectOID projectOID,
                                                           WorkstationOID workstationOID, boolean includeChildren) throws Exception
     {
         List<UnitFormQuery> fm = null;
@@ -1191,7 +1200,7 @@ public class WorkstationServiceImpl implements WorkstationService{
         }
     }
 
-    public  UnitWorkstation getUnitWorkstationSetting(int unitPk, ProjectOID projectOID,
+    public  UnitWorkstation getUnitWorkstationSetting(long unitPk, ProjectOID projectOID,
                                                             WorkstationOID workstationOID)
     {
         return persistWrapper.read(UnitWorkstation.class,
@@ -1310,22 +1319,22 @@ public class WorkstationServiceImpl implements WorkstationService{
 
             if (copyOpenItemTeam)
             {
-                List<User> testList = ProjectManager.getUsersForProjectInRole(copyFromProjectOID.getPk(),
-                        DummyWorkstation.getOID(), User.ROLE_TESTER);
-                List<User> verifyList = ProjectManager.getUsersForProjectInRole(copyFromProjectOID.getPk(),
-                        DummyWorkstation.getOID(), User.ROLE_VERIFY);
-                List<User> readonlyList = ProjectManager.getUsersForProjectInRole(copyFromProjectOID.getPk(),
-                        DummyWorkstation.getOID(), User.ROLE_READONLY);
+                List<User> testList = projectService.getUsersForProjectInRole(copyFromProjectOID.getPk(),
+                        dummyWorkstation.getOID(), User.ROLE_TESTER);
+                List<User> verifyList = projectService.getUsersForProjectInRole(copyFromProjectOID.getPk(),
+                        dummyWorkstation.getOID(), User.ROLE_VERIFY);
+                List<User> readonlyList = projectService.getUsersForProjectInRole(copyFromProjectOID.getPk(),
+                        dummyWorkstation.getOID(), User.ROLE_READONLY);
 
                 removeAllUsersFromProject(context,
-                        destinationProjectOID.getPk(), DummyWorkstation.getOID());
+                        destinationProjectOID.getPk(), dummyWorkstation.getOID());
                 if (testList != null)
                 {
                     for (Iterator iterator = testList.iterator(); iterator.hasNext();)
                     {
                         User aUser = (User) iterator.next();
                         addUserToProject(context,
-                                destinationProjectOID.getPk(), DummyWorkstation.getOID(), aUser.getPk(),
+                                destinationProjectOID.getPk(), dummyWorkstation.getOID(), aUser.getPk(),
                                 User.ROLE_TESTER);
                     }
                 }
@@ -1335,7 +1344,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                     {
                         User aUser = (User) iterator.next();
                         addUserToProject(context,
-                                destinationProjectOID.getPk(), DummyWorkstation.getOID(), aUser.getPk(),
+                                destinationProjectOID.getPk(), dummyWorkstation.getOID(), aUser.getPk(),
                                 User.ROLE_VERIFY);
                     }
                 }
@@ -1345,7 +1354,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                     {
                         User aUser = (User) iterator.next();
                         addReadonlyUserToProject(context,
-                                destinationProjectOID.getPk(), DummyWorkstation.getOID(), aUser.getPk());
+                                destinationProjectOID.getPk(), dummyWorkstation.getOID(), aUser.getPk());
                     }
                 }
             }
@@ -1379,7 +1388,7 @@ public class WorkstationServiceImpl implements WorkstationService{
 
                     if (copyForms != null && copyForms == true)
                     {
-                        List<ProjectFormQuery> wsForms = getProjectFormsForProject(copyFromProjectOID.getPk(), wsOID);
+                        List<ProjectFormQuery> wsForms = projectService.getProjectFormsForProject((int) copyFromProjectOID.getPk(), wsOID);
                         for (Iterator iterator2 = wsForms.iterator(); iterator2.hasNext();)
                         {
                             ProjectFormQuery projectFormQuery = (ProjectFormQuery) iterator2.next();
@@ -1401,7 +1410,7 @@ public class WorkstationServiceImpl implements WorkstationService{
 
                     if (copyTeam != null && copyTeam == true)
                     {
-                        List<ProjectUserQuery> projectUsers = getProjectUserQueryList(copyFromProjectOID, wsOID);
+                        List<ProjectUserQuery> projectUsers = projectService.getProjectUserQueryList(copyFromProjectOID, wsOID);
                         for (Iterator iterator2 = projectUsers.iterator(); iterator2.hasNext();)
                         {
                             ProjectUserQuery projectUserQuery = (ProjectUserQuery) iterator2.next();

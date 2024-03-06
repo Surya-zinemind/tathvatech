@@ -15,61 +15,11 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import com.tathvatech.forms.response.ResponseMasterNew;
+import com.tathvatech.survey.service.SurveyResponseManager;
+import com.tathvatech.user.OID.*;
+import com.tathvatech.user.common.UserContext;
 
-import com.sarvasutra.etest.api.model.FormResponseBean;
-import com.tathvatech.ts.caf.activitylogging.ActivityLogQuery;
-import com.tathvatech.ts.caf.activitylogging.ActivityLoggingDelegate;
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.caf.util.ServiceLocator;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.project.FormOID;
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.project.TestProcOID;
-import com.tathvatech.ts.core.project.TestProcObj;
-import com.tathvatech.ts.core.project.UnitInProject;
-import com.tathvatech.ts.core.project.UnitLocation;
-import com.tathvatech.ts.core.project.UnitLocationQuery;
-import com.tathvatech.ts.core.project.UnitOID;
-import com.tathvatech.ts.core.project.UnitObj;
-import com.tathvatech.ts.core.project.WorkstationOID;
-import com.tathvatech.ts.core.survey.ObjectLock;
-import com.tathvatech.ts.core.survey.ObjectLockQuery;
-import com.tathvatech.ts.core.survey.Survey;
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.response.EntityVersionReviewProxy;
-import com.tathvatech.ts.core.survey.response.FormItemResponse;
-import com.tathvatech.ts.core.survey.response.FormItemResponseOID;
-import com.tathvatech.ts.core.survey.response.FormResponseClientSubmissionRev;
-import com.tathvatech.ts.core.survey.response.FormResponseDesc;
-import com.tathvatech.ts.core.survey.response.FormResponseMaster;
-import com.tathvatech.ts.core.survey.response.FormResponseOID;
-import com.tathvatech.ts.core.survey.response.ResponseMaster;
-import com.tathvatech.ts.core.survey.response.ResponseMasterNew;
-import com.tathvatech.ts.core.survey.response.SectionResponse;
-import com.tathvatech.ts.core.survey.response.SurveyItemResponse;
-import com.tathvatech.ts.core.survey.response.SurveyResponse;
-import com.tathvatech.ts.core.workflow.FormWorkflow;
-import com.thirdi.surveyside.project.AssignedTestsQuery;
-import com.thirdi.surveyside.project.Project;
-import com.thirdi.surveyside.project.ProjectDelegate;
-import com.thirdi.surveyside.project.ProjectManager;
-import com.thirdi.surveyside.project.TestProcManager;
-import com.thirdi.surveyside.project.UnitInProjectObj;
-import com.thirdi.surveyside.project.UnitManager;
-import com.thirdi.surveyside.project.WorkflowManager;
-import com.thirdi.surveyside.security.Actions;
-import com.thirdi.surveyside.survey.LockedByAnotherUserException;
-import com.thirdi.surveyside.survey.SurveyItem;
-import com.thirdi.surveyside.survey.SurveyMaster;
-import com.thirdi.surveyside.survey.delegate.SurveyDelegate;
-import com.thirdi.surveyside.survey.response.ResponseSubmissionBookmark;
-import com.thirdi.surveyside.survey.response.SectionResponseQuery;
-import com.thirdi.surveyside.survey.response.SurveyResponseManager;
-import com.thirdi.surveyside.survey.surveyitem.Section;
-import com.thirdi.surveyside.survey.surveyitem.SurveySaveItem;
 
 /**
  * @author Hari
@@ -79,13 +29,13 @@ import com.thirdi.surveyside.survey.surveyitem.SurveySaveItem;
  */
 public class SurveyResponseDelegate
 {
-    private static final Logger logger = Logger
+    /*private static final Logger logger = Logger
 	    .getLogger(SurveyResponseDelegate.class);
 
 
-    /**
+    *//**
      * Called when the workstation is changed to in progress
-     */
+     *//*
     public static SurveyResponse ceateDummyResponse(UserContext context, 
 	    SurveyResponse surveyResponse) throws Exception
     {
@@ -113,9 +63,9 @@ public class SurveyResponseDelegate
     }
     
     
-    /**
+    *//**
      * 
-     */
+     *//*
     public static SurveyResponse savePageResponse(UserContext context, 
 	    SurveyResponse surveyResponse) throws Exception
     {
@@ -206,7 +156,7 @@ public class SurveyResponseDelegate
     }
     
     
-    /**
+    *//**
      * this function is just a save of the current response. we also take a history printout of the current response data and save it as an attachment
      * we could also email the manager or do some other actions based on this user interaction.
      * added as part of the signalling project implementation.
@@ -214,7 +164,7 @@ public class SurveyResponseDelegate
      * @param surveyResponse
      * @return
      * @throws Exception
-     */
+     *//*
     public static SurveyResponse submitInterimResponse(UserContext context, 
     	    SurveyResponse surveyResponse) throws Exception
     {
@@ -245,9 +195,9 @@ public class SurveyResponseDelegate
 		}
 	}    
 
-    /**
+    *//**
      * save a specific set of questions and not a complete section.
-     */
+     *//*
     public static SurveyResponse saveQuestionResponses(UserContext context, 
 	    SurveyResponse surveyResponse, List questionsToSave) throws Exception
     {
@@ -320,10 +270,10 @@ public class SurveyResponseDelegate
 		}
     }
 
-    /**
+    *//**
      * @param sd
      * @param responseId
-     */
+     *//*
     public static void finalizeSurveyResponse(UserContext userContext, SurveyDefinition surveyDef,
 	    SurveyResponse surveyResponse) throws Exception
     {
@@ -515,7 +465,7 @@ public class SurveyResponseDelegate
     	return SurveyResponseManager.getLastResponseSubmissionBookmark(testprocOID);
     }
 
-    /**
+    *//**
      * Adds a new response entry to a form. Function called by response bulk
      * import action. difference between addSurveyResponse and this one is that
      * addSurveyResponse calls the notify function after adding the response.
@@ -523,7 +473,7 @@ public class SurveyResponseDelegate
      * @param surveyResponse
      * @return
      * @throws Exception
-     */
+     *//*
     public static long importSurveyResponse(UserContext userContext, SurveyDefinition surveyDef,
 	    SurveyResponse surveyResponse) throws Exception
     {
@@ -568,14 +518,14 @@ public class SurveyResponseDelegate
 	}
     }
 
-    /**
+    *//**
      * called when the verifier or approver edits the response
      * @param userContext
      * @param surveyDef
      * @param responseId
      * @param surveyResponse
      * @throws Exception
-     */
+     *//*
     public static SurveyResponse updateSurveyResponse(UserContext userContext, SurveyDefinition surveyDef,
 	    SurveyResponse surveyResponse) throws Exception
     {
@@ -718,13 +668,13 @@ public class SurveyResponseDelegate
     }
 
 
-    /**
+    *//**
      * count of responses recieved for a survey between the given dates.
      * includes the responses recieved on the start and end date
      * 
      * @param startDate
      * @param endDate
-     */
+     *//*
     // public static long getResponseCountByDateRange(Survey survey, Date
     // startDate, Date endDate)throws Exception
     // {
@@ -737,14 +687,14 @@ public class SurveyResponseDelegate
 		return SurveyResponseManager.getResponseStatusSetForForm(context, survey);
 	}
 
-    /**
+    *//**
      * returns all the responseMaster records for a survey by a respondent in
      * descenting order of responseTime
      * 
      * @param surveyPk
      * @param respondentPk
      * @return
-     */
+     *//*
     public static List getResponseMastersForRespondent(int surveyPk,
 	    int respondentPk) throws Exception
     {
@@ -752,11 +702,11 @@ public class SurveyResponseDelegate
     			respondentPk);
     }
 
-    /**
+    *//**
      * @param surveyPk
      * @param responseId
      * @return
-     */
+     *//*
     public static ResponseMaster getResponseMaster(int surveyPk,
 	    String responseId) throws Exception
     {
@@ -1014,7 +964,7 @@ public class SurveyResponseDelegate
     }
         
     
-    /**
+    *//**
      * returns if sections are locked by other users
      * parameter surveyQuestions is filledout by this function with the sections that should be saved.
      * @param surveyResponse
@@ -1022,7 +972,7 @@ public class SurveyResponseDelegate
      * @param errors
      * @return
      * @throws Exception
-     */
+     *//*
 	private static boolean getQuestionsToSaveResponsesFor(UserContext context, SurveyDefinition surveyDef, List<Section> surveyQuestions, 
 			FormResponseOID responseOID)throws Exception
 	{
@@ -1279,5 +1229,5 @@ public class SurveyResponseDelegate
 	public static FormResponseBean getFormResponseBeanForSyncErrorReview(int entityVersionReviewPk) throws Exception
 	{
 		return SurveyResponseManager.getFormResponseBeanForSyncErrorReview(entityVersionReviewPk);
-	}
+	}*/
 }

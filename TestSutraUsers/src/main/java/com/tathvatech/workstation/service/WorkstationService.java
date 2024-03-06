@@ -33,7 +33,7 @@ public interface WorkstationService {
 
     WorkstationQuery getWorkstationQueryByPk(WorkstationOID workstationOID);
 
-    List<WorkstationQuery> getWorkstationsForProject(int projectPk);
+    List<WorkstationQuery> getWorkstationsForProject(long projectPk);
 
     List<WorkstationQuery> getWorkstations(WorkstationFilter filter);
 
@@ -114,7 +114,7 @@ public interface WorkstationService {
 
     void moveWorkstationOrderDown(UserContext context, WorkstationOID workstationOID);
 
-    UnitWorkstation getUnitWorkstationSetting(int unitPk, ProjectOID projectOID,
+    UnitWorkstation getUnitWorkstationSetting(long unitPk, ProjectOID projectOID,
                                               WorkstationOID workstationOID);
 
     UnitWorkstation updateUnitWorkstationSetting(UnitWorkstation unitWorkstation) throws Exception;

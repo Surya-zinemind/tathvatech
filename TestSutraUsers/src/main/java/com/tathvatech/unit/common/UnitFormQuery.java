@@ -8,10 +8,14 @@ package com.tathvatech.unit.common;
 
 import java.util.Date;
 
-import com.tathvatech.ts.core.common.DummyWorkstation;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
 
-import net.sf.persist.annotations.NoTable;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.unit.entity.UnitLocation;
+import com.tathvatech.user.OID.TestProcOID;
+import com.tathvatech.workstation.common.DummyWorkstation;
+import jakarta.persistence.Transient;
+import org.springframework.beans.factory.annotation.Autowired;
+
 
 /**
  * @author Hari
@@ -19,7 +23,7 @@ import net.sf.persist.annotations.NoTable;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-@NoTable
+
 public class UnitFormQuery
 {
 	private int pk;
@@ -666,13 +670,17 @@ public class UnitFormQuery
 		return false;			
 	}
 
+	@Autowired
+	@Transient
+	private DummyWorkstation dummyWorkstation;
+
 	@Override
 	public int hashCode() 
 	{
 		return pk;
 	}
 
-	public static String sql = "select ut.pk as pk, uth.name as name, uth.projectTestProcPk as projectTestProcPk, "
+	public  String sql = "select ut.pk as pk, uth.name as name, uth.projectTestProcPk as projectTestProcPk, "
 			+ " uth.projectPk as projectPk, p.projectName as projectName, p.projectDescription as projectDescription, tfa.appliedByUserFk, "
 			+ " part.pk as partPk, part.name as partName, partType.typeName as partType, pp.name as projectPartName, "
 			+ " uth.workstationPk as workstationPk, w.workstationName as workstationName, w.description as workstationDescription, "
@@ -697,7 +705,7 @@ public class UnitFormQuery
 			+ " join TAB_UNIT u on uth.unitPk = u.pk "
 			+ " join TAB_UNIT_H uh on uh.unitPk = u.pk and now() between uh.effectiveDateFrom and uh.effectiveDateTo "
 			+ " join TAB_PROJECT p on uth.projectPk = p.pk  "
-			+ " join TAB_WORKSTATION w on uth.workstationPk = w.pk  and w.pk != " + DummyWorkstation.getPk() 
+			+ " join TAB_WORKSTATION w on uth.workstationPk = w.pk  and w.pk != " + dummyWorkstation.getPk()
 			+ " join site on w.sitePk = site.pk"
 			+ " join TAB_SURVEY f on tfa.formFk = f.pk "
 			+ " join unit_project_ref upr on upr.unitPk = uth.unitPk and upr.projectPk = uth.projectPk "

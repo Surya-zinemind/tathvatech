@@ -3,11 +3,13 @@ package com.tathvatech.workstation.common;
 
 import com.tathvatech.user.OID.WorkstationOID;
 import com.tathvatech.common.wrapper.PersistWrapper;
+import org.springframework.stereotype.Service;
 
+@Service
 public class DummyWorkstation {
 
     public static final String DUMMY = "dummy";
-    private static int pk = 0;
+    private  int pk = 0;
     private PersistWrapper persistWrapper;
     public  int getPk()
 	{
@@ -15,7 +17,7 @@ public class DummyWorkstation {
     	{
 			try 
 			{
-				pk =  PersistWrapper.read(Integer.class, "select pk from TAB_WORKSTATION where workstationName = ?", DUMMY);
+				pk =  persistWrapper.read(Integer.class, "select pk from TAB_WORKSTATION where workstationName = ?", DUMMY);
 			} catch (Exception e) 
 			{
 				// TODO Auto-generated catch block
