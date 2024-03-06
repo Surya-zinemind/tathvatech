@@ -42,7 +42,7 @@ public class SurveyDefFactory
 
 //    private static ReferenceMap defMap = new ReferenceMap(ReferenceMap.SOFT, ReferenceMap.SOFT);
     
-    public static SurveyDefinition getSurveyDefinition(FormOID surveyOID) throws Exception
+   /* public static SurveyDefinition getSurveyDefinition(FormOID surveyOID) throws Exception
     {
         SurveyDefinition surveyDef = null;
 //        surveyDef = (SurveyDefinition) defMap.get(surveyOID.getPk());
@@ -177,9 +177,9 @@ public class SurveyDefFactory
     }
 
 
-    /**
+    *//**
      * @param tableName
-     */
+     *//*
     private static void createSurveyTables(String tableName)throws Exception
     {
         String mainTableSql = "create table "+ tableName + " (responseId varchar(25), surveyPk varchar(25), responseTime datetime, ipaddress varchar(20),  respondentPk varchar(25), lastSurveyItem varchar(25), status varchar(20), responseMode varchar(20))";
@@ -247,5 +247,5 @@ public class SurveyDefFactory
         surveyMgr = new SurveyDefinitionManager(surveyDef.getSurveyConfig());
 
 		return surveyMgr;
-    }
+    }*/
 }

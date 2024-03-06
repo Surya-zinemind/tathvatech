@@ -15,6 +15,8 @@ import com.tathvatech.unit.service.UnitManagerCore;
 import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.SupplierOID;
 import com.tathvatech.user.OID.UnitOID;
+import jakarta.persistence.Transient;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 
@@ -179,6 +181,9 @@ public class UnitObj implements TestableEntity
     {
     }
 
+	@Autowired
+	@Transient
+	private UnitManagerCore unitManagerCore;
 
 	public UnitObj(UnitBean unitBean)
 	{
@@ -203,9 +208,9 @@ public class UnitObj implements TestableEntity
 	public UnitBean getUnitBean(ProjectOID projectOID)
 	{
 		Date now = new Date();
-		UnitH unitH = UnitManagerCore.getUnitH(this.getOID(), now);
-		UnitInProject unitInProject = UnitManagerCore.getUnitInProject(this.getOID(), projectOID);
-		UnitInProjectH unitInProjectH = UnitManagerCore.getUnitInProjectH(unitInProject.getOID(), now);
+		UnitH unitH = unitManagerCore.getUnitH(this.getOID(), now);
+		UnitInProject unitInProject = unitManagerCore.getUnitInProject(this.getOID(), projectOID);
+		UnitInProjectH unitInProjectH = unitManagerCore.getUnitInProjectH(unitInProject.getOID(), now);
 		// TODO:: should load the part info and add the part name and partNo to this. in TS7 now so cant add 
 		
 		UnitBean unitBean = new UnitBean();

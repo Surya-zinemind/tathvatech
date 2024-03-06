@@ -55,8 +55,8 @@ public interface WorkstationService {
     UnitWorkstation addWorkstationToUnit(UserContext context, ProjectOID projectOID, UnitOID unitOID,
                                          WorkstationOID workstationOID) throws Exception;
 
-    void removeWorkstationFromUnit(UserContext context, UnitOID unitOID, ProjectOID projectOID,
-                                   WorkstationOID workstationOID) throws Exception;
+   /* void removeWorkstationFromUnit(UserContext context, UnitOID unitOID, ProjectOID projectOID,
+                                   WorkstationOID workstationOID) throws Exception;*/
 
     List<UnitLocationQuery> getUnitWorkstationStatus(UnitOID unitOID, ProjectOID projectOID)
             throws Exception;
@@ -82,24 +82,6 @@ public interface WorkstationService {
     void recordWorkstationFormUnlock(TestProcOID testProcOID);
 
     void deleteWorstation(UserContext context, WorkstationOID workstationOID) throws Exception;
-
-    void setWorkstationsAndTeamsOnUnitOpen(UserContext context, ProjectOID projectOID, UnitOID unitOID,
-                                           UnitInProjectObj unitInProject,
-                                           boolean copyProjectWorkstationUsersToUnit, boolean copyProjectWorkstationFormsToUnit) throws Exception;
-
-    void copyWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
-                                WorkstationQuery workstationQuery, Integer[] selectedUnits) throws Exception;
-
-    void setWorkstationProjectPartTeamSetupToUnits(UserContext context, ProjectQuery projectQuery,
-                                                   WorkstationQuery workstationQuery, ProjectPartOID projectPartOID, Integer[] selectedUnits,
-                                                   boolean copyDefaultTeamIfNoProjectPartTeamIsSet) throws Exception;
-
-    void cascadeWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
-                                   WorkstationQuery workstationQuery, Integer[] selectedUnitsForForm, Integer[] selectedUnitsForTeam)
-            throws Exception;
-
-    void deleteWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
-                                  WorkstationQuery workstationQuery, UnitObj[] selectedUnits) throws Exception;
 
     List<Project> getProjectsForWorkstation(UserContext context, WorkstationOID workstationOID)
             throws Exception;

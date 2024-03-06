@@ -10,6 +10,8 @@ import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.dao.TestProcDAO;
 import com.tathvatech.forms.response.ResponseMasterNew;
 import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.common.SurveyForm;
+import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.survey.service.SurveyDefFactory;
 import com.tathvatech.survey.service.SurveyResponseManager;
 import com.tathvatech.unit.common.UnitFormQuery;
@@ -18,6 +20,9 @@ import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.User;
+import com.tathvatech.workstation.service.WorkstationService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.Iterator;
@@ -31,23 +36,32 @@ import java.util.logging.Logger;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
+@Service
+@RequiredArgsConstructor
 public class TestProcManager
+
+
 {
     private static final Logger logger = Logger.getLogger(String.valueOf(TestProcManager.class));
-    private PersistWrapper persistWrapper;
-	public static void activateTestProcs(UserContext userContext,
+    private final PersistWrapper persistWrapper;
+
+	private final WorkstationService workstationService;
+
+	private final SurveyResponseManager surveyResponseManager;
+
+	/*public  void activateTestProcs(UserContext userContext,
 										 List<UnitFormQuery> formsToActivate) throws Exception
 	{
 		//if there is no response for this form already, create response placeholder..this is needed when opening for the first time 
 		//this is required since when filling up responses from
 		//different tablets at the same time and submitting, they need to synchronize on the same
 		//response id. so a placeholder is created as soon as the form is opened..
-		
+
 		for (Iterator iterator = formsToActivate.iterator(); iterator.hasNext();) 
 		{
 			UnitFormQuery unitFormQuery = (UnitFormQuery) iterator.next();
 			
-			ResponseMasterNew response = SurveyResponseManager.getLatestResponseMasterForTest(unitFormQuery.getOID());
+			ResponseMasterNew response = surveyResponseManager.getLatestResponseMasterForTest(unitFormQuery.getOID());
 			if(response == null)
 			{
 				SurveyDefinition sd = SurveyDefFactory.getSurveyDefinition(new FormOID(unitFormQuery.getFormPk(), unitFormQuery.getFormName()));
@@ -70,7 +84,7 @@ public class TestProcManager
 				// the response is there, so if it is in paused status, we need to change it to InProgress
 				if(response!= null && ResponseMasterNew.STATUS_PAUSED.equals(response.getStatus()))
 				{
-					SurveyResponseManager.changeResponseStatus(userContext, response.getResponseId(), ResponseMasterNew.STATUS_INPROGRESS);
+					surveyResponseManager.changeResponseStatus(userContext, response.getResponseId(), ResponseMasterNew.STATUS_INPROGRESS);
 				}
 			}
 		
@@ -79,11 +93,11 @@ public class TestProcManager
 			notifyWorkstationFormActivated(userContext, unitFormQuery);
 		}
 	}
-
+*/
 
 	private  void notifyWorkstationFormActivated(UserContext userContext, UnitFormQuery unitFormQuery) throws Exception
 	{
-		UnitLocation currentRec = ProjectManager.getUnitWorkstation(unitFormQuery.getUnitPk(),
+		UnitLocation currentRec = workstationService.getUnitWorkstation(unitFormQuery.getUnitPk(),
 				new ProjectOID(unitFormQuery.getProjectPk(), null), new WorkstationOID(unitFormQuery.getWorkstationPk(), null));
 		if(currentRec != null && UnitLocation.STATUS_IN_PROGRESS.equals(currentRec.getStatus()))
 		{
@@ -125,7 +139,7 @@ public class TestProcManager
 		return new TestProcDAO().getTestProc(testProcPk);
 	}
 	
-	public  UnitFormQuery getTestProcQuery(int testProcPk)
+	/*public  UnitFormQuery getTestProcQuery(int testProcPk)
 	{
 		try 
 		{
@@ -137,17 +151,17 @@ public class TestProcManager
 			e.printStackTrace();
 			return null;
 		}
-	}
+	}*/
 	
 
-	public static List<UnitFormQuery> getTestProcsForItem(UserContext context, int entityPk)throws Exception
+	/*public static List<UnitFormQuery> getTestProcsForItem(UserContext context, int entityPk)throws Exception
 	{
 		TestProcFilter filter = new TestProcFilter();
 		filter.setUnitOID(new UnitOID(entityPk));
 		return new TestProcListReport(context, filter).getTestProcs();
-	}
+	}*/
 
-	public static List<UnitFormQuery> getTestProcsForItem(UserContext context, int entityPk, ProjectOID projectOID, boolean includeChildren)throws Exception
+	/*public static List<UnitFormQuery> getTestProcsForItem(UserContext context, int entityPk, ProjectOID projectOID, boolean includeChildren)throws Exception
 	{
 		return getTestProcsForItemImpl(context, entityPk, projectOID, null, includeChildren);
 	}
@@ -155,18 +169,18 @@ public class TestProcManager
 	public static List<UnitFormQuery> getTestProcsForItem(UserContext context, int entityPk, ProjectOID projectOID, WorkstationOID workstationOID, boolean includeChildren)throws Exception
 	{
 		return getTestProcsForItemImpl(context, entityPk, projectOID, workstationOID, includeChildren);
-	}
+	}*/
 
-	private static List<UnitFormQuery> getTestProcsForItemImpl(UserContext context, int entityPk, ProjectOID projectOID, WorkstationOID workstationOID, boolean includeChildren)throws Exception
+	/*private static List<UnitFormQuery> getTestProcsForItemImpl(UserContext context, int entityPk, ProjectOID projectOID, WorkstationOID workstationOID, boolean includeChildren)throws Exception
 	{
 		TestProcFilter filter = new TestProcFilter(projectOID);
 		filter.setUnitOID(new UnitOID(entityPk));
 		filter.setWorkstationOID(workstationOID);
 		filter.setIncludeChildren(includeChildren);
 		return new TestProcListReport(context, filter).getTestProcs();
-	}
+	}*/
 	
-	public static TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
+/*	public static TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 	{
 		return new TestProcDAO().getCurrentTestProcFormEntity(testProcOID);
 	}
@@ -198,6 +212,6 @@ public class TestProcManager
 		TestProcSectionObj sectionObj = getTestProcSection(testProcSectionOID);
 		TestProcFormAssign tpFormAssign = persistWrapper.readByPrimaryKey(TestProcFormAssign.class, sectionObj.getTestProcFormAssignFk());
 		return getTestProc(tpFormAssign.getTestProcFk());
-	}
+	}*/
 	
 }

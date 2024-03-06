@@ -22,7 +22,9 @@ import com.tathvatech.site.entity.ACL;
 import com.tathvatech.site.entity.ProjectSiteConfig;
 import com.tathvatech.site.service.SiteService;
 import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.common.SurveyForm;
 import com.tathvatech.survey.controller.SurveyResponseDelegate;
+import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.survey.service.SurveyDefFactory;
 import com.tathvatech.survey.service.SurveyResponseManager;
 import com.tathvatech.unit.common.UnitFormQuery;
@@ -31,6 +33,7 @@ import com.tathvatech.unit.common.UnitObj;
 import com.tathvatech.unit.dao.UnitInProjectDAO;
 import com.tathvatech.unit.entity.UnitLocation;
 import com.tathvatech.unit.service.UnitManager;
+import com.tathvatech.unit.service.UnitService;
 import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
@@ -73,6 +76,12 @@ public class WorkstationServiceImpl implements WorkstationService{
     private final ProjectTemplateManager projectTemplateManager;
 
     private final DummyWorkstation dummyWorkstation;
+
+    private final UnitService unitService;
+
+    private final AuthorizationManager authorizationManager;
+
+    private final AndonManager andonManager;
 
     public Workstation createWorkstation(UserContext context, Workstation workstation) throws Exception
     {
@@ -406,8 +415,9 @@ public class WorkstationServiceImpl implements WorkstationService{
 
         return (UnitWorkstation) persistWrapper.readByPrimaryKey(UnitWorkstation.class, uwPk);
     }
+    //Fix it later
 
-    public  void removeWorkstationFromUnit(UserContext context, UnitOID unitOID, ProjectOID projectOID,
+   /* public  void removeWorkstationFromUnit(UserContext context, UnitOID unitOID, ProjectOID projectOID,
                                                  WorkstationOID workstationOID) throws Exception
     {
         // if the forms related to workstations have been attempted, the
@@ -442,7 +452,7 @@ public class WorkstationServiceImpl implements WorkstationService{
         uw.setUpdatedBy((int) context.getUser().getPk());
         uw.setEstatus(EStatusEnum.Deleted.getValue());
         persistWrapper.update(uw);
-    }
+    }*/
 
     /*
      * Not used anywhere. Please check and remove if so.
@@ -506,9 +516,10 @@ public class WorkstationServiceImpl implements WorkstationService{
     public  void setUnitWorkstationStatus(UserContext userContext, int unitPk, ProjectOID projectOID,
                                                 WorkstationOID workstationOID, String status) throws Exception
     {
+        //Fix it after finishing form
 
         // create the new unit location on any change, so we have a history of
-        // all activities.
+       /* // all activities.
         UnitLocation nuLoc = new UnitLocation();
         nuLoc.setProjectPk((int) projectOID.getPk());
         nuLoc.setMovedInBy((int) userContext.getUser().getPk());
@@ -559,7 +570,7 @@ public class WorkstationServiceImpl implements WorkstationService{
 
             // any andons in on this unit in this workstation should be closed
             // when the workstation is marked as completed
-            AndonManager.markAllAndonsForUnitOnWorkstationAsClosed(userContext, new UnitOID(unitPk), projectOID,
+            andonManager.markAllAndonsForUnitOnWorkstationAsClosed(userContext, new UnitOID(unitPk), projectOID,
                     workstationOID);
         }
 
@@ -630,7 +641,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                     }
                 }
             }
-        }
+        }*/
     }
 
     public  void recordWorkstationFormAccess(TestProcOID testProcOID)
@@ -760,350 +771,9 @@ public class WorkstationServiceImpl implements WorkstationService{
         workstation.setUpdatedBy((int) context.getUser().getPk());
         persistWrapper.update(workstation);
     }
-    public  void setWorkstationsAndTeamsOnUnitOpen(UserContext context, ProjectOID projectOID, UnitOID unitOID,
-                                                          UnitInProjectObj unitInProject,
-                                                          boolean copyProjectWorkstationUsersToUnit, boolean copyProjectWorkstationFormsToUnit) throws Exception
-    {
-        // the status is being changed from planned to open, so copy the
-        // workstation, users, forms etc.
-        // copy project workstations to unitworkstations
-        List<WorkstationQuery> workstations = getWorkstationsForProject(projectOID.getPk());
-        for (Iterator iterator = workstations.iterator(); iterator.hasNext();)
-        {
-            if(copyProjectWorkstationFormsToUnit == false && copyProjectWorkstationUsersToUnit == false)
-                continue;
 
-            WorkstationQuery workstationQuery = (WorkstationQuery) iterator.next();
 
-            // if workstation is already added, skip;
-            UnitWorkstation uw = getUnitWorkstationSetting(unitOID.getPk(), projectOID,
-                    workstationQuery.getOID());
-            if (uw != null)
-                continue;
 
-            // copy forms
-            if (unitInProject.getProjectPartPk() == null)
-                continue;
-
-            List<ProjectFormQuery> pForms = projectTemplateManager.getTestProcsForProjectPart(projectOID,
-                    new ProjectPartOID(unitInProject.getProjectPartPk(), null), (int) workstationQuery.getPk());
-
-            // check if there are any users defined for that workstation
-            List<ProjectUserQuery> pUsers = projectService.getProjectUserQueryList(projectOID,
-                    new ProjectPartOID(unitInProject.getProjectPartPk(), null), workstationQuery.getOID());
-
-            if (pForms.size() == 0 && pUsers.size() == 0)
-                continue; // dont copy the workstation for which there are no
-            // forms added for part type or there are no teams
-            // defined at that workstation.
-
-            // create unit workstation
-            UnitWorkstation unitWorkstation = new UnitWorkstation();
-            unitWorkstation.setEstatus(EStatusEnum.Active.getValue());
-            unitWorkstation.setUpdatedBy((int) context.getUser().getPk());
-            unitWorkstation.setProjectPk((int) projectOID.getPk());
-            unitWorkstation.setUnitPk((int) unitOID.getPk());
-            unitWorkstation.setWorkstationPk((int) workstationQuery.getPk());
-            int unitWorkstationPk = (int) persistWrapper.createEntity(unitWorkstation);
-
-            // copy projectUsers to unitusers
-            if(copyProjectWorkstationUsersToUnit)
-                copyProjectUsersToUnit(projectOID, unitOID, workstationQuery.getOID(), true);
-
-            if(copyProjectWorkstationFormsToUnit)
-                copyProjectFormsToUnit(context, projectOID, pForms, unitOID, workstationQuery.getOID());
-
-            String defaultWorkstationStatusValue = (String) new CommonServicesDelegate().getEntityPropertyValue(projectOID,
-                    ProjectPropertyEnum.SetNewWorkstationsDefaultStatusTo.getId(), String.class);
-            if (defaultWorkstationStatusValue != null && (!(UnitLocation.STATUS_WAITING.equals(defaultWorkstationStatusValue))))
-            {
-                if(UnitLocation.STATUS_WAITING.equals(defaultWorkstationStatusValue) || UnitLocation.STATUS_IN_PROGRESS.equals(defaultWorkstationStatusValue)
-                        || UnitLocation.STATUS_COMPLETED.equals(defaultWorkstationStatusValue))
-                {
-                    setUnitWorkstationStatus(context, (int) unitOID.getPk(), projectOID, workstationQuery.getOID(),
-                            defaultWorkstationStatusValue);
-                }
-                else
-                {
-                    throw new AppException("Default status value configured for workstation status is invalid. Please contact support");
-                }
-            }
-
-        }
-    }
-    /**
-     * Method to copy the workstation to units, here the forms or team is not
-     * copied, only the workstation is copied
-     *
-     * @param context
-     * @param projectQuery
-     * @param workstationQuery
-     * @param selectedUnits
-     * @throws Exception
-     */
-    public  void copyWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
-                                              WorkstationQuery workstationQuery, Integer[] selectedUnits) throws Exception
-    {
-        long workstationPk = workstationQuery.getPk();
-
-        // teams
-        for (int i = 0; i < selectedUnits.length; i++)
-        {
-            int unitPk = selectedUnits[i];
-            UnitObj unit = getUnitByPk(new UnitOID(unitPk));
-            List unitWorkstations = getWorkstationsForUnit(unit.getOID(), projectQuery.getOID());
-
-            if (unitWorkstations.contains(workstationQuery))
-            {
-            } else
-            {
-                // unit does not contain that workstation
-                addWorkstationToUnit(context, projectQuery.getOID(), unit.getOID(), workstationQuery.getOID());
-            }
-        }
-    }
-
-    /**
-     * Method to set the teams for a project part to units, here the forms is
-     * not copied
-     *
-     * @param context
-     * @param projectQuery
-     * @param workstationQuery
-     * @param selectedUnits
-     * @throws Exception
-     */
-    public  void setWorkstationProjectPartTeamSetupToUnits(UserContext context, ProjectQuery projectQuery,
-                                                                 WorkstationQuery workstationQuery, ProjectPartOID projectPartOID, Integer[] selectedUnits,
-                                                                 boolean copyDefaultTeamIfNoProjectPartTeamIsSet) throws Exception
-    {
-        UnitInProjectDAO uprDAO = new UnitInProjectDAO();
-        // teams
-        for (int i = 0; i < selectedUnits.length; i++)
-        {
-            int unitPk = selectedUnits[i];
-            UnitObj unit = getUnitByPk(new UnitOID(unitPk));
-
-            UnitInProjectObj unitInProject = uprDAO.getUnitInProject(unit.getOID(), projectQuery.getOID());
-            if (unitInProject == null)
-                throw new AppException("Unit is not associated with the project, Team cannot be set.");
-
-            if (unitInProject.getProjectPartPk() == null || unitInProject.getProjectPartPk() != projectPartOID.getPk())
-                continue;
-
-            List<WorkstationQuery> unitWorkstations = getWorkstationsForUnit(unit.getOID(), projectQuery.getOID());
-            if (unitWorkstations.contains(workstationQuery))
-            {
-                if (copyDefaultTeamIfNoProjectPartTeamIsSet)
-                    copyProjectUsersToUnit(projectQuery.getOID(), unit.getOID(), workstationQuery.getOID(), true);
-                else
-                    copyProjectUsersToUnit(projectQuery.getOID(), unit.getOID(), workstationQuery.getOID(), false);
-            }
-        }
-    }
-
-    public  void cascadeWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
-                                                 WorkstationQuery workstationQuery, Integer[] selectedUnitsForForm, Integer[] selectedUnitsForTeam)
-            throws Exception
-    {
-        UnitInProjectDAO uprDAO = new UnitInProjectDAO();
-        // teams
-        for (int i = 0; i < selectedUnitsForTeam.length; i++)
-        {
-            int unitPk = selectedUnitsForTeam[i];
-            UnitObj unit = getUnitByPk(new UnitOID(unitPk));
-
-            UnitInProjectObj unitInProject = uprDAO.getUnitInProject(unit.getOID(), projectQuery.getOID());
-            if (unitInProject == null)
-                throw new AppException("Unit is not associated with the project, It cannot opened.");
-
-            if (unitInProject.getProjectPartPk() == null)
-                continue;
-
-            List unitWorkstations = getWorkstationsForUnit(unit.getOID(), projectQuery.getOID());
-
-            UnitLocationQuery uLocationQ = getUnitWorkstationStatus(unit.getOID(), projectQuery.getOID(),
-                    workstationQuery.getOID());
-            if (uLocationQ != null && UnitLocation.STATUS_COMPLETED.equals(uLocationQ.getStatus()))
-            {
-                continue;
-            } else if (unitWorkstations.contains(workstationQuery))
-            {
-                // now take care of the users, they can just be deleted and
-                // replaced
-                copyProjectUsersToUnit(projectQuery.getOID(), unit.getOID(), workstationQuery.getOID(), true);
-            } else
-            {
-                // unit does not contain that workstation
-                addWorkstationToUnit(context, projectQuery.getOID(), unit.getOID(), workstationQuery.getOID());
-                copyProjectUsersToUnit(projectQuery.getOID(), unit.getOID(), workstationQuery.getOID(), true);
-            }
-        }
-
-        // forms
-        TestProcDAO testProcDAO = new TestProcDAO();
-        for (int i = 0; i < selectedUnitsForForm.length; i++)
-        {
-            int unitPk = selectedUnitsForForm[i];
-            UnitObj unit = getUnitByPk(new UnitOID(unitPk));
-
-            UnitInProjectObj unitInProject = uprDAO.getUnitInProject(unit.getOID(), projectQuery.getOID());
-            if (unitInProject == null)
-                throw new AppException("Unit is not associated with the project, It cannot opened.");
-
-            if (unitInProject.getProjectPartPk() == null)
-                continue;
-
-            List unitWorkstations = getWorkstationsForUnit(unit.getOID(), projectQuery.getOID());
-            UnitLocationQuery uLocationQ = getUnitWorkstationStatus(unit.getOID(), projectQuery.getOID(),
-                    workstationQuery.getOID());
-            if (uLocationQ != null && UnitLocation.STATUS_COMPLETED.equals(uLocationQ.getStatus()))
-            {
-                continue;
-            }
-            if (unitWorkstations.contains(workstationQuery))
-            {
-                // unit already contains this workstation
-                // copy the forms which are not there,
-                // if the form is getting upgraded, then we should upgrade the
-                // form inside the testproc.
-                List<ProjectFormQuery> pForms = projectTemplateManager.getTestProcsForProjectPart(projectQuery.getOID(),
-                        new ProjectPartOID(unitInProject.getProjectPartPk(), null), workstationQuery.getPk());
-                List<UnitFormQuery> uForms = TestProcManager.getTestProcsForItem(context, unitPk, projectQuery.getOID(),
-                        workstationQuery.getOID(), false);
-                for (Iterator iterator = pForms.iterator(); iterator.hasNext();)
-                {
-                    ProjectFormQuery aPForm = (ProjectFormQuery) iterator.next();
-                    if (TestProcMatchMaker.testItemContainsForm(aPForm, uForms) != null)
-                    {
-                    } else
-                    {
-                        UnitFormQuery previousRevTestProc = TestProcMatchMaker.getMatchingLowerVersionOfForm(aPForm,
-                                uForms);
-                        if (previousRevTestProc != null)
-                        {
-                            // upgrade the testproc with the new form version
-                            TestProcObj testProc = new TestProcDAO().getTestProc(previousRevTestProc.getPk());
-                            testProc.setFormPk(aPForm.getFormPk());
-                            testProc.setAppliedByUserFk((int) context.getUser().getPk());
-
-                            testProcDAO.saveTestProc(context, testProc);
-                        } else
-                        {
-                            // need to create a new testproc on the unit
-                            TestProcObj testProc = new TestProcObj();
-                            testProc.setProjectPk(projectQuery.getPk());
-                            testProc.setUnitPk(unitPk);
-                            testProc.setWorkstationPk((int) workstationQuery.getPk());
-                            testProc.setFormPk(aPForm.getFormPk());
-                            testProc.setProjectTestProcPk(aPForm.getPk());
-                            testProc.setName(aPForm.getName());
-                            testProc.setAppliedByUserFk(aPForm.getAppliedByUserFk());
-
-                            testProcDAO.saveTestProc(context, testProc);
-                        }
-                    }
-                }
-                // now remove any forms from the unit that are not there in the
-                // project, if they were added directly to the unit, leave them
-                // there.
-
-                // we have to re-fetch the unit forms list here, else,
-                // the forms upgrades will get removed as they are not part of
-                // the unit list fetched earlier
-                uForms = TestProcManager.getTestProcsForItem(context, unitPk, projectQuery.getOID(),
-                        workstationQuery.getOID(), false);
-                for (Iterator iterator = uForms.iterator(); iterator.hasNext();)
-                {
-                    UnitFormQuery aForm = (UnitFormQuery) iterator.next();
-                    try
-                    {
-                        if (aForm.getProjectTestProcPk() == 0)
-                        {
-                            continue; // this means the form was added directly
-                            // to the unit, so dont remove it.
-                        }
-                        if (TestProcMatchMaker.projectContainsForm(aForm, pForms))
-                        {
-                            continue;
-                        }
-                        deleteTestProcFromUnit(context, aForm.getOID());
-                    }
-                    catch (FormApprovedException fx)
-                    {
-                    }
-                }
-            } else
-            {
-                // unit does not contain that workstation
-
-                List<ProjectFormQuery> pForms = projectTemplateManager.getTestProcsForProjectPart(projectQuery.getOID(),
-                        new ProjectPartOID(unitInProject.getProjectPartPk(), null), workstationQuery.getPk());
-
-                addWorkstationToUnit(context, projectQuery.getOID(), unit.getOID(), workstationQuery.getOID());
-                copyProjectFormsToUnit(context, projectQuery.getOID(), pForms, unit.getOID(),
-                        workstationQuery.getOID());
-            }
-            if (uLocationQ != null && UnitLocation.STATUS_IN_PROGRESS.equals(uLocationQ.getStatus()))
-            {
-                setUnitWorkstationStatus(context, unitPk, projectQuery.getOID(),
-                        workstationQuery.getOID(), UnitLocation.STATUS_IN_PROGRESS);
-            }
-        }
-    }
-
-    public  void deleteWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
-                                                WorkstationQuery workstationQuery, UnitObj[] selectedUnits) throws Exception
-    {
-        for (int i = 0; i < selectedUnits.length; i++)
-        {
-            boolean allTestsRemoved = true;
-
-            UnitObj unit = selectedUnits[i];
-            List unitWorkstations = getWorkstationsForUnit(unit.getOID(), projectQuery.getOID());
-            UnitLocationQuery uLocationQ = getUnitWorkstationStatus(unit.getOID(), projectQuery.getOID(),
-                    workstationQuery.getOID());
-            if (uLocationQ != null && UnitLocation.STATUS_COMPLETED.equals(uLocationQ.getStatus()))
-            {
-                continue;
-            }
-            if (unitWorkstations.contains(workstationQuery))
-            {
-                // unit contains this workstation
-                // remove any forms from the unit that are not there in the
-                // project
-                List<UnitFormQuery> uForms = TestProcManager.getTestProcsForItem(context, unit.getPk(),
-                        projectQuery.getOID(), workstationQuery.getOID(), true);
-                for (Iterator iterator = uForms.iterator(); iterator.hasNext();)
-                {
-                    UnitFormQuery testProc = (UnitFormQuery) iterator.next();
-                    try
-                    {
-                        deleteTestProcFromUnit(context, testProc.getOID());
-                    }
-                    catch (FormApprovedException fx)
-                    {
-                        allTestsRemoved = false;
-                        // do not delete from this unit
-                        continue;
-                    }
-                }
-
-                // now take care of the users, they can just be deleted and
-                // replaced
-                if (allTestsRemoved)
-                {
-                    removeAllUsersFromUnit(context, unit.getOID(), projectQuery.getOID(), workstationQuery.getOID());
-                }
-            }
-
-            // remove the workstation from unit
-            if (allTestsRemoved)
-            {
-                removeWorkstationFromUnit(context, unit.getOID(), projectQuery.getOID(), workstationQuery.getOID());
-            }
-        }
-    }
 
     public  List<Project> getProjectsForWorkstation(UserContext context, WorkstationOID workstationOID)
             throws Exception
@@ -1123,20 +793,21 @@ public class WorkstationServiceImpl implements WorkstationService{
                                                           WorkstationOID workstationOID, boolean includeChildren) throws Exception
     {
         List<UnitFormQuery> fm = null;
-        if (workstationOID == null)
+        //Uncomment and fix it while doing form
+       /* if (workstationOID == null)
         {
             fm = TestProcManager.getTestProcsForItem(context, unitPk, projectOID, includeChildren);
         } else
         {
             fm = TestProcManager.getTestProcsForItem(context, unitPk, projectOID, workstationOID, includeChildren);
-        }
+        }*/
         int formCount = 0;
         float percenCompleteAccumulator = 0f;
         for (Iterator iterator = fm.iterator(); iterator.hasNext();)
         {
             UnitFormQuery formQuery = (UnitFormQuery) iterator.next();
             formCount++;
-            final ResponseMasterNew formResponse = SurveyResponseDelegate
+            final ResponseMasterNew formResponse = surveyResponseManager
                     .getLatestResponseMasterForTest(formQuery.getOID());
 
             if (formResponse != null)
@@ -1225,25 +896,25 @@ public class WorkstationServiceImpl implements WorkstationService{
         {
             if (copySites)
             {
-                List<Site> sites = getSitesForProject(copyFromProjectOID);
-                saveSitesForProject(destinationProjectOID, sites);
+                List<Site> sites = projectService.getSitesForProject(copyFromProjectOID);
+               projectService.saveSitesForProject(destinationProjectOID, sites);
             }
 
             if (copyProjectFunctionTeams)
             {
-                List<ProjectSiteConfig> config = getProjectSiteConfigs(destinationProjectOID);
+                List<ProjectSiteConfig> config = projectService.getProjectSiteConfigs(destinationProjectOID);
                 for (Iterator iterator = config.iterator(); iterator.hasNext();)
                 {
                     ProjectSiteConfig projectSiteConfig = (ProjectSiteConfig) iterator.next();
-                    new AuthorizationManager().removeAllAcls(projectSiteConfig.getOID());
+                    authorizationManager.removeAllAcls(projectSiteConfig.getOID());
 
                     // get the corresponding projectSite config on the
                     // sourceproject
-                    ProjectSiteConfig sourcePf = getProjectSiteConfig(copyFromProjectOID,
+                    ProjectSiteConfig sourcePf = projectService.getProjectSiteConfig(copyFromProjectOID,
                             new SiteOID(projectSiteConfig.getSiteFk(), null));
                     if (sourcePf != null)
                     {
-                        List<ACL> acls = new AuthorizationManager().getAcls(sourcePf.getOID());
+                        List<ACL> acls = authorizationManager.getAcls(sourcePf.getOID());
 
                         for (Iterator iterator2 = acls.iterator(); iterator2.hasNext();)
                         {
@@ -1326,14 +997,14 @@ public class WorkstationServiceImpl implements WorkstationService{
                 List<User> readonlyList = projectService.getUsersForProjectInRole(copyFromProjectOID.getPk(),
                         dummyWorkstation.getOID(), User.ROLE_READONLY);
 
-                removeAllUsersFromProject(context,
+               projectService.removeAllUsersFromProject(context,
                         destinationProjectOID.getPk(), dummyWorkstation.getOID());
                 if (testList != null)
                 {
                     for (Iterator iterator = testList.iterator(); iterator.hasNext();)
                     {
                         User aUser = (User) iterator.next();
-                        addUserToProject(context,
+                        projectService.addUserToProject(context,
                                 destinationProjectOID.getPk(), dummyWorkstation.getOID(), aUser.getPk(),
                                 User.ROLE_TESTER);
                     }
@@ -1343,7 +1014,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                     for (Iterator iterator = verifyList.iterator(); iterator.hasNext();)
                     {
                         User aUser = (User) iterator.next();
-                        addUserToProject(context,
+                        projectService.addUserToProject(context,
                                 destinationProjectOID.getPk(), dummyWorkstation.getOID(), aUser.getPk(),
                                 User.ROLE_VERIFY);
                     }
@@ -1353,7 +1024,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                     for (Iterator iterator = readonlyList.iterator(); iterator.hasNext();)
                     {
                         User aUser = (User) iterator.next();
-                        addReadonlyUserToProject(context,
+                        projectService.addReadonlyUserToProject(context,
                                 destinationProjectOID.getPk(), dummyWorkstation.getOID(), aUser.getPk());
                     }
                 }

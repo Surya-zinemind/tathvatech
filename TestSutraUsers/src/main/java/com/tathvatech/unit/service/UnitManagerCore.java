@@ -10,25 +10,30 @@ import com.tathvatech.unit.entity.UnitInProjectH;
 import com.tathvatech.unit.oid.UnitInProjectOID;
 import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.UnitOID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
+@Service
+@RequiredArgsConstructor
 public class UnitManagerCore
 {
-	public static UnitInProject getUnitInProject(UnitOID unitOID, ProjectOID projectOID)
+	private final PersistWrapper persistWrapper;
+	public  UnitInProject getUnitInProject(UnitOID unitOID, ProjectOID projectOID)
 	{
-		return PersistWrapper.read(UnitInProject.class,
+		return persistWrapper.read(UnitInProject.class,
 				"select * from unit_project_ref where unitPk = ? and projectPk = ?", unitOID.getPk(), projectOID.getPk());
 	}
 
-	public static UnitInProjectH getUnitInProjectH(
+	public  UnitInProjectH getUnitInProjectH(
 			UnitInProjectOID unitInProjectOID, Date date)
 	{
-		return PersistWrapper.read(UnitInProjectH.class, 
+		return persistWrapper.read(UnitInProjectH.class,
 				"select * from unit_project_ref_h where unitInProjectPk = ? and ? between effectiveDateFrom and effectiveDateTo", unitInProjectOID.getPk(), date);
 	}
 
-	public static UnitH getUnitH(UnitOID unitOID, Date date)
+	public  UnitH getUnitH(UnitOID unitOID, Date date)
 	{
-		return PersistWrapper.read(UnitH.class, 
+		return persistWrapper.read(UnitH.class,
 				"select * from TAB_UNIT_H where unitPk = ? and ? between effectiveDateFrom and effectiveDateTo", unitOID.getPk(), date);
 	}
 

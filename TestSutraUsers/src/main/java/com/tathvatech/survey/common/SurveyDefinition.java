@@ -13,17 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.apache.log4j.Logger;
-import org.jdom.Element;
-
-import com.tathvatech.ts.caf.TestSutraProperties;
-import com.tathvatech.ts.core.common.FileStoreManager;
-import com.tathvatech.ts.core.survey.surveyitem.ContainerBase;
-import com.tathvatech.ts.core.survey.surveyitem.SectionBase;
-import com.tathvatech.ts.core.survey.surveyitem.SurveyItemBase;
-import com.tathvatech.ts.core.survey.surveyitem.SurveyItemManager;
-import com.tathvatech.ts.core.survey.surveyitem.SurveyItemOrderComparator;
-import com.tathvatech.ts.core.survey.surveyitem.SurveyParamBase;
 
 /**
  * @author Hari
@@ -33,7 +22,7 @@ import com.tathvatech.ts.core.survey.surveyitem.SurveyParamBase;
  */
 public class SurveyDefinition implements SurveyDefinitionBase
 {
-    private static final Logger logger = Logger.getLogger(SurveyDefinition.class);
+   /* private static final Logger logger = Logger.getLogger(SurveyDefinition.class);
     
     public static final String DB_SUFFIX = "_desc";
     public static final String TEXT_SUFFIX = "_text";
@@ -70,9 +59,9 @@ public class SurveyDefinition implements SurveyDefinitionBase
         return surveyConfig;
     }
     
-    /**
+    *//**
      * @return
-     */
+     *//*
     public String getSurveyName()
     {
         return surveyConfig.getIdentityNumber();
@@ -151,10 +140,10 @@ public class SurveyDefinition implements SurveyDefinitionBase
     	return -1;
     }
     
-    /**
+    *//**
      * return all questions, top level and nested ones in a linear list
      * @return
-     */
+     *//*
     public List<SurveyItemBase> getQuestionsLinear()
     {
     	List<SurveyItemBase> qList = new ArrayList();
@@ -167,10 +156,10 @@ public class SurveyDefinition implements SurveyDefinitionBase
     	return qList;
     }
     
-    /**
+    *//**
      * return all questions, everything below the one passed in a linear list
      * @return
-     */
+     *//*
     public List<SurveyItemBase> getQuestionsLinear(String surveyItemId)
     {
     	List<SurveyItemBase> qList = new ArrayList();
@@ -203,10 +192,10 @@ public class SurveyDefinition implements SurveyDefinitionBase
     	}
     }
     
-    /**
+    *//**
      * @param questionId
      * @return
-     */
+     *//*
     public SurveyItemBase getQuestion(String questionId)
     {
     	if(questionId == null)
@@ -364,6 +353,6 @@ public class SurveyDefinition implements SurveyDefinitionBase
 			e.printStackTrace();
 		}
         
-    }
+    }*/
 
 }

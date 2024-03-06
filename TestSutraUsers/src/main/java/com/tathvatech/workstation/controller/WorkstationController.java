@@ -224,27 +224,7 @@ public class WorkstationController {
         }
     }
 
-    public  void removeWorkstationFromUnit(UserContext context, UnitOID unitOID, ProjectOID projectOID,
-                                                 WorkstationOID workstationOID) throws Exception
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-            workstationService.removeWorkstationFromUnit(context, unitOID, projectOID, workstationOID);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
-    }
 
     public UnitLocation getUnitWorkstation(int unitPk, ProjectOID projectOID, WorkstationOID workstationOID)
             throws Exception
@@ -436,114 +416,8 @@ public class WorkstationController {
             con.commit();
         }
     }
-    public  void copyWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
-                                        WorkstationQuery workstationQuery, Integer[] selectedUnits) throws Exception
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-            workstationService.copyWorkstationToUnits(context, projectQuery, workstationQuery, selectedUnits);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
-    }
 
-    public  void setWorkstationProjectPartTeamSetupToUnits(UserContext context, ProjectQuery projectQuery,
-                                                           WorkstationQuery workstationQuery, ProjectPartOID projectPartOID, Integer[] selectedUnits,
-                                                           boolean copyDefaultTeamIfNoProjectPartTeamIsSet) throws Exception
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-            workstationService.setWorkstationProjectPartTeamSetupToUnits(context, projectQuery, workstationQuery,
-                    projectPartOID, selectedUnits, copyDefaultTeamIfNoProjectPartTeamIsSet);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
-    }
-
-    public  void cascadeWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
-                                                 WorkstationQuery workstationQuery, Integer[] selectedUnitsForForm, Integer[] selectedUnitsForTeam)
-            throws Exception
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-            workstationService.cascadeWorkstationToUnits(context, projectQuery, workstationQuery, selectedUnitsForForm,
-                    selectedUnitsForTeam);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
-    }
-
-    public  void deleteWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
-                                                WorkstationQuery workstationQuery, Integer[] selectedUnits) throws Exception
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-            // delete of workstation happens at the unit level where as the
-            // cascade of forms happen at the car level also,
-            // they use the same inteface where units are captured as int pks.
-            // so, here I am filtering the unit ones only.
-            // we change something in the UI to make it generic. dont know at
-            // this point.
-            List<UnitObj> units = new ArrayList();
-            for (int x = 0; x < selectedUnits.length; x++)
-            {
-                UnitObj unit = unitService.getUnitByPk(new UnitOID(selectedUnits[x]));
-                if (unit != null)
-                {
-                    units.add(unit);
-                }
-            }
-
-            workstationService.deleteWorkstationToUnits(context, projectQuery, workstationQuery,
-                    units.toArray(new UnitObj[units.size()]));
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
-    }
 
     public  List<Project> getProjectsForWorkstation(UserContext context, WorkstationOID workstationOID)
             throws Exception

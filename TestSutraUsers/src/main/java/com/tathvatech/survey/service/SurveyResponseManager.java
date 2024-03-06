@@ -24,10 +24,12 @@ import java.util.List;
 import java.util.TimeZone;
 
 import com.tathvatech.common.common.ServiceLocator;
+import com.tathvatech.common.utils.Sqls;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.dao.TestProcDAO;
 import com.tathvatech.forms.response.ResponseMasterNew;
 import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.TestProcObj;
 
@@ -127,7 +129,7 @@ public class SurveyResponseManager
 	/**
 	 * 
 	 */
-	public static SurveyResponse ceateDummyResponse(UserContext context, SurveyResponse surveyResponse) throws Exception
+	/*public static SurveyResponse ceateDummyResponse(UserContext context, SurveyResponse surveyResponse) throws Exception
 	{
 		SurveyDefinition surveyDef = surveyResponse.getSurveyDefinition();
 		String tableName = surveyDef.getSurveyConfig().getDbTable();
@@ -283,7 +285,7 @@ public class SurveyResponseManager
 			{
 			}
 		}
-	}
+	}*/
 	
 	/**
      * This function  
@@ -2051,11 +2053,11 @@ public class SurveyResponseManager
 	}
 */
 	/**
-	 * @param surveyPk
-	 * @param responseId
+	 * @param
+	 * @param
 	 * @return
 	 */
-	public static ResponseMaster getResponseMaster(int surveyPk, String responseId) throws Exception
+	/*public static ResponseMaster getResponseMaster(int surveyPk, String responseId) throws Exception
 	{
 		Survey survey = SurveyMaster.getSurveyByPk(surveyPk);
 
@@ -2122,7 +2124,7 @@ public class SurveyResponseManager
 		return rMaster;
 	}
 
-
+*/
 //	public static String getLastResponseReferenceNoFromDevice(String devicePk) throws Exception
 //	{
 //		Connection conn = null;

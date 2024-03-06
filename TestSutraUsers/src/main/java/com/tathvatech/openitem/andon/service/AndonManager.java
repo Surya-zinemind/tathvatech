@@ -13,6 +13,8 @@ import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.openitem.andon.common.AndonBean;
+import com.tathvatech.openitem.andon.entity.Andon;
 import com.tathvatech.project.common.ProjectQuery;
 import com.tathvatech.unit.common.UnitObj;
 import com.tathvatech.unit.service.UnitManager;
@@ -24,18 +26,25 @@ import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.Project;
 import com.tathvatech.user.service.CommonServiceManager;
 import com.tathvatech.workstation.entity.Workstation;
+import com.tathvatech.workstation.service.WorkstationService;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.aspectj.apache.bcel.classfile.annotation.NameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
-
+@Service
+@RequiredArgsConstructor
 public class AndonManager
 {
 	private static final Logger logger = LoggerFactory.getLogger(AndonManager.class);
-   private PersistWrapper persistWrapper;
-	public  Terminal getTerminal(int terminalPk) throws Exception
+
+   private final PersistWrapper persistWrapper;
+   private final WorkstationService workstationService;
+
+	/*public  Terminal getTerminal(int terminalPk) throws Exception
 	{
 		return persistWrapper.readByPrimaryKey(Terminal.class, terminalPk);
 	}
@@ -300,19 +309,78 @@ public class AndonManager
 		}
 	}
 
-	public  Andon getAndon(int andonPk) throws Exception
+
+
+
+	public  Andon markAndonAsAttended(UserContext context, Andon andon, List<AttachmentIntf> attachments)
+			throws Exception
 	{
-		return persistWrapper.readByPrimaryKey(Andon.class, andonPk);
+		andon.setAttendedDate(new Date());
+		andon.setStatus(Andon.STATUS_ATTENDED);
+		andon.setAttendedBy(context.getUser().getPk());
+		persistWrapper.update(andon);
+		List<AttachmentIntf> attachmentlist = new ArrayList<AttachmentIntf>();
+
+		if (attachments != null && attachments.size() > 0)
+		{
+			for (AttachmentIntf attachmentIntf : attachments)
+			{
+
+				attachmentlist.add(attachmentIntf);
+			}
+		}
+		CommonServiceManager.saveAttachments(context, andon.getPk(), EntityTypeEnum.Andon.getValue(), attachmentlist,
+				true);
+		return getAndon(andon.getPk());
+	}*/
+
+	public  Andon markAndonAsClosed(UserContext context, Andon andon, List<AttachmentIntf> attachments)
+			throws Exception
+	{
+		if (andon.getSource() == null || andon.getSource().trim().length() < 1)
+		{
+			logger.info("Invalid source.\nandon - " + andon.getAndonNo() + " source-" + andon.getSource());
+			throw new AppException("Invalid Source information. Please try again later.");
+		}
+		if (andon.STATUS_OPEN.equals(andon.getStatus()))
+		{
+			// you are directly closing an andon
+			andon.setAttendedBy((int) context.getUser().getPk());
+			andon.setAttendedDate(new Date());
+		}
+		andon.setClosedDate(new Date());
+		andon.setClosedBy((int) context.getUser().getPk());
+		andon.setStatus(Andon.STATUS_CLOSED);
+
+		persistWrapper.update(andon);
+		List<AttachmentIntf> attachmentlist = new ArrayList<AttachmentIntf>();
+
+		if (attachments != null && attachments.size() > 0)
+		{
+			for (AttachmentIntf attachmentIntf : attachments)
+			{
+
+				attachmentlist.add(attachmentIntf);
+			}
+		}
+		CommonServiceManager.saveAttachments(context, (int) andon.getPk(), EntityTypeEnum.Andon.getValue(), attachmentlist,
+				true);
+		return getAndon(andon.getPk());
+	}
+	public  Andon getAndon(long andonPk) throws Exception
+	{
+		return (Andon) persistWrapper.readByPrimaryKey(Andon.class, andonPk);
 	}
 
-	public  AndonBean getAndonBean(int andonPk) throws Exception
+
+	public  AndonBean getAndonBean(long andonPk) throws Exception
 	{
 		AndonBean andonBean = null;
-		Andon andon = persistWrapper.readByPrimaryKey(Andon.class, andonPk);
+		Andon andon = (Andon) persistWrapper.readByPrimaryKey(Andon.class, andonPk);
 		if (andon != null && andon.getPk() > 0)
 		{
 			andonBean = new AndonBean();
-			andonBean.setPk(andon.getPk());
+			andonBean.setPk((int) andon.getPk());
 			andonBean.setType(andon.getType());
 			andonBean.setProjectPk(andon.getProjectPk());
 			andonBean.setUnitPk(andon.getUnitPk());
@@ -357,9 +425,10 @@ public class AndonManager
 			andonBean.setStatus(andon.getStatus());
 			andonBean.setLastUpdated(andon.getLastUpdated());
 			andonBean.setAttachments(
-					CommonServiceManager.getAttachments(andon.getPk(), EntityTypeEnum.Andon.getValue()));
+					CommonServiceManager.getAttachments((int) andon.getPk(), EntityTypeEnum.Andon.getValue()));
 
-			List<HazardReferenceBean> mrfReference = HazardMaintanenceManager.getCreatedChildReference(andon.getPk(),
+			//Fix later
+			/*List<HazardReferenceBean> mrfReference = HazardMaintanenceManager.getCreatedChildReference(andon.getPk(),
 					EntityTypeEnum.Andon, EntityTypeEnum.MRF);
 			if (mrfReference != null && mrfReference.size() > 0)
 			{
@@ -373,66 +442,10 @@ public class AndonManager
 				}
 				Mrf mrf = persistWrapper.readByPrimaryKey(Mrf.class, mrfFk);
 				andonBean.setMrfOID(new MRFOID(mrf.getPk(), mrf.getMrfno()));
-			}
+			}*/
 		}
 		return andonBean;
 
-	}
-
-	public  Andon markAndonAsAttended(UserContext context, Andon andon, List<AttachmentIntf> attachments)
-			throws Exception
-	{
-		andon.setAttendedDate(new Date());
-		andon.setStatus(Andon.STATUS_ATTENDED);
-		andon.setAttendedBy(context.getUser().getPk());
-		persistWrapper.update(andon);
-		List<AttachmentIntf> attachmentlist = new ArrayList<AttachmentIntf>();
-
-		if (attachments != null && attachments.size() > 0)
-		{
-			for (AttachmentIntf attachmentIntf : attachments)
-			{
-
-				attachmentlist.add(attachmentIntf);
-			}
-		}
-		CommonServiceManager.saveAttachments(context, andon.getPk(), EntityTypeEnum.Andon.getValue(), attachmentlist,
-				true);
-		return getAndon(andon.getPk());
-	}
-
-	public  Andon markAndonAsClosed(UserContext context, Andon andon, List<AttachmentIntf> attachments)
-			throws Exception
-	{
-		if (andon.getSource() == null || andon.getSource().trim().length() < 1)
-		{
-			logger.info("Invalid source.\nandon - " + andon.getAndonNo() + " source-" + andon.getSource());
-			throw new AppException("Invalid Source information. Please try again later.");
-		}
-		if (andon.STATUS_OPEN.equals(andon.getStatus()))
-		{
-			// you are directly closing an andon
-			andon.setAttendedBy(context.getUser().getPk());
-			andon.setAttendedDate(new Date());
-		}
-		andon.setClosedDate(new Date());
-		andon.setClosedBy(context.getUser().getPk());
-		andon.setStatus(Andon.STATUS_CLOSED);
-
-		persistWrapper.update(andon);
-		List<AttachmentIntf> attachmentlist = new ArrayList<AttachmentIntf>();
-
-		if (attachments != null && attachments.size() > 0)
-		{
-			for (AttachmentIntf attachmentIntf : attachments)
-			{
-
-				attachmentlist.add(attachmentIntf);
-			}
-		}
-		CommonServiceManager.saveAttachments(context, andon.getPk(), EntityTypeEnum.Andon.getValue(), attachmentlist,
-				true);
-		return getAndon(andon.getPk());
 	}
 
 	public  void markAllAndonsForUnitOnWorkstationAsClosed(UserContext context, UnitOID unitOID,
@@ -448,7 +461,7 @@ public class AndonManager
 			Andon andon = (Andon) iterator.next();
 			if (StringUtils.isBlank(andon.getSource()))
 			{
-				Workstation ws = ProjectManager.getWorkstation(new WorkstationOID(andon.getWorkstationPk()));
+				Workstation ws = workstationService.getWorkstation(new WorkstationOID(andon.getWorkstationPk()));
 				andon.setSource("WS" + ws.getWorkstationName());
 			}
 			andon.setClosedComment("Andon closed as the workstation is complete.");
@@ -458,7 +471,7 @@ public class AndonManager
 		}
 	}
 
-	public  List<AndonType> getAndonTypesForWorkstation(int projectPk, int workstationPk) throws Exception
+	/*public  List<AndonType> getAndonTypesForWorkstation(int projectPk, int workstationPk) throws Exception
 	{
 		return persistWrapper.readList(AndonType.class, "select * from ANDON_TYPE where pk in "
 				+ "(select andonTypePk from WORKSTATION_ANDON_TYPE where projectPk = ? and workstationPk=?) and status = ?",
@@ -833,6 +846,6 @@ public class AndonManager
 
 		return persistWrapper.readList(AndonQuery.class, sql.toString(),
 				(params.size() > 0) ? params.toArray(new Object[params.size()]) : null);
-	}
+	}*/
 
 }

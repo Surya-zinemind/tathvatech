@@ -13,6 +13,7 @@ import com.tathvatech.workstation.common.UnitInProjectObj;
 import com.tathvatech.workstation.service.WorkstationServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Objects;
 
 
+@Service
 public class UnitManager
 {
 	private static final Logger logger = LoggerFactory.getLogger(UnitManager.class);
@@ -71,7 +73,7 @@ public class UnitManager
 	}
 
 	
-	public static void moveUnitOrderUp(UserContext context, UnitOID unitOID, ProjectOID projectOID)
+	/*public static void moveUnitOrderUp(UserContext context, UnitOID unitOID, ProjectOID projectOID)
 	{
 		UnitInProjectDAO uprDAO = new UnitInProjectDAO();
 		try 
@@ -94,9 +96,9 @@ public class UnitManager
 			logger.error("Exception changing unit order", e);
 			throw new AppException("Could not change unit order, please try again later");
 		}
-	}
+	}*/
 
-	public static void moveUnitOrderDown(UserContext context, UnitOID unitOID, ProjectOID projectOID)
+	/*public static void moveUnitOrderDown(UserContext context, UnitOID unitOID, ProjectOID projectOID)
 	{
 		UnitInProjectDAO uprDAO = new UnitInProjectDAO();
 		try 
@@ -309,8 +311,8 @@ public class UnitManager
 		changeUnitParentInt(userContext, uprDAO, selectedParentUPROID, childUPR.getOID(), projectOID);
 		
 		return;
-	}
-	
+	}*/
+	/*
 	private static void changeUnitParentInt(UserContext userContext, UnitInProjectDAO uprDAO, 
 			UnitInProjectOID selectedParentOID, UnitInProjectOID unitToChangeOID, ProjectOID projectOID) throws Exception
 	{
@@ -397,11 +399,11 @@ public class UnitManager
 	}
 	
 
-	/**
+	*//**
 	 * This method does not consider the status of the unit inside the project. so i think it does not work properly... check before using it.
 	 * @param unitOID
 	 * @return
-	 */
+	 *//*
 	public  List<ProjectQuery> getUnitAssignedProjects(UnitOID unitOID)
 	{
 		String sql = ProjectQuery.fetchSQL 
@@ -563,6 +565,6 @@ public class UnitManager
 		
 		if(bookmark != null)
 			persistWrapper.deleteEntity(bookmark);
-	}
+	}*/
 	
 }
