@@ -18,7 +18,7 @@ import com.tathvatech.workstation.common.UnitWorkstationQuery;
 import com.tathvatech.workstation.common.WorkstationQuery;
 import com.tathvatech.workstation.entity.UnitWorkstation;
 import com.tathvatech.workstation.entity.Workstation;
-import com.tathvatech.workstation.request.WorkstationFilter;
+import com.tathvatech.workstation.request.*;
 import com.tathvatech.workstation.service.WorkstationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.LoggerFactory;
@@ -82,9 +82,10 @@ public class WorkstationController {
         return l;
     }
 
-    @GetMapping("/getWorkstationsForSiteAndProject/{sitePk}/{projectPk}")
-    public List<WorkstationQuery> getWorkstationsForSiteAndProject(@PathVariable("sitePk") int sitePk, @PathVariable("projectPk") int projectPk) throws Exception {
-        List<WorkstationQuery> l = workstationService.getWorkstationsForSiteAndProject(sitePk, projectPk);
+    @GetMapping("/getWorkstationsForSiteAndProject")
+    public List<WorkstationQuery> getWorkstationsForSiteAndProject(@RequestBody WorkstationsForSiteAndProjectRequest workstationsForSiteAndProjectRequest) throws Exception {
+        List<WorkstationQuery> l = workstationService.getWorkstationsForSiteAndProject(workstationsForSiteAndProjectRequest.getSitePk(),
+                workstationsForSiteAndProjectRequest.getProjectPk());
         return l;
     }
 
@@ -98,23 +99,25 @@ public class WorkstationController {
         return workstationService.getWorkstationQueryByPk(workstationOID);
     }
 
-    @PostMapping("/addWorkstationToProject/{projectPk}")
-    public void addWorkstationToProject(@PathVariable("projectPk") int projectPk, @RequestBody WorkstationOID workstationOID) throws Exception {
+    @PostMapping("/addWorkstationToProject")
+    public void addWorkstationToProject( @RequestBody WorkstationToProjectRequest workstationToProjectRequest) throws Exception {
         UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        workstationService.addWorkstationToProject(context, projectPk, workstationOID);
+        workstationService.addWorkstationToProject(context, workstationToProjectRequest.getProjectPk(),
+                workstationToProjectRequest.getWorkstationOID());
 
     }
 
-    @DeleteMapping("/removeWorkstationFromProject/{projectPk}")
-    public void removeWorkstationFromProject(@PathVariable("projectPk") int projectPk, @RequestBody WorkstationOID workstationOID)
+    @DeleteMapping("/removeWorkstationFromProject")
+    public void removeWorkstationFromProject(@RequestBody WorkstationFromProjectRequest workstationFromProjectRequest )
             throws Exception {
 
         UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        workstationService.removeWorkstationFromProject(context, projectPk, workstationOID);
+        workstationService.removeWorkstationFromProject(context, workstationFromProjectRequest.getProjectPk(),
+                workstationFromProjectRequest.getWorkstationOID());
 
     }
 
-    @DeleteMapping("/removeAllWorkstationsFromProject/{ projectPk}")
+    @DeleteMapping("/removeAllWorkstationsFromProject/{projectPk}")
     public void removeAllWorkstationsFromProject(@PathVariable int projectPk) throws Exception {
 
         UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -122,31 +125,36 @@ public class WorkstationController {
 
     }
 
-    @GetMapping("/getWorkstationsForUnit/{unitPk}/{includeChildUnits}")
-    public List<UnitWorkstationQuery> getWorkstationsForUnit(@PathVariable("unitPk") int unitPk, @RequestBody ProjectOID projectOID,
-                                                             @PathVariable("includeChildUnits") boolean includeChildUnits) throws Exception {
-        return workstationService.getWorkstationsForUnit(new UnitOID(unitPk, null), projectOID, includeChildUnits);
+    @GetMapping("/getWorkstationsForUnit")
+    public List<UnitWorkstationQuery> getWorkstationsForUnit( @RequestBody WorkstationsForUnitRequest workstationsForUnitRequest) throws Exception {
+        return workstationService.getWorkstationsForUnit(new UnitOID(workstationsForUnitRequest.getUnitPk(),null) ,
+                workstationsForUnitRequest.getProjectOID(),
+                workstationsForUnitRequest.isIncludeChildUnits());
     }
 
-    @GetMapping("/getWorkstationsForUnit/{unitPk}")
-    public List<WorkstationQuery> getWorkstationsForUnit(@PathVariable(" unitPk") int unitPk, @RequestBody ProjectOID projectOID) throws Exception {
-        return workstationService.getWorkstationsForUnit(new UnitOID(unitPk, null), projectOID);
+    @GetMapping("/getWorkstationsForUnits")
+    public List<WorkstationQuery> getWorkstationsForUnit(@RequestBody WorkstationsForUnitbyPkRequest workstationsForUnitbyPkRequest) throws Exception {
+        return workstationService.getWorkstationsForUnit(new UnitOID(workstationsForUnitbyPkRequest.getUnitPk(),null),
+               workstationsForUnitbyPkRequest.getProjectOID() );
     }
 
     @PostMapping("/addWorkstationToUnit")
-    public void addWorkstationToUnit(@RequestBody ProjectOID projectOID, @RequestBody UnitOID unitOID,
-                                     @RequestBody WorkstationOID workstationOID) throws Exception {
+    public void addWorkstationToUnit(@RequestBody WorkstationToUnitRequest workstationToUnitRequest) throws Exception {
 
         UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        workstationService.addWorkstationToUnit(context, projectOID, unitOID, workstationOID);
+        workstationService.addWorkstationToUnit(context, workstationToUnitRequest.getProjectOID(),
+                workstationToUnitRequest.getUnitOID(),
+                workstationToUnitRequest.getWorkstationOID());
 
     }
 
 
-    @GetMapping("/getUnitWorkstation/{unitPk}")
-    public UnitLocation getUnitWorkstation(@PathVariable("unitPk") int unitPk, @RequestBody ProjectOID projectOID, @RequestBody WorkstationOID workstationOID)
+    @GetMapping("/getUnitWorkstation")
+    public UnitLocation getUnitWorkstation(@RequestBody UnitWorkstationRequest unitWorkstationRequest)
             throws Exception {
-        return workstationService.getUnitWorkstation(unitPk, projectOID, workstationOID);
+        return workstationService.getUnitWorkstation(unitWorkstationRequest.getUnitPk(),
+                unitWorkstationRequest.getProjectOID(),
+                unitWorkstationRequest.getWorkstationOID());
     }
 
     /*
@@ -154,29 +162,34 @@ public class WorkstationController {
      */
     @Deprecated
     @GetMapping("/getUnitWorkstationStatus")
-    public List<UnitLocationQuery> getUnitWorkstationStatus(@RequestBody UnitOID unitOID, @RequestBody ProjectOID projectOID)
+    public List<UnitLocationQuery> getUnitWorkstationStatus(@RequestBody  UnitWorkstationStatusRequest unitWorkstationStatusRequest)
             throws Exception {
-        return workstationService.getUnitWorkstationStatus(unitOID, projectOID);
+        return workstationService.getUnitWorkstationStatus(unitWorkstationStatusRequest.getUnitOID(),
+                unitWorkstationStatusRequest.getProjectOID());
     }
 
-    @GetMapping("/getUnitWorkstationStatus/{unitPk}")
-    public UnitLocationQuery getUnitWorkstationStatus(@PathVariable("unitPk") int unitPk, @RequestBody ProjectOID projectOID,
-                                                      @RequestBody WorkstationOID workstationOID) {
-        return workstationService.getUnitWorkstationStatus(new UnitOID(unitPk, null), projectOID, workstationOID);
+    @GetMapping("/getUnitWorkstationStatuss")
+    public UnitLocationQuery getUnitWorkstationStatus( @RequestBody UnitWorkstationStatusbyPkRequest unitWorkstationStatusbyPkRequest) {
+        return workstationService.getUnitWorkstationStatus(new UnitOID(unitWorkstationStatusbyPkRequest.getUnitPk(),null)
+                , unitWorkstationStatusbyPkRequest.getProjectOID(),
+                unitWorkstationStatusbyPkRequest.getWorkstationOID());
     }
 
-    @GetMapping("/getUnitWorkstationStatusHistory/{unitPk}")
-    public List<UnitLocationQuery> getUnitWorkstationStatusHistory(@PathVariable("unitPk") int unitPk, @RequestBody ProjectOID projectOID,
-                                                                   @RequestBody WorkstationOID workstationOID) throws Exception {
-        return workstationService.getUnitWorkstationStatusHistory(unitPk, projectOID, workstationOID);
+    @GetMapping("/getUnitWorkstationStatusHistory")
+    public List<UnitLocationQuery> getUnitWorkstationStatusHistory(@RequestBody UnitWorkstationStatusHistoryRequest unitWorkstationStatusHistoryRequest) throws Exception {
+        return workstationService.getUnitWorkstationStatusHistory(unitWorkstationStatusHistoryRequest.getUnitPk(),
+                unitWorkstationStatusHistoryRequest.getProjectOID(),
+                unitWorkstationStatusHistoryRequest.getWorkstationOID());
     }
 
-    @PutMapping("/setUnitWorkstationStatus/{unitPk}/{status}")
-    public void setUnitWorkstationStatus(@RequestBody ProjectOID projectOID, @PathVariable("unitPk") int unitPk,
-                                         @RequestBody WorkstationOID workstationOID, @PathVariable("status") String status) throws Exception {
+    @PutMapping("/setUnitWorkstationStatus")
+    public void setUnitWorkstationStatus(@RequestBody SetUnitWorkstationStatusRequest setUnitWorkstationStatusRequest) throws Exception {
         UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        workstationService.setUnitWorkstationStatus(userContext, unitPk, projectOID, workstationOID, status);
+        workstationService.setUnitWorkstationStatus(userContext,setUnitWorkstationStatusRequest.getUnitPk(),
+                setUnitWorkstationStatusRequest.getProjectOID(),
+                setUnitWorkstationStatusRequest.getWorkstationOID(),
+                setUnitWorkstationStatusRequest.getStatus());
 
     }
 
@@ -228,13 +241,14 @@ public class WorkstationController {
         return workstationService.getProjectsForWorkstation(context, workstationOID);
     }
 
-    @GetMapping("/getWorkstationPercentComplete/{unitPk}/{includeChildren}")
-    public float getWorkstationPercentComplete(@PathVariable("unitPk") int unitPk, @RequestBody ProjectOID projectOID,
-                                               @RequestBody WorkstationOID workstationOID, @PathVariable("includeChildren") boolean includeChildren) throws Exception {
+    @GetMapping("/getWorkstationPercentComplete")
+    public float getWorkstationPercentComplete(@RequestBody WorkstationPercentCompleteRequest workstationPercentCompleteRequest) throws Exception {
         UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        return workstationService.getWorkstationPercentComplete(context, unitPk, projectOID, workstationOID,
-                includeChildren);
+        return workstationService.getWorkstationPercentComplete(context, workstationPercentCompleteRequest.getUnitPk(),
+                workstationPercentCompleteRequest.getProjectOID(),
+                workstationPercentCompleteRequest.getWorkstationOID(),
+                        workstationPercentCompleteRequest.isIncludeChildren());
     }
 
     @PutMapping("/moveWorkstationOrderUp")
@@ -251,10 +265,9 @@ public class WorkstationController {
 
     }
 
-    @GetMapping("/getUnitWorkstationSetting/{unitPk}")
-    public UnitWorkstation getUnitWorkstationSetting(@PathVariable("unitPk") int unitPk, @RequestBody ProjectOID projectOID,
-                                                     @RequestBody WorkstationOID workstationOID) {
-        return workstationService.getUnitWorkstationSetting(unitPk, projectOID, workstationOID);
+    @GetMapping("/getUnitWorkstationSetting")
+    public UnitWorkstation getUnitWorkstationSetting(@RequestBody UnitWorkstationSettingRequest unitWorkstationSettingRequest) {
+        return workstationService.getUnitWorkstationSetting(unitWorkstationSettingRequest.getUnitPk(),unitWorkstationSettingRequest.getProjectOID(),unitWorkstationSettingRequest.getWorkstationOID());
     }
 
     @PutMapping("/updateUnitWorkstationSetting")
@@ -266,16 +279,21 @@ public class WorkstationController {
 
     }
 
-    @PostMapping("copyWorkstationSettings/{copySites}/{copyProjectFunctionTeams}/{ copyParts}/{copyOpenItemTeam}/{copyProjectCoordinators}")
-    public void copyWorkstationSettings(@RequestBody ProjectOID copyFromProjectOID,
-                                        @RequestBody ProjectOID destinationProjectOID, @PathVariable("copySites") boolean copySites, @PathVariable("copyProjectFunctionTeams") boolean copyProjectFunctionTeams, @PathVariable(" copyParts") boolean copyParts,
-                                        @PathVariable("copyOpenItemTeam") boolean copyOpenItemTeam, @PathVariable("copyProjectCoordinators") boolean copyProjectCoordinators, @RequestBody List<Object[]> workstationsToCopy)
+    @PostMapping("/copyWorkstationSettings")
+    public void copyWorkstationSettings(@RequestBody WorkstationSettingsRequest workstationSettingsRequest)
             throws Exception {
 
         UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        workstationService.copyWorkstationSettings(context, copyFromProjectOID, destinationProjectOID, copySites,
-                copyProjectFunctionTeams, copyParts, copyOpenItemTeam, copyProjectCoordinators, workstationsToCopy);
+        workstationService.copyWorkstationSettings(context,workstationSettingsRequest.getCopyFromProjectOID(),
+                workstationSettingsRequest.getDestinationProjectOID(),
+                workstationSettingsRequest.isCopySites(),
+                workstationSettingsRequest.isCopyProjectFunctionTeams(),
+                workstationSettingsRequest.isCopyParts(),
+                workstationSettingsRequest.isCopyOpenItemTeam(),
+                workstationSettingsRequest.isCopyProjectCoordinators(),
+                workstationSettingsRequest.getWorkstationsToCopy() );
 
 
     }
 }
+
