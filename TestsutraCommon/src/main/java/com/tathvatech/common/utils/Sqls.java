@@ -8,7 +8,7 @@ package com.tathvatech.common.utils;
 
 import java.util.TimeZone;
 
-import com.tathvatech.ts.core.survey.response.ResponseMasterNew;
+
 
 /**
  * @author Hari
@@ -40,11 +40,11 @@ public class Sqls
     public static String clearResponseSkipsSQL = "delete from TAB_QSKIPS where surveyPk=? and responseId=?";
 
     public static String finalizeResponse = "update TAB_RESPONSE set status=?, responseCompleteTime=?, responseSyncTime=?, userPk=? where responseId=?";
-    
-    public static String verityResponse = "update TAB_RESPONSE set verifiedDate=CURRENT_TIMESTAMP(), status='" + ResponseMasterNew.STATUS_VERIFIED + "', verifiedBy=?, verifyComment=? where responseId=?";
+    //Uncomment once ResponseMasterNew is added
+   /* public static String verityResponse = "update TAB_RESPONSE set verifiedDate=CURRENT_TIMESTAMP(), status='" + ResponseMasterNew.STATUS_VERIFIED + "', verifiedBy=?, verifyComment=? where responseId=?";
     public static String approveResponse = "update TAB_RESPONSE set approvedDate=CURRENT_TIMESTAMP(), status='" + ResponseMasterNew.STATUS_APPROVED + "', approvedBy=?, approveComment=? where responseId=?";
     public static String approveResponseWithComments = "update TAB_RESPONSE set approvedDate=CURRENT_TIMESTAMP(), status='" + ResponseMasterNew.STATUS_APPROVED_WITH_COMMENTS + "', approvedBy=?, approveComment=? where responseId=?";
-    public static String changeResponseStatus = "update TAB_RESPONSE set status=? where responseId=?";
+   */ public static String changeResponseStatus = "update TAB_RESPONSE set status=? where responseId=?";
     public static String markResponseAsOldOrCurrent = "update TAB_RESPONSE set current=? where responseId=?";
     public static String setResponseCompletionDate = "update TAB_RESPONSE set responseCompleteTime=?, responseSyncTime=? where responseId=?";
 
