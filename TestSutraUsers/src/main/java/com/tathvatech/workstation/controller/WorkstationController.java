@@ -1,6 +1,6 @@
 package com.tathvatech.workstation.controller;
 
-import ch.qos.logback.classic.Logger;
+
 import com.tathvatech.project.common.ProjectQuery;
 import com.tathvatech.project.oid.ProjectPartOID;
 import com.tathvatech.unit.common.UnitLocationQuery;
@@ -21,6 +21,7 @@ import com.tathvatech.workstation.entity.Workstation;
 import com.tathvatech.workstation.request.*;
 import com.tathvatech.workstation.service.WorkstationService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +39,7 @@ public class WorkstationController {
     private final UnitService unitService;
 
     private final WorkstationService workstationService;
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(WorkstationController.class);
+    private static final Logger logger = LoggerFactory.getLogger(WorkstationController.class);
 
     @PostMapping("/createWorkstation")
     public void createWorkstation(@RequestBody Workstation workstation) throws Exception {
