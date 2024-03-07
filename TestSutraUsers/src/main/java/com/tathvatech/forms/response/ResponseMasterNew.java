@@ -389,12 +389,12 @@ public class ResponseMasterNew implements Serializable
 	public void setLastUpdated(Date lastUpdated) {
 		this.lastUpdated = lastUpdated;
 	}
-	
+	//fix it later
 	@JsonIgnore
-	public FormResponseOID getOID()
+	/*public FormResponseOID getOID()
 	{
 		return new FormResponseOID(responseId);
-	}
+	}*/
 
 	public static String	fetchQuery		
 						= "select res.responseId, res.responseRefNo, "

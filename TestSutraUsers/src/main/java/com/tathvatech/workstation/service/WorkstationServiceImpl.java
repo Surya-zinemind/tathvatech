@@ -464,7 +464,7 @@ public class WorkstationServiceImpl implements WorkstationService{
     {
         // we only need to get the workstations where the form count is greater
         // than 0;
-        List<Map<String, Object>> validWs = persistWrapper.readListAsMap(
+     /*   List<Map<String, Object>> validWs = persistWrapper.readListAsMap(
                 "select count(*) as count, uth.workstationPk as wspk from unit_testproc ut "
                         + " join testproc_form_assign tfa on tfa.testProcFk = ut.pk and tfa.current = 1 "
                         + " join unit_testproc_h uth on uth.unitTestProcFk = ut.pk and now() between uth.effectiveDateFrom and uth.effectiveDateTo "
@@ -472,19 +472,19 @@ public class WorkstationServiceImpl implements WorkstationService{
                 unitOID.getPk(), projectOID.getPk(), dummyWorkstation.getPk());
 
         if (validWs == null || validWs.size() == 0)
-            return new ArrayList<UnitLocationQuery>();
+            return new ArrayList<UnitLocationQuery>();*/
 
         StringBuffer sb = new StringBuffer(UnitLocationQuery.fetchSQL)
                 .append(" and uloc.unitPk = ? and uloc.projectPk = ?").append(" and uloc.workstationPk in (");
 
         String sep = "";
-        for (Iterator iterator = validWs.iterator(); iterator.hasNext();)
+        /*for (Iterator iterator = validWs.iterator(); iterator.hasNext();)
         {
             Map<String, Object> aWs = (Map<String, Object>) iterator.next();
             sb.append(sep);
             sb.append(aWs.get("wspk"));
             sep = ",";
-        }
+        }*/
         sb.append(")");
         sb.append(" and uloc.current = 1");
         return persistWrapper.readList(UnitLocationQuery.class, sb.toString(), unitOID.getPk(), projectOID.getPk());

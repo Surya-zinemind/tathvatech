@@ -5,6 +5,7 @@ import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.utils.DateUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,8 +31,8 @@ public class TestProcDAO
 	{
 		return persistWrapper.read(TestProcObj.class, fetchSql + " and ut.pk = ?", testProcPk);
 	}
-
-	public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
+//Uncomment later and fix it
+/*	public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 	{
 		TestProcFormAssign currentTestProcFormEntity = PersistWrapper.read(TestProcFormAssign.class, 
 				"select * from testproc_form_assign where testProcFk = ? and current = 1", testProcOID.getPk());
@@ -208,14 +209,14 @@ public class TestProcDAO
 		}
 	}
 
-	/**
+	*//**
 	 * copy the schedules from the existing testProc and testProcSections to the ones associated to the new form.
 	 * we are not removing the schedules from the old testProc/Sections . that way a revert if needed does not need any changes here. 
 	 * @param context
 	 * @param currentTPForm
 	 * @param newTPForm
 	 * @throws Exception
-	 */
+	 *//*
 	private void copySchedulesToNewForm(UserContext context, TestProcFormAssign currentTPForm, TestProcFormAssign newTPForm) throws Exception
 	{
 		// the formlevel schedule need not be copied as it is linked to testproc and not to the testprocFormEntity
@@ -336,11 +337,11 @@ public class TestProcDAO
 		}
 	}
 
-	/**
+	*//**
 	 * @param context
 	 * @param testProcObj
 	 * @throws Exception
-	 */
+	 *//*
 	private void createTestProcSections(UserContext context, TestProcObj testProcObj, TestProcFormAssign newTestProcFormEntity) throws Exception
 	{
 		// we only need to create the testprocSection records for the new form in the testproc.
@@ -357,7 +358,7 @@ public class TestProcDAO
 			tSec.setTestProcFormAssignFk(newTestProcFormEntity.getPk());
 			persistWrapper.createEntity(tSec);
 		}
-	}
+	}*/
 	
 	private static String fetchSql = "select ut.pk as pk, uth.name as name, tfa.appliedByUserFk, uth.projectTestProcPk as projectTestProcPk, "
 			+ " uth.projectPk as projectPk, uth.workstationPk as workstationPk, uth.unitPk as unitPk, "

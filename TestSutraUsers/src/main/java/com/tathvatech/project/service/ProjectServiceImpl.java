@@ -219,9 +219,9 @@ public class ProjectServiceImpl implements ProjectService{
                                   String role) throws Exception
     {
         ProjectUser pUser = new ProjectUser();
-        pUser.setProjectPk(projectPk);
+        pUser.setProjectPk((int) projectPk);
         pUser.setWorkstationPk((int) workstationOID.getPk());
-        pUser.setUserPk(userPk);
+        pUser.setUserPk((int) userPk);
         pUser.setRole(role);
 
         persistWrapper.createEntity(pUser);
@@ -231,9 +231,9 @@ public class ProjectServiceImpl implements ProjectService{
                                           long userPk) throws Exception
     {
         ProjectUser pUser = new ProjectUser();
-        pUser.setProjectPk(projectPk);
+        pUser.setProjectPk((int) projectPk);
         pUser.setWorkstationPk((int) workstationOID.getPk());
-        pUser.setUserPk(userPk);
+        pUser.setUserPk((int) userPk);
         pUser.setRole(User.ROLE_READONLY);
 
         persistWrapper.createEntity(pUser);

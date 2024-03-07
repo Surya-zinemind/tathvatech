@@ -32,8 +32,9 @@ public class SurveyResponse
     
     public static final String STATUS_INCOMPLETE = "In Progress";
     public static final String STATUS_COMPLETE = "Complete";
+	//Uncommet and fix this
     
-    private int responseId;
+   /* private int responseId;
     private int testProcPk;
     private int surveyPk; 
     private int userPk;
@@ -314,11 +315,11 @@ public class SurveyResponse
     	this.surveyDefinition = sDef;
     }
     
-    /**
+    *//**
      * @param question
      * @param answer
      * @throws Exception
-     */
+     *//*
     public void addAnswer(SurveySaveItemBase sItem, SurveyItemResponse answer)
     {
         AnswerPersistor ap = sItem.getPersistor(answer);
@@ -330,19 +331,19 @@ public class SurveyResponse
         }
     }
 
-    /**
+    *//**
      * @param item
      * @return
-     */
+     *//*
     @NoColumn
     public SurveyItemResponse getAnswer(SurveySaveItemBase sItem)
     {
         return (SurveyItemResponse)answerMap.get(sItem);
     }
 
-    /**
+    *//**
      * @param ssItem
-     */
+     *//*
     public void clearAnswer(SurveySaveItemBase ssItem)
     {
         answerMap.remove(ssItem);
@@ -353,11 +354,11 @@ public class SurveyResponse
     	return answerMap;
     }
     
-    /**
+    *//**
      * use with caution, there could be duplicate surveyItem ids across different forms.
      * @param itemId
      * @return
-     */
+     *//*
     public SurveyItemResponse getAnswerBySurveyItemId(String itemId)
     {
     	SurveyItemResponse ires = null;
@@ -394,5 +395,5 @@ public class SurveyResponse
 	public FormResponseOID getOID()
 	{
 		return new FormResponseOID(responseId);
-	}
+	}*/
 }

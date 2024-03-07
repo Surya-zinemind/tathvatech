@@ -8,36 +8,19 @@ package com.tathvatech.survey.service;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.TimeZone;
 
 import com.tathvatech.common.common.ServiceLocator;
-import com.tathvatech.common.utils.Sqls;
+import com.tathvatech.user.utils.Sqls;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.dao.TestProcDAO;
 import com.tathvatech.forms.response.ResponseMasterNew;
-import com.tathvatech.survey.common.SurveyDefinition;
-import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.TestProcObj;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.tathvatech.user.common.UserContext;
-import com.tathvatech.user.entity.User;
 import com.tathvatech.workstation.common.DummyWorkstation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

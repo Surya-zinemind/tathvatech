@@ -12,12 +12,16 @@ import com.tathvatech.unit.oid.UnitInProjectOID;
 import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.UnitOID;
 import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.utils.DateUtils;
 import com.tathvatech.workstation.common.UnitInProjectObj;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 public class UnitInProjectDAO
 {
 	private Date now ;
+	@Autowired
+	private PersistWrapper persistWrapper;
 	public UnitInProjectDAO()
 	{
 		now = DateUtils.getNowDateForEffectiveDateFrom();
@@ -25,25 +29,25 @@ public class UnitInProjectDAO
 	
 	public UnitInProjectObj getUnitInProject(UnitInProjectOID oid)
 	{
-		return PersistWrapper.read(UnitInProjectObj.class, fetchSql + " and upr.pk = ?", oid.getPk());
+		return persistWrapper.read(UnitInProjectObj.class, fetchSql + " and upr.pk = ?", oid.getPk());
 	}
 	
 	public UnitInProjectObj getUnitInProject(UnitOID unitOID, ProjectOID projectOID)
 	{
-		return PersistWrapper.read(UnitInProjectObj.class, fetchSql + " and upr.unitPk = ? and upr.projectPk=?", unitOID.getPk(), projectOID.getPk());
+		return persistWrapper.read(UnitInProjectObj.class, fetchSql + " and upr.unitPk = ? and upr.projectPk=?", unitOID.getPk(), projectOID.getPk());
 	}
 	
 	public UnitInProjectObj getPreviousOneInOrder(ProjectOID projectOID, UnitInProjectObj obj)
 	{
 		if(obj.getParentPk() != null && obj.getParentPk() != 0)
 		{
-			return PersistWrapper.read(UnitInProjectObj.class, 
+			return persistWrapper.read(UnitInProjectObj.class, 
 					fetchSql + " and upr.projectPk = ? and uprh.orderNo < ? and uprh.parentPk = ? order by uprh.orderNo desc limit 0, 1", 
 					projectOID.getPk(), obj.getOrderNo(), obj.getParentPk());
 		}
 		else
 		{
-			return PersistWrapper.read(UnitInProjectObj.class, 
+			return persistWrapper.read(UnitInProjectObj.class, 
 					fetchSql + " and upr.projectPk = ? and uprh.orderNo < ? and uprh.parentPk is null order by uprh.orderNo desc limit 0, 1", 
 					projectOID.getPk(), obj.getOrderNo());
 		}
@@ -54,32 +58,32 @@ public class UnitInProjectDAO
 	{
 		if(obj.getParentPk() != null && obj.getParentPk() != 0)
 		{
-			return PersistWrapper.read(UnitInProjectObj.class, 
+			return persistWrapper.read(UnitInProjectObj.class, 
 					fetchSql + " and upr.projectPk = ? and uprh.orderNo > ? and uprh.parentPk = ? order by uprh.orderNo desc limit 0, 1", 
 					projectOID.getPk(), obj.getOrderNo(), obj.getParentPk());
 		}
 		else
 		{
-			return PersistWrapper.read(UnitInProjectObj.class, 
+			return persistWrapper.read(UnitInProjectObj.class, 
 					fetchSql + " and upr.projectPk = ? and uprh.orderNo > ? and uprh.parentPk is null order by uprh.orderNo desc limit 0, 1", 
 					projectOID.getPk(), obj.getOrderNo());
 		}
 		
 	}
-	
-	public  UnitInProjectObj saveUnitInProject(UserContext context, UnitInProjectObj obj) throws Exception
+	//uncommment later
+	/*public  UnitInProjectObj saveUnitInProject(UserContext context, UnitInProjectObj obj) throws Exception
 	{
 		return saveUnitInProject(context, obj, null);
-	}
+	}*/
 	
-	public  UnitInProjectObj saveUnitInProject(UserContext context, UnitInProjectObj obj, Actions[]  actions) throws Exception
+	/*public  UnitInProjectObj saveUnitInProject(UserContext context, UnitInProjectObj obj, Actions[]  actions) throws Exception
 	{
 		UnitInProject upr = null;
 		if(obj.getPk() > 0)
-			upr = (UnitInProject) PersistWrapper.readByPrimaryKey(UnitInProject.class, obj.getPk());
+			upr = (UnitInProject) persistWrapper.readByPrimaryKey(UnitInProject.class, obj.getPk());
 		
 		if(upr == null)
-			upr = PersistWrapper.read(UnitInProject.class, 
+			upr = persistWrapper.read(UnitInProject.class, 
 				"select * from unit_project_ref where unitPk = ? and projectPk = ? ", obj.getUnitPk(), obj.getProjectPk());
 		
 		
@@ -91,7 +95,7 @@ public class UnitInProjectDAO
 			upr.setProjectPk(obj.getProjectPk());
 			upr.setUnitOriginType(obj.getUnitOriginType());
 			upr.setUnitPk(obj.getUnitPk());
-			int pk = (int) PersistWrapper.createEntity(upr);
+			int pk = (int) persistWrapper.createEntity(upr);
 			upr.setPk(pk);
 			
 			
@@ -115,11 +119,11 @@ public class UnitInProjectDAO
 			uprhNew.setRootParentPk(obj.getRootParentPk());
 			uprhNew.setStatus(obj.getStatus());
 			uprhNew.setUnitInProjectPk((int) upr.getPk());
-			PersistWrapper.createEntity(uprhNew);
+			persistWrapper.createEntity(uprhNew);
 		}
 		else
 		{
-			UnitInProjectH uprhCurrent = PersistWrapper.read(UnitInProjectH.class, 
+			UnitInProjectH uprhCurrent = persistWrapper.read(UnitInProjectH.class, 
 					"select * from unit_project_ref_h where unitInProjectPk = ? and now() between effectiveDateFrom and effectiveDateTo ", obj.getPk());
 			
 			
@@ -137,12 +141,12 @@ public class UnitInProjectDAO
 				uprhCurrent.setRootParentPk(obj.getRootParentPk());
 				uprhCurrent.setStatus(obj.getStatus());
 				uprhCurrent.setUnitInProjectPk((int) upr.getPk());
-				PersistWrapper.update(uprhCurrent); 
+				persistWrapper.update(uprhCurrent); 
 			}
 			else
 			{
 				uprhCurrent.setEffectiveDateTo(new Date(now.getTime() - 1000));
-				PersistWrapper.update(uprhCurrent);
+				persistWrapper.update(uprhCurrent);
 
 				EntityActions act = null;
 				if(actions != null)
@@ -164,7 +168,7 @@ public class UnitInProjectDAO
 				uprhNew.setRootParentPk(obj.getRootParentPk());
 				uprhNew.setStatus(obj.getStatus());
 				uprhNew.setUnitInProjectPk((int) upr.getPk());
-				PersistWrapper.createEntity(uprhNew); 
+				persistWrapper.createEntity(uprhNew); 
 			}
 		}
 
@@ -177,7 +181,7 @@ public class UnitInProjectDAO
 
 		UnitInProjectH hRec = getHRecord(unitInProject.getOID(), now);
 		hRec.setEffectiveDateTo(new Date(now.getTime()-1000));
-		PersistWrapper.update(hRec);
+		persistWrapper.update(hRec);
 		
 		UnitInProjectH hRecNew = hRec.clone();
 		hRecNew.setPk(0);
@@ -187,13 +191,13 @@ public class UnitInProjectDAO
 		hRecNew.setCreatedDate(new Date());
 		hRecNew.setEffectiveDateFrom(now);
 		hRecNew.setEffectiveDateTo(DateUtils.getMaxDate());
-		PersistWrapper.createEntity(hRecNew);
-	} 
+		persistWrapper.createEntity(hRecNew);
+	} */
 
 	public List<UnitInProjectObj> getDirectChildren(UnitInProjectOID oid)
 	{
 		UnitInProjectObj uprObj = getUnitInProject(oid);
-		return PersistWrapper.readList(UnitInProjectObj.class,
+		return persistWrapper.readList(UnitInProjectObj.class,
 				fetchSql + " and upr.projectPk = ? and uprh.parentPk = ?",
 				uprObj.getProjectPk(), uprObj.getPk());
 				
@@ -202,7 +206,7 @@ public class UnitInProjectDAO
 	public List<UnitInProjectObj> getAllChildrenInTree(UnitInProjectOID oid)
 	{
 		UnitInProjectObj uprObj = getUnitInProject(oid);
-		return PersistWrapper.readList(UnitInProjectObj.class,
+		return persistWrapper.readList(UnitInProjectObj.class,
 				fetchSql + " and upr.projectPk = ? and uprh.rootParentPk = ? and uprh.level > ? and uprh.heiCode like ?",
 				uprObj.getProjectPk(), uprObj.getRootParentPk(), uprObj.getLevel(), uprObj.getHeiCode()+".%");
 				
@@ -213,12 +217,12 @@ public class UnitInProjectDAO
 		String sql = "select count(*) from unit_project_ref upr" 
 				+ " join unit_project_ref_h uprh on uprh.unitInProjectPk = upr.pk and now() between uprh.effectiveDateFrom and uprh.effectiveDateTo " 
 				+ " where uprh.parentPk = ? and upr.unitOriginType = ? "; 
-		return PersistWrapper.read(Integer.class, sql, oid.getPk(), UnitOriginType.Manufactured.name());
+		return persistWrapper.read(Integer.class, sql, oid.getPk(), UnitOriginType.Manufactured.name());
 	}
 	
 	private UnitInProjectH getHRecord(UnitInProjectOID oid, Date date)
 	{
-		return PersistWrapper.read(UnitInProjectH.class, 
+		return persistWrapper.read(UnitInProjectH.class, 
 				"select * from unit_project_ref_h where unitInProjectPk = ? and ? between effectiveDateFrom and effectiveDateTo", oid.getPk(), date);
 	}
 	
