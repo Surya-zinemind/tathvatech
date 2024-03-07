@@ -55,6 +55,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -82,7 +84,9 @@ public class WorkstationServiceImpl implements WorkstationService{
 
     private final AuthorizationManager authorizationManager;
 
-    private final AndonManager andonManager;
+    @Lazy
+    @Autowired
+    private  AndonManager andonManager;
 
     public Workstation createWorkstation(UserContext context, Workstation workstation) throws Exception
     {

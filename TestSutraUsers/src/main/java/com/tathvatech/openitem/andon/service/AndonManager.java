@@ -33,6 +33,8 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.aspectj.apache.bcel.classfile.annotation.NameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -42,7 +44,10 @@ public class AndonManager
 	private static final Logger logger = LoggerFactory.getLogger(AndonManager.class);
 
    private final PersistWrapper persistWrapper;
-   private final WorkstationService workstationService;
+
+   @Lazy
+   @Autowired
+   private  WorkstationService workstationService;
 
 	/*public  Terminal getTerminal(int terminalPk) throws Exception
 	{

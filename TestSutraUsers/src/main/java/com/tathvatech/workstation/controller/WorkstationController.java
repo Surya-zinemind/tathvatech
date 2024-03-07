@@ -128,7 +128,7 @@ public class WorkstationController {
         return workstationService.getWorkstationsForUnit(new UnitOID(unitPk, null), projectOID, includeChildUnits);
     }
 
-    @GetMapping("/getWorkstationsForUnit/{ unitPk}")
+    @GetMapping("/getWorkstationsForUnit/{unitPk}")
     public List<WorkstationQuery> getWorkstationsForUnit(@PathVariable(" unitPk") int unitPk, @RequestBody ProjectOID projectOID) throws Exception {
         return workstationService.getWorkstationsForUnit(new UnitOID(unitPk, null), projectOID);
     }
