@@ -3,12 +3,14 @@ package com.tathvatech.workstation.common;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.tathvatech.user.OID.SiteOID;
 import com.tathvatech.user.OID.TSBeanBase;
 import com.tathvatech.user.OID.WorkstationOID;
 import com.tathvatech.user.entity.Site;
 import com.tathvatech.user.entity.SiteCache;
+import com.tathvatech.user.entity.User;
 import com.tathvatech.workstation.inf.WorkstationOrderComparable;
 
 
@@ -144,10 +146,15 @@ public class WorkstationQuery extends TSBeanBase implements WorkstationOrderComp
 		return "WS" + workstationName + " / " + siteName;
 	}
 
+	@JsonIgnore
+
 	public String getDisplayString()
 	{
-		Site site = SiteCache.getInstance().getSite(new SiteOID(this.getSitePk(), null));
-		return "WS" + workstationName + ((description != null)?(" " + description): "") + " / " + siteName;
+//		Site site = SiteCache.getInstance().getSite(new SiteOID(this.getSitePk(), null));
+		String siteName = "NA";
+//		if(site != null)
+//			siteName = site.getName();
+		return siteName +  ((User.STATUS_INACTIVE.equals(status))?" (Inactive)":"");
 	}
 
 	@Override
