@@ -15,8 +15,9 @@ import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.utils.DateUtils;
 import com.tathvatech.workstation.common.UnitInProjectObj;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-
+@Repository
 public class UnitInProjectDAO
 {
 	private Date now ;

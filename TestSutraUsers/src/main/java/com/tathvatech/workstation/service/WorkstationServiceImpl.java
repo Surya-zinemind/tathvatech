@@ -84,6 +84,8 @@ public class WorkstationServiceImpl implements WorkstationService{
 
     private final AuthorizationManager authorizationManager;
 
+    private final UnitManager unitManager;
+
     @Lazy
     @Autowired
     private  AndonManager andonManager;
@@ -357,7 +359,7 @@ public class WorkstationServiceImpl implements WorkstationService{
     {
         if (includeChildUnits)
         {
-            UnitInProjectObj unitInProject = UnitManager.getUnitInProject(unitOID, projectOID);
+            UnitInProjectObj unitInProject = unitManager.getUnitInProject(unitOID, projectOID);
 
             String sql = UnitWorkstationQuery.sql + " and " + "w.workstationName != ?  "
                     + " and ( (u.pk = ?) or (uprh.rootParentPk = ? and uprh.heiCode like ?) )"

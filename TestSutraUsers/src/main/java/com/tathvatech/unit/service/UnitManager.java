@@ -11,6 +11,7 @@ import com.tathvatech.user.OID.UnitOID;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.workstation.common.UnitInProjectObj;
 import com.tathvatech.workstation.service.WorkstationServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,10 +24,12 @@ import java.util.Objects;
 
 
 @Service
+@RequiredArgsConstructor
 public class UnitManager
 {
 	private static final Logger logger = LoggerFactory.getLogger(UnitManager.class);
-	private PersistWrapper persistWrapper;
+	private final PersistWrapper persistWrapper;
+	private final UnitInProjectDAO unitInProjectDAO;
 	public  int getRootUnitPk(UnitOID unitOID, ProjectOID projectOID) throws Exception
 	{
 		String sql = " select rootupr.unitPk " 
@@ -41,14 +44,14 @@ public class UnitManager
 		return val;
 	}
 
-	public static UnitInProjectObj getUnitInProject(UnitInProjectOID uprOID)
+	public  UnitInProjectObj getUnitInProject(UnitInProjectOID uprOID)
 	{
-		return new UnitInProjectDAO().getUnitInProject(uprOID);
+		return unitInProjectDAO.getUnitInProject(uprOID);
 	}
 	
-	public static UnitInProjectObj getUnitInProject(UnitOID unitOID, ProjectOID projectOID)
+	public  UnitInProjectObj getUnitInProject(UnitOID unitOID, ProjectOID projectOID)
 	{
-		return new UnitInProjectDAO().getUnitInProject(unitOID, projectOID);
+		return unitInProjectDAO.getUnitInProject(unitOID, projectOID);
 	}
 	
 	public  boolean isUnitPartOfAnyProjects(UnitOID unitOID)
@@ -75,7 +78,7 @@ public class UnitManager
 	
 	/*public static void moveUnitOrderUp(UserContext context, UnitOID unitOID, ProjectOID projectOID)
 	{
-		UnitInProjectDAO uprDAO = new UnitInProjectDAO();
+		UnitInProjectDAO uprDAO = unitInProjectDAO;
 		try 
 		{
 			UnitInProjectObj unitInProjectToMove = uprDAO.getUnitInProject(unitOID, projectOID);
@@ -100,7 +103,7 @@ public class UnitManager
 
 	/*public static void moveUnitOrderDown(UserContext context, UnitOID unitOID, ProjectOID projectOID)
 	{
-		UnitInProjectDAO uprDAO = new UnitInProjectDAO();
+		UnitInProjectDAO uprDAO = unitInProjectDAO;
 		try 
 		{
 //			Unit unit = PersistWrapper.readByPrimaryKey(Unit.class, unitOID.getPk());
@@ -266,7 +269,7 @@ public class UnitManager
 	public static void changeUnitParent(UserContext userContext,
 			UnitOID selectedParent, UnitOID unitToChangeOID, ProjectOID projectOID) throws Exception
 	{
-		UnitInProjectDAO uprDAO = new UnitInProjectDAO();
+		UnitInProjectDAO uprDAO = unitInProjectDAO;
 		UnitInProjectObj childUPR = getUnitInProject(unitToChangeOID, projectOID);
 		UnitInProjectObj selectedParentUPR = null;
 		UnitInProjectOID selectedParentUPROID = null;
