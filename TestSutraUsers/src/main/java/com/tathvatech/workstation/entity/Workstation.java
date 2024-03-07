@@ -173,8 +173,11 @@ public class Workstation extends AbstractEntity implements Serializable,Authoriz
 
 	public String getDisplayString()
 	{
-		Site site = SiteCache.getInstance().getSite(new SiteOID(this.getSitePk(), null));
-		return "WS" + workstationName + ((description != null)?(" " + description): "") + " / " + site.getName();
+		//		Site site = SiteCache.getInstance().getSite(new SiteOID(this.getSitePk(), null));
+		String siteName = "NA";
+//		if(site != null)
+//			siteName = site.getName();
+		return "WS" + workstationName + ((description != null)?(" " + description): "") + " / " + siteName;
 	}
 
 	@Override
