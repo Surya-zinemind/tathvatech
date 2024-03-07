@@ -22,8 +22,8 @@ import com.tathvatech.workstation.request.WorkstationFilter;
 import com.tathvatech.workstation.service.WorkstationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -34,201 +34,118 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class WorkstationController {
-    
+
     private final UnitService unitService;
 
     private final WorkstationService workstationService;
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(WorkstationController.class);
 
-    public  void createWorkstation(UserContext context, Workstation workstation) throws Exception
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+    @PostMapping("/createWorkstation")
+    public void createWorkstation(@RequestBody Workstation workstation) throws Exception {
+        UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        workstationService.createWorkstation(context, workstation);
 
-            workstationService.createWorkstation(context, workstation);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
     }
 
-    public  void updateWorkstation(UserContext context, Workstation workstation) throws Exception
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-            workstationService.updateWorkstation(context, workstation);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+    @PutMapping("/updateWorkstation")
+    public void updateWorkstation(@RequestBody Workstation workstation) throws Exception {
+        UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        workstationService.updateWorkstation(context, workstation);
     }
 
-    public  List<WorkstationQuery> getWorkstationList() throws Exception
-    {
+    @GetMapping("/getWorkstationList")
+    public List<WorkstationQuery> getWorkstationList() throws Exception {
         List<WorkstationQuery> l = workstationService.getWorkstationList();
         return l;
     }
 
-    public  List<WorkstationQuery> getWorkstationsForProject(int projectPk)
-    {
+    @GetMapping("/getWorkstationsForProject/{projectPk}")
+    public List<WorkstationQuery> getWorkstationsForProject(@PathVariable("projectPk") int projectPk) {
         List<WorkstationQuery> l = workstationService.getWorkstationsForProject(projectPk);
         return l;
     }
 
-    public  List<WorkstationQuery> getWorkstations(WorkstationFilter filter)
-    {
+    @GetMapping("/getWorkstations")
+    public List<WorkstationQuery> getWorkstations(@RequestBody WorkstationFilter filter) {
         return workstationService.getWorkstations(filter);
     }
 
-    public  List<WorkstationQuery> getWorkstationsAssignableForProject(ProjectOID projectOID) throws Exception
-    {
+    @GetMapping("/getWorkstationsAssignableForProject")
+    public List<WorkstationQuery> getWorkstationsAssignableForProject(@RequestBody ProjectOID projectOID) throws Exception {
         List<WorkstationQuery> l = workstationService.getWorkstationsAssignableForProject(projectOID);
         return l;
     }
 
-    public  List<WorkstationQuery> getWorkstationsForSite(int sitePk) throws Exception
-    {
+    @GetMapping("/getWorkstationsForSite/{sitePk}")
+    public List<WorkstationQuery> getWorkstationsForSite(@PathVariable("sitePk") int sitePk) throws Exception {
         List<WorkstationQuery> l = workstationService.getWorkstationsForSite(sitePk);
         return l;
     }
 
-    public  List<WorkstationQuery> getWorkstationsForSiteAndProject(int sitePk, int projectPk) throws Exception
-    {
+    @GetMapping("/getWorkstationsForSiteAndProject/{sitePk}/{projectPk}")
+    public List<WorkstationQuery> getWorkstationsForSiteAndProject(@PathVariable("sitePk") int sitePk, @PathVariable("projectPk") int projectPk) throws Exception {
         List<WorkstationQuery> l = workstationService.getWorkstationsForSiteAndProject(sitePk, projectPk);
         return l;
     }
 
-    public  Workstation getWorkstation(int workstationPk)
-    {
+    @GetMapping("/getWorkstation/{workstationPk}")
+    public Workstation getWorkstation(@PathVariable("workstationPk") int workstationPk) {
         return workstationService.getWorkstation(new WorkstationOID(workstationPk));
     }
 
-    public  WorkstationQuery getWorkstationQueryByPk(WorkstationOID workstationOID)
-    {
+    @GetMapping("/getWorkstationQueryByPk")
+    public WorkstationQuery getWorkstationQueryByPk(@RequestBody WorkstationOID workstationOID) {
         return workstationService.getWorkstationQueryByPk(workstationOID);
     }
 
-    public  void addWorkstationToProject(UserContext context, int projectPk, WorkstationOID workstationOID)
-            throws Exception
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+    @PostMapping("/addWorkstationToProject/{projectPk}")
+    public void addWorkstationToProject(@PathVariable("projectPk") int projectPk, @RequestBody WorkstationOID workstationOID) throws Exception {
+        UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        workstationService.addWorkstationToProject(context, projectPk, workstationOID);
 
-            workstationService.addWorkstationToProject(context, projectPk, workstationOID);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
     }
 
-    public  void removeWorkstationFromProject(UserContext context, int projectPk, WorkstationOID workstationOID)
-            throws Exception
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+    @DeleteMapping("/removeWorkstationFromProject/{projectPk}")
+    public void removeWorkstationFromProject(@PathVariable("projectPk") int projectPk, @RequestBody WorkstationOID workstationOID)
+            throws Exception {
 
-            workstationService.removeWorkstationFromProject(context, projectPk, workstationOID);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+        UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        workstationService.removeWorkstationFromProject(context, projectPk, workstationOID);
+
     }
 
-    public  void removeAllWorkstationsFromProject(UserContext context, int projectPk) throws Exception
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+    @DeleteMapping("/removeAllWorkstationsFromProject/{ projectPk}")
+    public void removeAllWorkstationsFromProject(@PathVariable int projectPk) throws Exception {
 
-            workstationService.removeAllWorkstationsFromProject(context, projectPk);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+        UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        workstationService.removeAllWorkstationsFromProject(context, projectPk);
+
     }
-    public List<UnitWorkstationQuery> getWorkstationsForUnit(int unitPk, ProjectOID projectOID,
-                                                             boolean includeChildUnits) throws Exception
-    {
+
+    @GetMapping("/getWorkstationsForUnit/{unitPk}/{includeChildUnits}")
+    public List<UnitWorkstationQuery> getWorkstationsForUnit(@PathVariable("unitPk") int unitPk, @RequestBody ProjectOID projectOID,
+                                                             @PathVariable("includeChildUnits") boolean includeChildUnits) throws Exception {
         return workstationService.getWorkstationsForUnit(new UnitOID(unitPk, null), projectOID, includeChildUnits);
     }
 
-    public  List<WorkstationQuery> getWorkstationsForUnit(int unitPk, ProjectOID projectOID) throws Exception
-    {
+    @GetMapping("/getWorkstationsForUnit/{ unitPk}")
+    public List<WorkstationQuery> getWorkstationsForUnit(@PathVariable(" unitPk") int unitPk, @RequestBody ProjectOID projectOID) throws Exception {
         return workstationService.getWorkstationsForUnit(new UnitOID(unitPk, null), projectOID);
     }
 
-    public  void addWorkstationToUnit(UserContext context, ProjectOID projectOID, UnitOID unitOID,
-                                            WorkstationOID workstationOID) throws Exception
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+    @PostMapping("/addWorkstationToUnit")
+    public void addWorkstationToUnit(@RequestBody ProjectOID projectOID, @RequestBody UnitOID unitOID,
+                                     @RequestBody WorkstationOID workstationOID) throws Exception {
 
-            workstationService.addWorkstationToUnit(context, projectOID, unitOID, workstationOID);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+        UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        workstationService.addWorkstationToUnit(context, projectOID, unitOID, workstationOID);
+
     }
 
 
-
-    public UnitLocation getUnitWorkstation(int unitPk, ProjectOID projectOID, WorkstationOID workstationOID)
-            throws Exception
-    {
+    @GetMapping("/getUnitWorkstation/{unitPk}")
+    public UnitLocation getUnitWorkstation(@PathVariable("unitPk") int unitPk, @RequestBody ProjectOID projectOID, @RequestBody WorkstationOID workstationOID)
+            throws Exception {
         return workstationService.getUnitWorkstation(unitPk, projectOID, workstationOID);
     }
 
@@ -236,325 +153,129 @@ public class WorkstationController {
      * Not used anywhere. Please check and remove if so.
      */
     @Deprecated
-    public  List<UnitLocationQuery> getUnitWorkstationStatus(UnitOID unitOID, ProjectOID projectOID)
-            throws Exception
-    {
+    @GetMapping("/getUnitWorkstationStatus")
+    public List<UnitLocationQuery> getUnitWorkstationStatus(@RequestBody UnitOID unitOID, @RequestBody ProjectOID projectOID)
+            throws Exception {
         return workstationService.getUnitWorkstationStatus(unitOID, projectOID);
     }
 
-    public  UnitLocationQuery getUnitWorkstationStatus(int unitPk, ProjectOID projectOID,
-                                                             WorkstationOID workstationOID)
-    {
+    @GetMapping("/getUnitWorkstationStatus/{unitPk}")
+    public UnitLocationQuery getUnitWorkstationStatus(@PathVariable("unitPk") int unitPk, @RequestBody ProjectOID projectOID,
+                                                      @RequestBody WorkstationOID workstationOID) {
         return workstationService.getUnitWorkstationStatus(new UnitOID(unitPk, null), projectOID, workstationOID);
     }
 
-    public  List<UnitLocationQuery> getUnitWorkstationStatusHistory(int unitPk, ProjectOID projectOID,
-                                                                          WorkstationOID workstationOID) throws Exception
-    {
+    @GetMapping("/getUnitWorkstationStatusHistory/{unitPk}")
+    public List<UnitLocationQuery> getUnitWorkstationStatusHistory(@PathVariable("unitPk") int unitPk, @RequestBody ProjectOID projectOID,
+                                                                   @RequestBody WorkstationOID workstationOID) throws Exception {
         return workstationService.getUnitWorkstationStatusHistory(unitPk, projectOID, workstationOID);
     }
 
-    public  void setUnitWorkstationStatus(UserContext userContext, ProjectOID projectOID, int unitPk,
-                                                WorkstationOID workstationOID, String status) throws Exception
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+    @PutMapping("/setUnitWorkstationStatus/{unitPk}/{status}")
+    public void setUnitWorkstationStatus(@RequestBody ProjectOID projectOID, @PathVariable("unitPk") int unitPk,
+                                         @RequestBody WorkstationOID workstationOID, @PathVariable("status") String status) throws Exception {
+        UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-            workstationService.setUnitWorkstationStatus(userContext, unitPk, projectOID, workstationOID, status);
+        workstationService.setUnitWorkstationStatus(userContext, unitPk, projectOID, workstationOID, status);
 
-            con.commit();
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
     }
 
-    public  void recordWorkstationFormAccess(TestProcOID testProcOID)
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+    @PutMapping("/recordWorkstationFormAccess")
+    public void recordWorkstationFormAccess(@RequestBody TestProcOID testProcOID) {
+        workstationService.recordWorkstationFormAccess(testProcOID);
 
-            workstationService.recordWorkstationFormAccess(testProcOID);
-
-            con.commit();
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        finally
-        {
-        }
     }
 
-    public  void recordWorkstationSave(TestProcOID testProcOID)
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+    @PutMapping("/recordWorkstationSave")
+    public void recordWorkstationSave(@RequestBody TestProcOID testProcOID) {
 
-            workstationService.recordWorkstationSave(testProcOID);
 
-            con.commit();
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        finally
-        {
-        }
+        workstationService.recordWorkstationSave(testProcOID);
+
+
     }
 
-    public  void recordWorkstationFormLock(TestProcOID testProcOID)
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+    @PutMapping("/recordWorkstationFormLock")
+    public void recordWorkstationFormLock(@RequestBody TestProcOID testProcOID) {
 
-            workstationService.recordWorkstationFormLock(testProcOID);
 
-            con.commit();
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        finally
-        {
-        }
+        workstationService.recordWorkstationFormLock(testProcOID);
+
+
     }
 
-    public  void recordWorkstationFormUnlock(TestProcOID testProcOID)
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+    @PutMapping("/recordWorkstationFormUnlock")
+    public void recordWorkstationFormUnlock(@RequestBody TestProcOID testProcOID) {
 
-            workstationService.recordWorkstationFormUnlock(testProcOID);
+        workstationService.recordWorkstationFormUnlock(testProcOID);
 
-            con.commit();
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        finally
-        {
-        }
     }
-    public  void deleteWorkstation(UserContext context, WorkstationOID workstationOID) throws Exception
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-            workstationService.deleteWorstation(context, workstationOID);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+    @DeleteMapping("/deleteWorkstation")
+    public void deleteWorkstation(@RequestBody WorkstationOID workstationOID) throws Exception {
+        UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        workstationService.deleteWorstation(context, workstationOID);
+
     }
 
 
+    @GetMapping("/getProjectsForWorkstation")
+    public List<Project> getProjectsForWorkstation(@RequestBody WorkstationOID workstationOID)
+            throws Exception {
 
-    public  List<Project> getProjectsForWorkstation(UserContext context, WorkstationOID workstationOID)
-            throws Exception
-    {
+        UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return workstationService.getProjectsForWorkstation(context, workstationOID);
     }
 
-    public  float getWorkstationPercentComplete(UserContext context, int unitPk, ProjectOID projectOID,
-                                                      WorkstationOID workstationOID, boolean includeChildren) throws Exception
-    {
+    @GetMapping("/getWorkstationPercentComplete/{unitPk}/{includeChildren}")
+    public float getWorkstationPercentComplete(@PathVariable("unitPk") int unitPk, @RequestBody ProjectOID projectOID,
+                                               @RequestBody WorkstationOID workstationOID, @PathVariable("includeChildren") boolean includeChildren) throws Exception {
+        UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         return workstationService.getWorkstationPercentComplete(context, unitPk, projectOID, workstationOID,
                 includeChildren);
     }
-    public  void moveWorkstationOrderUp(UserContext context, WorkstationOID workstationOID)
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-            workstationService.moveWorkstationOrderUp(context, workstationOID);
-            con.commit();
-        }
-        catch (Exception ex)
-        {
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                Logger logger = null;
-                logger.error("Count not rollback transaction", ex);
-            }
-        }
-        finally
-        {
-        }
+    @PutMapping("/moveWorkstationOrderUp")
+    public void moveWorkstationOrderUp(@RequestBody WorkstationOID workstationOID) {
+        UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        workstationService.moveWorkstationOrderUp(context, workstationOID);
+
     }
 
-    public  void moveWorkstationOrderDown(UserContext context, WorkstationOID workstationOID)
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+    @PutMapping("/moveWorkstationOrderDown")
+    public void moveWorkstationOrderDown(@RequestBody WorkstationOID workstationOID) {
+        UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        workstationService.moveWorkstationOrderDown(context, workstationOID);
 
-            workstationService.moveWorkstationOrderDown(context, workstationOID);
-            con.commit();
-        }
-        catch (Exception ex)
-        {
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-
-                logger.error("Count not rollback transaction", ex);
-            }
-        }
-        finally
-        {
-        }
     }
-    public  UnitWorkstation getUnitWorkstationSetting(int unitPk, ProjectOID projectOID,
-                                                            WorkstationOID workstationOID)
-    {
+
+    @GetMapping("/getUnitWorkstationSetting/{unitPk}")
+    public UnitWorkstation getUnitWorkstationSetting(@PathVariable("unitPk") int unitPk, @RequestBody ProjectOID projectOID,
+                                                     @RequestBody WorkstationOID workstationOID) {
         return workstationService.getUnitWorkstationSetting(unitPk, projectOID, workstationOID);
     }
 
-    public  UnitWorkstation updateUnitWorkstationSetting(UnitWorkstation unitWorkstation) throws Exception
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+    @PutMapping("/updateUnitWorkstationSetting")
+    public UnitWorkstation updateUnitWorkstationSetting(@RequestBody UnitWorkstation unitWorkstation) throws Exception {
 
-            UnitWorkstation w = workstationService.updateUnitWorkstationSetting(unitWorkstation);
-            con.commit();
-            return w;
-        }
-        catch (Exception ex)
-        {
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
 
-                logger.error("Count not rollback transaction", ex);
-            }
-            throw ex;
-        }
-        finally
-        {
-        }
-    }
-    public  void copyWorkstationSettings(UserContext context, ProjectOID copyFromProjectOID,
-                                               ProjectOID destinationProjectOID, boolean copySites, boolean copyProjectFunctionTeams, boolean copyParts,
-                                               boolean copyOpenItemTeam, boolean copyProjectCoordinators, List<Object[]> workstationsToCopy)
-            throws Exception
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+        UnitWorkstation w = workstationService.updateUnitWorkstationSetting(unitWorkstation);
+        return w;
 
-            workstationService.copyWorkstationSettings(context, copyFromProjectOID, destinationProjectOID, copySites,
-                    copyProjectFunctionTeams, copyParts, copyOpenItemTeam, copyProjectCoordinators, workstationsToCopy);
-
-            con.commit();
-        }
-        catch (Exception ex)
-        {
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-
-                logger.error("Count not rollback transaction", ex);
-            }
-            throw ex;
-        }
-        finally
-        {
-        }
     }
 
+    @PostMapping("copyWorkstationSettings/{copySites}/{copyProjectFunctionTeams}/{ copyParts}/{copyOpenItemTeam}/{copyProjectCoordinators}")
+    public void copyWorkstationSettings(@RequestBody ProjectOID copyFromProjectOID,
+                                        @RequestBody ProjectOID destinationProjectOID, @PathVariable("copySites") boolean copySites, @PathVariable("copyProjectFunctionTeams") boolean copyProjectFunctionTeams, @PathVariable(" copyParts") boolean copyParts,
+                                        @PathVariable("copyOpenItemTeam") boolean copyOpenItemTeam, @PathVariable("copyProjectCoordinators") boolean copyProjectCoordinators, @RequestBody List<Object[]> workstationsToCopy)
+            throws Exception {
+
+        UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        workstationService.copyWorkstationSettings(context, copyFromProjectOID, destinationProjectOID, copySites,
+                copyProjectFunctionTeams, copyParts, copyOpenItemTeam, copyProjectCoordinators, workstationsToCopy);
 
 
+    }
 }
