@@ -18,12 +18,14 @@ import com.tathvatech.workstation.entity.ProjectWorkstation;
 import com.tathvatech.workstation.entity.UnitWorkstation;
 import com.tathvatech.workstation.entity.Workstation;
 import com.tathvatech.workstation.request.WorkstationFilter;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 public interface WorkstationService {
 
-    Workstation createWorkstation(UserContext context, Workstation workstation) throws Exception;
+
+   Workstation createWorkstation(UserContext context, Workstation workstation) throws Exception;
 
     Workstation updateWorkstation(UserContext context, Workstation workstation) throws Exception;
 

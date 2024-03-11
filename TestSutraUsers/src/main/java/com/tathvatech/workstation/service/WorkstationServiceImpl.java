@@ -58,6 +58,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -297,7 +298,8 @@ public class WorkstationServiceImpl implements WorkstationService{
         return persistWrapper.readList(WorkstationQuery.class, sql, dummyWorkstation.DUMMY, sitePk, projectPk);
     }
 
-    public  void addWorkstationToProject(UserContext context, int projectPk, WorkstationOID workstationOID)
+   @Transactional
+   public  void addWorkstationToProject(UserContext context, int projectPk, WorkstationOID workstationOID)
             throws Exception
     {
         ProjectWorkstation pForm = new ProjectWorkstation();
@@ -886,6 +888,7 @@ public class WorkstationServiceImpl implements WorkstationService{
                 projectOID.getPk(), workstationOID.getPk());
     }
 
+    @Transactional
     public  UnitWorkstation updateUnitWorkstationSetting(UnitWorkstation unitWorkstation) throws Exception
     {
         persistWrapper.update(unitWorkstation);
