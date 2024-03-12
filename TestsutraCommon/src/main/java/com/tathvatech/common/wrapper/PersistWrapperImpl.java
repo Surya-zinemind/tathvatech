@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.context.ApplicationContext;
 
 import java.util.List;
+import java.util.Map;
 
 
 @Repository
@@ -136,4 +137,84 @@ public class PersistWrapperImpl implements PersistWrapper {
 //		jdbcTemplate.update(sb.toString(), values.toArray(), argTypes.toArray(new Integer[] {}));
 //
 //	}
+
+	public Map<String, Object> readAsMap(final String sql, final Object...parameters) throws Exception
+	{
+		return jdbcTemplate.queryForMap(sql, parameters);
+//		if(logger.isDebugEnabled())
+//			logger.debug("Load map:" + ", sql:" + sql + " " + Arrays.deepToString(parameters));
+//
+//		Connection conn = null;
+//		try
+//		{
+//			conn = ServiceLocator.locate().getConnection();
+//			Persist p = new Persist(conn);
+//
+//			return  p.readMap(sql, parameters);
+//
+//		} catch (SQLException e)
+//		{
+//			e.printStackTrace();
+//			logger.error("Error getting units for project " + " :: "
+//					+ e.getMessage());
+//			if (logger.isDebugEnabled())
+//			{
+//				logger.debug(e.getMessage(), e);
+//			}
+//			throw new Exception();
+//		} finally
+//		{
+//			try
+//			{
+//				if (conn != null)
+//				{
+//					conn.close();
+//				}
+//			} catch (Exception e)
+//			{
+//			}
+//		}
+	}
+
+	public List<Map<String,Object>> readListAsMap(final String sql, final Object...parameters) throws Exception
+	{
+		return jdbcTemplate.queryForList(sql, parameters);
+//		if(logger.isDebugEnabled())
+//		{
+//			logger.debug("Load list as map:" + ", sql:" + sql + " " + Arrays.deepToString(parameters));
+//		}
+//
+//		Connection conn = null;
+//		try
+//		{
+//			conn = ServiceLocator.locate().getConnection();
+//			Persist p = new Persist(conn);
+//
+//			return  p.readMapList(sql, parameters);
+//
+//		} catch (Exception e)
+//		{
+//			e.printStackTrace();
+//			logger.error("Error getting units for project " + " :: "
+//					+ e.getMessage());
+//			if (logger.isDebugEnabled())
+//			{
+//				logger.debug(e.getMessage(), e);
+//			}
+//			return null;
+//		} finally
+//		{
+//			try
+//			{
+//				if (conn != null)
+//				{
+//					conn.close();
+//				}
+//			} catch (Exception e)
+//			{
+//			}
+//		}
+	}
+
+
 }
