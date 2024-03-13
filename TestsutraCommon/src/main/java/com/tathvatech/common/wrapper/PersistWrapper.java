@@ -30,4 +30,5 @@ public interface PersistWrapper {
 	Map<String, Object> readAsMap(final String sql, final Object...parameters) throws Exception;
 
 	List<Map<String,Object>> readListAsMap(final String sql, final Object...parameters) throws Exception;
+
 }
