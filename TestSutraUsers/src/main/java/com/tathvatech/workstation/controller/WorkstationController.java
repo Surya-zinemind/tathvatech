@@ -41,7 +41,7 @@ public class WorkstationController {
     private final WorkstationService workstationService;
     private static final Logger logger = LoggerFactory.getLogger(WorkstationController.class);
 
-    @PostMapping("/createWorkstation")
+   /* @PostMapping("/createWorkstation")
     public void createWorkstation(@RequestBody Workstation workstation) throws Exception {
         UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         workstationService.createWorkstation(context, workstation);
@@ -52,7 +52,7 @@ public class WorkstationController {
     public void updateWorkstation(@RequestBody Workstation workstation) throws Exception {
         UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         workstationService.updateWorkstation(context, workstation);
-    }
+    }*/
 
     @GetMapping("/getWorkstationList")
     public List<WorkstationQuery> getWorkstationList() throws Exception {

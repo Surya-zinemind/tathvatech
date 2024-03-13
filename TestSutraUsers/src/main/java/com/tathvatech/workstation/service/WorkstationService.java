@@ -25,9 +25,9 @@ import java.util.List;
 public interface WorkstationService {
 
 
-   Workstation createWorkstation(UserContext context, Workstation workstation) throws Exception;
+ //  Workstation createWorkstation(UserContext context, Workstation workstation) throws Exception;
 
-    Workstation updateWorkstation(UserContext context, Workstation workstation) throws Exception;
+  //  Workstation updateWorkstation(UserContext context, Workstation workstation) throws Exception;
 
     List<WorkstationQuery> getWorkstationList() throws Exception;
 

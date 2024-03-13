@@ -91,7 +91,7 @@ public class WorkstationServiceImpl implements WorkstationService{
     @Autowired
     private  AndonManager andonManager;
 
-    public Workstation createWorkstation(UserContext context, Workstation workstation) throws Exception
+  /*  public Workstation createWorkstation(UserContext context, Workstation workstation) throws Exception
     {
         Account acc = (Account) context.getAccount();
         User user = (User) context.getUser();
@@ -144,7 +144,8 @@ public class WorkstationServiceImpl implements WorkstationService{
         // fetch the new project back
         workstation = (Workstation) persistWrapper.readByPrimaryKey(Workstation.class, workstation.getPk());
         return workstation;
-    }
+        
+    }*/
     private  boolean isWorkstationNameExist(Account acc, Site site, String workstationName) throws Exception
     {
         List list = persistWrapper.readList(Workstation.class,
@@ -406,8 +407,9 @@ public class WorkstationServiceImpl implements WorkstationService{
 
 
 
-        String defaultWorkstationStatusValue = (String) new CommonServicesDelegate().getEntityPropertyValue(projectOID,
-                ProjectPropertyEnum.SetNewWorkstationsDefaultStatusTo.getId(), String.class);
+        String defaultWorkstationStatusValue =UnitLocation.STATUS_WAITING;//fix it later
+        /*(String) new CommonServicesDelegate().getEntityPropertyValue(projectOID,
+                ProjectPropertyEnum.SetNewWorkstationsDefaultStatusTo.getId(), String.class);*/
         if (defaultWorkstationStatusValue != null && (!(UnitLocation.STATUS_WAITING.equals(defaultWorkstationStatusValue))))
         {
             if(UnitLocation.STATUS_WAITING.equals(defaultWorkstationStatusValue) || UnitLocation.STATUS_IN_PROGRESS.equals(defaultWorkstationStatusValue)
@@ -470,9 +472,9 @@ public class WorkstationServiceImpl implements WorkstationService{
     public  List<UnitLocationQuery> getUnitWorkstationStatus(UnitOID unitOID, ProjectOID projectOID)
             throws Exception
     {
-        // we only need to get the workstations where the form count is greater
-        // than 0;
-     /*   List<Map<String, Object>> validWs = persistWrapper.readListAsMap(
+        //we only need to get the workstations where the form count is greater
+       // than 0;
+        List<Map<String, Object>> validWs = persistWrapper.readListAsMap(
                 "select count(*) as count, uth.workstationPk as wspk from unit_testproc ut "
                         + " join testproc_form_assign tfa on tfa.testProcFk = ut.pk and tfa.current = 1 "
                         + " join unit_testproc_h uth on uth.unitTestProcFk = ut.pk and now() between uth.effectiveDateFrom and uth.effectiveDateTo "
@@ -480,19 +482,19 @@ public class WorkstationServiceImpl implements WorkstationService{
                 unitOID.getPk(), projectOID.getPk(), dummyWorkstation.getPk());
 
         if (validWs == null || validWs.size() == 0)
-            return new ArrayList<UnitLocationQuery>();*/
+            return new ArrayList<UnitLocationQuery>();
 
         StringBuffer sb = new StringBuffer(UnitLocationQuery.fetchSQL)
                 .append(" and uloc.unitPk = ? and uloc.projectPk = ?").append(" and uloc.workstationPk in (");
 
         String sep = "";
-        /*for (Iterator iterator = validWs.iterator(); iterator.hasNext();)
+        for (Iterator iterator = validWs.iterator(); iterator.hasNext();)
         {
             Map<String, Object> aWs = (Map<String, Object>) iterator.next();
             sb.append(sep);
             sb.append(aWs.get("wspk"));
             sep = ",";
-        }*/
+        }
         sb.append(")");
         sb.append(" and uloc.current = 1");
         return persistWrapper.readList(UnitLocationQuery.class, sb.toString(), unitOID.getPk(), projectOID.getPk());
@@ -827,7 +829,7 @@ public class WorkstationServiceImpl implements WorkstationService{
 
         return (formCount > 0) ? (percenCompleteAccumulator * 100) / (float) (100 * formCount) : 0;
     }
-    public  void moveWorkstationOrderUp(UserContext context, WorkstationOID workstationOID)
+    @Transactional public  void moveWorkstationOrderUp(UserContext context, WorkstationOID workstationOID)
     {
         try
         {
@@ -854,7 +856,8 @@ public class WorkstationServiceImpl implements WorkstationService{
         }
     }
 
-    public  void moveWorkstationOrderDown(UserContext context, WorkstationOID workstationOID)
+   @Transactional
+   public  void moveWorkstationOrderDown(UserContext context, WorkstationOID workstationOID)
     {
         try
         {
