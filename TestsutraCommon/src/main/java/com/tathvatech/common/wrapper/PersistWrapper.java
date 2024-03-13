@@ -3,7 +3,6 @@ package com.tathvatech.common.wrapper;
 import com.tathvatech.common.entity.AbstractEntity;
 
 import java.util.List;
-import java.util.Map;
 
 public interface PersistWrapper {
 
@@ -27,7 +26,5 @@ public interface PersistWrapper {
 
 	int delete(String whereClause, Object... parameters) throws Exception;
 
-	Map<String, Object> readAsMap(final String sql, final Object...parameters) throws Exception;
 
-	List<Map<String,Object>> readListAsMap(final String sql, final Object...parameters) throws Exception;
 }

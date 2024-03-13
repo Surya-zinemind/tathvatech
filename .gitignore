@@ -6,3 +6,5 @@ TestSutraUsers/target/classes/*
 TestSutraUsers/target/*
 TestSutraUsers/target/classes/application.properties
 *.class
+TestSutraUsers/target/*
+*.class
