@@ -32,7 +32,10 @@ public class PersistWrapperImpl implements PersistWrapper {
 	{
 		RowMapper<T> rowMapper = BeanPropertyRowMapper.newInstance(objectClass);
 		List<T> list = jdbcTemplate.query(sql, rowMapper, parameters);
-		return list.getLast();
+		if(list != null)
+			return list.getLast();
+		else
+			return null;
 	}
 
 	@Override
@@ -73,7 +76,8 @@ public class PersistWrapperImpl implements PersistWrapper {
 	public void deleteEntity(Class objClass, long pk) throws Exception
 	{
 		AbstractEntity entity = readByPrimaryKey(objClass, pk);
-		deleteEntity(entity);
+		if(entity != null)
+			deleteEntity(entity);
 	}
 	public int delete(String whereClause, Object... parameters) throws Exception
 	{
