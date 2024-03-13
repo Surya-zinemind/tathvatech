@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.context.ApplicationContext;
 
 import java.util.List;
+import java.util.Map;
 
 
 @Repository
@@ -31,7 +32,10 @@ public class PersistWrapperImpl implements PersistWrapper {
 	{
 		RowMapper<T> rowMapper = BeanPropertyRowMapper.newInstance(objectClass);
 		List<T> list = jdbcTemplate.query(sql, rowMapper, parameters);
-		return list.getLast();
+		if(!list.isEmpty())
+			return list.getLast();
+		else
+			return null;
 	}
 
 	@Override
@@ -41,6 +45,7 @@ public class PersistWrapperImpl implements PersistWrapper {
 		return jdbcTemplate.query(sql, rowMapper, parameters);
 	}
 
+	@Override
 	public	List<? extends AbstractEntity> readAll(final Class<? extends AbstractEntity> objectClass)
 	{
 		return context.getBean(GenericJpaDao.class).findAll(objectClass);
@@ -59,21 +64,26 @@ public class PersistWrapperImpl implements PersistWrapper {
 		return context.getBean(GenericJpaDao.class).update(inObject);
 	}
 
+	@Override
 	public int executeUpdate(String sql, Object... parameters) throws Exception
 	{
 		return jdbcTemplate.update(sql, parameters);
 	}
 
+	@Override
 	public void deleteEntity(AbstractEntity inObject) throws Exception
 	{
 		context.getBean(GenericJpaDao.class).delete(inObject);
 	}
 
+	@Override
 	public void deleteEntity(Class objClass, long pk) throws Exception
 	{
 		AbstractEntity entity = readByPrimaryKey(objClass, pk);
-		deleteEntity(entity);
+		if(entity != null)
+			deleteEntity(entity);
 	}
+	@Override
 	public int delete(String whereClause, Object... parameters) throws Exception
 	{
 		return jdbcTemplate.update(whereClause, parameters);
@@ -136,4 +146,86 @@ public class PersistWrapperImpl implements PersistWrapper {
 //		jdbcTemplate.update(sb.toString(), values.toArray(), argTypes.toArray(new Integer[] {}));
 //
 //	}
+
+	@Override
+	public Map<String, Object> readAsMap(final String sql, final Object...parameters) throws Exception
+	{
+		return jdbcTemplate.queryForMap(sql, parameters);
+//		if(logger.isDebugEnabled())
+//			logger.debug("Load map:" + ", sql:" + sql + " " + Arrays.deepToString(parameters));
+//
+//		Connection conn = null;
+//		try
+//		{
+//			conn = ServiceLocator.locate().getConnection();
+//			Persist p = new Persist(conn);
+//
+//			return  p.readMap(sql, parameters);
+//
+//		} catch (SQLException e)
+//		{
+//			e.printStackTrace();
+//			logger.error("Error getting units for project " + " :: "
+//					+ e.getMessage());
+//			if (logger.isDebugEnabled())
+//			{
+//				logger.debug(e.getMessage(), e);
+//			}
+//			throw new Exception();
+//		} finally
+//		{
+//			try
+//			{
+//				if (conn != null)
+//				{
+//					conn.close();
+//				}
+//			} catch (Exception e)
+//			{
+//			}
+//		}
+	}
+
+	@Override
+	public List<Map<String,Object>> readListAsMap(final String sql, final Object...parameters) throws Exception
+	{
+		return jdbcTemplate.queryForList(sql, parameters);
+//		if(logger.isDebugEnabled())
+//		{
+//			logger.debug("Load list as map:" + ", sql:" + sql + " " + Arrays.deepToString(parameters));
+//		}
+//
+//		Connection conn = null;
+//		try
+//		{
+//			conn = ServiceLocator.locate().getConnection();
+//			Persist p = new Persist(conn);
+//
+//			return  p.readMapList(sql, parameters);
+//
+//		} catch (Exception e)
+//		{
+//			e.printStackTrace();
+//			logger.error("Error getting units for project " + " :: "
+//					+ e.getMessage());
+//			if (logger.isDebugEnabled())
+//			{
+//				logger.debug(e.getMessage(), e);
+//			}
+//			return null;
+//		} finally
+//		{
+//			try
+//			{
+//				if (conn != null)
+//				{
+//					conn.close();
+//				}
+//			} catch (Exception e)
+//			{
+//			}
+//		}
+	}
+
+
 }
