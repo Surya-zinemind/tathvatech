@@ -32,7 +32,7 @@ public class PersistWrapperImpl implements PersistWrapper {
 	{
 		RowMapper<T> rowMapper = BeanPropertyRowMapper.newInstance(objectClass);
 		List<T> list = jdbcTemplate.query(sql, rowMapper, parameters);
-		if(list != null)
+		if(!list.isEmpty())
 			return list.getLast();
 		else
 			return null;
@@ -45,6 +45,7 @@ public class PersistWrapperImpl implements PersistWrapper {
 		return jdbcTemplate.query(sql, rowMapper, parameters);
 	}
 
+	@Override
 	public	List<? extends AbstractEntity> readAll(final Class<? extends AbstractEntity> objectClass)
 	{
 		return context.getBean(GenericJpaDao.class).findAll(objectClass);
@@ -63,22 +64,26 @@ public class PersistWrapperImpl implements PersistWrapper {
 		return context.getBean(GenericJpaDao.class).update(inObject);
 	}
 
+	@Override
 	public int executeUpdate(String sql, Object... parameters) throws Exception
 	{
 		return jdbcTemplate.update(sql, parameters);
 	}
 
+	@Override
 	public void deleteEntity(AbstractEntity inObject) throws Exception
 	{
 		context.getBean(GenericJpaDao.class).delete(inObject);
 	}
 
+	@Override
 	public void deleteEntity(Class objClass, long pk) throws Exception
 	{
 		AbstractEntity entity = readByPrimaryKey(objClass, pk);
 		if(entity != null)
 			deleteEntity(entity);
 	}
+	@Override
 	public int delete(String whereClause, Object... parameters) throws Exception
 	{
 		return jdbcTemplate.update(whereClause, parameters);
@@ -142,6 +147,7 @@ public class PersistWrapperImpl implements PersistWrapper {
 //
 //	}
 
+	@Override
 	public Map<String, Object> readAsMap(final String sql, final Object...parameters) throws Exception
 	{
 		return jdbcTemplate.queryForMap(sql, parameters);
@@ -180,6 +186,7 @@ public class PersistWrapperImpl implements PersistWrapper {
 //		}
 	}
 
+	@Override
 	public List<Map<String,Object>> readListAsMap(final String sql, final Object...parameters) throws Exception
 	{
 		return jdbcTemplate.queryForList(sql, parameters);
