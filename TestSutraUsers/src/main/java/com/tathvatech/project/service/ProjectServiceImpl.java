@@ -1,22 +1,22 @@
 package com.tathvatech.project.service;
-
+import com.tathvatech.project.common.*;
+import com.tathvatech.project.entity.ProjectPart;
 import com.tathvatech.common.enums.EStatusEnum;
 import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.common.ProjectFormQuery;
-import com.tathvatech.project.common.ProjectFilter;
-import com.tathvatech.project.common.ProjectQuery;
-import com.tathvatech.project.common.ProjectSignatorySetBean;
-import com.tathvatech.project.common.ProjectUserQuery;
-
+import com.tathvatech.user.service.AccountService;
+import com.tathvatech.workstation.common.DummyWorkstation;
 import com.tathvatech.project.entity.Project;
+import com.tathvatech.forms.common.FormQuery;
 import com.tathvatech.project.entity.ProjectForm;
 import com.tathvatech.project.entity.ProjectStage;
 import com.tathvatech.project.entity.ProjectUser;
 import com.tathvatech.project.oid.ProjectPartOID;
 import com.tathvatech.site.entity.ProjectSiteConfig;
 import com.tathvatech.site.enums.ProjectSiteConfigRolesEnum;
+import com.tathvatech.unit.enums.UnitOriginType;
 import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.Account;
@@ -26,6 +26,7 @@ import com.tathvatech.user.entity.UserPerms;
 import com.tathvatech.user.enums.ProjectRolesEnum;
 import com.tathvatech.user.enums.SiteRolesEnum;
 import com.tathvatech.user.service.AuthorizationManager;
+import com.tathvatech.workstation.entity.ProjectWorkstation;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -40,12 +41,12 @@ import java.util.stream.Collectors;
 public class ProjectServiceImpl implements ProjectService{
 
     private  final Logger logger = LoggerFactory.getLogger(ProjectServiceImpl.class);
-
+    private final AccountService accountService;
     private final PersistWrapper persistWrapper;
-
+    private final DummyWorkstation dummyWorkstation;
+    private final ProjectService projectService;
     private final AuthorizationManager authorizationManager;
-    public  List<ProjectQuery> getProjectList(UserContext context, ProjectFilter filter)
-    {
+    public  List<ProjectQuery> getProjectList(UserContext context, ProjectFilter filter) {
         if (User.USER_PRIMARY.equals(context.getUser().getUserType())) // all
         // projects
         {
@@ -85,7 +86,12 @@ public class ProjectServiceImpl implements ProjectService{
             if (list != null)
             {
                 List<Integer> projectPks = list.stream().map(query -> query.getPk()).collect(Collectors.toList());
-                HashMap<ProjectOID, Integer> projectUnit = getUnitCount(projectPks, false);
+                HashMap<ProjectOID, Integer> projectUnit = null;
+                try {
+                    projectUnit = getUnitCount(projectPks, false);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
                 for (int i = 0; i < list.size(); i++)
                 {
                     if (projectUnit.containsKey(list.get(i).getOID()))
@@ -210,7 +216,7 @@ public class ProjectServiceImpl implements ProjectService{
                 // tab_project_users
                 List<Integer> pkList = persistWrapper.readList(Integer.class,
                         "select projectPk from TAB_PROJECT_USERS where userPk=? and workstationPk=? and role=?",
-                        context.getUser().getPk(), DummyWorkstation.getPk(), User.ROLE_READONLY);
+                        context.getUser().getPk(), dummyWorkstation.getPk(), User.ROLE_READONLY);
                 for (Iterator iterator = pkList.iterator(); iterator.hasNext();)
                 {
                     Integer integer = (Integer) iterator.next();
@@ -335,7 +341,12 @@ public class ProjectServiceImpl implements ProjectService{
             if (list != null)
             {
                 List<Integer> projectPks = list.stream().map(query -> query.getPk()).collect(Collectors.toList());
-                HashMap<ProjectOID, Integer> projectUnit = getUnitCount(projectPks, false);
+                HashMap<ProjectOID, Integer> projectUnit = null;
+                try {
+                    projectUnit = getUnitCount(projectPks, false);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
                 for (int i = 0; i < list.size(); i++)
                 {
                     if (projectUnit.containsKey(list.get(i).getOID()))
@@ -376,7 +387,12 @@ public class ProjectServiceImpl implements ProjectService{
                 ProjectQuery.fetchSQL + " where 1 = 1 and project.pk=?", projectPk);
         if (projectQuery != null)
         {
-            HashMap<ProjectOID, Integer> projectUnit = getUnitCount(Arrays.asList(projectQuery.getPk()), false);
+            HashMap<ProjectOID, Integer> projectUnit = null;
+            try {
+                projectUnit = getUnitCount(Arrays.asList(projectQuery.getPk()), false);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
             if (projectUnit.containsKey(projectQuery.getOID()))
             {
                 projectQuery.setUnitCount(projectUnit.get(projectQuery.getOID()));
@@ -460,12 +476,12 @@ public class ProjectServiceImpl implements ProjectService{
             throw new AppException("Duplicate project name, Please choose a different project name.");
         }
 
-        project.setAccountPk(acc.getPk());
-        project.setCreatedBy(user.getPk());
+        project.setAccountPk((int) acc.getPk());
+        project.setCreatedBy((int) user.getPk());
         project.setCreatedDate(new Date());
         project.setStatus(Project.STATUS_OPEN);
 
-        int pk = persistWrapper.createEntity(project);
+        int pk = (int) persistWrapper.createEntity(project);
 
         // fetch the new project back
 
@@ -488,7 +504,7 @@ public class ProjectServiceImpl implements ProjectService{
     {
 
         String name = project.getProjectName();
-        if (isProjectNameExistForAnotherProject(name, project.getPk()))
+        if (isProjectNameExistForAnotherProject(name, (int) project.getPk()))
         {
             throw new AppException("Duplicate project name, Please choose a different project name.");
         }
@@ -508,8 +524,7 @@ public class ProjectServiceImpl implements ProjectService{
 
         return projectQuery;
     }
-    public  HashMap<ProjectOID, Integer> getUnitCount(List<Integer> projectPks, boolean includeChildren)
-    {
+    public  HashMap<ProjectOID, Integer> getUnitCount(List<Integer> projectPks, boolean includeChildren) throws Exception {
         HashMap<ProjectOID, Integer> result = new HashMap<ProjectOID, Integer>();
         List<Object> params = new ArrayList<Object>();
 
@@ -559,7 +574,7 @@ public class ProjectServiceImpl implements ProjectService{
     }
     public  ProjectPart getProjectPart(ProjectPartOID projectpartOID)
     {
-        return persistWrapper.readByPrimaryKey(ProjectPart.class, projectpartOID.getPk());
+        return (ProjectPart) persistWrapper.readByPrimaryKey(ProjectPart.class, projectpartOID.getPk());
     }
     public  void addFormToProjectPart(UserContext context, ProjectOID projectOID, ProjectPartOID projectPartOID,
                                             WorkstationOID workstationOID, int formPk, String testName) throws Exception
@@ -642,7 +657,7 @@ public class ProjectServiceImpl implements ProjectService{
         ProjectUser pUser = new ProjectUser();
         pUser.setProjectPk(projectPk);
         if (projectPartOID != null)
-            pUser.setProjectPartPk(projectPartOID.getPk());
+            pUser.setProjectPartPk((int) projectPartOID.getPk());
         pUser.setWorkstationPk(workstationPk);
         pUser.setUserPk(userPk);
         pUser.setRole(role);
@@ -655,7 +670,7 @@ public class ProjectServiceImpl implements ProjectService{
     {
         ProjectUser pUser = new ProjectUser();
         pUser.setProjectPk(projectPk);
-        pUser.setWorkstationPk(workstationOID.getPk());
+        pUser.setWorkstationPk((int) workstationOID.getPk());
         pUser.setUserPk(userPk);
         pUser.setRole(role);
 
@@ -667,7 +682,7 @@ public class ProjectServiceImpl implements ProjectService{
     {
         ProjectUser pUser = new ProjectUser();
         pUser.setProjectPk(projectPk);
-        pUser.setWorkstationPk(workstationOID.getPk());
+        pUser.setWorkstationPk((int) workstationOID.getPk());
         pUser.setUserPk(userPk);
         pUser.setRole(User.ROLE_READONLY);
 
@@ -678,10 +693,10 @@ public class ProjectServiceImpl implements ProjectService{
     {
         List<User> workstationTesters = new ArrayList();
         if (projectPartOID != null)
-            workstationTesters = ProjectManager.getUsersForProjectPartInRole(projectOID.getPk(), projectPartOID, wsOID,
+            workstationTesters = projectService.getUsersForProjectPartInRole((int) projectOID.getPk(), projectPartOID, wsOID,
                     User.ROLE_TESTER);
         else
-            workstationTesters = ProjectManager.getUsersForProjectInRole(projectOID.getPk(), wsOID, User.ROLE_TESTER);
+            workstationTesters = projectService.getUsersForProjectInRole(projectOID.getPk(), wsOID, User.ROLE_TESTER);
         if (testList != null)
         {
             for (Iterator iterator = testList.iterator(); iterator.hasNext();)
@@ -690,7 +705,7 @@ public class ProjectServiceImpl implements ProjectService{
                 boolean containsNow = workstationTesters.remove(newUser);
                 if (!(containsNow))
                 {
-                    addUserToProject(context, projectOID.getPk(), projectPartOID, wsOID.getPk(), newUser.getPk(),
+                    addUserToProject(context, (int) projectOID.getPk(), projectPartOID, (int) wsOID.getPk(), (int) newUser.getPk(),
                             User.ROLE_TESTER);
                 }
             }
@@ -699,19 +714,19 @@ public class ProjectServiceImpl implements ProjectService{
         {
             User user = (User) iterator.next();
             if (projectPartOID != null)
-                removeUserFromProject(context, projectOID.getPk(), projectPartOID, wsOID.getPk(), user.getPk(),
+                removeUserFromProject(context, (int) projectOID.getPk(), projectPartOID, (int) wsOID.getPk(), (int) user.getPk(),
                         User.ROLE_TESTER);
             else
-                removeUserFromProject(context, projectOID.getPk(), wsOID.getPk(), user.getPk(), User.ROLE_TESTER);
+                removeUserFromProject(context, (int) projectOID.getPk(), (int) wsOID.getPk(), (int) user.getPk(), User.ROLE_TESTER);
 
         }
 
         List<User> workstationVerifiers = new ArrayList();
         if (projectPartOID != null)
-            workstationVerifiers = ProjectManager.getUsersForProjectPartInRole(projectOID.getPk(), projectPartOID,
+            workstationVerifiers = projectService.getUsersForProjectPartInRole((int) projectOID.getPk(), projectPartOID,
                     wsOID, User.ROLE_VERIFY);
         else
-            workstationVerifiers = ProjectManager.getUsersForProjectInRole(projectOID.getPk(), wsOID, User.ROLE_VERIFY);
+            workstationVerifiers = projectService.getUsersForProjectInRole(projectOID.getPk(), wsOID, User.ROLE_VERIFY);
         if (verifyList != null)
         {
             for (Iterator iterator = verifyList.iterator(); iterator.hasNext();)
@@ -720,7 +735,7 @@ public class ProjectServiceImpl implements ProjectService{
                 boolean containsNow = workstationVerifiers.remove(newUser);
                 if (!(containsNow))
                 {
-                    addUserToProject(context, projectOID.getPk(), projectPartOID, wsOID.getPk(), newUser.getPk(),
+                    addUserToProject(context, (int) projectOID.getPk(), projectPartOID, (int) wsOID.getPk(), (int) newUser.getPk(),
                             User.ROLE_VERIFY);
                 }
             }
@@ -729,19 +744,19 @@ public class ProjectServiceImpl implements ProjectService{
         {
             User user = (User) iterator.next();
             if (projectPartOID != null)
-                removeUserFromProject(context, projectOID.getPk(), projectPartOID, wsOID.getPk(), user.getPk(),
+                removeUserFromProject(context, (int) projectOID.getPk(), projectPartOID, (int) wsOID.getPk(), (int) user.getPk(),
                         User.ROLE_VERIFY);
             else
-                removeUserFromProject(context, projectOID.getPk(), wsOID.getPk(), user.getPk(), User.ROLE_VERIFY);
+                removeUserFromProject(context, (int) projectOID.getPk(), (int) wsOID.getPk(), (int) user.getPk(), User.ROLE_VERIFY);
         }
 
         List<User> workstationApprovers = new ArrayList();
 
         if (projectPartOID != null)
-            workstationApprovers = ProjectManager.getUsersForProjectPartInRole(projectOID.getPk(), projectPartOID,
+            workstationApprovers = projectService.getUsersForProjectPartInRole((int) projectOID.getPk(), projectPartOID,
                     wsOID, User.ROLE_APPROVE);
         else
-            workstationApprovers = ProjectManager.getUsersForProjectInRole(projectOID.getPk(), wsOID,
+            workstationApprovers = projectService.getUsersForProjectInRole(projectOID.getPk(), wsOID,
                     User.ROLE_APPROVE);
 
         if (approveList != null)
@@ -752,7 +767,7 @@ public class ProjectServiceImpl implements ProjectService{
                 boolean containsNow = workstationApprovers.remove(newUser);
                 if (!(containsNow))
                 {
-                    addUserToProject(context, projectOID.getPk(), projectPartOID, wsOID.getPk(), newUser.getPk(),
+                    addUserToProject(context, (int) projectOID.getPk(), projectPartOID, (int) wsOID.getPk(), (int) newUser.getPk(),
                             User.ROLE_APPROVE);
                 }
             }
@@ -761,10 +776,10 @@ public class ProjectServiceImpl implements ProjectService{
         {
             User user = (User) iterator.next();
             if (projectPartOID != null)
-                removeUserFromProject(context, projectOID.getPk(), projectPartOID, wsOID.getPk(), user.getPk(),
+                removeUserFromProject(context, (int) projectOID.getPk(), projectPartOID, (int) wsOID.getPk(), (int) user.getPk(),
                         User.ROLE_APPROVE);
             else
-                removeUserFromProject(context, projectOID.getPk(), wsOID.getPk(), user.getPk(), User.ROLE_APPROVE);
+                removeUserFromProject(context, (int) projectOID.getPk(), (int) wsOID.getPk(), (int) user.getPk(), User.ROLE_APPROVE);
         }
     }
 
@@ -816,13 +831,7 @@ public class ProjectServiceImpl implements ProjectService{
         }
     }
 
-    public  List<User> getUsersForProjectInRole(ProjectOID projectOID, String roleName) throws Exception
-    {
-        return persistWrapper.readList(User.class,
-                "select distinct u.* from TAB_USER u " + " inner join TAB_PROJECT_USERS tpu on tpu.userPk = u.pk  "
-                        + "where tpu.projectPk=? and tpu.projectPartPk is null and tpu.role=? order by u.firstName asc",
-                projectOID.getPk(), roleName);
-    }
+
 
     public  List<User> getUsersForProjectInRole(int projectPk, WorkstationOID workstationOID, String roleName)
             throws Exception
@@ -849,7 +858,7 @@ public class ProjectServiceImpl implements ProjectService{
                     "select distinct p.* from TAB_PROJECT p "
                             + " inner join TAB_PROJECT_USERS tpu on tpu.projectPk = p.pk "
                             + " where tpu.userPk=? and tpu.workstationPk=? and tpu.role in (?, ?, ?)",
-                    context.getUser().getPk(), DummyWorkstation.getPk(), User.ROLE_TESTER, User.ROLE_VERIFY,
+                    context.getUser().getPk(), dummyWorkstation.getPk(), User.ROLE_TESTER, User.ROLE_VERIFY,
                     User.ROLE_READONLY);
         }
         catch (Exception e)
@@ -863,7 +872,7 @@ public class ProjectServiceImpl implements ProjectService{
     {
         try
         {
-            Project p = persistWrapper.readByPrimaryKey(Project.class, projectPk);
+            Project p = (Project) persistWrapper.readByPrimaryKey(Project.class, projectPk);
             if (p != null && p.getManagerPk() != null && p.getManagerPk() == userContext.getUser().getPk())
             {
                 return true;
@@ -956,7 +965,7 @@ public class ProjectServiceImpl implements ProjectService{
     public  void closeProject(ProjectQuery projectQuery) throws Exception
     {
         // TODO some other logic need to be done when a project is closed
-        Project p = persistWrapper.readByPrimaryKey(Project.class, projectQuery.getPk());
+        Project p = (Project) persistWrapper.readByPrimaryKey(Project.class, projectQuery.getPk());
         p.setStatus(Project.STATUS_CLOSED);
         persistWrapper.update(p);
     }
@@ -964,7 +973,7 @@ public class ProjectServiceImpl implements ProjectService{
     public  void openProject(ProjectQuery projectQuery) throws Exception
     {
         // TODO some other process need to be done when a project is opened
-        Project p = persistWrapper.readByPrimaryKey(Project.class, projectQuery.getPk());
+        Project p = (Project) persistWrapper.readByPrimaryKey(Project.class, projectQuery.getPk());
         p.setStatus(Project.STATUS_OPEN);
         persistWrapper.update(p);
     }
@@ -981,11 +990,11 @@ public class ProjectServiceImpl implements ProjectService{
             Project proj = getProject(projectOID.getPk());
             if (proj.getManagerPk() != 0)
             {
-                User mgr = persistWrapper.readByPrimaryKey(User.class, proj.getManagerPk());
+                User mgr = (User) persistWrapper.readByPrimaryKey(User.class, proj.getManagerPk());
                 returnList.add(mgr);
             }
 
-            List<User> existingMgrACList = AccountDelegate.getACLs(proj.getPk(), UserPerms.OBJECTTYPE_PROJECT,
+            List<User> existingMgrACList = accountService.getACLs((int) proj.getPk(), UserPerms.OBJECTTYPE_PROJECT,
                     UserPerms.ROLE_MANAGER);
             if (existingMgrACList != null)
                 returnList.addAll(existingMgrACList);
@@ -1001,7 +1010,7 @@ public class ProjectServiceImpl implements ProjectService{
 
     public  List<User> getDataClerks(ProjectQuery projectQuery) throws Exception
     {
-        List<User> existingDataClerkACList = AccountDelegate.getACLs(projectQuery.getPk(), UserPerms.OBJECTTYPE_PROJECT,
+        List<User> existingDataClerkACList = accountService.getACLs(projectQuery.getPk(), UserPerms.OBJECTTYPE_PROJECT,
                 UserPerms.ROLE_DATACLERK);
         return existingDataClerkACList;
     }
@@ -1035,14 +1044,14 @@ public class ProjectServiceImpl implements ProjectService{
             throw new AppException("Invalid Project; Cannot add stage");
 
         projectStage.setEstatus(EStatusEnum.Active.getValue());
-        int newPk = persistWrapper.createEntity(projectStage);
+        int newPk = (int) persistWrapper.createEntity(projectStage);
 
-        return persistWrapper.readByPrimaryKey(ProjectStage.class, newPk);
+        return (ProjectStage) persistWrapper.readByPrimaryKey(ProjectStage.class, newPk);
     }
 
     public  ProjectStage updateProjectStage(ProjectStage projectStage) throws Exception
     {
-        ProjectStage ps = persistWrapper.readByPrimaryKey(ProjectStage.class, projectStage.getPk());
+        ProjectStage ps = (ProjectStage) persistWrapper.readByPrimaryKey(ProjectStage.class, projectStage.getPk());
         if(ps == null)
             throw new AppException("Inalid Project stage; remove failed");
 
@@ -1058,12 +1067,12 @@ public class ProjectServiceImpl implements ProjectService{
         ps.setEstatus(EStatusEnum.Active.getValue());
 
         persistWrapper.update(ps);
-        return persistWrapper.readByPrimaryKey(ProjectStage.class, projectStage.getPk());
+        return (ProjectStage) persistWrapper.readByPrimaryKey(ProjectStage.class, projectStage.getPk());
     }
 
     public  void removeProjectStage(int projectStagePk) throws Exception
     {
-        ProjectStage ps = persistWrapper.readByPrimaryKey(ProjectStage.class, projectStagePk);
+        ProjectStage ps = (ProjectStage) persistWrapper.readByPrimaryKey(ProjectStage.class, projectStagePk);
         if(ps == null)
             throw new AppException("Inalid Project stage; remove failed");
 

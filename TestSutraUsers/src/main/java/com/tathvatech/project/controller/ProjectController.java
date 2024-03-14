@@ -1,16 +1,33 @@
 package com.tathvatech.project.controller;
 
+import com.tathvatech.common.exception.AppException;
+import com.tathvatech.forms.common.FormQuery;
+import com.tathvatech.forms.common.ProjectFormQuery;
+import com.tathvatech.project.common.ProjectFilter;
+import com.tathvatech.project.common.ProjectQuery;
+import com.tathvatech.project.common.ProjectSignatorySetBean;
 import com.tathvatech.project.entity.Project;
+import com.tathvatech.project.entity.ProjectPart;
+import com.tathvatech.project.entity.ProjectStage;
+import com.tathvatech.project.oid.ProjectPartOID;
 import com.tathvatech.project.service.ProjectService;
-import com.tathvatech.user.OID.PartOID;
-import com.tathvatech.user.OID.ProjectOID;
-import com.tathvatech.user.OID.WorkstationOID;
+import com.tathvatech.site.entity.ProjectSiteConfig;
+import com.tathvatech.user.OID.*;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.Account;
+import com.tathvatech.user.entity.Attachment;
+import com.tathvatech.user.entity.Site;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.service.CommonServiceManager;
+import com.tathvatech.workstation.entity.ProjectWorkstation;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 @RequestMapping("/project")
@@ -93,75 +110,21 @@ public class ProjectController {
     public  void createProjectByCopy(UserContext context, Project project, String copyFromProjectPk)
             throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+        ProjectQuery newProject = projectService.createProject(context, project);
 
-            ProjectQuery newProject = projectService.createProject(context, project);
-
-            // Project copyFromProject =
-            // projectService.getProjectByPk(copyFromProjectPk);
-            con.commit();
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
     }
 
     public  ProjectQuery createProject(UserContext context, Project project) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+        return projectService.createProject(context, project);
+        }
 
-            return projectService.createProject(context, project);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            // a call to commit in the finally is ok as if there is an exception
-            // rollback is already called..
-            // and a commit call will not do anything. else you need to store
-            // the return val in a local variable
-            // call commit and then return that variable. unwanted lines of
-            // code.
-            con.commit();
-        }
-    }
     public  ProjectQuery updateProject(UserContext context, Project pVal) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+        return projectService.updateProject(context, pVal);
+        }
 
-            return projectService.updateProject(context, pVal);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
-    }
-    public  ProjectPart getProjectPart(ProjectPartOID projectpartOID)
+    public ProjectPart getProjectPart(ProjectPartOID projectpartOID)
     {
         return projectService.getProjectPart(projectpartOID);
     }
@@ -169,11 +132,6 @@ public class ProjectController {
                                                 List<ProjectPartOID> projectPartList, WorkstationOID workstationOID, Collection<FormQuery> selectedFormList,
                                                 String testName) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
             // projectService.deleteAllFormsFromProjectPart(context,
             // projectPartOID, workstationPk);
@@ -189,16 +147,8 @@ public class ProjectController {
                             formQuery.getPk(), testName);
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
+
     }
 
     /**
@@ -214,11 +164,7 @@ public class ProjectController {
                                                 List<ProjectPartOID> projectPartList, Collection<FormQuery> selectedFormList,
                                                 String testName) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
             // projectService.deleteAllFormsFromProjectPart(context,
             // projectPartOID, workstationPk);
@@ -234,38 +180,16 @@ public class ProjectController {
                             formQuery.getPk(), testName);
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
     }
 
     public  void removeProjectFromFromProject(UserContext userContext, ProjectFormOID projectFormOID)
             throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
             projectService.deleteProjectForm(userContext, projectFormOID);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
     }
     public  List<ProjectFormQuery> getProjectFormsForProject(ProjectOID projectOID)
     {
@@ -313,129 +237,51 @@ public class ProjectController {
     public  void removeAllUsersFromProject(UserContext context, int projectPk, WorkstationOID workstationOID)
             throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
             projectService.removeAllUsersFromProject(context, projectPk, workstationOID);
         }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
 
-    }
+
+
+
     public  void addUserToProject(UserContext context, int projectPk, WorkstationOID workstationOID, int userPk,
                                         String role) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
             projectService.addUserToProject(context, projectPk, workstationOID, userPk, role);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
     }
 
     public  void addReadonlyUserToProject(UserContext context, int projectPk, WorkstationOID workstationOID,
                                                 int userPk) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
             projectService.addReadonlyUserToProject(context, projectPk, workstationOID, userPk);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
     }
 
     public  void deleteProject(int projectPk) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
             projectService.deleteProject(projectPk);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
     }
     public  void closeProject(ProjectQuery projectQuery) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
             projectService.closeProject(projectQuery);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
     }
 
     public  void openProject(ProjectQuery projectQuery) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
             projectService.openProject(projectQuery);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
     }
     public  List<User> getprojectServices(ProjectOID projectOID)
     {
@@ -447,33 +293,13 @@ public class ProjectController {
         return projectService.getDataClerks(projectQuery);
     }
     public  void updateProjectTeam(UserContext context, ProjectOID projectOID, ProjectPartOID projectPartOID,
-                                         WorkstationOID wsOID, Collection testList, Collection verifyList, Collection approveList) throws Exception
+                                   WorkstationOID wsOID, Collection testList, Collection verifyList, Collection approveList) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
             projectService.updateProjectTeam(context, projectOID, projectPartOID, wsOID, testList, verifyList,
                     approveList);
-            con.commit();
-        }
-        catch (Exception ex)
-        {
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                logger.error("Count not rollback transaction", ex);
-            }
-            throw ex;
-        }
-        finally
-        {
-        }
+
     }
 
     public  List<Site> getSitesForProject(ProjectOID projectOID)
@@ -488,42 +314,13 @@ public class ProjectController {
 
     public  void saveSitesForProject(ProjectOID projectOID, Collection<Site> siteList) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
             int a = projectService.saveSitesForProject(projectOID, siteList);
-            con.commit();
-            if (a == 0)
-            {
-                return;
-            } else if (a == 1)
-            {
-                throw new AppException(
-                        "Some sites could not be removed as workstations from those sites are part of the project.");
-            }
 
-        }
-        catch (Exception ex)
-        {
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                logger.error("Count not rollback transaction", ex);
-            }
-            throw ex;
-        }
-        finally
-        {
-        }
+
     }
 
-    public  ProjectStage getProjectStage(ProjectStageOID projectStageOID)
+    public ProjectStage getProjectStage(ProjectStageOID projectStageOID)
     {
         return projectService.getProjectStage(projectStageOID);
     }
@@ -535,99 +332,33 @@ public class ProjectController {
 
     public  ProjectStage addProjectStage(ProjectStage projectStage) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
             ProjectStage ps = projectService.addProjectStage(projectStage);
-            con.commit();
-
             return ps;
 
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                logger.error("Count not rollback transaction", ex);
-            }
-            throw ex;
-        }
-        finally
-        {
-        }
     }
 
     public  ProjectStage updateProjectStage(ProjectStage projectStage) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
             ProjectStage ps = projectService.updateProjectStage(projectStage);
-            con.commit();
 
             return ps;
 
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                logger.error("Count not rollback transaction", ex);
-            }
-            throw ex;
-        }
-        finally
-        {
-        }
     }
 
     public  void removeProjectStage(int projectStagePk)throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
             projectService.removeProjectStage(projectStagePk);
-            con.commit();
 
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                logger.error("Count not rollback transaction", ex);
-            }
-            throw ex;
-        }
-        finally
-        {
-        }
+
     }
 
-    public  ProjectSignatorySetBean getProjectSignatorySet(ProjectSignatorySetOID sigSetOID)
+    public ProjectSignatorySetBean getProjectSignatorySet(ProjectSignatorySetOID sigSetOID)
     {
         return projectService.getProjectSignatorySet(sigSetOID);
     }
@@ -639,91 +370,28 @@ public class ProjectController {
 
     public  ProjectSignatorySetBean addProjectSignatorySet(ProjectSignatorySetBean sBean) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
             ProjectSignatorySetBean set = projectService.addProjectSignatorySet(sBean);
-            con.commit();
+
             return set;
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                logger.error("Count not rollback transaction", ex);
-            }
-            throw ex;
-        }
-        finally
-        {
-        }
+
     }
 
     public  ProjectSignatorySetBean updateProjectSignatorySet(ProjectSignatorySetBean sBean) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
             ProjectSignatorySetBean set = projectService.updateProjectSignatorySet(sBean);
-            con.commit();
+
             return set;
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                logger.error("Count not rollback transaction", ex);
-            }
-            throw ex;
-        }
-        finally
-        {
-        }
+
     }
 
     public  void removeProjectSignatorySet(ProjectSignatorySetOID setOID) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
             projectService.removeProjectSignatorySet(setOID);
-            con.commit();
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                logger.error("Count not rollback transaction", ex);
-            }
-            throw ex;
-        }
-        finally
-        {
-        }
+
     }
 
     public List<Project> getProjectsForPart(PartOID partOID)
@@ -746,33 +414,15 @@ public class ProjectController {
 
     public  void removeProjectAttachment(UserContext userContext, Attachment attachment) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
             // TODO:: add code here to check if the attachment has open items added to this drawing and throw an error if so.
 
             new CommonServiceManager().removeAttachment(userContext, attachment);
 
-            con.commit();
-        }
-        catch (Exception ex)
-        {
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                logger.error("Count not rollback transaction", ex);
-            }
-            throw ex;
-        }
-        finally
-        {
-        }
+
+
+
+
     }
 
     public  List<ProjectWorkstation> getProjectWorkstations(ProjectOID projectOID)
