@@ -1,6 +1,6 @@
 package com.tathvatech.project.service;
 import com.tathvatech.project.common.*;
-import com.tathvatech.project.entity.ProjectPart;
+import com.tathvatech.project.entity.*;
 import com.tathvatech.common.enums.EStatusEnum;
 import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.common.exception.AppException;
@@ -8,11 +8,7 @@ import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.common.ProjectFormQuery;
 import com.tathvatech.user.service.AccountService;
 import com.tathvatech.workstation.common.DummyWorkstation;
-import com.tathvatech.project.entity.Project;
 import com.tathvatech.forms.common.FormQuery;
-import com.tathvatech.project.entity.ProjectForm;
-import com.tathvatech.project.entity.ProjectStage;
-import com.tathvatech.project.entity.ProjectUser;
 import com.tathvatech.project.oid.ProjectPartOID;
 import com.tathvatech.site.entity.ProjectSiteConfig;
 import com.tathvatech.site.enums.ProjectSiteConfigRolesEnum;
@@ -591,6 +587,20 @@ public class ProjectServiceImpl implements ProjectService{
 
         persistWrapper.createEntity(pForm);
     }
+    public  void addFormToProjectPart(UserContext context, ProjectOID projectOID, ProjectPartOID projectPartOID,
+                                            int formPk, String testName) throws Exception
+    {
+        ProjectForm pForm = new ProjectForm();
+        pForm.setProjectPk(projectOID.getPk());
+        pForm.setProjectPartPk(projectPartOID.getPk());
+        pForm.setFormPk(formPk);
+        if (testName != null && testName.trim().length() > 0)
+            pForm.setName(testName);
+
+        pForm.setAppliedByUserFk(context.getUser().getPk());
+
+        persistWrapper.createEntity(pForm);
+    }
 
     public  void deleteProjectForm(UserContext context, ProjectFormOID projectFormOID) throws Exception
     {
@@ -614,41 +624,6 @@ public class ProjectServiceImpl implements ProjectService{
         }
 
 
-    }
-    public  List<FormQuery> getFormsForProject(ProjectOID projectOID) throws Exception
-    {
-        FormFilter filter = new FormFilter();
-        filter.setStatus(new String[] { Survey.STATUS_OPEN });
-        filter.setShowAllFormRevisions(true);
-        filter.setProjectFormFilter(filter.new ProjectFormAssignmentFilter(projectOID, true));
-        ReportRequest req = new ReportRequest(ReportTypes.FormListReport);
-        req.setFilter(filter);
-        req.setFetchRowCount(false);
-        req.setFetchAllRows(true);
-        ReportResponse response = new FormListReport().runReport(req);
-        List<FormQuery> list = (List<FormQuery>) response.getReportData();
-        if (list != null)
-            return list;
-
-        return new ArrayList();
-    }
-
-    public  List<FormQuery> getFormsForProject(int projectPk, WorkstationOID workstationOID) throws Exception
-    {
-        FormFilter filter = new FormFilter();
-        filter.setStatus(new String[] { Survey.STATUS_OPEN });
-        filter.setShowAllFormRevisions(true);
-        filter.setProjectFormFilter(filter.new ProjectFormAssignmentFilter(new ProjectOID(projectPk), workstationOID));
-        ReportRequest req = new ReportRequest(ReportTypes.FormListReport);
-        req.setFilter(filter);
-        req.setFetchRowCount(false);
-        req.setFetchAllRows(true);
-        ReportResponse response = new FormListReport().runReport(req);
-        List<FormQuery> list = (List<FormQuery>) response.getReportData();
-        if (list != null)
-            return list;
-
-        return new ArrayList();
     }
 
     public  void addUserToProject(UserContext context, int projectPk, ProjectPartOID projectPartOID,
@@ -1115,7 +1090,7 @@ public class ProjectServiceImpl implements ProjectService{
         set.setEstatus(EStatusEnum.Active.getValue());
         set.setName(sBean.getName());
         set.setProjectFk(sBean.getProjectFk());
-        int pk = persistWrapper.createEntity(set);
+        int pk = (int) persistWrapper.createEntity(set);
 
         for (Iterator iterator = sBean.getSigatoryItems().iterator(); iterator.hasNext();)
         {
@@ -1137,7 +1112,7 @@ public class ProjectServiceImpl implements ProjectService{
             logger.error("Pk cannot be 0 when updating");
             throw new AppException("Invalid request.");
         }
-        ProjectSignatorySet set = persistWrapper.readByPrimaryKey(ProjectSignatorySet.class, sBean.getPk());
+        ProjectSignatorySet set = (ProjectSignatorySet) persistWrapper.readByPrimaryKey(ProjectSignatorySet.class, sBean.getPk());
         if(set == null)
         {
             logger.error("Invalid SignatorySet Pk: " + sBean.getPk());
@@ -1160,7 +1135,7 @@ public class ProjectServiceImpl implements ProjectService{
         for (Iterator iterator = currentItems.iterator(); iterator.hasNext();)
         {
             ProjectSignatoryItem aItem = (ProjectSignatoryItem) iterator.next();
-            currentItemsMap.put(aItem.getPk(), aItem);
+            currentItemsMap.put((int) aItem.getPk(), aItem);
         }
 
         set.setDescription(sBean.getDescription());
@@ -1185,7 +1160,7 @@ public class ProjectServiceImpl implements ProjectService{
             else
             {
                 ProjectSignatoryItem theItem = new ProjectSignatoryItem();
-                theItem.setProjectSignatorySetFk(set.getPk());
+                theItem.setProjectSignatorySetFk((int) set.getPk());
                 theItem.setOrderNo(aItemBean.getOrderNo());
                 theItem.setRoleId(aItemBean.getRoleId());
                 persistWrapper.createEntity(theItem);

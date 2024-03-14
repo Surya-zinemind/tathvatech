@@ -202,15 +202,7 @@ public class ProjectController {
         return projectService.getProjectFormsForProject(projectPk, workstationOID);
     }
 
-    public  List<FormQuery> getFormsForProject(ProjectOID projectOID) throws Exception
-    {
-        return projectService.getFormsForProject(projectOID);
-    }
 
-    public  List<FormQuery> getFormsForProject(int projectPk, WorkstationOID workstationOID) throws Exception
-    {
-        return projectService.getFormsForProject(projectPk, workstationOID);
-    }
     public  List<User> getUsersForProjectInRole(ProjectOID projectOID, String roleName) throws Exception
     {
         return projectService.getUsersForProjectInRole(projectOID, roleName);
@@ -283,9 +275,9 @@ public class ProjectController {
             projectService.openProject(projectQuery);
 
     }
-    public  List<User> getprojectServices(ProjectOID projectOID)
+    public  List<User> getprojectManagers(ProjectOID projectOID)
     {
-        return projectService.getprojectServices(projectOID);
+        return projectService.getProjectManagers(projectOID);
     }
 
     public  List<User> getDataClerks(ProjectQuery projectQuery) throws Exception

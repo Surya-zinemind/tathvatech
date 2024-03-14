@@ -36,6 +36,8 @@ public interface ProjectService {
     ProjectPart getProjectPart(ProjectPartOID projectpartOID);
     void addFormToProjectPart(UserContext context, ProjectOID projectOID, ProjectPartOID projectPartOID,
                               WorkstationOID workstationOID, int formPk, String testName) throws Exception;
+    void addFormToProjectPart(UserContext context, ProjectOID projectOID, ProjectPartOID projectPartOID,
+                              int formPk, String testName) throws Exception;
     void deleteProjectForm(UserContext context, ProjectFormOID projectFormOID) throws Exception;
 
 
@@ -48,8 +50,7 @@ public interface ProjectService {
     List<User> getUsersForProjectInRole(long projectPk, WorkstationOID workstationOID, String roleName) throws Exception;
     List<ProjectFormQuery> getProjectFormsForProject(ProjectOID projectOID);
     List<ProjectFormQuery> getProjectFormsForProject(int projectPk, WorkstationOID workstationOID);
-    List<FormQuery> getFormsForProject(ProjectOID projectOID) throws Exception;
-    List<FormQuery> getFormsForProject(int projectPk, WorkstationOID workstationOID) throws Exception;
+
     void addUserToProject(UserContext context, int projectPk, ProjectPartOID projectPartOID,
                           int workstationPk, int userPk, String role) throws Exception;
     void addUserToProject(UserContext context, int projectPk, WorkstationOID workstationOID, int userPk,
