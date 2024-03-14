@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class SurveyPermissionRequest {
+public class SurveyPermissionRequest  {
     private int surveyPk;
     private List permsList;
 }

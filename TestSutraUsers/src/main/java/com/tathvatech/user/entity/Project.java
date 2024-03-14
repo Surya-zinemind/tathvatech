@@ -3,7 +3,8 @@ package com.tathvatech.user.entity;
 import com.tathvatech.common.entity.AbstractEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import org.springframework.data.relational.core.mapping.Table;
+import jakarta.persistence.Table;
+
 
 import java.io.Serializable;
 import java.util.Date;
