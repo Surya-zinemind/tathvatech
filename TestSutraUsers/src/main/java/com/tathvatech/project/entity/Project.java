@@ -1,16 +1,4 @@
-/*
- * Created on Nov 1, 2005
- *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
- */
 package com.tathvatech.project.entity;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
 
 import com.tathvatech.common.entity.AbstractEntity;
 import com.tathvatech.common.enums.EntityType;
@@ -23,9 +11,13 @@ import com.tathvatech.user.enums.ProjectRolesEnum;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import org.apache.commons.lang3.StringUtils;
 
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Hari
@@ -35,7 +27,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 @Entity
 @Table(name="TAB_PROJECT")
-public class Project extends AbstractEntity implements Serializable,Authorizable
+public class Project extends AbstractEntity implements Serializable, Authorizable
 {
 	@Id
 	private long pk;
@@ -55,14 +47,16 @@ public class Project extends AbstractEntity implements Serializable,Authorizable
 	private Boolean enableChecksheets;
 	private String status;
 	private Date lastUpdated;
-
-
-	@Override
-	public long getPk() {
+	
+	
+	@Id
+	public long getPk()
+	{
 		return pk;
 	}
 
-	public void setPk(long pk) {
+	public void setPk(long pk)
+	{
 		this.pk = pk;
 	}
 
@@ -203,7 +197,6 @@ public class Project extends AbstractEntity implements Serializable,Authorizable
 		this.enableChecksheets = enableChecksheets;
 	}
 
-
 	public Date getLastUpdated()
 	{
 		return lastUpdated;
@@ -214,23 +207,13 @@ public class Project extends AbstractEntity implements Serializable,Authorizable
 		this.lastUpdated = lastUpdated;
 	}
 	
-	public String getDisplayString()
-	{
-		StringBuffer sb = new StringBuffer();
-		sb.append(projectName);
-		if(!(StringUtils.isEmpty(projectDescription)))
-		{
-			sb.append(" - ").append(projectDescription);
-		}
-		return sb.toString();
-	}
 
 	@Override
 	public int hashCode() 
 	{
 		if (pk == 0)
 			return super.hashCode();
-		return (int) pk;
+		return (int)pk;
 	}
 
 	@Override
@@ -243,8 +226,7 @@ public class Project extends AbstractEntity implements Serializable,Authorizable
 	@Override
 	public String toString()
 	{
-		// TODO Auto-generated method stub
-		return getDisplayString();
+		return projectName;
 	}
 
 	/**
@@ -253,33 +235,32 @@ public class Project extends AbstractEntity implements Serializable,Authorizable
     public Project()
     {
     }
-
 	public ProjectOID getOID()
 	{
 		return new ProjectOID((int) pk, projectName + ((projectDescription != null)? (" - " + projectDescription):""));
 	}
-    
-    public static String STATUS_OPEN = "Open";
-    public static final String STATUS_CLOSED = "Closed";
-    
-    public static final String AttachmentContext_CustomerLogo = "custLogo";
-    public static final String AttachmentContext_LogbookPreface = "logbookPreface";
-    public static final String AttachmentContext_PartDrawings = "PartDrawing";
-    public static final String AttachmentContext_WorkstationLayout = "WorkstationLayout";
 
-    public static final String AllowClientSubmissionOnFormsPropertyKey = "AllowClientSubmissionOnForms";
+	public static String STATUS_OPEN = "Open";
+	public static final String STATUS_CLOSED = "Closed";
+
+	public static final String AttachmentContext_CustomerLogo = "custLogo";
+	public static final String AttachmentContext_LogbookPreface = "logbookPreface";
+	public static final String AttachmentContext_PartDrawings = "PartDrawing";
+	public static final String AttachmentContext_WorkstationLayout = "WorkstationLayout";
+
+	public static final String AllowClientSubmissionOnFormsPropertyKey = "AllowClientSubmissionOnForms";
 	public static String EnableAddAttachmentInFormResponseMode = "EnableAddAttachmentInFormResponseMode"; // Default is false - Allow attachments to be added while filling up the forms.
 	public static String DisableWorkstationCloseWhenAllFormsApproved = "DisableWorkstationCloseWhenAllFormsApproved"; // Default is true - When all forms are approved on a workstation, ask if the workstation could be marked as completed
 
-    public static String AllowApproveWithCommentsForChecksheets = "AllowApproveWithCommentsForChecksheets"; // If enabled, approver can Approve or Approve with comments the checksheet after verification
-    
-    public static String EnableUnitCreationAtWorkstation = "EnableUnitCreationAtWorkstation";  // if Enabled, you can create a unit at a specific workstation. no workstation level settings will be applied to the unit. only part level settings are applied to this unit.
-    
-    
-    public static String ProjectType = "ProjectType"; // the value can be one of the ProjectTypeEnums
-    public static enum ProjectTypeEnum{RollingStock, Signalling}
-	
-    @Override
+	public static String AllowApproveWithCommentsForChecksheets = "AllowApproveWithCommentsForChecksheets"; // If enabled, approver can Approve or Approve with comments the checksheet after verification
+
+	public static String EnableUnitCreationAtWorkstation = "EnableUnitCreationAtWorkstation";  // if Enabled, you can create a unit at a specific workstation. no workstation level settings will be applied to the unit. only part level settings are applied to this unit.
+
+
+	public static String ProjectType = "ProjectType"; // the value can be one of the ProjectTypeEnums
+	public static enum ProjectTypeEnum{RollingStock, Signalling}
+
+	@Override
 	public EntityType getEntityType()
 	{
 		return EntityTypeEnum.Project;

@@ -3,11 +3,15 @@ package com.tathvatech.project.controller;
 import com.tathvatech.project.entity.Project;
 import com.tathvatech.project.service.ProjectService;
 import com.tathvatech.user.OID.PartOID;
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.WorkstationOID;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RequestMapping("/project")
 @RestController
@@ -722,7 +726,7 @@ public class ProjectController {
         }
     }
 
-    public  List<Project> getProjectsForPart(PartOID partOID)
+    public List<Project> getProjectsForPart(PartOID partOID)
     {
         return projectService.getProjectsForPart(partOID);
     }

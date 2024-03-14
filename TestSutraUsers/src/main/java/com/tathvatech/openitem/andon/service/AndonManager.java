@@ -1,13 +1,9 @@
 package com.tathvatech.openitem.andon.service;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
-import java.util.Random;
 
 import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.common.enums.EntityTypeEnum;
@@ -15,22 +11,15 @@ import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.openitem.andon.common.AndonBean;
 import com.tathvatech.openitem.andon.entity.Andon;
-import com.tathvatech.project.common.ProjectQuery;
-import com.tathvatech.unit.common.UnitObj;
-import com.tathvatech.unit.service.UnitManager;
-import com.tathvatech.user.OID.MRFOID;
 import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.UnitOID;
 import com.tathvatech.user.OID.WorkstationOID;
 import com.tathvatech.user.common.UserContext;
-import com.tathvatech.user.entity.Project;
 import com.tathvatech.user.service.CommonServiceManager;
 import com.tathvatech.workstation.entity.Workstation;
 import com.tathvatech.workstation.service.WorkstationService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
-import org.aspectj.apache.bcel.classfile.annotation.NameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
