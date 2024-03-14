@@ -1,23 +1,31 @@
 package com.tathvatech.project.service;
 
 import com.tathvatech.common.enums.EStatusEnum;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.common.ProjectFormQuery;
 import com.tathvatech.project.common.ProjectFilter;
 import com.tathvatech.project.common.ProjectQuery;
 import com.tathvatech.project.common.ProjectSignatorySetBean;
 import com.tathvatech.project.common.ProjectUserQuery;
-import com.tathvatech.project.controller.ProjectController;
+
+import com.tathvatech.project.entity.Project;
+import com.tathvatech.project.entity.ProjectForm;
 import com.tathvatech.project.entity.ProjectStage;
 import com.tathvatech.project.entity.ProjectUser;
 import com.tathvatech.project.oid.ProjectPartOID;
 import com.tathvatech.site.entity.ProjectSiteConfig;
-import com.tathvatech.user.OID.ProjectFormOID;
-import com.tathvatech.user.OID.ProjectOID;
-import com.tathvatech.user.OID.SiteOID;
-import com.tathvatech.user.OID.WorkstationOID;
+import com.tathvatech.site.enums.ProjectSiteConfigRolesEnum;
+import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.UserContext;
-import com.tathvatech.user.entity.*;
+import com.tathvatech.user.entity.Account;
+import com.tathvatech.user.entity.Site;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.entity.UserPerms;
+import com.tathvatech.user.enums.ProjectRolesEnum;
+import com.tathvatech.user.enums.SiteRolesEnum;
+import com.tathvatech.user.service.AuthorizationManager;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -34,6 +42,8 @@ public class ProjectServiceImpl implements ProjectService{
     private  final Logger logger = LoggerFactory.getLogger(ProjectServiceImpl.class);
 
     private final PersistWrapper persistWrapper;
+
+    private final AuthorizationManager authorizationManager;
     public  List<ProjectQuery> getProjectList(UserContext context, ProjectFilter filter)
     {
         if (User.USER_PRIMARY.equals(context.getUser().getUserType())) // all
@@ -114,7 +124,7 @@ public class ProjectServiceImpl implements ProjectService{
                 // get the sitePks from the valid site roles in the filter
                 if (siteRoles.size() > 0)
                 {
-                    List<Integer> sitesPksFromRole = new ArrayList(new AuthorizationDelegate().getEntitiesWithRole(
+                    List<Integer> sitesPksFromRole = new ArrayList(authorizationManager.getEntitiesWithRole(
                             context, EntityTypeEnum.Site, siteRoles.toArray(new SiteRolesEnum[siteRoles.size()])));
 
                     // get the projectpks from the project_site_config table for
@@ -136,7 +146,7 @@ public class ProjectServiceImpl implements ProjectService{
                 if (projectSiteRoles.size() > 0)
                 {
                     List<Integer> projectSitesPks = new ArrayList(
-                            new AuthorizationDelegate().getEntitiesWithRole(context, EntityTypeEnum.ProjectSiteConfig,
+                            authorizationManager.getEntitiesWithRole(context, EntityTypeEnum.ProjectSiteConfig,
                                     projectSiteRoles.toArray(new ProjectSiteConfigRolesEnum[projectSiteRoles.size()])));
 
                     if (projectSitesPks.size() > 0)
@@ -187,7 +197,7 @@ public class ProjectServiceImpl implements ProjectService{
                 // acl readonly users for project. Now we need to change the
                 // name of
                 // this role.
-                List<Integer> intList = new AuthorizationDelegate().getEntitiesWithRole(context, EntityTypeEnum.Project,
+                List<Integer> intList = authorizationManager.getEntitiesWithRole(context, EntityTypeEnum.Project,
                         ProjectRolesEnum.ReadOnlyUsers);
                 for (Iterator iterator = intList.iterator(); iterator.hasNext();)
                 {
@@ -569,7 +579,7 @@ public class ProjectServiceImpl implements ProjectService{
 
     public  void deleteProjectForm(UserContext context, ProjectFormOID projectFormOID) throws Exception
     {
-        ProjectForm pForm = persistWrapper.readByPrimaryKey(ProjectForm.class, projectFormOID.getPk());
+        ProjectForm pForm = (ProjectForm) persistWrapper.readByPrimaryKey(ProjectForm.class, projectFormOID.getPk());
         persistWrapper.deleteEntity(pForm);
     }
 
