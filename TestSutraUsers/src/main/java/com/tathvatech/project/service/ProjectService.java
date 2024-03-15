@@ -2,14 +2,14 @@ package com.tathvatech.project.service;
 
 import com.tathvatech.forms.common.FormQuery;
 import com.tathvatech.forms.common.ProjectFormQuery;
-import com.tathvatech.project.common.ProjectFilter;
-import com.tathvatech.project.common.ProjectQuery;
-import com.tathvatech.project.common.ProjectSignatorySetBean;
-import com.tathvatech.project.common.ProjectUserQuery;
+import com.tathvatech.forms.oid.FormMainOID;
+import com.tathvatech.project.common.*;
 import com.tathvatech.project.entity.Project;
 import com.tathvatech.project.entity.ProjectPart;
 import com.tathvatech.project.entity.ProjectStage;
 import com.tathvatech.project.oid.ProjectPartOID;
+import com.tathvatech.project.oid.ProjectSignatorySetOID;
+import com.tathvatech.project.oid.ProjectStageOID;
 import com.tathvatech.site.entity.ProjectSiteConfig;
 import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.UserContext;

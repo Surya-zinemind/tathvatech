@@ -6,6 +6,8 @@
  */
 package com.tathvatech.project.common;
 
+import com.tathvatech.project.oid.ProjectSignatorySetOID;
+
 import java.util.Date;
 import java.util.List;
 

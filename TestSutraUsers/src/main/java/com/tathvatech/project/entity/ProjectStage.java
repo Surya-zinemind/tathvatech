@@ -1,6 +1,7 @@
 package com.tathvatech.project.entity;
 
 import com.tathvatech.common.entity.AbstractEntity;
+import com.tathvatech.project.oid.ProjectStageOID;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -71,6 +72,6 @@ public class ProjectStage extends AbstractEntity implements Serializable
 	
 	public ProjectStageOID getOID()
 	{
-		return new ProjectStageOID(pk, name);
+		return new ProjectStageOID((int) pk, name);
 	}
 }

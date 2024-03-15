@@ -8,10 +8,13 @@ package com.tathvatech.project.common;
 
 import java.util.Date;
 
-import com.tathvatech.ts.core.FormAssignable;
-import com.tathvatech.ts.core.common.OID;
+import com.tathvatech.forms.oid.FormAssignable;
+import com.tathvatech.project.oid.ProjectPartOID;
 
-import net.sf.persist.annotations.NoTable;
+
+import com.tathvatech.user.OID.OID;
+import jakarta.persistence.Entity;
+
 
 /**
  * @author Hari
@@ -19,7 +22,7 @@ import net.sf.persist.annotations.NoTable;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-@NoTable
+
 public class ProjectPartQuery implements FormAssignable
 {
 	private int pk;

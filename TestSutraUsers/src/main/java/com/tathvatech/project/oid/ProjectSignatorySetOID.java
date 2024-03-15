@@ -2,10 +2,11 @@ package com.tathvatech.project.oid;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.OID;
+import com.tathvatech.common.enums.EntityTypeEnum;
 
-public class ProjectSignatorySetOID extends OID{
+import com.tathvatech.user.OID.OID;
+
+public class ProjectSignatorySetOID extends OID {
 
 	public ProjectSignatorySetOID()
 	{
@@ -25,7 +26,7 @@ public class ProjectSignatorySetOID extends OID{
 
 	@Override
 	public int hashCode() {
-		return getPk();
+		return (int) getPk();
 	}
 
 	@Override

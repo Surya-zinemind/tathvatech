@@ -1,4 +1,5 @@
 package com.tathvatech.project.service;
+import com.tathvatech.forms.oid.FormMainOID;
 import com.tathvatech.project.common.*;
 import com.tathvatech.project.entity.*;
 import com.tathvatech.common.enums.EStatusEnum;
@@ -6,6 +7,8 @@ import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.common.ProjectFormQuery;
+import com.tathvatech.project.oid.ProjectSignatorySetOID;
+import com.tathvatech.project.oid.ProjectStageOID;
 import com.tathvatech.user.service.AccountService;
 import com.tathvatech.workstation.common.DummyWorkstation;
 import com.tathvatech.forms.common.FormQuery;
@@ -993,7 +996,7 @@ public class ProjectServiceImpl implements ProjectService{
 
     public  ProjectStage getProjectStage(ProjectStageOID projectStageOID)
     {
-        return persistWrapper.readByPrimaryKey(ProjectStage.class, projectStageOID.getPk());
+        return (ProjectStage) persistWrapper.readByPrimaryKey(ProjectStage.class, projectStageOID.getPk());
     }
 
     public  List<ProjectStage> getProjectStages(ProjectOID projectOID)
@@ -1057,7 +1060,7 @@ public class ProjectServiceImpl implements ProjectService{
 
     public ProjectSignatorySetBean getProjectSignatorySet(ProjectSignatorySetOID sigSetOID)
     {
-        ProjectSignatorySet set = persistWrapper.readByPrimaryKey(ProjectSignatorySet.class, sigSetOID.getPk());
+        ProjectSignatorySet set = (ProjectSignatorySet) persistWrapper.readByPrimaryKey(ProjectSignatorySet.class, sigSetOID.getPk());
         if(set != null)
             return set.getBean();
 
@@ -1179,7 +1182,7 @@ public class ProjectServiceImpl implements ProjectService{
 
     public  void removeProjectSignatorySet(ProjectSignatorySetOID setOID) throws Exception
     {
-        ProjectSignatorySet set = persistWrapper.readByPrimaryKey(ProjectSignatorySet.class, setOID.getPk());
+        ProjectSignatorySet set = (ProjectSignatorySet) persistWrapper.readByPrimaryKey(ProjectSignatorySet.class, setOID.getPk());
         if(set == null)
         {
             logger.error("Invalid SignatorySet Pk: " + setOID.getPk());
