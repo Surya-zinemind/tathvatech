@@ -43,7 +43,6 @@ public class ProjectServiceImpl implements ProjectService{
     private final AccountService accountService;
     private final PersistWrapper persistWrapper;
     private final DummyWorkstation dummyWorkstation;
-    private final ProjectService projectService;
     private final AuthorizationManager authorizationManager;
     public  List<ProjectQuery> getProjectList(UserContext context, ProjectFilter filter) {
         if (User.USER_PRIMARY.equals(context.getUser().getUserType())) // all
@@ -430,7 +429,7 @@ public class ProjectServiceImpl implements ProjectService{
      * Check if the name exists for a project other than the one specified as
      * the projectPk argument
      *
-     * @param acc
+     * @param
      * @param projectName
      * @param projectPk
      * @return
@@ -671,10 +670,10 @@ public class ProjectServiceImpl implements ProjectService{
     {
         List<User> workstationTesters = new ArrayList();
         if (projectPartOID != null)
-            workstationTesters = projectService.getUsersForProjectPartInRole((int) projectOID.getPk(), projectPartOID, wsOID,
+            workstationTesters = getUsersForProjectPartInRole((int) projectOID.getPk(), projectPartOID, wsOID,
                     User.ROLE_TESTER);
         else
-            workstationTesters = projectService.getUsersForProjectInRole(projectOID.getPk(), wsOID, User.ROLE_TESTER);
+            workstationTesters = getUsersForProjectInRole(projectOID.getPk(), wsOID, User.ROLE_TESTER);
         if (testList != null)
         {
             for (Iterator iterator = testList.iterator(); iterator.hasNext();)
@@ -701,10 +700,10 @@ public class ProjectServiceImpl implements ProjectService{
 
         List<User> workstationVerifiers = new ArrayList();
         if (projectPartOID != null)
-            workstationVerifiers = projectService.getUsersForProjectPartInRole((int) projectOID.getPk(), projectPartOID,
+            workstationVerifiers = getUsersForProjectPartInRole((int) projectOID.getPk(), projectPartOID,
                     wsOID, User.ROLE_VERIFY);
         else
-            workstationVerifiers = projectService.getUsersForProjectInRole(projectOID.getPk(), wsOID, User.ROLE_VERIFY);
+            workstationVerifiers = getUsersForProjectInRole(projectOID.getPk(), wsOID, User.ROLE_VERIFY);
         if (verifyList != null)
         {
             for (Iterator iterator = verifyList.iterator(); iterator.hasNext();)
@@ -731,10 +730,10 @@ public class ProjectServiceImpl implements ProjectService{
         List<User> workstationApprovers = new ArrayList();
 
         if (projectPartOID != null)
-            workstationApprovers = projectService.getUsersForProjectPartInRole((int) projectOID.getPk(), projectPartOID,
+            workstationApprovers = getUsersForProjectPartInRole((int) projectOID.getPk(), projectPartOID,
                     wsOID, User.ROLE_APPROVE);
         else
-            workstationApprovers = projectService.getUsersForProjectInRole(projectOID.getPk(), wsOID,
+            workstationApprovers = getUsersForProjectInRole(projectOID.getPk(), wsOID,
                     User.ROLE_APPROVE);
 
         if (approveList != null)
@@ -1226,7 +1225,7 @@ public class ProjectServiceImpl implements ProjectService{
      * Get all project part specific forms setup for the project.
      * For part specific forms, we store them in the same tab_project_forms table with workstationPk as null
      * @param projectOID
-     * @param projectPartOID
+     * @param
      * @return
      */
     public  List<ProjectFormQuery> getProjectPartAssignedForms(ProjectOID projectOID)

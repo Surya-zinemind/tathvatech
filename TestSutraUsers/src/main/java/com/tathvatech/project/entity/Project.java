@@ -11,6 +11,7 @@ import com.tathvatech.user.enums.ProjectRolesEnum;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 
 import java.io.Serializable;
@@ -235,6 +236,7 @@ public class Project extends AbstractEntity implements Serializable, Authorizabl
     public Project()
     {
     }
+	@Transient
 	public ProjectOID getOID()
 	{
 		return new ProjectOID((int) pk, projectName + ((projectDescription != null)? (" - " + projectDescription):""));
@@ -260,24 +262,27 @@ public class Project extends AbstractEntity implements Serializable, Authorizabl
 	public static String ProjectType = "ProjectType"; // the value can be one of the ProjectTypeEnums
 	public static enum ProjectTypeEnum{RollingStock, Signalling}
 
+	@Transient
 	@Override
 	public EntityType getEntityType()
 	{
 		return EntityTypeEnum.Project;
 	}
 
+	@Transient
 	@Override
 	public String getDisplayText()
 	{
 		return projectName + " - " + getProjectDescription();
 	}
 
+	@Transient
 	@Override
 	public List<? extends Role> getSupportedRoles()
 	{
 		return Arrays.asList(ProjectRolesEnum.values());
 	}
-
+	@Transient
 	@Override
 	public List<? extends Action> getSupportedActions()
 	{

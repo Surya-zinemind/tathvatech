@@ -84,8 +84,8 @@ public class ProjectController {
     }
 
     /**
-     * @param acc
-     * @param projectName
+     * @param
+     * @param
      * @return
      * @throws Exception
      */
@@ -99,9 +99,9 @@ public class ProjectController {
      * Check if the name exists for a project other than the one specified as
      * the projectPk argument
      *
-     * @param acc
-     * @param projectName
-     * @param projectPk
+     * @param
+     * @param
+     * @param
      * @return
      * @throws Exception
      */
@@ -166,11 +166,11 @@ public class ProjectController {
 
     /**
      * We are setting a form on a project part. with no workstation information. the workstationPk will be null in the database
-     * @param context
-     * @param projectOID
-     * @param projectPartList
-     * @param selectedFormList
-     * @param testName
+     * @param
+     * @param
+     * @param
+     * @param
+     * @param
      * @throws Exception
      */
     @PutMapping("/updateFormsToProjectParts")
@@ -437,7 +437,7 @@ public class ProjectController {
     {
         return projectService.getProjectPartsWithTeams(getProjectPartsWithTeamsRequest.getProjectOID(), getProjectPartsWithTeamsRequest.getWorkstationOID());
     }
-   @GetMapping("/getProjectPartAssignedForms")
+   @GetMapping("/getProjectPartAssignedFormsProject")
    public  List<ProjectFormQuery> getProjectPartAssignedForms(@RequestBody ProjectOID projectOID)
     {
         return projectService.getProjectPartAssignedForms(projectOID);

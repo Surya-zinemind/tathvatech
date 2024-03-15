@@ -13,6 +13,7 @@ import com.tathvatech.project.common.ProjectSignatorySetBean;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
@@ -98,6 +99,7 @@ public class ProjectSignatorySet extends AbstractEntity implements Serializable
 	{
 		this.lastUpdated = lastUpdated;
 	}
+	@Transient
 	@Autowired
 	private PersistWrapper persistWrapper;
 	public ProjectSignatorySetBean getBean()
