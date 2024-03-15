@@ -3,6 +3,7 @@ package com.tathvatech.project.controller;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.forms.common.FormQuery;
 import com.tathvatech.forms.common.ProjectFormQuery;
+import com.tathvatech.project.Request.*;
 import com.tathvatech.project.common.ProjectFilter;
 import com.tathvatech.project.common.ProjectPartQuery;
 import com.tathvatech.project.common.ProjectQuery;
@@ -26,8 +27,8 @@ import com.tathvatech.workstation.entity.ProjectWorkstation;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -41,30 +42,27 @@ public class ProjectController {
     private  final Logger logger = LoggerFactory.getLogger(ProjectController.class);
     private final ProjectService projectService;
 
-    public  List<ProjectQuery> getProjectList(UserContext context, ProjectFilter filter)
+   @GetMapping("/getProjectList")
+   public  List<ProjectQuery> getProjectList( @RequestBody ProjectFilter filter)
     {
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return projectService.getProjectList(context, filter);
     }
 
-    public  List<Project> getProjectsAtSite(SiteOID siteOID)
+    @GetMapping("/getProjectsAtSite")
+    public  List<Project> getProjectsAtSite(@RequestBody SiteOID siteOID)
     {
         return projectService.getProjectsAtSite(siteOID);
     }
 
-    public  Project getProjectByName(String projectName)
-    {
-        try
-        {
-            return projectService.getProjectByName(projectName);
-        }
-        catch (Exception e)
-        {
-            logger.error("Error getting project by name", e);
-        }
-        return null;
+    @GetMapping("/getProjectByName/{projectName}")
+    public  Project getProjectByName(@PathVariable("projectName") String projectName) throws Exception {
+        return projectService.getProjectByName(projectName);
+
     }
 
-    public  Project getProject(int projectPk)
+    @GetMapping("/getProject/{projectPk}")
+    public  Project getProject(@PathVariable("projectPk") int projectPk)
     {
         return projectService.getProject(projectPk);
     }
@@ -73,11 +71,13 @@ public class ProjectController {
      * @param projectPk
      * @return
      */
-    public  ProjectQuery getProjectQueryByPk(int projectPk)
+    @GetMapping("/getProjectQueryByPk/{projectPk}")
+    public  ProjectQuery getProjectQueryByPk(@PathVariable("projectPk") int projectPk)
     {
         return projectService.getProjectByPk(projectPk);
     }
 
+    @GetMapping("/getActiveProjects")
     public  List<Project> getActiveProjects() throws Exception
     {
         return projectService.getActiveProjects();
@@ -89,9 +89,10 @@ public class ProjectController {
      * @return
      * @throws Exception
      */
-    public  boolean isProjectNameExist(Account acc, String projectName) throws Exception
+   @GetMapping("/isProjectNameExist")
+   public  boolean isProjectNameExist(@RequestBody IsProjectNameExistRequest isProjectNameExistRequest) throws Exception
     {
-        return projectService.isProjectNameExist(acc, projectName);
+        return projectService.isProjectNameExist(isProjectNameExistRequest.getAcc(), isProjectNameExistRequest.getProjectName());
     }
 
     /**
@@ -104,50 +105,59 @@ public class ProjectController {
      * @return
      * @throws Exception
      */
-    public  boolean isProjectNameExistForAnotherProject(Account acc, String projectName, int projectPk)
+    @GetMapping("/isProjectNameExistForAnotherProject")
+    public  boolean isProjectNameExistForAnotherProject(@RequestBody IsProjectNameExistForAnotherProjectRequest isProjectNameExistForAnotherProjectRequest)
             throws Exception
     {
-        return projectService.isProjectNameExistForAnotherProject(projectName, projectPk);
+        return projectService.isProjectNameExistForAnotherProject(isProjectNameExistForAnotherProjectRequest.getProjectName(),isProjectNameExistForAnotherProjectRequest.getProjectPk());
     }
 
-    public  void createProjectByCopy(UserContext context, Project project, String copyFromProjectPk)
+    @PostMapping("/createProjectByCopy")
+
+   public  void createProjectByCopy(@RequestBody CreateProjectByCopyRequest createProjectByCopyRequest)
             throws Exception
     {
-        ProjectQuery newProject = projectService.createProject(context, project);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ProjectQuery newProject = projectService.createProject(context, createProjectByCopyRequest.getProject());
 
     }
 
-    public  ProjectQuery createProject(UserContext context, Project project) throws Exception
+    @PostMapping("/createProject")
+    public  ProjectQuery createProject(@RequestBody Project project) throws Exception
     {
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return projectService.createProject(context, project);
         }
 
-    public  ProjectQuery updateProject(UserContext context, Project pVal) throws Exception
+    @PutMapping("/updateProject")
+    public  ProjectQuery updateProject(@RequestBody Project pVal) throws Exception
     {
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return projectService.updateProject(context, pVal);
         }
 
-    public ProjectPart getProjectPart(ProjectPartOID projectpartOID)
+    @GetMapping("/getProjectPart")
+    public ProjectPart getProjectPart(@RequestBody ProjectPartOID projectpartOID)
     {
         return projectService.getProjectPart(projectpartOID);
     }
-    public  void updateFormsToProjectPart(UserContext context, ProjectOID projectOID,
-                                                List<ProjectPartOID> projectPartList, WorkstationOID workstationOID, Collection<FormQuery> selectedFormList,
-                                                String testName) throws Exception
+   @PutMapping("/updateFormsToProjectPart")
+   public  void updateFormsToProjectPart( @RequestBody UpdateFormsToProjectPartRequest updateFormsToProjectPartRequest) throws Exception
     {
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
             // projectService.deleteAllFormsFromProjectPart(context,
             // projectPartOID, workstationPk);
 
-            for (Iterator iterator = projectPartList.iterator(); iterator.hasNext();)
+            for (Iterator iterator = updateFormsToProjectPartRequest.getProjectPartList().iterator(); iterator.hasNext();)
             {
                 ProjectPartOID projectPartOID = (ProjectPartOID) iterator.next();
 
-                for (Iterator iterator1 = selectedFormList.iterator(); iterator1.hasNext();)
+                for (Iterator iterator1 = updateFormsToProjectPartRequest.getSelectedFormList().iterator(); iterator1.hasNext();)
                 {
                     FormQuery formQuery = (FormQuery) iterator1.next();
-                    projectService.addFormToProjectPart(context, projectOID, projectPartOID, workstationOID,
-                            formQuery.getPk(), testName);
+                    projectService.addFormToProjectPart(context, updateFormsToProjectPartRequest.getProjectOID(), projectPartOID, updateFormsToProjectPartRequest.getWorkstationOID(),
+                            formQuery.getPk(), updateFormsToProjectPartRequest.getTestName());
                 }
             }
 
@@ -163,107 +173,119 @@ public class ProjectController {
      * @param testName
      * @throws Exception
      */
-    public  void updateFormsToProjectPart(UserContext context, ProjectOID projectOID,
-                                                List<ProjectPartOID> projectPartList, Collection<FormQuery> selectedFormList,
-                                                String testName) throws Exception
+    @PutMapping("/updateFormsToProjectParts")
+    public  void updateFormsToProjectPart( @RequestBody UpdateFormsToProjectPartsRequest updateFormsToProjectPartsRequest) throws Exception
     {
-
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
             // projectService.deleteAllFormsFromProjectPart(context,
             // projectPartOID, workstationPk);
 
-            for (Iterator iterator = projectPartList.iterator(); iterator.hasNext();)
+            for (Iterator iterator = updateFormsToProjectPartsRequest.getProjectPartList().iterator(); iterator.hasNext();)
             {
                 ProjectPartOID projectPartOID = (ProjectPartOID) iterator.next();
 
-                for (Iterator iterator1 = selectedFormList.iterator(); iterator1.hasNext();)
+                for (Iterator iterator1 = updateFormsToProjectPartsRequest.getSelectedFormList().iterator(); iterator1.hasNext();)
                 {
                     FormQuery formQuery = (FormQuery) iterator1.next();
-                    projectService.addFormToProjectPart(context, projectOID, projectPartOID,
-                            formQuery.getPk(), testName);
+                    projectService.addFormToProjectPart(context, updateFormsToProjectPartsRequest.getProjectOID(), projectPartOID,
+                            formQuery.getPk(),updateFormsToProjectPartsRequest.getTestName());
                 }
             }
 
     }
 
-    public  void removeProjectFromFromProject(UserContext userContext, ProjectFormOID projectFormOID)
+    @DeleteMapping("/removeProjectFromFromProject")
+    public  void removeProjectFromFromProject(@RequestBody ProjectFormOID projectFormOID)
             throws Exception
     {
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-
-            projectService.deleteProjectForm(userContext, projectFormOID);
+            projectService.deleteProjectForm(context, projectFormOID);
 
     }
-    public  List<ProjectFormQuery> getProjectFormsForProject(ProjectOID projectOID)
+   @GetMapping("/getProjectFormsForProject")
+   public  List<ProjectFormQuery> getProjectFormsForProject(@RequestBody ProjectOID projectOID)
     {
         return projectService.getProjectFormsForProject(projectOID);
     }
 
-    public  List<ProjectFormQuery> getProjectFormsForProject(int projectPk, WorkstationOID workstationOID)
+    @GetMapping("/getProjectFormsForProjects")
+    public  List<ProjectFormQuery> getProjectFormsForProject(@RequestBody GetProjectFormsForProjectRequest getProjectFormsForProjectRequest)
             throws Exception
     {
-        return projectService.getProjectFormsForProject(projectPk, workstationOID);
+        return projectService.getProjectFormsForProject(getProjectFormsForProjectRequest.getProjectPk(), getProjectFormsForProjectRequest.getWorkstationOID());
     }
 
 
-    public  List<User> getUsersForProjectInRole(ProjectOID projectOID, String roleName) throws Exception
+   @GetMapping("/getUsersForProjectInRole")
+   public  List<User> getUsersForProjectInRole(@RequestBody GetUsersForProjectInRoleRequest  getUsersForProjectInRoleRequest) throws Exception
     {
-        return projectService.getUsersForProjectInRole(projectOID, roleName);
+        return projectService.getUsersForProjectInRole(getUsersForProjectInRoleRequest.getProjectOID(), getUsersForProjectInRoleRequest.getRoleName());
     }
 
-    public  List<User> getUsersForProjectInRole(int projectPk, WorkstationOID workstationOID, String roleName)
+   @GetMapping("/getUsersForProjectInRoles")
+   public  List<User> getUsersForProjectInRole(@RequestBody GetUsersForProjectInRolesRequest getUsersForProjectInRolesRequest)
             throws Exception
     {
-        return projectService.getUsersForProjectInRole(projectPk, workstationOID, roleName);
+        return projectService.getUsersForProjectInRole(getUsersForProjectInRolesRequest.getProjectPk(), getUsersForProjectInRolesRequest.getWorkstationOID(), getUsersForProjectInRolesRequest.getRoleName());
     }
 
-    public  List<User> getUsersForProject(int projectPk, WorkstationOID workstationOID) throws Exception
+    @GetMapping("/getUsersForProject")
+    public  List<User> getUsersForProject(@RequestBody GetUsersForProjectRequest getUsersForProjectRequest) throws Exception
     {
-        return projectService.getUsersForProject(projectPk, workstationOID);
+        return projectService.getUsersForProject(getUsersForProjectRequest.getProjectPk(), getUsersForProjectRequest.getWorkstationOID());
     }
-    public  List<Project> getProjectsWhereTheUserIsReadOnly(UserContext context)
+    @GetMapping("/getProjectsWhereTheUserIsReadOnly")
+    public  List<Project> getProjectsWhereTheUserIsReadOnly()
     {
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return projectService.getProjectsWhereTheUserIsReadOnly(context);
     }
-    public  boolean isUserCoordinatorForProject(UserContext userContext, int projectPk)
+    @GetMapping("/isUserCoordinatorForProject/{projectPk}")
+    public  boolean isUserCoordinatorForProject( @PathVariable("projectPk") int projectPk)
     {
+        UserContext userContext= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return projectService.isUserCoordinatorForProject(userContext, projectPk);
     }
-    public  void removeAllUsersFromProject(UserContext context, int projectPk, WorkstationOID workstationOID)
+    @DeleteMapping("/removeAllUsersFromProject")
+    public  void removeAllUsersFromProject( @RequestBody RemoveAllUsersFromProjectRequest removeAllUsersFromProjectRequest)
             throws Exception
     {
-
-            projectService.removeAllUsersFromProject(context, projectPk, workstationOID);
+        UserContext userContext= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            projectService.removeAllUsersFromProject(userContext, removeAllUsersFromProjectRequest.getProjectPk(), removeAllUsersFromProjectRequest.getWorkstationOID());
         }
 
 
 
 
-    public  void addUserToProject(UserContext context, int projectPk, WorkstationOID workstationOID, int userPk,
-                                        String role) throws Exception
+   @PostMapping("/addUserToProject")
+   public  void addUserToProject(@RequestBody AddUserToProjectRequest addUserToProjectRequest) throws Exception
     {
-
-            projectService.addUserToProject(context, projectPk, workstationOID, userPk, role);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            projectService.addUserToProject(context,addUserToProjectRequest.getProjectPk() , addUserToProjectRequest.getWorkstationOID(),addUserToProjectRequest.getUserPk(),addUserToProjectRequest.getRole());
 
     }
 
-    public  void addReadonlyUserToProject(UserContext context, int projectPk, WorkstationOID workstationOID,
-                                                int userPk) throws Exception
+    @PostMapping("/addReadonlyUserToProject")
+    public  void addReadonlyUserToProject( @RequestBody AddReadonlyUserToProjectRequest addReadonlyUserToProjectRequest) throws Exception
     {
 
-
-            projectService.addReadonlyUserToProject(context, projectPk, workstationOID, userPk);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            projectService.addReadonlyUserToProject(context, addReadonlyUserToProjectRequest.getProjectPk(), addReadonlyUserToProjectRequest.getWorkstationOID(), addReadonlyUserToProjectRequest.getUserPk());
 
     }
 
-    public  void deleteProject(int projectPk) throws Exception
+    @DeleteMapping("/deleteProject/{projectPk}")
+    public  void deleteProject(@PathVariable("projectPk") int projectPk) throws Exception
     {
 
 
             projectService.deleteProject(projectPk);
 
     }
-    public  void closeProject(ProjectQuery projectQuery) throws Exception
+   @PutMapping("/closeProject")
+   public  void closeProject(@RequestBody ProjectQuery projectQuery) throws Exception
     {
 
 
@@ -271,61 +293,70 @@ public class ProjectController {
 
     }
 
-    public  void openProject(ProjectQuery projectQuery) throws Exception
+    @PutMapping("/openProject")
+    public  void openProject(@RequestBody ProjectQuery projectQuery) throws Exception
     {
 
 
             projectService.openProject(projectQuery);
 
     }
-    public  List<User> getprojectManagers(ProjectOID projectOID)
+   @GetMapping("/getprojectManagers")
+   public  List<User> getprojectManagers(@RequestBody ProjectOID projectOID)
     {
         return projectService.getProjectManagers(projectOID);
     }
 
-    public  List<User> getDataClerks(ProjectQuery projectQuery) throws Exception
+    @GetMapping("/getDataClerks")
+    public  List<User> getDataClerks(@RequestBody ProjectQuery projectQuery) throws Exception
     {
         return projectService.getDataClerks(projectQuery);
     }
-    public  void updateProjectTeam(UserContext context, ProjectOID projectOID, ProjectPartOID projectPartOID,
-                                   WorkstationOID wsOID, Collection testList, Collection verifyList, Collection approveList) throws Exception
+   @PutMapping("/updateProjectTeam")
+   public  void updateProjectTeam( @RequestBody UpdateProjectTeamRequest updateProjectTeamRequest) throws Exception
     {
 
-
-            projectService.updateProjectTeam(context, projectOID, projectPartOID, wsOID, testList, verifyList,
-                    approveList);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            projectService.updateProjectTeam(context, updateProjectTeamRequest.getProjectOID(), updateProjectTeamRequest.getProjectPartOID(),updateProjectTeamRequest.getWsOID(), updateProjectTeamRequest.getTestList(),updateProjectTeamRequest.getVerifyList(),
+                    updateProjectTeamRequest.getApproveList());
 
     }
 
-    public  List<Site> getSitesForProject(ProjectOID projectOID)
+   @GetMapping("/getSitesForProject")
+   public  List<Site> getSitesForProject(@RequestBody ProjectOID projectOID)
     {
         return projectService.getSitesForProject(projectOID);
     }
 
-    public  List<ProjectSiteConfig> getProjectSiteConfigs(ProjectOID projectOID) throws AppException
+   @GetMapping("/getProjectSiteConfigs")
+   public  List<ProjectSiteConfig> getProjectSiteConfigs(@RequestBody ProjectOID projectOID) throws AppException
     {
         return projectService.getProjectSiteConfigs(projectOID);
     }
 
-    public  void saveSitesForProject(ProjectOID projectOID, Collection<Site> siteList) throws Exception
+    @PostMapping("/saveSitesForProject")
+    public  void saveSitesForProject(@RequestBody SaveSitesForProjectRequest saveSitesForProjectRequest) throws Exception
     {
 
-            int a = projectService.saveSitesForProject(projectOID, siteList);
+            int a = projectService.saveSitesForProject(saveSitesForProjectRequest.getProjectOID(),saveSitesForProjectRequest.getSiteList());
 
 
     }
 
-    public ProjectStage getProjectStage(ProjectStageOID projectStageOID)
+   @GetMapping("/getProjectStage")
+   public ProjectStage getProjectStage(@RequestBody ProjectStageOID projectStageOID)
     {
         return projectService.getProjectStage(projectStageOID);
     }
 
-    public  List<ProjectStage> getProjectStages(ProjectOID projectOID)
+    @GetMapping("/getProjectStages")
+    public  List<ProjectStage> getProjectStages(@RequestBody ProjectOID projectOID)
     {
         return projectService.getProjectStages(projectOID);
     }
 
-    public  ProjectStage addProjectStage(ProjectStage projectStage) throws Exception
+    @PostMapping("/ addProjectStage")
+    public  ProjectStage addProjectStage(@RequestBody ProjectStage projectStage) throws Exception
     {
 
 
@@ -334,7 +365,8 @@ public class ProjectController {
 
     }
 
-    public  ProjectStage updateProjectStage(ProjectStage projectStage) throws Exception
+   @PutMapping("/updateProjectStage")
+   public  ProjectStage updateProjectStage(@RequestBody ProjectStage projectStage) throws Exception
     {
 
 
@@ -344,7 +376,8 @@ public class ProjectController {
 
     }
 
-    public  void removeProjectStage(int projectStagePk)throws Exception
+   @DeleteMapping("/removeProjectStage/{projectStagePk}")
+   public  void removeProjectStage(@PathVariable("projectStagePk") int projectStagePk)throws Exception
     {
 
 
@@ -353,17 +386,20 @@ public class ProjectController {
 
     }
 
-    public ProjectSignatorySetBean getProjectSignatorySet(ProjectSignatorySetOID sigSetOID)
+   @GetMapping("/getProjectSignatorySet")
+   public ProjectSignatorySetBean getProjectSignatorySet(@RequestBody ProjectSignatorySetOID sigSetOID)
     {
         return projectService.getProjectSignatorySet(sigSetOID);
     }
 
-    public  List<ProjectSignatorySetBean> getProjectSignatorySets(ProjectOID projectOID)
+    @GetMapping("/getProjectSignatorySets")
+    public  List<ProjectSignatorySetBean> getProjectSignatorySets(@RequestBody ProjectOID projectOID)
     {
         return projectService.getProjectSignatorySets(projectOID);
     }
 
-    public  ProjectSignatorySetBean addProjectSignatorySet(ProjectSignatorySetBean sBean) throws Exception
+   @PostMapping("/addProjectSignatorySet")
+   public  ProjectSignatorySetBean addProjectSignatorySet(@RequestBody ProjectSignatorySetBean sBean) throws Exception
     {
 
             ProjectSignatorySetBean set = projectService.addProjectSignatorySet(sBean);
@@ -372,7 +408,8 @@ public class ProjectController {
 
     }
 
-    public  ProjectSignatorySetBean updateProjectSignatorySet(ProjectSignatorySetBean sBean) throws Exception
+  @PutMapping("/updateProjectSignatorySet")
+  public  ProjectSignatorySetBean updateProjectSignatorySet(@RequestBody ProjectSignatorySetBean sBean) throws Exception
     {
 
 
@@ -382,37 +419,43 @@ public class ProjectController {
 
     }
 
-    public  void removeProjectSignatorySet(ProjectSignatorySetOID setOID) throws Exception
+   @DeleteMapping("/removeProjectSignatorySet")
+   public  void removeProjectSignatorySet(@RequestBody ProjectSignatorySetOID setOID) throws Exception
     {
 
             projectService.removeProjectSignatorySet(setOID);
 
     }
 
-    public List<Project> getProjectsForPart(PartOID partOID)
+    @GetMapping("/getProjectsForPart")
+    public List<Project> getProjectsForPart(@RequestBody PartOID partOID)
     {
         return projectService.getProjectsForPart(partOID);
     }
-    public  List<ProjectPartQuery> getProjectPartsWithTeams(ProjectOID projectOID, WorkstationOID workstationOID)
+    @GetMapping("/getProjectPartsWithTeams")
+    public  List<ProjectPartQuery> getProjectPartsWithTeams(@RequestBody GetProjectPartsWithTeamsRequest getProjectPartsWithTeamsRequest)
     {
-        return projectService.getProjectPartsWithTeams(projectOID, workstationOID);
+        return projectService.getProjectPartsWithTeams(getProjectPartsWithTeamsRequest.getProjectOID(), getProjectPartsWithTeamsRequest.getWorkstationOID());
     }
-    public  List<ProjectFormQuery> getProjectPartAssignedForms(ProjectOID projectOID)
+   @GetMapping("/getProjectPartAssignedForms")
+   public  List<ProjectFormQuery> getProjectPartAssignedForms(@RequestBody ProjectOID projectOID)
     {
         return projectService.getProjectPartAssignedForms(projectOID);
     }
 
-    public  List<ProjectFormQuery> getProjectPartAssignedForms(ProjectOID projectOID, ProjectPartOID projectPartOID)
+  @GetMapping("/getProjectPartAssignedForms")
+  public  List<ProjectFormQuery> getProjectPartAssignedForms(@RequestBody GetProjectPartAssignedFormsRequest getProjectPartAssignedFormsRequest)
     {
-        return projectService.getProjectPartAssignedForms(projectOID, projectPartOID);
+        return projectService.getProjectPartAssignedForms(getProjectPartAssignedFormsRequest.getProjectOID(), getProjectPartAssignedFormsRequest.getProjectPartOID());
     }
 
-    public  void removeProjectAttachment(UserContext userContext, Attachment attachment) throws Exception
+   @DeleteMapping("/removeProjectAttachment")
+   public  void removeProjectAttachment(@RequestBody Attachment attachment) throws Exception
     {
 
             // TODO:: add code here to check if the attachment has open items added to this drawing and throw an error if so.
-
-            new CommonServiceManager().removeAttachment(userContext, attachment);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            new CommonServiceManager().removeAttachment(context, attachment);
 
 
 
@@ -420,7 +463,8 @@ public class ProjectController {
 
     }
 
-    public  List<ProjectWorkstation> getProjectWorkstations(ProjectOID projectOID)
+   @GetMapping("/getProjectWorkstations")
+   public  List<ProjectWorkstation> getProjectWorkstations(@RequestBody ProjectOID projectOID)
     {
         return projectService.getProjectWorkstations(projectOID);
     }
