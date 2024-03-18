@@ -355,7 +355,7 @@ public class ProjectController {
         return projectService.getProjectStages(projectOID);
     }
 
-    @PostMapping("/ addProjectStage")
+    @PostMapping("/addProjectStage")
     public  ProjectStage addProjectStage(@RequestBody ProjectStage projectStage) throws Exception
     {
 

@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -498,6 +499,7 @@ public class ProjectServiceImpl implements ProjectService{
         return projectQuery;
 
     }
+    @Transactional
     public  ProjectQuery updateProject(UserContext context, Project project) throws Exception
     {
 
@@ -604,7 +606,8 @@ public class ProjectServiceImpl implements ProjectService{
         persistWrapper.createEntity(pForm);
     }
 
-    public  void deleteProjectForm(UserContext context, ProjectFormOID projectFormOID) throws Exception
+   @Transactional
+   public  void deleteProjectForm(UserContext context, ProjectFormOID projectFormOID) throws Exception
     {
         ProjectForm pForm = (ProjectForm) persistWrapper.readByPrimaryKey(ProjectForm.class, projectFormOID.getPk());
         persistWrapper.deleteEntity(pForm);
@@ -642,7 +645,8 @@ public class ProjectServiceImpl implements ProjectService{
         persistWrapper.createEntity(pUser);
     }
 
-    public  void addUserToProject(UserContext context, int projectPk, WorkstationOID workstationOID, int userPk,
+   @Transactional
+   public  void addUserToProject(UserContext context, int projectPk, WorkstationOID workstationOID, int userPk,
                                         String role) throws Exception
     {
         ProjectUser pUser = new ProjectUser();
@@ -654,7 +658,8 @@ public class ProjectServiceImpl implements ProjectService{
         persistWrapper.createEntity(pUser);
     }
 
-    public  void addReadonlyUserToProject(UserContext context, int projectPk, WorkstationOID workstationOID,
+  @Transactional
+  public  void addReadonlyUserToProject(UserContext context, int projectPk, WorkstationOID workstationOID,
                                                 int userPk) throws Exception
     {
         ProjectUser pUser = new ProjectUser();
@@ -939,7 +944,8 @@ public class ProjectServiceImpl implements ProjectService{
             throw new AppException((String[]) errors.toArray(new String[errors.size()]));
         }
     }
-    public  void closeProject(ProjectQuery projectQuery) throws Exception
+   @Transactional
+   public  void closeProject(ProjectQuery projectQuery) throws Exception
     {
         // TODO some other logic need to be done when a project is closed
         Project p = (Project) persistWrapper.readByPrimaryKey(Project.class, projectQuery.getPk());
@@ -947,7 +953,8 @@ public class ProjectServiceImpl implements ProjectService{
         persistWrapper.update(p);
     }
 
-    public  void openProject(ProjectQuery projectQuery) throws Exception
+   @Transactional
+   public  void openProject(ProjectQuery projectQuery) throws Exception
     {
         // TODO some other process need to be done when a project is opened
         Project p = (Project) persistWrapper.readByPrimaryKey(Project.class, projectQuery.getPk());
@@ -1012,7 +1019,8 @@ public class ProjectServiceImpl implements ProjectService{
         }
     }
 
-    public ProjectStage addProjectStage(ProjectStage projectStage) throws Exception
+   @Transactional
+   public ProjectStage addProjectStage(ProjectStage projectStage) throws Exception
     {
         if(projectStage.getProjectFk() == 0)
             throw new AppException("Project not specified; Cannot add stage");
@@ -1026,7 +1034,8 @@ public class ProjectServiceImpl implements ProjectService{
         return (ProjectStage) persistWrapper.readByPrimaryKey(ProjectStage.class, newPk);
     }
 
-    public  ProjectStage updateProjectStage(ProjectStage projectStage) throws Exception
+   @Transactional
+   public  ProjectStage updateProjectStage(ProjectStage projectStage) throws Exception
     {
         ProjectStage ps = (ProjectStage) persistWrapper.readByPrimaryKey(ProjectStage.class, projectStage.getPk());
         if(ps == null)
@@ -1047,7 +1056,8 @@ public class ProjectServiceImpl implements ProjectService{
         return (ProjectStage) persistWrapper.readByPrimaryKey(ProjectStage.class, projectStage.getPk());
     }
 
-    public  void removeProjectStage(int projectStagePk) throws Exception
+   @Transactional
+   public  void removeProjectStage(int projectStagePk) throws Exception
     {
         ProjectStage ps = (ProjectStage) persistWrapper.readByPrimaryKey(ProjectStage.class, projectStagePk);
         if(ps == null)
