@@ -465,7 +465,7 @@ public class ProjectServiceImpl implements ProjectService{
         }
     }
 
-    public  ProjectQuery createProject(UserContext context, Project project) throws Exception
+   /* public  ProjectQuery createProject(UserContext context, Project project) throws Exception
     {
         Account acc = (Account) context.getAccount();
         User user = (User) context.getUser();
@@ -498,7 +498,7 @@ public class ProjectServiceImpl implements ProjectService{
 
         return projectQuery;
 
-    }
+    }*/
     @Transactional
     public  ProjectQuery updateProject(UserContext context, Project project) throws Exception
     {
@@ -1067,7 +1067,7 @@ public class ProjectServiceImpl implements ProjectService{
         persistWrapper.update(ps);
     }
 
-    public ProjectSignatorySetBean getProjectSignatorySet(ProjectSignatorySetOID sigSetOID)
+    /*public ProjectSignatorySetBean getProjectSignatorySet(ProjectSignatorySetOID sigSetOID)
     {
         ProjectSignatorySet set = (ProjectSignatorySet) persistWrapper.readByPrimaryKey(ProjectSignatorySet.class, sigSetOID.getPk());
         if(set != null)
@@ -1200,7 +1200,7 @@ public class ProjectServiceImpl implements ProjectService{
 
         set.setEstatus(EStatusEnum.Deleted.getValue());
         persistWrapper.update(set);
-    }
+    }*/
     public  List<Project> getProjectsForPart(PartOID partOID)
     {
         try

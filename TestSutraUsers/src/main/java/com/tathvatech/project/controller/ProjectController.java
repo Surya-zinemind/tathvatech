@@ -112,8 +112,7 @@ public class ProjectController {
         return projectService.isProjectNameExistForAnotherProject(isProjectNameExistForAnotherProjectRequest.getProjectName(),isProjectNameExistForAnotherProjectRequest.getProjectPk());
     }
 
-    @PostMapping("/createProjectByCopy")
-
+    /*@PostMapping("/createProjectByCopy")
    public  void createProjectByCopy(@RequestBody CreateProjectByCopyRequest createProjectByCopyRequest)
             throws Exception
     {
@@ -128,7 +127,7 @@ public class ProjectController {
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return projectService.createProject(context, project);
         }
-
+*/
     @PutMapping("/updateProject")
     public  ProjectQuery updateProject(@RequestBody Project pVal) throws Exception
     {
@@ -386,7 +385,7 @@ public class ProjectController {
 
     }
 
-   @GetMapping("/getProjectSignatorySet")
+  /* @GetMapping("/getProjectSignatorySet")
    public ProjectSignatorySetBean getProjectSignatorySet(@RequestBody ProjectSignatorySetOID sigSetOID)
     {
         return projectService.getProjectSignatorySet(sigSetOID);
@@ -425,7 +424,7 @@ public class ProjectController {
 
             projectService.removeProjectSignatorySet(setOID);
 
-    }
+    }*/
 
     @GetMapping("/getProjectsForPart")
     public List<Project> getProjectsForPart(@RequestBody PartOID partOID)

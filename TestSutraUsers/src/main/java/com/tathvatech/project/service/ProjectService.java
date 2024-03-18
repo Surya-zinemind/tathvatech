@@ -31,7 +31,7 @@ public interface ProjectService {
     List<Project> getActiveProjects() throws Exception;
     boolean isProjectNameExist(Account acc, String projectName) throws Exception;
     boolean isProjectNameExistForAnotherProject(String projectName, int projectPk) throws Exception;
-    ProjectQuery createProject(UserContext context, Project project) throws Exception;
+   // ProjectQuery createProject(UserContext context, Project project) throws Exception;
     ProjectQuery updateProject(UserContext context, Project project) throws Exception;
     ProjectPart getProjectPart(ProjectPartOID projectpartOID);
     void addFormToProjectPart(UserContext context, ProjectOID projectOID, ProjectPartOID projectPartOID,
@@ -85,11 +85,12 @@ public interface ProjectService {
     ProjectStage addProjectStage(ProjectStage projectStage) throws Exception;
     ProjectStage updateProjectStage(ProjectStage projectStage) throws Exception;
     void removeProjectStage(int projectStagePk) throws Exception;
-    ProjectSignatorySetBean getProjectSignatorySet(ProjectSignatorySetOID sigSetOID);
+    //Commenting
+   /* ProjectSignatorySetBean getProjectSignatorySet(ProjectSignatorySetOID sigSetOID);
     List<ProjectSignatorySetBean> getProjectSignatorySets(ProjectOID projectOID);
     ProjectSignatorySetBean addProjectSignatorySet(ProjectSignatorySetBean sBean) throws Exception;
     ProjectSignatorySetBean updateProjectSignatorySet(ProjectSignatorySetBean sBean) throws Exception;
-    void removeProjectSignatorySet(ProjectSignatorySetOID setOID) throws Exception;
+    void removeProjectSignatorySet(ProjectSignatorySetOID setOID) throws Exception;*/
     List<Project> getProjectsForPart(PartOID partOID);
     List<ProjectPartQuery> getProjectPartsWithTeams(ProjectOID projectOID, WorkstationOID workstationOID);
     List<ProjectFormQuery> getProjectPartAssignedForms(ProjectOID projectOID);
