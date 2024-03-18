@@ -16,23 +16,25 @@ import com.tathvatech.user.entity.UserPreferencesData;
 import com.tathvatech.user.entity.UserPreferencesDataBean;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.util.*;
 
-
+@Service
 public class CommonServiceManager
 {
 
-	@Autowired
-	static PersistWrapper persistWrapper;
+	 @Autowired
+	 private PersistWrapper persistWrapper;
 
-	public static void saveSnapshot(UserContext context, VersionableEntity versionableEntity)
+	public  void saveSnapshot(UserContext context, VersionableEntity versionableEntity)
 	{
 		saveSnapshot(context, null, versionableEntity);
 	}
 
-	public static void saveSnapshot(UserContext context, String versionContext, VersionableEntity versionableEntity)
+	public  void saveSnapshot(UserContext context, String versionContext, VersionableEntity versionableEntity)
 	{
 		try {
 			EntityVersion v = new EntityVersion();
@@ -112,7 +114,7 @@ public class CommonServiceManager
 	 * @return
 	 * @throws Exception
 	 */
-	public static EntityConfigData saveEntityConfig(OID entityOID, String property, Integer intParam1, String stringParam1, String value) throws Exception
+	public  EntityConfigData saveEntityConfig(OID entityOID, String property, Integer intParam1, String stringParam1, String value) throws Exception
 	{
 		StringBuilder sb = new StringBuilder("select * from entity_config_data where "
 				+ " objectPk=? and objectType=? and property=?");
@@ -161,7 +163,7 @@ public class CommonServiceManager
 		return (EntityConfigData) persistWrapper.readByPrimaryKey(EntityConfigData.class, pkRet);
 	}
 
-	public static void removeEntityConfig(OID entityOID, String property, Integer intParam1, String stringParam1) throws Exception
+	public  void removeEntityConfig(OID entityOID, String property, Integer intParam1, String stringParam1) throws Exception
 	{
 		StringBuilder sb = new StringBuilder("select * from entity_config_data where "
 				+ " objectPk=? and objectType=? and property=?");
@@ -194,7 +196,7 @@ public class CommonServiceManager
 			persistWrapper.deleteEntity(cdata);
 	}
 
-	public static UserPreferencesData saveUserPreferenceData(UserPreferencesDataBean bean) throws Exception
+	public  UserPreferencesData saveUserPreferenceData(UserPreferencesDataBean bean) throws Exception
 	{
 		if(StringUtils.isEmpty(bean.getValue()))
 			throw new AppException("Value string cannot be empty");
@@ -234,7 +236,7 @@ public class CommonServiceManager
 		return (UserPreferencesData) persistWrapper.readByPrimaryKey(UserPreferencesData.class, pkRet);
 	}
 	
-	public static List<UserPreferencesData> getUserPreferenceData(UserOID userOID, OID anchorObjectOID, String property)
+	public  List<UserPreferencesData> getUserPreferenceData(UserOID userOID, OID anchorObjectOID, String property)
 	{
 		List<Object> params = new ArrayList<Object>();
 		StringBuilder sb = new StringBuilder("select * from user_preferences_data where userPk = ? ");
@@ -256,14 +258,14 @@ public class CommonServiceManager
 		return persistWrapper.readList(UserPreferencesData.class, sb.toString(), params.toArray());
 	}
 
-	public static List<EntityReference> getEntityReferences(OID fromOID)
+	public  List<EntityReference> getEntityReferences(OID fromOID)
 	{
 		List currentList = persistWrapper.readList(EntityReference.class, "select * from reference where referenceFromPk = ? and referenceFromType = ?", 
 				fromOID.getPk(), fromOID.getEntityType().getValue());
 		return currentList;
 	}
 	
-	public static void createEntityReference(UserContext context, OID fromOID, OID toOID)throws Exception
+	public  void createEntityReference(UserContext context, OID fromOID, OID toOID)throws Exception
 	{
 		List currentList = persistWrapper.readList(EntityReference.class, "select * from reference where referenceFromPk = ? and referenceFromType = ? and "
 				+ " referenceToPk = ? and referenceToType = ?", 
@@ -281,13 +283,13 @@ public class CommonServiceManager
 		persistWrapper.createEntity(ref);
 	}
 	
-	public static List getAttachments(int objectPk, int objectType) 
+	public  List getAttachments(int objectPk, int objectType) 
 	{
 		return persistWrapper.readList(Attachment.class, "select * from TAB_ATTACHMENT where objectPk=? and objectType=? and estatus != 9 ",
 				objectPk, objectType);
 	}
 
-	public static List getAttachments(Integer[] objectPkList, int objectType) 
+	public  List getAttachments(Integer[] objectPkList, int objectType) 
 	{
 		String pks = Arrays.deepToString(objectPkList);
 		pks = pks.replace('[', '(');
@@ -296,7 +298,7 @@ public class CommonServiceManager
 				objectType);
 	}
 
-	public static List<Attachment> getAttachments(int objectPk, int objectType, String attachmentcontext)
+	public  List<Attachment> getAttachments(int objectPk, int objectType, String attachmentcontext)
 	{
 		if(attachmentcontext == null)
 		{
@@ -313,7 +315,7 @@ public class CommonServiceManager
 	}
 
 	
-	public static void addAttachments(UserContext context, int objectPk, int objectType,
+	public  void addAttachments(UserContext context, int objectPk, int objectType,
 			List<AttachmentIntf> attachedFiles) throws Exception 
 	{
 		if(attachedFiles == null)
@@ -343,7 +345,7 @@ public class CommonServiceManager
 	 * @param deleteItemsNotInList attachements not in the passed list which area already available under this object is removed if deleteItemsNotInList is true. They are only added or updated
 	 * @throws Exception
 	 */
-	public static void saveAttachments(UserContext context, int objectPk, int objectType,
+	public  void saveAttachments(UserContext context, int objectPk, int objectType,
 									   List<AttachmentIntf> attachedFiles, boolean deleteItemsNotInList) throws Exception
 	{
 		if(attachedFiles == null)
@@ -377,8 +379,8 @@ public class CommonServiceManager
 			}
 		}
 	}
-
-	public static void saveAttachments(UserContext context, int objectPk, int objectType, String attachmentContext,
+@Transactional
+	public  void saveAttachments(UserContext context, int objectPk, int objectType, String attachmentContext,
 			List<? extends AttachmentIntf> attachedFiles) throws Exception 
 	{
 		List currentAtts = getAttachments(objectPk, objectType, attachmentContext);
@@ -409,7 +411,8 @@ public class CommonServiceManager
 		
 	}
 
-	public static void removeAttachment(UserContext userContext, Attachment attachment) throws Exception
+	@Transactional
+	public  void removeAttachment(UserContext userContext, Attachment attachment) throws Exception
 	{
 		String fileName = attachment.getFileName();
 		

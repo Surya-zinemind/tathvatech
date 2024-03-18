@@ -41,6 +41,7 @@ public class ProjectController {
 
     private  final Logger logger = LoggerFactory.getLogger(ProjectController.class);
     private final ProjectService projectService;
+    private final CommonServiceManager commonServiceManager;
 
    @GetMapping("/getProjectList")
    public  List<ProjectQuery> getProjectList( @RequestBody ProjectFilter filter)
@@ -454,7 +455,7 @@ public class ProjectController {
 
             // TODO:: add code here to check if the attachment has open items added to this drawing and throw an error if so.
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            new CommonServiceManager().removeAttachment(context, attachment);
+        commonServiceManager.removeAttachment(context, attachment);
 
 
 

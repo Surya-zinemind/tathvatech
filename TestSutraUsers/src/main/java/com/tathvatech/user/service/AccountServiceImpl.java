@@ -48,10 +48,13 @@ public class AccountServiceImpl implements AccountService {
 
 	private final SequenceIdGenerator sequenceIdGenerator;
 
-    public AccountServiceImpl(PersistWrapper persistWrapper, UserPasswordResetKeyDAO userPasswordResetKeyDAO, SequenceIdGenerator sequenceIdGenerator) {
+	private final CommonServiceManager commonServiceManager;
+
+    public AccountServiceImpl(PersistWrapper persistWrapper, UserPasswordResetKeyDAO userPasswordResetKeyDAO, SequenceIdGenerator sequenceIdGenerator, CommonServiceManager commonServiceManager) {
         this.persistWrapper = persistWrapper;
         this.userPasswordResetKeyDAO = userPasswordResetKeyDAO;
         this.sequenceIdGenerator = sequenceIdGenerator;
+        this.commonServiceManager = commonServiceManager;
     }
 
 
@@ -202,7 +205,7 @@ public class AccountServiceImpl implements AccountService {
         }
         
 		//now save the attachments
-        CommonServiceManager.saveAttachments(context, (int) user.getPk(), EntityTypeEnum.User.getValue(), User.AttachContext_ProfilePic, attachments);
+        commonServiceManager.saveAttachments(context, (int) user.getPk(), EntityTypeEnum.User.getValue(), User.AttachContext_ProfilePic, attachments);
         
 		NotificationsDelegate.notifyNewUserCreated(user, userPassword, sendWelcomeKit);
         return user;
@@ -274,7 +277,7 @@ public class AccountServiceImpl implements AccountService {
         }
         
 		//now save the attachments
-        CommonServiceManager.saveAttachments(context, (int) user.getPk(), EntityTypeEnum.User.getValue(), User.AttachContext_ProfilePic, attachments);
+        commonServiceManager.saveAttachments(context, (int) user.getPk(), EntityTypeEnum.User.getValue(), User.AttachContext_ProfilePic, attachments);
         
 
         //if the user is of restricted type, make sure that it has no users assigned to it.

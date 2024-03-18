@@ -32,15 +32,19 @@ import com.tathvatech.user.entity.Attachment;
 import com.tathvatech.user.entity.UserPreferencesData;
 import com.tathvatech.user.entity.UserPreferencesDataBean;
 import com.tathvatech.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 
-
+@Service
+@RequiredArgsConstructor
 public class CommonServicesDelegate 
 {
-	@Autowired
-	static PersistWrapper persistWrapper;
+	
+	 private final PersistWrapper persistWrapper;
+	 private final CommonServiceManager commonServiceManager;
 	
 	public List<TSTimeZone> getSupportedTimeZoneIDs()
 	{
@@ -55,7 +59,7 @@ public class CommonServicesDelegate
 	}
 	
 	
-	private static String displayTimeZone(String id) 
+	private  String displayTimeZone(String id) 
 	{
 		Date now = new Date();
 		TimeZone tz = TimeZone.getTimeZone(id);
@@ -81,7 +85,7 @@ public class CommonServicesDelegate
 
 	}
 	
-	public static List<EntityVersion> getEntityVersions(EntityVersionFilter filter)
+	public  List<EntityVersion> getEntityVersions(EntityVersionFilter filter)
 	{
 		if(filter.getEntityType() == null)
 			throw new AppException("Invalid entityType");
@@ -123,12 +127,12 @@ public class CommonServicesDelegate
 		return persistWrapper.readByPrimaryKey(class1, pk);
 	}
 
-	public static EntityConfigData saveEntityConfig(OID entityOID, String property, String value) throws Exception
+	public  EntityConfigData saveEntityConfig(OID entityOID, String property, String value) throws Exception
 	{
 		return saveEntityConfig(entityOID, property, null, null, value);
 	}
 	
-	public static EntityConfigData saveEntityConfig(OID entityOID, String property, Integer intParam1, String stringParam1, String value) throws Exception
+	public  EntityConfigData saveEntityConfig(OID entityOID, String property, Integer intParam1, String stringParam1, String value) throws Exception
 	{
         Connection con = null;
         try
@@ -136,7 +140,7 @@ public class CommonServicesDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-            EntityConfigData e = CommonServiceManager.saveEntityConfig(entityOID, property, intParam1, stringParam1, value);
+            EntityConfigData e = commonServiceManager.saveEntityConfig(entityOID, property, intParam1, stringParam1, value);
             con.commit();
             return e;
         }
@@ -153,16 +157,16 @@ public class CommonServicesDelegate
 	
 	public <T> Object getEntityPropertyValue(OID entityOID, String property, Class<T> type)
 	{
-		return new CommonServiceManager().getEntityPropertyValue(entityOID, property, null, null, type);
+		return  commonServiceManager.getEntityPropertyValue(entityOID, property, null, null, type);
 	}
 
 	public <T> Object getEntityPropertyValue(OID entityOID, String property, Integer intParam1, String stringParam1, Class<T> type)
 	{
-		return new CommonServiceManager().getEntityPropertyValue(entityOID, property, intParam1, stringParam1, type);
+		return  commonServiceManager.getEntityPropertyValue(entityOID, property, intParam1, stringParam1, type);
 	}
 	
 
-	public static void removeEntityConfig(OID entityOID, String property, Integer intParam1, String stringParam1) throws Exception
+	public  void removeEntityConfig(OID entityOID, String property, Integer intParam1, String stringParam1) throws Exception
 	{
         Connection con = null;
         try
@@ -170,7 +174,7 @@ public class CommonServicesDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-            CommonServiceManager.removeEntityConfig(entityOID, property, intParam1, stringParam1);
+            commonServiceManager.removeEntityConfig(entityOID, property, intParam1, stringParam1);
             con.commit();
         }
         catch(Exception ex)
@@ -183,7 +187,7 @@ public class CommonServicesDelegate
         }
 	}
 	
-	public static String saveImageAsByteArrayToFileStore(String fileNameOrginal, String imageString)throws Exception
+	public  String saveImageAsByteArrayToFileStore(String fileNameOrginal, String imageString)throws Exception
 	{
     	if(imageString != null && imageString.length() > 0)
     	{
@@ -218,7 +222,7 @@ public class CommonServicesDelegate
     	return null;
 	}
 	
-	public static UserPreferencesDataBean saveUserPreferenceData(UserPreferencesDataBean bean)throws Exception
+	public  UserPreferencesDataBean saveUserPreferenceData(UserPreferencesDataBean bean)throws Exception
 	{
         Connection con = null;
         try
@@ -226,7 +230,7 @@ public class CommonServicesDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-            UserPreferencesData e = CommonServiceManager.saveUserPreferenceData(bean);
+            UserPreferencesData e = commonServiceManager.saveUserPreferenceData(bean);
             
             UserPreferencesDataBean b = new UserPreferencesDataBean();
             b.setCreatedDate(e.getCreatedDate());
@@ -254,10 +258,10 @@ public class CommonServicesDelegate
         }
 	}
 	
-	public static List<UserPreferencesDataBean> getUserPreferenceData(UserOID userOID, OID anchorObjectOID, String property)
+	public  List<UserPreferencesDataBean> getUserPreferenceData(UserOID userOID, OID anchorObjectOID, String property)
 	{
 		List<UserPreferencesDataBean> returnList = new ArrayList<UserPreferencesDataBean>();
-		List<UserPreferencesData> list = CommonServiceManager.getUserPreferenceData(userOID, anchorObjectOID, property);
+		List<UserPreferencesData> list = commonServiceManager.getUserPreferenceData(userOID, anchorObjectOID, property);
 		for (Iterator iterator = list.iterator(); iterator.hasNext();) {
 			UserPreferencesData e = (UserPreferencesData) iterator.next();
 			
@@ -280,28 +284,28 @@ public class CommonServicesDelegate
 	}
 
 
-	public static List getEntityReferences(TestProcOID oid)
+	public  List getEntityReferences(TestProcOID oid)
 	{
-		return CommonServiceManager.getEntityReferences(oid);
+		return commonServiceManager.getEntityReferences(oid);
 	}	
 	
-	public static List getAttachments(int objectPk, int objectType)  
+	public  List getAttachments(int objectPk, int objectType)  
 	{
-		return CommonServiceManager.getAttachments(objectPk, objectType);
+		return commonServiceManager.getAttachments(objectPk, objectType);
 	}
 
-	public static List getAttachments(Integer[] objectPks, int objectType)  
+	public  List getAttachments(Integer[] objectPks, int objectType)  
 	{
-		return CommonServiceManager.getAttachments(objectPks, objectType);
+		return commonServiceManager.getAttachments(objectPks, objectType);
 	}
 
-	public static List getAttachments(int objectPk, int objectType,
+	public  List getAttachments(int objectPk, int objectType,
 			String attachmentcontext) throws Exception 
 	{
-		return CommonServiceManager.getAttachments(objectPk, objectType, attachmentcontext);
+		return commonServiceManager.getAttachments(objectPk, objectType, attachmentcontext);
 	}
 
-	public static void addAttachments(UserContext context, int objectPk, int objectType,
+	public  void addAttachments(UserContext context, int objectPk, int objectType,
 									  List<AttachmentIntf> attachedFiles) throws Exception
 	{
         Connection con = null;
@@ -310,7 +314,7 @@ public class CommonServicesDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-            CommonServiceManager.addAttachments(context, objectPk, objectType, attachedFiles);
+            commonServiceManager.addAttachments(context, objectPk, objectType, attachedFiles);
     		
             con.commit();
         }
@@ -324,7 +328,7 @@ public class CommonServicesDelegate
 	    }
 	}
 	
-	public static void saveAttachments(UserContext context, int objectPk, int objectType, 
+	public  void saveAttachments(UserContext context, int objectPk, int objectType, 
 			List<AttachmentIntf> attachedFiles, boolean deleteItemsNotInList) throws Exception 
 	{
         Connection con = null;
@@ -333,7 +337,7 @@ public class CommonServicesDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-            CommonServiceManager.saveAttachments(context, objectPk, objectType, attachedFiles, deleteItemsNotInList);
+            commonServiceManager.saveAttachments(context, objectPk, objectType, attachedFiles, deleteItemsNotInList);
     		
             con.commit();
         }
@@ -347,7 +351,7 @@ public class CommonServicesDelegate
 	    }
 	}
 
-	public static void saveAttachments(UserContext context, int objectPk, int objectType, String attachmentContext, 
+	public  void saveAttachments(UserContext context, int objectPk, int objectType, String attachmentContext, 
 			List<AttachmentIntf> attachedFiles) throws Exception
 	{
         Connection con = null;
@@ -356,7 +360,7 @@ public class CommonServicesDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-    		CommonServiceManager.saveAttachments(context, objectPk, objectType, attachmentContext, attachedFiles);
+    		commonServiceManager.saveAttachments(context, objectPk, objectType, attachmentContext, attachedFiles);
     		
             con.commit();
         }
@@ -371,7 +375,7 @@ public class CommonServicesDelegate
 	}
 
 
-	public static void removeAttachment(UserContext userContext, Attachment attachment)throws Exception
+	public  void removeAttachment(UserContext userContext, Attachment attachment)throws Exception
 	{
         Connection con = null;
         try
@@ -379,7 +383,7 @@ public class CommonServicesDelegate
             con = ServiceLocator.locate().getConnection();
             con.setAutoCommit(false);
 
-    		CommonServiceManager.removeAttachment(userContext, attachment);
+    		commonServiceManager.removeAttachment(userContext, attachment);
     		
             con.commit();
         }

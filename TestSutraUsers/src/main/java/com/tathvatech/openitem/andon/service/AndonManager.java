@@ -33,7 +33,7 @@ public class AndonManager
 	private static final Logger logger = LoggerFactory.getLogger(AndonManager.class);
 
    private final PersistWrapper persistWrapper;
-
+   private final CommonServiceManager commonServiceManager;
    @Lazy
    @Autowired
    private  WorkstationService workstationService;
@@ -357,7 +357,7 @@ public class AndonManager
 				attachmentlist.add(attachmentIntf);
 			}
 		}
-		CommonServiceManager.saveAttachments(context, (int) andon.getPk(), EntityTypeEnum.Andon.getValue(), attachmentlist,
+		commonServiceManager.saveAttachments(context, (int) andon.getPk(), EntityTypeEnum.Andon.getValue(), attachmentlist,
 				true);
 		return getAndon(andon.getPk());
 	}
@@ -419,7 +419,7 @@ public class AndonManager
 			andonBean.setStatus(andon.getStatus());
 			andonBean.setLastUpdated(andon.getLastUpdated());
 			andonBean.setAttachments(
-					CommonServiceManager.getAttachments((int) andon.getPk(), EntityTypeEnum.Andon.getValue()));
+					commonServiceManager.getAttachments((int) andon.getPk(), EntityTypeEnum.Andon.getValue()));
 
 			//Fix later
 			/*List<HazardReferenceBean> mrfReference = HazardMaintanenceManager.getCreatedChildReference(andon.getPk(),
