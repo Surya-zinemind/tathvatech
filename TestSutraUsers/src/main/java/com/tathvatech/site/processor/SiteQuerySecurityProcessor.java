@@ -24,6 +24,9 @@ public class SiteQuerySecurityProcessor {
 	@Autowired
 	private  AuthorizationManager authorizationManager;
 
+	@Autowired
+	private CommonServicesDelegate commonServicesDelegate;
+
 	public void addAuthorizationFilterParams(UserContext context, SiteFilter siteFilter) throws Exception
 	{
 		if(User.USER_PRIMARY.equals(context.getUser().getUserType()))
@@ -61,7 +64,7 @@ public class SiteQuerySecurityProcessor {
 				for (Iterator iterator = projectSitePks.iterator(); iterator.hasNext();)
 				{
 					Integer aProjectSitePk = (Integer) iterator.next();
-					ProjectSiteConfig aPConfig = (ProjectSiteConfig)new CommonServicesDelegate().getObjectByPk(ProjectSiteConfig.class, aProjectSitePk);
+					ProjectSiteConfig aPConfig = (ProjectSiteConfig) commonServicesDelegate.getObjectByPk(ProjectSiteConfig.class, aProjectSitePk);
 					if(aPConfig != null)
 					{
 						if(!(returnList.contains(aPConfig.getSiteFk())))

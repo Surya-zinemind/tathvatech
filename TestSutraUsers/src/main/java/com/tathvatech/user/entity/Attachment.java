@@ -11,6 +11,7 @@ import com.tathvatech.common.entity.AttachmentIntf;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -30,6 +31,7 @@ public class Attachment  extends AbstractEntity   implements AttachmentIntf, Ser
 	private long pk;
 	private int objectPk;
 	private int objectType;
+	@Transient
 	private String fullFilePath; // this denotes the absolute path of the file.not a db field
 	private String fileName;
 	private String fileDisplayName;
