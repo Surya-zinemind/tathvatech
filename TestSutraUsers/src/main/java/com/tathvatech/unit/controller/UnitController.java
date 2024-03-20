@@ -6,8 +6,10 @@ import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.common.FormQuery;
 import com.tathvatech.forms.common.ProjectFormQuery;
 import com.tathvatech.project.common.ProjectQuery;
+import com.tathvatech.project.entity.ProjectForm;
 import com.tathvatech.project.enums.ProjectPropertyEnum;
 import com.tathvatech.project.oid.ProjectPartOID;
+import com.tathvatech.project.service.ProjectService;
 import com.tathvatech.project.service.ProjectTemplateManager;
 import com.tathvatech.unit.common.UnitBean;
 import com.tathvatech.unit.common.UnitLocationQuery;
@@ -25,6 +27,7 @@ import com.tathvatech.user.OID.WorkstationOID;
 import com.tathvatech.user.common.ServiceLocator;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.User;
+import com.tathvatech.workstation.common.DummyWorkstation;
 import com.tathvatech.workstation.common.UnitInProjectObj;
 import com.tathvatech.workstation.common.WorkstationQuery;
 import lombok.RequiredArgsConstructor;
@@ -44,8 +47,10 @@ public class UnitController {
     private  final Logger logger = LoggerFactory.getLogger(UnitController.class);
     
     private final UnitService unitService;
-
+    private final UnitManager unitManager;
     private final PersistWrapper persistWrapper;
+    private final DummyWorkstation dummyWorkstation;
+    private final ProjectService projectService;
 
     public  List<UnitQuery> getUnitsBySerialNos(String[] serialNos, ProjectOID projectOID)
     {
@@ -95,7 +100,7 @@ public class UnitController {
             {
                 UnitOID parentOID = new UnitOID(unitBean.getParentPk());
 
-                UnitInProjectObj parentUnit = UnitManager.getUnitInProject(parentOID, new ProjectOID(projectPk));
+                UnitInProjectObj parentUnit = unitManager.getUnitInProject(parentOID, new ProjectOID(projectPk));
                 Integer rootParentPk = parentUnit.getRootParentPk();
 
                 UnitChangeSynchronizer sync = UnitChangeSynchronizer.getInstance();
@@ -209,7 +214,7 @@ public class UnitController {
         return unitService.getUnitQueryByPk(unitPk, projectOID);
     }
     public  TestProcOID addFormToUnit(UserContext context, ProjectForm projectForm, int unitPk, ProjectOID projectOID,
-                                            WorkstationOID workstationOID, int formPk, String testName, boolean makeWorkstationInProgress, boolean reviewPending) throws Exception
+                                      WorkstationOID workstationOID, int formPk, String testName, boolean makeWorkstationInProgress, boolean reviewPending) throws Exception
     {
         Connection con = null;
         try
@@ -304,9 +309,9 @@ public class UnitController {
     public  List<User> getUsersForUnit(ProjectOID projectOID, int unitPk, WorkstationOID workstationOID)
             throws Exception
     {
-        if (DummyWorkstation.getPk() == workstationOID.getPk())
+        if (dummyWorkstation.getPk() == workstationOID.getPk())
         {
-            return projectService.getUsersForProject(projectOID.getPk(), workstationOID);
+            return projectService.getUsersForProject((int) projectOID.getPk(), workstationOID);
         } else
         {
             return unitService.getUsersForUnit(unitPk, projectOID, workstationOID);
@@ -316,7 +321,7 @@ public class UnitController {
     public  List<User> getUsersForUnitInRole(int unitPk, ProjectOID projectOID, WorkstationOID workstationOID,
                                                    String roleName) throws Exception
     {
-        if (DummyWorkstation.getPk() == workstationOID.getPk())
+        if (dummyWorkstation.getPk() == workstationOID.getPk())
         {
             return unitService.getUsersForProjectInRole(projectOID.getPk(), workstationOID, roleName);
         } else
@@ -327,7 +332,7 @@ public class UnitController {
     public  boolean isUsersForUnitInRole(ProjectOID projectOID, int userPk, int unitPk,
                                                WorkstationOID workstationOID, String roleName)
     {
-        if (DummyWorkstation.getPk() == workstationOID.getPk())
+        if (dummyWorkstation.getPk() == workstationOID.getPk())
         {
             return unitService.isUsersForProjectInRole(userPk, projectOID, workstationOID, roleName);
         } else
