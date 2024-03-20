@@ -663,7 +663,7 @@ public class UnitServiceImpl implements UnitService{
             for (Iterator iterator = currentLocationTestList.iterator(); iterator.hasNext();)
             {
                 UnitFormQuery testProc = (UnitFormQuery) iterator.next();
-                ResponseMasterNew response = SurveyResponseDelegate
+                ResponseMasterNew response = surveyResponseManager
                         .getLatestResponseMasterForTest(new TestProcOID(testProc.getPk(), null));
                 if (response != null && ResponseMasterNew.STATUS_INPROGRESS.equals(response.getStatus()))
                 {
@@ -735,7 +735,7 @@ public class UnitServiceImpl implements UnitService{
                 {
                     // if response is in inprogress status, we need to change it
                     // to paused status
-                    ResponseMasterNew response = SurveyResponseDelegate
+                    ResponseMasterNew response = surveyResponseManager
                             .getLatestResponseMasterForTest(unitFormQuery.getOID());
                     if (response != null && ResponseMasterNew.STATUS_INPROGRESS.equals(response.getStatus()))
                     {
@@ -1433,6 +1433,20 @@ public class UnitServiceImpl implements UnitService{
             }
         }
     }
+
+    public  Project getProjectWhereUnitIsOpen(UnitOID unitOID)
+    {
+        return persistWrapper.read(Project.class, "select * from TAB_PROJECT where pk = "
+                        + "(select projectPk from unit_project_ref upr join unit_project_ref_h uprh on uprh.unitInProjectPk = upr.pk and now() between uprh.effectiveDateFrom and uprh.effectiveDateTo where upr.unitPk = ? and uprh.status = ?)",
+                unitOID.getPk(), UnitInProject.STATUS_OPEN);
+    }
+    public  void removeUserFromUnit(UnitOID unitOID, WorkstationOID wsOID, UserOID userOID, String role)
+            throws Exception
+    {
+        persistWrapper.delete(
+                "delete from TAB_UNIT_USERS where unitPk=? and workstationPk=? and userPk = ? and role = ?",
+                unitOID.getPk(), wsOID.getPk(), userOID.getPk(), role);
+    }
     public  void removeUserFromUnit(int userPk, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID,
                                           String role) throws Exception
     {
@@ -1879,7 +1893,7 @@ public class UnitServiceImpl implements UnitService{
             }
             if (uLocationQ != null && UnitLocation.STATUS_IN_PROGRESS.equals(uLocationQ.getStatus()))
             {
-                ProjectManager.setUnitWorkstationStatus(context, unitPk, projectQuery.getOID(),
+                workstationService.setUnitWorkstationStatus(context, unitPk, projectQuery.getOID(),
                         workstationQuery.getOID(), UnitLocation.STATUS_IN_PROGRESS);
             }
         }

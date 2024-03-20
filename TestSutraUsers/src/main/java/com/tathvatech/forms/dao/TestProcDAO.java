@@ -31,8 +31,7 @@ public class TestProcDAO
 	{
 		return persistWrapper.read(TestProcObj.class, fetchSql + " and ut.pk = ?", testProcPk);
 	}
-//Uncomment later and fix it
-/*	public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
+public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 	{
 		TestProcFormAssign currentTestProcFormEntity = PersistWrapper.read(TestProcFormAssign.class, 
 				"select * from testproc_form_assign where testProcFk = ? and current = 1", testProcOID.getPk());
@@ -209,7 +208,7 @@ public class TestProcDAO
 		}
 	}
 
-	*//**
+	/**
 	 * copy the schedules from the existing testProc and testProcSections to the ones associated to the new form.
 	 * we are not removing the schedules from the old testProc/Sections . that way a revert if needed does not need any changes here. 
 	 * @param context
@@ -310,7 +309,7 @@ public class TestProcDAO
 			persistWrapper.update(uHCurrent);
 		}
 	}
-
+*/
 	public void deleteAllTestProcsMatching(UserContext context, UnitOID unitOID, ProjectOID projectOID,
 										   WorkstationOID workstationOID) throws Exception
 	{
@@ -358,7 +357,7 @@ public class TestProcDAO
 			tSec.setTestProcFormAssignFk(newTestProcFormEntity.getPk());
 			persistWrapper.createEntity(tSec);
 		}
-	}*/
+	}
 	
 	private static String fetchSql = "select ut.pk as pk, uth.name as name, tfa.appliedByUserFk, uth.projectTestProcPk as projectTestProcPk, "
 			+ " uth.projectPk as projectPk, uth.workstationPk as workstationPk, uth.unitPk as unitPk, "

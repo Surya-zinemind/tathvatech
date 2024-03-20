@@ -34,7 +34,7 @@ public class SurveyResponse
     public static final String STATUS_COMPLETE = "Complete";
 	//Uncommet and fix this
     
-   /* private int responseId;
+ private int responseId;
     private int testProcPk;
     private int surveyPk; 
     private int userPk;
@@ -395,5 +395,5 @@ public class SurveyResponse
 	public FormResponseOID getOID()
 	{
 		return new FormResponseOID(responseId);
-	}*/
+	}
 }

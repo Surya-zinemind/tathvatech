@@ -76,7 +76,7 @@ public class UnitManager
 	}
 
 	
-	/*public static void moveUnitOrderUp(UserContext context, UnitOID unitOID, ProjectOID projectOID)
+	public static void moveUnitOrderUp(UserContext context, UnitOID unitOID, ProjectOID projectOID)
 	{
 		UnitInProjectDAO uprDAO = unitInProjectDAO;
 		try 
@@ -99,9 +99,9 @@ public class UnitManager
 			logger.error("Exception changing unit order", e);
 			throw new AppException("Could not change unit order, please try again later");
 		}
-	}*/
+	}
 
-	/*public static void moveUnitOrderDown(UserContext context, UnitOID unitOID, ProjectOID projectOID)
+	public static void moveUnitOrderDown(UserContext context, UnitOID unitOID, ProjectOID projectOID)
 	{
 		UnitInProjectDAO uprDAO = unitInProjectDAO;
 		try 
@@ -314,8 +314,8 @@ public class UnitManager
 		changeUnitParentInt(userContext, uprDAO, selectedParentUPROID, childUPR.getOID(), projectOID);
 		
 		return;
-	}*/
-	/*
+	}
+
 	private static void changeUnitParentInt(UserContext userContext, UnitInProjectDAO uprDAO, 
 			UnitInProjectOID selectedParentOID, UnitInProjectOID unitToChangeOID, ProjectOID projectOID) throws Exception
 	{
@@ -402,11 +402,11 @@ public class UnitManager
 	}
 	
 
-	*//**
+	/**
 	 * This method does not consider the status of the unit inside the project. so i think it does not work properly... check before using it.
 	 * @param unitOID
 	 * @return
-	 *//*
+	 */
 	public  List<ProjectQuery> getUnitAssignedProjects(UnitOID unitOID)
 	{
 		String sql = ProjectQuery.fetchSQL 
@@ -568,6 +568,6 @@ public class UnitManager
 		
 		if(bookmark != null)
 			persistWrapper.deleteEntity(bookmark);
-	}*/
+	}
 	
 }

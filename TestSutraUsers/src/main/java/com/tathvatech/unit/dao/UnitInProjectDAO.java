@@ -71,13 +71,12 @@ public class UnitInProjectDAO
 		}
 		
 	}
-	//uncommment later
-	/*public  UnitInProjectObj saveUnitInProject(UserContext context, UnitInProjectObj obj) throws Exception
+	public  UnitInProjectObj saveUnitInProject(UserContext context, UnitInProjectObj obj) throws Exception
 	{
 		return saveUnitInProject(context, obj, null);
-	}*/
+	}
 	
-	/*public  UnitInProjectObj saveUnitInProject(UserContext context, UnitInProjectObj obj, Actions[]  actions) throws Exception
+	public  UnitInProjectObj saveUnitInProject(UserContext context, UnitInProjectObj obj, Actions[]  actions) throws Exception
 	{
 		UnitInProject upr = null;
 		if(obj.getPk() > 0)
@@ -193,7 +192,7 @@ public class UnitInProjectDAO
 		hRecNew.setEffectiveDateFrom(now);
 		hRecNew.setEffectiveDateTo(DateUtils.getMaxDate());
 		persistWrapper.createEntity(hRecNew);
-	} */
+	}
 
 	public List<UnitInProjectObj> getDirectChildren(UnitInProjectOID oid)
 	{

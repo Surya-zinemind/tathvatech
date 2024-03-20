@@ -40,9 +40,9 @@ public class SurveyDefFactory
 {
     private static final Logger logger = LoggerFactory.getLogger(SurveyDefFactory.class);
 
-//    private static ReferenceMap defMap = new ReferenceMap(ReferenceMap.SOFT, ReferenceMap.SOFT);
+   private static ReferenceMap defMap = new ReferenceMap(ReferenceMap.SOFT, ReferenceMap.SOFT);
     
-   /* public static SurveyDefinition getSurveyDefinition(FormOID surveyOID) throws Exception
+   public static SurveyDefinition getSurveyDefinition(FormOID surveyOID) throws Exception
     {
         SurveyDefinition surveyDef = null;
 //        surveyDef = (SurveyDefinition) defMap.get(surveyOID.getPk());
@@ -247,5 +247,5 @@ public class SurveyDefFactory
         surveyMgr = new SurveyDefinitionManager(surveyDef.getSurveyConfig());
 
 		return surveyMgr;
-    }*/
+    }
 }

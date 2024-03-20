@@ -39,11 +39,11 @@ public interface UnitService {
 
     TestProcOID addFormToUnit(UserContext context, ProjectForm projectForm, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID, int formPk, String testName, boolean makeWorkstationInProgress, boolean reviewPending);
 
-    void removeAllFormsFromUnit(UserContext context, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID);
+    void removeAllFormsFromUnit(UserContext context, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID) throws Exception;
 
-    void deleteTestProcFromUnit(UserContext context, TestProcOID testProcOid);
+    void deleteTestProcFromUnit(UserContext context, TestProcOID testProcOid) throws Exception;
 
-    List<FormQuery> getAllFormsForUnit(UnitOID unitOID, ProjectOID projectOID);
+    List<FormQuery> getAllFormsForUnit(UnitOID unitOID, ProjectOID projectOID) throws Exception;
 
     List<FormQuery> getFormsForUnit(UnitOID unitOID, ProjectOID projectOID, WorkstationOID workstationOID);
 
@@ -73,7 +73,7 @@ public interface UnitService {
 
     void openUnit(UserContext context, UnitBean rootUnitToOpen, List<UnitBean> unitBeanAndChildrenList, ProjectOID lastOpenProjectOID, ProjectOID destinationProjectOID);
 
-    void removeUserFromUnit(int userPk, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID, String role);
+    void removeUserFromUnit(int userPk, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID, String role) throws Exception;
 
     void updateUnit(UnitObj unit);
 

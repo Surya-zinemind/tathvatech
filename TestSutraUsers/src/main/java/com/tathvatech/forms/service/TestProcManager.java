@@ -154,14 +154,14 @@ public class TestProcManager
 	}*/
 	
 
-	/*public static List<UnitFormQuery> getTestProcsForItem(UserContext context, int entityPk)throws Exception
+	public static List<UnitFormQuery> getTestProcsForItem(UserContext context, int entityPk)throws Exception
 	{
 		TestProcFilter filter = new TestProcFilter();
 		filter.setUnitOID(new UnitOID(entityPk));
 		return new TestProcListReport(context, filter).getTestProcs();
-	}*/
+	}
 
-	/*public static List<UnitFormQuery> getTestProcsForItem(UserContext context, int entityPk, ProjectOID projectOID, boolean includeChildren)throws Exception
+	public static List<UnitFormQuery> getTestProcsForItem(UserContext context, int entityPk, ProjectOID projectOID, boolean includeChildren)throws Exception
 	{
 		return getTestProcsForItemImpl(context, entityPk, projectOID, null, includeChildren);
 	}
@@ -169,16 +169,16 @@ public class TestProcManager
 	public static List<UnitFormQuery> getTestProcsForItem(UserContext context, int entityPk, ProjectOID projectOID, WorkstationOID workstationOID, boolean includeChildren)throws Exception
 	{
 		return getTestProcsForItemImpl(context, entityPk, projectOID, workstationOID, includeChildren);
-	}*/
+	}
 
-	/*private static List<UnitFormQuery> getTestProcsForItemImpl(UserContext context, int entityPk, ProjectOID projectOID, WorkstationOID workstationOID, boolean includeChildren)throws Exception
+	private static List<UnitFormQuery> getTestProcsForItemImpl(UserContext context, int entityPk, ProjectOID projectOID, WorkstationOID workstationOID, boolean includeChildren)throws Exception
 	{
 		TestProcFilter filter = new TestProcFilter(projectOID);
 		filter.setUnitOID(new UnitOID(entityPk));
 		filter.setWorkstationOID(workstationOID);
 		filter.setIncludeChildren(includeChildren);
 		return new TestProcListReport(context, filter).getTestProcs();
-	}*/
+	}
 	
 /*	public static TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 	{
