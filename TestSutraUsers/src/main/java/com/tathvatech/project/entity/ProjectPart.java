@@ -14,6 +14,7 @@ import com.tathvatech.project.oid.ProjectPartOID;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 
 /**
@@ -181,6 +182,7 @@ public class ProjectPart extends AbstractEntity implements Serializable
 		return ((ProjectPart)obj).getPk() == pk;
 	}
 
+	@Transient
 	public ProjectPartOID getOID()
     {
     	return new ProjectPartOID((int) pk, name);

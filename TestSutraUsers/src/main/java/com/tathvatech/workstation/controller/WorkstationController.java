@@ -1,19 +1,15 @@
 package com.tathvatech.workstation.controller;
 
 
-import com.tathvatech.project.common.ProjectQuery;
-import com.tathvatech.project.oid.ProjectPartOID;
 import com.tathvatech.unit.common.UnitLocationQuery;
-import com.tathvatech.unit.common.UnitObj;
 import com.tathvatech.unit.entity.UnitLocation;
 import com.tathvatech.unit.service.UnitService;
 import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.TestProcOID;
 import com.tathvatech.user.OID.UnitOID;
 import com.tathvatech.user.OID.WorkstationOID;
-import com.tathvatech.user.common.ServiceLocator;
 import com.tathvatech.user.common.UserContext;
-import com.tathvatech.user.entity.Project;
+import com.tathvatech.project.entity.Project;
 import com.tathvatech.workstation.common.UnitWorkstationQuery;
 import com.tathvatech.workstation.common.WorkstationQuery;
 import com.tathvatech.workstation.entity.UnitWorkstation;
@@ -26,9 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 @RequestMapping("/workstation")

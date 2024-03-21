@@ -1,13 +1,24 @@
-package com.tathvatech.user.entity;
+package com.tathvatech.project.entity;
 
 import com.tathvatech.common.entity.AbstractEntity;
+import com.tathvatech.common.enums.EntityType;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.user.OID.Action;
+import com.tathvatech.user.OID.Authorizable;
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.Role;
+import com.tathvatech.user.enums.ProjectRolesEnum;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Hari
@@ -17,7 +28,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name="TAB_PROJECT")
-public class Project extends AbstractEntity implements Serializable
+public class Project extends AbstractEntity implements Serializable, Authorizable
 {
 	@Id
 	private long pk;
@@ -225,4 +236,56 @@ public class Project extends AbstractEntity implements Serializable
     public Project()
     {
     }
+	@Transient
+	public ProjectOID getOID()
+	{
+		return new ProjectOID((int) pk, projectName + ((projectDescription != null)? (" - " + projectDescription):""));
+	}
+
+	public static String STATUS_OPEN = "Open";
+	public static final String STATUS_CLOSED = "Closed";
+
+	public static final String AttachmentContext_CustomerLogo = "custLogo";
+	public static final String AttachmentContext_LogbookPreface = "logbookPreface";
+	public static final String AttachmentContext_PartDrawings = "PartDrawing";
+	public static final String AttachmentContext_WorkstationLayout = "WorkstationLayout";
+
+	public static final String AllowClientSubmissionOnFormsPropertyKey = "AllowClientSubmissionOnForms";
+	public static String EnableAddAttachmentInFormResponseMode = "EnableAddAttachmentInFormResponseMode"; // Default is false - Allow attachments to be added while filling up the forms.
+	public static String DisableWorkstationCloseWhenAllFormsApproved = "DisableWorkstationCloseWhenAllFormsApproved"; // Default is true - When all forms are approved on a workstation, ask if the workstation could be marked as completed
+
+	public static String AllowApproveWithCommentsForChecksheets = "AllowApproveWithCommentsForChecksheets"; // If enabled, approver can Approve or Approve with comments the checksheet after verification
+
+	public static String EnableUnitCreationAtWorkstation = "EnableUnitCreationAtWorkstation";  // if Enabled, you can create a unit at a specific workstation. no workstation level settings will be applied to the unit. only part level settings are applied to this unit.
+
+
+	public static String ProjectType = "ProjectType"; // the value can be one of the ProjectTypeEnums
+	public static enum ProjectTypeEnum{RollingStock, Signalling}
+
+	@Transient
+	@Override
+	public EntityType getEntityType()
+	{
+		return EntityTypeEnum.Project;
+	}
+
+	@Transient
+	@Override
+	public String getDisplayText()
+	{
+		return projectName + " - " + getProjectDescription();
+	}
+
+	@Transient
+	@Override
+	public List<? extends Role> getSupportedRoles()
+	{
+		return Arrays.asList(ProjectRolesEnum.values());
+	}
+	@Transient
+	@Override
+	public List<? extends Action> getSupportedActions()
+	{
+		return new ArrayList<>();
+	};
 }
