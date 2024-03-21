@@ -6,6 +6,6 @@ public interface TestableEntity
 {
 	public OID getOID();
 
-	public int getPk();
+	public long getPk();
 
 }

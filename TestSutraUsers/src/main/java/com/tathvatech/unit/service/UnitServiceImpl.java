@@ -60,13 +60,15 @@ public class UnitServiceImpl implements UnitService{
 
     private final PersistWrapper persistWrapper;
     private final WorkstationService workstationService;
-  private final AndonManager andonManager;
-  private final UnitManager unitManager;
+    private final AndonManager andonManager;
+    private final UnitManager unitManager;
     private final ProjectTemplateManager projectTemplateManager;
     private final SurveyResponseManager surveyResponseManager;
     private final ProjectService projectService;
-
     private final CommonServiceManager commonServiceManager;
+    private final SurveyMaster surveyMaster;
+    private final SurveyDefFactory surveyDefFactory;
+
 
     public  List<UnitQuery> getUnitsBySerialNos(String[] serialNos, ProjectOID projectOID)
     {
@@ -518,7 +520,7 @@ public class UnitServiceImpl implements UnitService{
         List<User> pWorkstationTesters = projectService.getUsersForProjectPartInRole((int) projectOID.getPk(),
                 new ProjectPartOID(unitInProject.getProjectPartPk(), null), workstationOID, User.ROLE_TESTER);
         if (copyDefaultTeam == true && (pWorkstationTesters == null || pWorkstationTesters.size() == 0))
-            pWorkstationTesters = getUsersForProjectInRole(projectOID.getPk(), workstationOID, User.ROLE_TESTER);
+            pWorkstationTesters = getUsersForProjectInRole((int) projectOID.getPk(), workstationOID, User.ROLE_TESTER);
         List<User> uWorkstationTesters = getUsersForUnitInRole((int) unitOID.getPk(), projectOID, workstationOID,
                 User.ROLE_TESTER);
 
@@ -546,7 +548,7 @@ public class UnitServiceImpl implements UnitService{
         List<User> pWorkstationVerifiers = projectService.getUsersForProjectPartInRole((int) projectOID.getPk(),
                 new ProjectPartOID(unitInProject.getProjectPartPk(), null), workstationOID, User.ROLE_VERIFY);
         if (copyDefaultTeam == true && (pWorkstationVerifiers == null || pWorkstationVerifiers.size() == 0))
-            pWorkstationVerifiers = getUsersForProjectInRole(projectOID.getPk(), workstationOID, User.ROLE_VERIFY);
+            pWorkstationVerifiers = getUsersForProjectInRole((int)projectOID.getPk(), workstationOID, User.ROLE_VERIFY);
         List<User> uWorkstationVerifiers = getUsersForUnitInRole((int) unitOID.getPk(), projectOID, workstationOID,
                 User.ROLE_VERIFY);
 
@@ -574,7 +576,7 @@ public class UnitServiceImpl implements UnitService{
         List<User> pWorkstationApprovers = projectService.getUsersForProjectPartInRole((int) projectOID.getPk(),
                 new ProjectPartOID(unitInProject.getProjectPartPk(), null), workstationOID, User.ROLE_APPROVE);
         if (copyDefaultTeam == true && (pWorkstationApprovers == null || pWorkstationApprovers.size() == 0))
-            pWorkstationApprovers = getUsersForProjectInRole(projectOID.getPk(), workstationOID, User.ROLE_APPROVE);
+            pWorkstationApprovers = getUsersForProjectInRole((int)projectOID.getPk(), workstationOID, User.ROLE_APPROVE);
         List<User> uWorkstationApprovers = getUsersForUnitInRole((int) unitOID.getPk(), projectOID, workstationOID,
                 User.ROLE_APPROVE);
 
@@ -599,6 +601,14 @@ public class UnitServiceImpl implements UnitService{
             removeUserFromUnit((UnitOID) unitOID, workstationOID, user.getOID(), User.ROLE_APPROVE);
         }
 
+    }
+    public  List<User> getUsersForProjectInRole(int projectPk, WorkstationOID workstationOID, String roleName)
+            throws Exception
+    {
+        return persistWrapper.readList(User.class, "select distinct u.* from TAB_USER u "
+                        + " inner join TAB_PROJECT_USERS tpu on tpu.userPk = u.pk  "
+                        + "where tpu.projectPk=? and tpu.projectPartPk is null and tpu.workstationPk=? and tpu.role=? order by firstName asc",
+                projectPk, workstationOID.getPk(), roleName);
     }
     private  void copyProjectFormsToUnit(UserContext context, ProjectOID projectOID,
                                                List<ProjectFormQuery> projectTests, UnitOID unitOID, WorkstationOID workstationOID) throws Exception
@@ -626,7 +636,7 @@ public class UnitServiceImpl implements UnitService{
 
         // create the new unit location on any change, so we have a history of
         // all activities.
-        UnitLocation nuLoc = new UnitLocation();
+      /*  UnitLocation nuLoc = new UnitLocation();
         nuLoc.setProjectPk((int) projectOID.getPk());
         nuLoc.setMovedInBy((int) userContext.getUser().getPk());
         nuLoc.setMoveInDate(new Date());
@@ -708,7 +718,7 @@ public class UnitServiceImpl implements UnitService{
                             .getLatestResponseMasterForTest(unitFormQuery.getOID());
                     if (response == null)
                     {
-                        SurveyDefinition sd = SurveyDefFactory.getSurveyDefinition(new FormOID(unitFormQuery.getFormPk(), null));
+                        SurveyDefinition sd = surveyDefFactory.getSurveyDefinition(new FormOID(unitFormQuery.getFormPk(), null));
                         SurveyResponse sResponse = new SurveyResponse(sd);
                         sResponse.setSurveyPk(unitFormQuery.getFormPk());
                         sResponse.setTestProcPk(unitFormQuery.getPk());
@@ -746,7 +756,7 @@ public class UnitServiceImpl implements UnitService{
                     }
                 }
             }
-        }
+        }*/
     }
     public  UnitObj createUnitAtWorkstation(UserContext context, ProjectOID projectOID,
                                                   WorkstationOID workstationOID, UnitBean unitBean,
@@ -854,11 +864,12 @@ public class UnitServiceImpl implements UnitService{
      * But if the form is added from tablet, we need the response created right away. so we call this function
      * with forceResponseCreation = true from the tablet.
      */
-    public  TestProcOID addFormToUnit(UserContext context, ProjectForm projectTestProc, int unitPk,
+    //Fix while doing form
+   /* public  TestProcOID addFormToUnit(UserContext context, ProjectForm projectTestProc, int unitPk,
                                       ProjectOID projectOID, WorkstationOID workstationOID, int formPk,
                                       String testName, boolean makeWorkstationInProgress, boolean reviewPending) throws Exception
     {
-        Survey form = SurveyMaster.getSurveyByPk(formPk);
+        Survey form = surveyMaster.getSurveyByPk(formPk);
         if(form == null)
             throw new AppException("Invalid form");
         if(!(Survey.STATUS_OPEN.equals(form.getStatus())))
@@ -954,7 +965,7 @@ public class UnitServiceImpl implements UnitService{
             response = surveyResponseManager.getLatestResponseMasterForTest(obj.getOID());
             if (response == null)
             {
-                SurveyDefinition sd = SurveyDefFactory.getSurveyDefinition(new FormOID(obj.getFormPk(), null));
+                SurveyDefinition sd = surveyDefFactory.getSurveyDefinition(new FormOID(obj.getFormPk(), null));
                 SurveyResponse sResponse = new SurveyResponse(sd);
                 sResponse.setSurveyPk(obj.getFormPk());
                 sResponse.setTestProcPk(obj.getPk());
@@ -977,7 +988,7 @@ public class UnitServiceImpl implements UnitService{
         }
 
         return obj.getOID();
-    }
+    }*/
 
     public  void removeAllFormsFromUnit(UserContext context, int unitPk, ProjectOID projectOID,
                                               WorkstationOID workstationOID) throws Exception
@@ -998,7 +1009,8 @@ public class UnitServiceImpl implements UnitService{
 
         new TestProcDAO().deleteTestProc(context, testProcOID);
     }
-    public  List<FormQuery> getAllFormsForUnit(UnitOID unitOID, ProjectOID projectOID) throws Exception
+    //Fix after forms
+   /* public  List<FormQuery> getAllFormsForUnit(UnitOID unitOID, ProjectOID projectOID) throws Exception
     {
         FormFilter filter = new FormFilter();
         filter.setStatus(new String[] { Survey.STATUS_OPEN });
@@ -1033,7 +1045,7 @@ public class UnitServiceImpl implements UnitService{
             return list;
 
         return new ArrayList();
-    }
+    }*/
 
     public  List<User> getUsersForUnit(int unitPk, ProjectOID projectOID, WorkstationOID workstationOID)
             throws Exception
@@ -1200,7 +1212,7 @@ public class UnitServiceImpl implements UnitService{
             for (Iterator iterator = childs.iterator(); iterator.hasNext();)
             {
                 UnitInProjectObj upr = (UnitInProjectObj) iterator.next();
-                UnitManager.changeUnitParent(context, null, new UnitOID(upr.getUnitPk()), projectOID);
+                unitManager.changeUnitParent(context, null, new UnitOID(upr.getUnitPk()), projectOID);
             }
         } else if (CommonEnums.DeleteOptionEnum.DeleteTree == deleteUnitOption)
         {
@@ -1342,7 +1354,7 @@ public class UnitServiceImpl implements UnitService{
         for (Iterator iterator = roots.iterator(); iterator.hasNext();)
         {
             UnitOID unitOID = (UnitOID) iterator.next();
-            UnitManager.changeUnitParent(context, null, unitOID, destinationProjectOID);
+            unitManager.changeUnitParent(context, null, unitOID, destinationProjectOID);
         }
 
     }
@@ -1465,9 +1477,9 @@ public class UnitServiceImpl implements UnitService{
     public  float getUnitPercentComplete(UserContext context, int unitPk, ProjectOID projectOID,
                                                boolean includeChildren) throws Exception
     {
-        return getWorkstationPercentCompleteInt(context, unitPk, projectOID, null, includeChildren);
-    }public  HashMap<ProjectOID, Integer> getUnitCount(List<Integer> projectPks, boolean includeChildren)
-    {
+        return workstationService.getWorkstationPercentCompleteInt(context, unitPk, projectOID, null, includeChildren);
+    }
+    public  HashMap<ProjectOID, Integer> getUnitCount(List<Integer> projectPks, boolean includeChildren) throws Exception {
         HashMap<ProjectOID, Integer> result = new HashMap<ProjectOID, Integer>();
         List<Object> params = new ArrayList<Object>();
 
@@ -1655,7 +1667,7 @@ public class UnitServiceImpl implements UnitService{
             UnitOID parentUnitOID = null;
             if (unitBeanToAdd.getParentPk() != null)
                 parentUnitOID = new UnitOID(unitBeanToAdd.getParentPk());
-            UnitManager.changeUnitParent(context, parentUnitOID, unitBeanToAdd.getOID(), destinationProjectOID);
+            unitManager.changeUnitParent(context, parentUnitOID, unitBeanToAdd.getOID(), destinationProjectOID);
         } else
         {
             ProjectPart destProjectPart = null;

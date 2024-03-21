@@ -6,6 +6,7 @@
  */
 package com.tathvatech.unit.common;
 
+import com.tathvatech.common.entity.AbstractEntity;
 import com.tathvatech.site.oid.SiteGroupOID;
 import com.tathvatech.unit.entity.UnitH;
 import com.tathvatech.unit.entity.UnitInProject;
@@ -15,6 +16,7 @@ import com.tathvatech.unit.service.UnitManagerCore;
 import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.SupplierOID;
 import com.tathvatech.user.OID.UnitOID;
+import jakarta.persistence.Id;
 import jakarta.persistence.Transient;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,9 +31,11 @@ import java.util.Date;
  * Window - Preferences - Java - Code Style - Code Templates
  */
 
-public class UnitObj implements TestableEntity
+public class UnitObj extends AbstractEntity implements TestableEntity
 {
-	private int pk;
+
+	@Id
+	private long pk;
 	private int partPk;
 	private Integer partRevisionPk;
 	private Integer supplierFk;
@@ -45,14 +49,13 @@ public class UnitObj implements TestableEntity
 	private String unitDescription;
 	private String status;
 	private int estatus;
-	
-	public int getPk()
-	{
+
+	@Override
+	public long getPk() {
 		return pk;
 	}
 
-	public void setPk(int pk)
-	{
+	public void setPk(long pk) {
 		this.pk = pk;
 	}
 
@@ -216,7 +219,7 @@ public class UnitObj implements TestableEntity
 		UnitBean unitBean = new UnitBean();
 		
 		
-		unitBean.setPk(this.getPk());
+		unitBean.setPk((int) this.getPk());
 		unitBean.setPartPk(this.getPartPk());
 		unitBean.setPartRevisionPk(this.getPartRevisionPk());
 		if(this.getSupplierFk() != null)
@@ -241,6 +244,6 @@ public class UnitObj implements TestableEntity
     
 
 	public UnitOID getOID() {
-		return new UnitOID(pk, unitName);
+		return new UnitOID((int) pk, unitName);
 	}
 }

@@ -48,7 +48,7 @@ public class SurveyDefinitionManager extends Object
     /**
      * @param survey
      */
-    public SurveyDefinitionManager(Survey survey)throws Exception
+    /*public SurveyDefinitionManager(Survey survey)throws Exception
     {
         this.survey = survey;
         this.surveyDefinition = SurveyDefFactory.getSurveyDefinition(new FormOID((int) survey.getPk(), survey.getIdentityNumber()));
@@ -342,10 +342,10 @@ public class SurveyDefinitionManager extends Object
         outStream.close();
     }
 
-    /**
+    *//**
      * @param questionId
      * @param newLocationId
-     */
+     *//*
     public void moveQuestionToLocation(String questionId, String newLocationId)throws Exception
     {
         String status = survey.getStatus();
@@ -442,10 +442,10 @@ public class SurveyDefinitionManager extends Object
 
     }
 
-    /**
+    *//**
      * @param questionId
      * @param newLocationId
-     */
+     *//*
     public SurveyItem copyQuestionToLocation(String questionId, String newLocationId)throws Exception
     {
         String status = survey.getStatus();
@@ -504,10 +504,10 @@ public class SurveyDefinitionManager extends Object
         return newQuestion;
     }
     
-    /**
+    *//**
      * @param questionId
      * @param newLocationId
-     */
+     *//*
     public SurveyItem copyQuestionToLocation(FormQuery sourceForm, SurveyItem sourceItem, String destinationParentItemId, String newLocationId)throws Exception
     {
         String status = survey.getStatus();
@@ -590,9 +590,9 @@ public class SurveyDefinitionManager extends Object
         return newQuestion;
     }
 
-    /**
+    *//**
      * @param questionId
-     */
+     *//*
     public void moveQuestionUp(String questionId)throws Exception
     {
         String status = survey.getStatus();
@@ -643,9 +643,9 @@ public class SurveyDefinitionManager extends Object
         writeToFile();
     }
     
-    /**
+    *//**
      * @param questionId
-     */
+     *//*
     public void moveQuestionDown(String questionId)throws Exception
     {
         String status = survey.getStatus();
@@ -696,9 +696,9 @@ public class SurveyDefinitionManager extends Object
         writeToFile();
     }
     
-    /**
+    *//**
      * @param paramList
-     */
+     *//*
     public void setSurveyParameters(List paramList)throws Exception
     {
         String status = survey.getStatus();
@@ -825,10 +825,10 @@ public class SurveyDefinitionManager extends Object
         return logic;
     }
 
-    /**
+    *//**
      * @param sItem
      * @param logic
-     */
+     *//*
     public void deleteLogic(SurveyItem sItem, Logic logic)throws Exception
     {
         String status = survey.getStatus();
@@ -917,13 +917,13 @@ public class SurveyDefinitionManager extends Object
         outStream.close();
     }
 
-    /**
+    *//**
      * saves a logic to the surveydefinition file
      * @param item
      * @param logic
      * @param paramMap
      * @return
-     */
+     *//*
     public Logic updateLogic(SurveyItem item, Logic logic)throws Exception
     {
         String status = survey.getStatus();
@@ -1437,5 +1437,5 @@ public class SurveyDefinitionManager extends Object
         outputter.output(surveyDoc, writer);
         writer.close();
         outStream.close();
-	}
+	}*/
 }

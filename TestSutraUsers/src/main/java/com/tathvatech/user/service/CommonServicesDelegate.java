@@ -124,6 +124,8 @@ public class CommonServicesDelegate
 	
 	public Object getObjectByPk(Class class1, int pk)
 	{
+
+
 		return persistWrapper.readByPrimaryKey(class1, pk);
 	}
 

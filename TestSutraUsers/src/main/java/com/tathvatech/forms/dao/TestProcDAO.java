@@ -3,6 +3,7 @@ package com.tathvatech.forms.dao;
 import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.common.TestProcFormAssignBean;
+import com.tathvatech.forms.entity.EntitySchedule;
 import com.tathvatech.forms.entity.FormSection;
 import com.tathvatech.forms.entity.TestProcFormAssign;
 import com.tathvatech.forms.entity.TestProcFormSection;
@@ -14,6 +15,7 @@ import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.utils.DateUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,7 +28,11 @@ import java.util.logging.Logger;
 
 public class TestProcDAO
 {
+	@Autowired
 	private PersistWrapper persistWrapper;
+
+	@Autowired
+	private SurveyMaster surveyMaster;
 	Logger logger = Logger.getLogger(String.valueOf(TestProcDAO.class));
 	Date now;
 	
@@ -62,7 +68,7 @@ public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 		if(currentTestProcFormEntity == null)
 			return null;
 		
-		Survey currentForm = SurveyMaster.getSurveyByPk((int) currentTestProcFormEntity.getFormFk());
+		Survey currentForm = surveyMaster.getSurveyByPk((int) currentTestProcFormEntity.getFormFk());
 
 		List<TestProcFormAssign> allFormList = persistWrapper.readList(TestProcFormAssign.class,
 				"select tfa.* from testproc_form_assign  tfa "
@@ -223,7 +229,7 @@ public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 	 * @param currentTPForm
 	 * @param newTPForm
 	 * @throws Exception
-	 *//*
+	 */
 	private void copySchedulesToNewForm(UserContext context, TestProcFormAssign currentTPForm, TestProcFormAssign newTPForm) throws Exception
 	{
 		// the formlevel schedule need not be copied as it is linked to testproc and not to the testprocFormEntity
@@ -232,7 +238,7 @@ public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 		
 		// put the form section of the old form in a map with sectionPk as the key
 		HashMap<Long, FormSection> currentFormSectionMap = new HashMap<>();
-		List<FormSection> currentFormSections = PersistWrapper.readList(FormSection.class, "select * from form_section where formPk = ?",  currentTPForm.getFormFk());
+		List<FormSection> currentFormSections = persistWrapper.readList(FormSection.class, "select * from form_section where formPk = ?",  currentTPForm.getFormFk());
 		for (Iterator iterator = currentFormSections.iterator(); iterator.hasNext();)
 		{
 			FormSection formSection = (FormSection) iterator.next();
@@ -242,7 +248,7 @@ public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 		
 		// put the form sections on the new form in a map with the sectionMainPk as the key
 		HashMap<Long, FormSection> newFormSectionMap = new HashMap<>();
-		List<FormSection> newFormSections = PersistWrapper.readList(FormSection.class, "select * from form_section where formPk = ?",  newTPForm.getFormFk());
+		List<FormSection> newFormSections = persistWrapper.readList(FormSection.class, "select * from form_section where formPk = ?",  newTPForm.getFormFk());
 		for (Iterator iterator = newFormSections.iterator(); iterator.hasNext();)
 		{
 			FormSection formSection = (FormSection) iterator.next();
@@ -251,7 +257,7 @@ public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 		
 		//get the  testProcSections for the new form and put them in a map with formSectionPk as the key
 		HashMap<Long, TestProcFormSection> newTPFormSectionMap = new HashMap<>();
-		List<TestProcFormSection> tpSectionsNew = PersistWrapper.readList(TestProcFormSection.class, 
+		List<TestProcFormSection> tpSectionsNew = persistWrapper.readList(TestProcFormSection.class,
 				"select * from testproc_form_section where testProcFormAssignFk = ? ", newTPForm.getPk());
 		for (Iterator iterator = tpSectionsNew.iterator(); iterator.hasNext();)
 		{
@@ -260,7 +266,7 @@ public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 		}		
 		
 		//get the  testProcSections for the old form
-		List<TestProcFormSection> tpSectionsOld = PersistWrapper.readList(TestProcFormSection.class, 
+		List<TestProcFormSection> tpSectionsOld =persistWrapper.readList(TestProcFormSection.class,
 				"select * from testproc_form_section where testProcFormAssignFk = ? ", currentTPForm.getPk());
 		for (Iterator iterator = tpSectionsOld.iterator(); iterator.hasNext();)
 		{
@@ -287,7 +293,7 @@ public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 					newSchedule.setEstimateHours(secSchedule.getEstimateHours());
 					newSchedule.setForecastEndDate(secSchedule.getForecastEndDate());
 					newSchedule.setForecastStartDate(secSchedule.getForecastStartDate());
-					newSchedule.setObjectPk(newTPSection.getPk());
+					newSchedule.setObjectPk((int) newTPSection.getPk());
 					newSchedule.setObjectType(EntityTypeEnum.TestProcSection.getValue());
 					persistWrapper.createEntity(newSchedule);
 				}
@@ -307,17 +313,17 @@ public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 			persistWrapper.update(tpForm);
 		}
 		
-		UnitTestProcH uHCurrent = PersistWrapper.read(UnitTestProcH.class, 
+		UnitTestProcH uHCurrent = persistWrapper.read(UnitTestProcH.class,
 				"select * from unit_testproc_h where unitTestProcFk = ? and now() between effectiveDateFrom and effectiveDateTo", testProcOID.getPk());
 
 		if(uHCurrent != null)
 		{
-			uHCurrent.setUpdatedBy(context.getUser().getPk());
+			uHCurrent.setUpdatedBy((int) context.getUser().getPk());
 			uHCurrent.setEffectiveDateTo(new Date(now.getTime() - 1000));
 			persistWrapper.update(uHCurrent);
 		}
 	}
-*/
+
 	public void deleteAllTestProcsMatching(UserContext context, UnitOID unitOID, ProjectOID projectOID,
 										   WorkstationOID workstationOID) throws Exception
 	{
@@ -344,11 +350,7 @@ public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 		}
 	}
 
-	*//**
-	 * @param context
-	 * @param testProcObj
-	 * @throws Exception
-	 *//*
+
 	private void createTestProcSections(UserContext context, TestProcObj testProcObj, TestProcFormAssign newTestProcFormEntity) throws Exception
 	{
 		// we only need to create the testprocSection records for the new form in the testproc.

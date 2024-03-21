@@ -226,7 +226,7 @@ public class UnitController {
             UnitChangeSynchronizer sync = UnitChangeSynchronizer.getInstance();
             UnitOID lockableOID = sync.getLocableUnitOID(unitPk);
 
-            TestProcOID testProcOID;
+            TestProcOID testProcOID = null;
             synchronized (lockableOID)
             {
                 con.commit();
@@ -235,8 +235,9 @@ public class UnitController {
                 //as the first thread made these changes after the start of the transaction by the second thread.
                 // thus we will get non-unique records with 2 valid records in the unitworkstation and unitlocation table.
 
-                testProcOID = unitService.addFormToUnit(context, projectForm, unitPk, projectOID,
-                        workstationOID, formPk, testName, makeWorkstationInProgress, reviewPending);
+               // Fix after doing form
+               // testProcOID = unitService.addFormToUnit(context, projectForm, unitPk, projectOID,
+                      //  workstationOID, formPk, testName, makeWorkstationInProgress, reviewPending);
                 con.commit();
             }
 
@@ -297,7 +298,7 @@ public class UnitController {
             con.commit();
         }
     }
-    public  List<FormQuery> getAllFormsForUnit(UnitOID unitOID, ProjectOID projectOID) throws Exception
+  /*  public  List<FormQuery> getAllFormsForUnit(UnitOID unitOID, ProjectOID projectOID) throws Exception
     {
         return unitService.getAllFormsForUnit(unitOID, projectOID);
     }
@@ -306,7 +307,7 @@ public class UnitController {
             throws Exception
     {
         return unitService.getFormsForUnit(new UnitOID(unitPk, null), projectOID, workstationOID);
-    }
+    }*/
     public  List<User> getUsersForUnit(ProjectOID projectOID, int unitPk, WorkstationOID workstationOID)
             throws Exception
     {
@@ -324,7 +325,7 @@ public class UnitController {
     {
         if (dummyWorkstation.getPk() == workstationOID.getPk())
         {
-            return unitService.getUsersForProjectInRole(projectOID.getPk(), workstationOID, roleName);
+            return unitService.getUsersForProjectInRole((int) projectOID.getPk(), workstationOID, roleName);
         } else
         {
             return unitService.getUsersForUnitInRole(unitPk, projectOID, workstationOID, roleName);
@@ -335,7 +336,7 @@ public class UnitController {
     {
         if (dummyWorkstation.getPk() == workstationOID.getPk())
         {
-            return unitService.isUsersForProjectInRole(userPk, projectOID, workstationOID, roleName);
+            return projectService.isUsersForProjectInRole(userPk, projectOID, workstationOID, roleName);
         } else
         {
             return unitService.isUsersForUnitInRole(userPk, unitPk, projectOID, workstationOID, roleName);

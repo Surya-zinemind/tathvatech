@@ -84,7 +84,7 @@ public class UnitManager
 	}
 
 	
-	public static void moveUnitOrderUp(UserContext context, UnitOID unitOID, ProjectOID projectOID)
+	/*public static void moveUnitOrderUp(UserContext context, UnitOID unitOID, ProjectOID projectOID)
 	{
 		UnitInProjectDAO uprDAO = unitInProjectDAO;
 		try 
@@ -108,8 +108,8 @@ public class UnitManager
 			throw new AppException("Could not change unit order, please try again later");
 		}
 	}
-
-	public static void moveUnitOrderDown(UserContext context, UnitOID unitOID, ProjectOID projectOID)
+*/
+	/*public static void moveUnitOrderDown(UserContext context, UnitOID unitOID, ProjectOID projectOID)
 	{
 		UnitInProjectDAO uprDAO = unitInProjectDAO;
 		try 
@@ -134,7 +134,7 @@ public class UnitManager
 			throw new AppException("Could not change unit order, please try again later");
 		}
 	}
-	
+	*/
 	public  List<UnitQuery> getChildrenUnits(ProjectOID projectOID, UnitOID parentUnitOID)
 	{
 		if(parentUnitOID == null)
@@ -182,7 +182,7 @@ public class UnitManager
 	{
 		try
 		{
-			UnitInProjectObj unitInProject = UnitManager.getUnitInProject(parentUnitOID, projectOID);
+			UnitInProjectObj unitInProject = getUnitInProject(parentUnitOID, projectOID);
 
 			String sql = UnitQuery.sql + " where 1 = 1 and ( (u.pk = ?) or (uprh.rootParentPk = ? and uprh.heiCode like ?) ) ";
 			List<UnitQuery> children = persistWrapper.readList(UnitQuery.class,
@@ -274,7 +274,7 @@ public class UnitManager
 		return persistWrapper.readList(UnitQuery.class, sb.toString(), params.toArray());
 	}
 	
-	public static void changeUnitParent(UserContext userContext,
+	public  void changeUnitParent(UserContext userContext,
 			UnitOID selectedParent, UnitOID unitToChangeOID, ProjectOID projectOID) throws Exception
 	{
 		UnitInProjectDAO uprDAO = unitInProjectDAO;
@@ -499,7 +499,7 @@ public class UnitManager
 		
 	}
 	
-	public static UnitQuery getBookmarkedUnit(int pk)
+	public  UnitQuery getBookmarkedUnit(int pk)
 	{
 		StringBuffer sb = new StringBuffer("select u.pk as unitPk, upr.unitOriginType as unitOriginTypeString, "
 				+ " part_revision.pk as partRevisionPk, part_revision.revision as partRevision, "
@@ -527,7 +527,7 @@ public class UnitManager
 				+ " left outer join project_part on uprh.projectPartPk = project_part.pk "
 				+ " left outer join part_type on project_part.partTypePk = part_type.pk "
 				+ " where ubkm.pk = ?");
-		return PersistWrapper.read(UnitQuery.class, sb.toString(),pk);
+		return persistWrapper.read(UnitQuery.class, sb.toString(),pk);
 		
 	}
 	

@@ -13,15 +13,16 @@ import com.tathvatech.survey.common.SurveyDefinition;
 import com.tathvatech.survey.entity.Survey;
 import com.tathvatech.unit.service.UnitManager;
 import com.tathvatech.user.OID.FormOID;
-import org.apache.commons.collections4.map.ReferenceMap;
+
+import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.swing.text.Document;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,16 +47,20 @@ public class SurveyDefFactory
 {
     private static final Logger logger = LoggerFactory.getLogger(SurveyDefFactory.class);
 
-   private static ReferenceMap defMap = new ReferenceMap(ReferenceMap.SOFT, ReferenceMap.SOFT);
+    @Autowired
+    private SurveyMaster surveyMaster;
+  // private static ReferenceMap defMap = new ReferenceMap(ReferenceMap.SOFT, ReferenceMap.SOFT);
     
-   public static SurveyDefinition getSurveyDefinition(FormOID surveyOID) throws Exception
+/*
+   public  SurveyDefinition getSurveyDefinition(FormOID surveyOID) throws Exception
     {
+
         SurveyDefinition surveyDef = null;
 //        surveyDef = (SurveyDefinition) defMap.get(surveyOID.getPk());
 //        if(surveyDef != null)
 //        	return surveyDef;
         
-    	Survey survey = SurveyMaster.getSurveyByPk((int) surveyOID.getPk());
+    	Survey survey = surveyMaster.getSurveyByPk((int) surveyOID.getPk());
         if(survey == null)
         {
             logger.warn("Survey not found, pk - " + surveyOID.getPk());
@@ -101,6 +106,7 @@ public class SurveyDefFactory
 //		defMap.put(surveyOID.getPk(), surveyDef);
         return surveyDef;
     }
+*/
 
     public static void createSurveyDefFile(Survey survey)throws Exception
     {
@@ -137,13 +143,13 @@ public class SurveyDefFactory
         }
     }
 
-    public static void createSurveyByCopy(Survey survey, int sourceSurveyPk)throws Exception
+    public  void createSurveyByCopy(Survey survey, int sourceSurveyPk)throws Exception
     {
         String filePath = ApplicationProperties.getFormDefRoot();
 
         try
 		{
-            String surveyDefFile = SurveyMaster.getSurveyDefFileName(sourceSurveyPk);
+            String surveyDefFile = surveyMaster.getSurveyDefFileName(sourceSurveyPk);
 
             if(surveyDefFile == null || surveyDefFile.trim().length() == 0)
             {
@@ -183,9 +189,7 @@ public class SurveyDefFactory
     }
 
 
-    *//**
-     * @param tableName
-     *//*
+
     private static void createSurveyTables(String tableName)throws Exception
     {
         String mainTableSql = "create table "+ tableName + " (responseId varchar(25), surveyPk varchar(25), responseTime datetime, ipaddress varchar(20),  respondentPk varchar(25), lastSurveyItem varchar(25), status varchar(20), responseMode varchar(20))";
@@ -238,20 +242,20 @@ public class SurveyDefFactory
         }
     }
 
-    public static SurveyDefinitionManager getSurveyDefinitionManager(int surveyPk) throws Exception
+  /*  public  SurveyDefinitionManager getSurveyDefinitionManager(int surveyPk) throws Exception
     {
-        Survey survey = SurveyMaster.getSurveyByPk(surveyPk);
+        Survey survey = surveyMaster.getSurveyByPk(surveyPk);
         SurveyDefinitionManager surveyMgr = new SurveyDefinitionManager(survey);
 
 		return surveyMgr;
-    }
+    }*/
 
-    public static SurveyDefinitionManager getSurveyDefinitionManager(SurveyDefinition surveyDef) throws Exception
+    /*public  SurveyDefinitionManager getSurveyDefinitionManager(SurveyDefinition surveyDef) throws Exception
     {
         SurveyDefinitionManager surveyMgr = null;
 
         surveyMgr = new SurveyDefinitionManager(surveyDef.getSurveyConfig());
 
 		return surveyMgr;
-    }
+    }*/
 }

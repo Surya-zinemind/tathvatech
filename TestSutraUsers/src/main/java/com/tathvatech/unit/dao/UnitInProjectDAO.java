@@ -23,12 +23,13 @@ import org.springframework.stereotype.Repository;
 public class UnitInProjectDAO
 {
 	private Date now ;
-	private final EntityActions entityActions;
+	@Autowired
+	private  EntityActions entityActions;
 	@Autowired
 	private PersistWrapper persistWrapper;
-	public UnitInProjectDAO(EntityActions entityActions)
+	public UnitInProjectDAO()
 	{
-        this.entityActions = entityActions;
+
         now = DateUtils.getNowDateForEffectiveDateFrom();
 	}
 	

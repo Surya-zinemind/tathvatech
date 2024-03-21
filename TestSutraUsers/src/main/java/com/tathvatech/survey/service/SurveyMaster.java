@@ -72,7 +72,7 @@ public class SurveyMaster
 	// private static HashMap surveyMap = new HashMap();
 
 	/**
-	 * @param surveyPk
+	 * @param
 	 * @return
 	 */
 	public  String getSurveyDefFileName(int _surveyPk)
@@ -89,12 +89,12 @@ public class SurveyMaster
 	}
 
 	/**
-	 * @param acc
+	 * @param
 	 * @param surveyName
 	 * @return
 	 * @throws Exception
 	 */
-	private  boolean isSurveyNameExist(String surveyName)
+	/*private  boolean isSurveyNameExist(String surveyName)
 			throws Exception
 	{
 		List list = persistWrapper.readList(
@@ -110,19 +110,19 @@ public class SurveyMaster
 		{
 			return false;
 		}
-	}
+	}*/
 
 	/**
 	 * Check if the name exists for a survey other than the one specified as the
 	 * formMainOID argument
 	 *
-	 * @param acc
+	 * @param
 	 * @param surveyName
 	 * @param formMainOID
 	 * @return
 	 * @throws Exception
 	 */
-	private  boolean isSurveyNameExistForAnotherSurvey(String surveyName, FormMainOID formMainOID) throws Exception
+	/*private  boolean isSurveyNameExistForAnotherSurvey(String surveyName, FormMainOID formMainOID) throws Exception
 	{
 		List list = persistWrapper.readList(
 						FormMain.class,
@@ -137,7 +137,7 @@ public class SurveyMaster
 		{
 			return true;
 		}
-	}
+	}*/
 
 	/**
 	 * @param surveyPk
@@ -155,7 +155,7 @@ public class SurveyMaster
 	 * @param _fileName
 	 * @param tableName
 	 */
-	public  Survey createSurvey(UserContext context, Survey survey) throws Exception
+	/*public  Survey createSurvey(UserContext context, Survey survey) throws Exception
 	{
 		User user = (User)context.getUser();
 
@@ -197,12 +197,12 @@ public class SurveyMaster
 		return survey;
 	}
 
-	/**
+	*//**
 	 * @param account
 	 * @param _surveyName
 	 * @param _fileName
 	 * @param tableName
-	 */
+	 *//*
 	public  Survey createSurveyNewVersion(UserContext context, Survey newVersion, FormQuery baseRevision) throws Exception
 	{
 		Survey survey = SurveyMaster.getSurveyByPk(baseRevision.getPk());
@@ -243,12 +243,12 @@ public class SurveyMaster
 		return survey;
 	}
 
-	/**
+	*//**
 	 * @param account
 	 * @param _surveyName
 	 * @param _fileName
 	 * @param tableName
-	 */
+	 *//*
 	public  Survey createSurveyByCopy(UserContext context, Survey survey, int sourceSurveyPk) throws Exception
 	{
 		User user = (User)context.getUser();
@@ -291,12 +291,12 @@ public class SurveyMaster
 		return survey;
 	}
 
-	/**
+	*//**
 	 * mark the survey status as deleted.// the survey list will not show these
 	 * items . a complete removal should be done manually.
 	 *
 	 * @param surveyDef
-	 */
+	 *//*
 	public  void deleteSurvey(int surveyPk) throws Exception
 	{
 		List errors = new ArrayList();
@@ -714,8 +714,8 @@ public class SurveyMaster
 		return persistWrapper.read(ObjectLock.class, "select * from tab_sectionlock where responseFk = ? and formSectionFk = ? ",
 				responseFk, formSectionFk);
 	}
-
-	public synchronized  ObjectLock lockSectionToEdit(UserContext context, User lockForUser, FormResponseOID responseOID, String sectionId)throws LockedByAnotherUserException, Exception
+*/
+	/*public synchronized  ObjectLock lockSectionToEdit(UserContext context, User lockForUser, FormResponseOID responseOID, String sectionId)throws LockedByAnotherUserException, Exception
 	{
 		FormResponseMaster respMaster = persistWrapper.readByResponseId(FormResponseMaster.class, responseOID.getPk());
 		FormSection formSection = new FormDBManager().getFormSection(sectionId, respMaster.getSurveyPk());
@@ -959,6 +959,6 @@ public class SurveyMaster
 		
 		
 		return getFormPrintTemplateLocationConfig(formOID);
-	}
+	}*/
 
 }

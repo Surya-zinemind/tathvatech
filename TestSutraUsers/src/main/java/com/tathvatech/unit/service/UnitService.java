@@ -32,29 +32,27 @@ public interface UnitService {
 
     UnitObj createUnit(UserContext context, int projectPk, UnitBean unitBean, boolean createAsPlannedUnit, boolean pendingReview) throws Exception;
 
-    UnitObj createUnitAtWorkstation(UserContext context, ProjectOID projectOID, WorkstationOID workstationOID, UnitBean unit, boolean copyPartSpecificFormsToWorkstation, boolean pendingReview);
+    UnitObj createUnitAtWorkstation(UserContext context, ProjectOID projectOID, WorkstationOID workstationOID, UnitBean unit, boolean copyPartSpecificFormsToWorkstation, boolean pendingReview) throws Exception;
 
-    void updateUnit(UserContext context, UnitObj unit);
+    UnitObj updateUnit(UserContext context, UnitObj unit) throws Exception;
 
     UnitQuery getUnitQueryByPk(int unitPk, ProjectOID projectOID);
 
-    TestProcOID addFormToUnit(UserContext context, ProjectForm projectForm, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID, int formPk, String testName, boolean makeWorkstationInProgress, boolean reviewPending);
+    //TestProcOID addFormToUnit(UserContext context, ProjectForm projectForm, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID, int formPk, String testName, boolean makeWorkstationInProgress, boolean reviewPending);
 
     void removeAllFormsFromUnit(UserContext context, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID) throws Exception;
 
     void deleteTestProcFromUnit(UserContext context, TestProcOID testProcOid) throws Exception;
 
-    List<FormQuery> getAllFormsForUnit(UnitOID unitOID, ProjectOID projectOID) throws Exception;
+   /* List<FormQuery> getAllFormsForUnit(UnitOID unitOID, ProjectOID projectOID) throws Exception;
 
-    List<FormQuery> getFormsForUnit(UnitOID unitOID, ProjectOID projectOID, WorkstationOID workstationOID);
+    List<FormQuery> getFormsForUnit(UnitOID unitOID, ProjectOID projectOID, WorkstationOID workstationOID) throws Exception;*/
 
-    List<User> getUsersForUnit(int unitPk, ProjectOID projectOID, WorkstationOID workstationOID);
+    List<User> getUsersForUnit(int unitPk, ProjectOID projectOID, WorkstationOID workstationOID) throws Exception;
 
-    List<User> getUsersForProjectInRole(long pk, WorkstationOID workstationOID, String roleName);
+    List<User> getUsersForProjectInRole(int pk, WorkstationOID workstationOID, String roleName) throws Exception;
 
-    List<User> getUsersForUnitInRole(int unitPk, ProjectOID projectOID, WorkstationOID workstationOID, String roleName);
-
-    boolean isUsersForProjectInRole(int userPk, ProjectOID projectOID, WorkstationOID workstationOID, String roleName);
+    List<User> getUsersForUnitInRole(int unitPk, ProjectOID projectOID, WorkstationOID workstationOID, String roleName) throws Exception;
 
     boolean isUsersForUnitInRole(int userPk, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID, String roleName);
 
@@ -62,44 +60,44 @@ public interface UnitService {
 
     void addTesterToUnit(UserContext context, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID, int userPk);
 
-    void addVerifierToUnit(UserContext context, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID, int userPk);
+    void addVerifierToUnit(UserContext context, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID, int userPk) throws Exception;
 
-    void addApproverToUnit(UserContext context, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID, int userPk);
+    void addApproverToUnit(UserContext context, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID, int userPk) throws Exception;
 
-    void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID, int userPk);
+    void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID, int userPk) throws Exception;
 
-    List<UnitLocationQuery> getUnitLocationHistory(UnitOID unitOID, ProjectOID projectOID);
+    List<UnitLocationQuery> getUnitLocationHistory(UnitOID unitOID, ProjectOID projectOID) throws Exception;
 
-    void removeUnitFromProject(UserContext context, UnitOID unitOID, ProjectOID projectOID, CommonEnums.DeleteOptionEnum deleteUnitOption);
+    void removeUnitFromProject(UserContext context, UnitOID unitOID, ProjectOID projectOID, CommonEnums.DeleteOptionEnum deleteUnitOption) throws Exception;
 
-    void openUnit(UserContext context, UnitBean rootUnitToOpen, List<UnitBean> unitBeanAndChildrenList, ProjectOID lastOpenProjectOID, ProjectOID destinationProjectOID);
+    void openUnit(UserContext context, UnitBean rootUnitToOpen, List<UnitBean> unitBeanAndChildrenList, ProjectOID lastOpenProjectOID, ProjectOID destinationProjectOID) throws Exception;
 
     void removeUserFromUnit(int userPk, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID, String role) throws Exception;
 
-    void updateUnit(UnitObj unit);
+    void updateUnit(UnitObj unit) throws Exception;
 
-    List<UnitLocationQuery> getUnitLocationHistory(UnitOID unitOID, ProjectOID projectOID, boolean includeChildren);
+    List<UnitLocationQuery> getUnitLocationHistory(UnitOID unitOID, ProjectOID projectOID, boolean includeChildren) throws Exception;
 
-    float getUnitPercentComplete(UserContext context, int unitPk, ProjectOID projectOID, boolean includeChildren);
+    float getUnitPercentComplete(UserContext context, int unitPk, ProjectOID projectOID, boolean includeChildren) throws Exception;
 
-    HashMap<ProjectOID, Integer> getUnitCount(List<Integer> projectPks, boolean includeChildren);
+    HashMap<ProjectOID, Integer> getUnitCount(List<Integer> projectPks, boolean includeChildren) throws Exception;
 
-    int getUnitCount(int projectPk, boolean includeChildren);
+    int getUnitCount(int projectPk, boolean includeChildren) throws Exception;
 
     List<UnitQuery> getUnitsWithWorkstationsAssigned(ProjectOID projectOID, WorkstationOID workstationOID);
 
     List<UnitQuery> getUnitsWithWorkstationsAssigned(ProjectOID projectOID, ProjectPartOID projectPartOID, WorkstationOID workstationOID);
 
-    void addUnitToProject(UserContext context, ProjectOID sourceProjectOID, ProjectOID destinationProjectOID, UnitBean rootUnitBean, List<UnitBean> unitBeanAndChildrenList, boolean addAsPlannedUnit);
+    void addUnitToProject(UserContext context, ProjectOID sourceProjectOID, ProjectOID destinationProjectOID, UnitBean rootUnitBean, List<UnitBean> unitBeanAndChildrenList, boolean addAsPlannedUnit) throws Exception;
 
     void copyWorkstationToUnits(UserContext context, ProjectQuery projectQuery, WorkstationQuery workstationQuery, Integer[] selectedUnits);
-    void setWorkstationProjectPartTeamSetupToUnits(UserContext context, ProjectQuery projectQuery, WorkstationQuery workstationQuery, ProjectPartOID projectPartOID, Integer[] selectedUnits, boolean copyDefaultTeamIfNoProjectPartTeamIsSet);
+    void setWorkstationProjectPartTeamSetupToUnits(UserContext context, ProjectQuery projectQuery, WorkstationQuery workstationQuery, ProjectPartOID projectPartOID, Integer[] selectedUnits, boolean copyDefaultTeamIfNoProjectPartTeamIsSet) throws Exception;
 
-    void cascadeWorkstationToUnits(UserContext context, ProjectQuery projectQuery, WorkstationQuery workstationQuery, Integer[] selectedUnitsForForm, Integer[] selectedUnitsForTeam);
+    void cascadeWorkstationToUnits(UserContext context, ProjectQuery projectQuery, WorkstationQuery workstationQuery, Integer[] selectedUnitsForForm, Integer[] selectedUnitsForTeam) throws Exception;
 
-    void deleteWorkstationToUnits(UserContext context, ProjectQuery projectQuery, WorkstationQuery workstationQuery, UnitObj[] array);
+    void deleteWorkstationToUnits(UserContext context, ProjectQuery projectQuery, WorkstationQuery workstationQuery, UnitObj[] array) throws Exception;
 
-    void removeWorkstationFromUnit(UserContext context, UnitOID unitOID, ProjectOID projectOID, WorkstationOID workstationOID);
+    void removeWorkstationFromUnit(UserContext context, UnitOID unitOID, ProjectOID projectOID, WorkstationOID workstationOID) throws Exception;
 
 
 }

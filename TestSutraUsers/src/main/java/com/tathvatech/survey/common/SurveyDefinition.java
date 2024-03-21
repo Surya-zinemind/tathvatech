@@ -6,6 +6,13 @@
  */
 package com.tathvatech.survey.common;
 
+import com.tathvatech.common.common.FileStoreManager;
+import com.tathvatech.survey.entity.Survey;
+import com.tathvatech.survey.inf.SurveyItemBase;
+import org.jdom2.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,7 +29,7 @@ import java.util.StringTokenizer;
  */
 public class SurveyDefinition implements SurveyDefinitionBase
 {
-   /* private static final Logger logger = Logger.getLogger(SurveyDefinition.class);
+   private static final Logger logger = LoggerFactory.getLogger(SurveyDefinition.class);
     
     public static final String DB_SUFFIX = "_desc";
     public static final String TEXT_SUFFIX = "_text";
@@ -42,7 +49,7 @@ public class SurveyDefinition implements SurveyDefinitionBase
 
     }
 
-    public SurveyDefinition(Survey survey, Element rootElement)
+   /* public SurveyDefinition(Survey survey, Element rootElement)
     {
         this.surveyConfig = survey;
 
@@ -58,10 +65,7 @@ public class SurveyDefinition implements SurveyDefinitionBase
     {
         return surveyConfig;
     }
-    
-    *//**
-     * @return
-     *//*
+
     public String getSurveyName()
     {
         return surveyConfig.getIdentityNumber();
@@ -140,10 +144,7 @@ public class SurveyDefinition implements SurveyDefinitionBase
     	return -1;
     }
     
-    *//**
-     * return all questions, top level and nested ones in a linear list
-     * @return
-     *//*
+
     public List<SurveyItemBase> getQuestionsLinear()
     {
     	List<SurveyItemBase> qList = new ArrayList();
@@ -156,10 +157,7 @@ public class SurveyDefinition implements SurveyDefinitionBase
     	return qList;
     }
     
-    *//**
-     * return all questions, everything below the one passed in a linear list
-     * @return
-     *//*
+
     public List<SurveyItemBase> getQuestionsLinear(String surveyItemId)
     {
     	List<SurveyItemBase> qList = new ArrayList();
@@ -192,10 +190,7 @@ public class SurveyDefinition implements SurveyDefinitionBase
     	}
     }
     
-    *//**
-     * @param questionId
-     * @return
-     *//*
+
     public SurveyItemBase getQuestion(String questionId)
     {
     	if(questionId == null)
@@ -353,6 +348,6 @@ public class SurveyDefinition implements SurveyDefinitionBase
 			e.printStackTrace();
 		}
         
-    }*/
-
+    }
+*/
 }

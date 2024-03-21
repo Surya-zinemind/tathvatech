@@ -31,11 +31,10 @@ import jakarta.persistence.Table;
  * Window - Preferences - Java - Code Style - Code Templates
  */
 @Entity
-
 @Table(name="TAB_UNIT")
 public class Unit  extends AbstractEntity implements Serializable,TestableEntity
 {
-	private final UnitManagerCore unitManagerCore;
+	private  UnitManagerCore unitManagerCore;
 	@Id
 	private long pk;
 	private int partPk;
@@ -128,13 +127,12 @@ public class Unit  extends AbstractEntity implements Serializable,TestableEntity
 		this.lastUpdated = lastUpdated;
 	}
 
+	public Unit() {
+	}
+
 	/**
      * 
      */
-    public Unit(UnitManagerCore unitManagerCore)
-    {
-        this.unitManagerCore = unitManagerCore;
-    }
 
 
 	public Unit(UnitBean unitBean, UnitManagerCore unitManagerCore)

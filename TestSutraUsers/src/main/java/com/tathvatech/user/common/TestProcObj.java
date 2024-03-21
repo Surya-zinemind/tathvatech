@@ -1,5 +1,8 @@
 package com.tathvatech.user.common;
 
+import com.tathvatech.user.OID.TestProcOID;
+import com.tathvatech.user.OID.UnitOID;
+
 import java.util.Date;
 
 public class TestProcObj
@@ -15,6 +18,7 @@ public class TestProcObj
 	private int createdBy;
 	private Date createdDate;
 	private Date lastUpdated;
+	private int estatus;
 	
 	public int getPk()
 	{
@@ -95,6 +99,14 @@ public class TestProcObj
 		this.lastUpdated = lastUpdated;
 	}
 
+	public int getEstatus() {
+		return estatus;
+	}
+
+	public void setEstatus(int estatus) {
+		this.estatus = estatus;
+	}
+
 	@Override
 	public boolean equals(Object obj) 
 	{
@@ -108,5 +120,8 @@ public class TestProcObj
 	@Override
 	public int hashCode() {
 		return pk;
+	}
+	public TestProcOID getOID() {
+		return new TestProcOID((int) pk,name );
 	}
 }

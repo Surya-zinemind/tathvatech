@@ -322,11 +322,7 @@ public class SurveyResponse
     	this.surveyDefinition = sDef;
     }
     
-    *//**
-     * @param question
-     * @param answer
-     * @throws Exception
-     *//*
+
     public void addAnswer(SurveySaveItemBase sItem, SurveyItemResponse answer)
     {
         AnswerPersistor ap = sItem.getPersistor(answer);
@@ -338,19 +334,14 @@ public class SurveyResponse
         }
     }
 
-    *//**
-     * @param item
-     * @return
-     *//*
+
 
     public SurveyItemResponse getAnswer(SurveySaveItemBase sItem)
     {
         return (SurveyItemResponse)answerMap.get(sItem);
     }
 
-    *//**
-     * @param ssItem
-     *//*
+
     public void clearAnswer(SurveySaveItemBase ssItem)
     {
         answerMap.remove(ssItem);
@@ -360,12 +351,7 @@ public class SurveyResponse
     {
     	return answerMap;
     }
-    
-    *//**
-     * use with caution, there could be duplicate surveyItem ids across different forms.
-     * @param itemId
-     * @return
-     *//*
+
     public SurveyItemResponse getAnswerBySurveyItemId(String itemId)
     {
     	SurveyItemResponse ires = null;
