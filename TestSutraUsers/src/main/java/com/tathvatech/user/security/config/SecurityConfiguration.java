@@ -38,7 +38,8 @@ public class SecurityConfiguration
             "/swagger-ui/**",
             "/webjars/**",
             "/swagger-ui.html",
-            "/auth/login"};
+            "/auth/login",
+            "/health-check"};
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;
