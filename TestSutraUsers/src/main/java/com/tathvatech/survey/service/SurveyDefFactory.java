@@ -10,14 +10,19 @@ import com.tathvatech.common.common.ApplicationProperties;
 import com.tathvatech.common.common.ServiceLocator;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.entity.Survey;
 import com.tathvatech.unit.service.UnitManager;
 import com.tathvatech.user.OID.FormOID;
 import org.apache.commons.collections4.map.ReferenceMap;
+import org.jdom2.Element;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.text.Document;
-import javax.swing.text.Element;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -50,7 +55,7 @@ public class SurveyDefFactory
 //        if(surveyDef != null)
 //        	return surveyDef;
         
-    	Survey survey = SurveyMaster.getSurveyByPk(surveyOID.getPk());
+    	Survey survey = SurveyMaster.getSurveyByPk((int) surveyOID.getPk());
         if(survey == null)
         {
             logger.warn("Survey not found, pk - " + surveyOID.getPk());
@@ -77,8 +82,8 @@ public class SurveyDefFactory
 		{
 			FileInputStream inStream = new FileInputStream(new File(surveyDefFile));
 			InputStreamReader reader = new InputStreamReader(inStream, "UTF-8");
-	        SAXBuilder   builder = new SAXBuilder();
-			Document     doc = builder.build(reader);
+	        SAXBuilder builder = new SAXBuilder();
+			Document     doc = (Document) builder.build(reader);
 			reader.close();
 			inStream.close();
 
@@ -117,7 +122,7 @@ public class SurveyDefFactory
             XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
             FileOutputStream outStream = new FileOutputStream(fullFilePath, false);
             OutputStreamWriter writer = new OutputStreamWriter(outStream, "UTF-8");
-            outputter.output(surveyDoc, writer);
+            outputter.output((org.jdom2.Document) surveyDoc, writer);
             writer.close();
             outStream.close();
         }
@@ -149,7 +154,7 @@ public class SurveyDefFactory
     		FileInputStream inStream = new FileInputStream(new File(surveyDefFile));
     		InputStreamReader reader = new InputStreamReader(inStream, "UTF-8");
             SAXBuilder   builder = new SAXBuilder();
-    		Document doc = builder.build(reader);
+    		Document doc = (Document) builder.build(reader);
     		reader.close();
     		inStream.close();
 
@@ -162,7 +167,7 @@ public class SurveyDefFactory
             XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
             FileOutputStream outStream = new FileOutputStream(newFullFilePath, false);
             OutputStreamWriter writer = new OutputStreamWriter(outStream, "UTF-8");
-            outputter.output(doc, writer);
+            outputter.output((org.jdom2.Document) doc, writer);
             writer.close();
             outStream.close();
         }

@@ -3,9 +3,17 @@ package com.tathvatech.unit.service;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.project.common.ProjectQuery;
+import com.tathvatech.unit.common.UnitEntityQuery;
+import com.tathvatech.unit.common.UnitInProjectQuery;
+import com.tathvatech.unit.common.UnitQuery;
 import com.tathvatech.unit.dao.UnitInProjectDAO;
+import com.tathvatech.unit.entity.Unit;
+import com.tathvatech.unit.entity.UnitBookmark;
 import com.tathvatech.unit.entity.UnitInProject;
+import com.tathvatech.unit.enums.Actions;
 import com.tathvatech.unit.oid.UnitInProjectOID;
+import com.tathvatech.unit.request.SerialNumberFilter;
+import com.tathvatech.unit.request.UnitEntityListReportRequest;
 import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.UnitOID;
 import com.tathvatech.user.common.UserContext;
@@ -194,11 +202,11 @@ public class UnitManager
 		return null;
 	}
 	
-	public static Unit getUnitBySerialNo(String serialNo)
+	public  Unit getUnitBySerialNo(String serialNo)
 	{
 		try 
 		{
-			List<Unit> units = PersistWrapper.readList(Unit.class, "select u.* from TAB_UNIT u "
+			List<Unit> units = persistWrapper.readList(Unit.class, "select u.* from TAB_UNIT u "
 					+ " join TAB_UNIT_H uh on uh.unitPk = u.pk and now() between uh.effectiveDateFrom and uh.effectiveDateTo"
 					+ " where uh.serialNo = ?", serialNo);
 			
@@ -219,7 +227,7 @@ public class UnitManager
 		return null;
 	}
 
-	public static List<UnitQuery> getUnits(SerialNumberFilter serialNumberFilter)
+	public  List<UnitQuery> getUnits(SerialNumberFilter serialNumberFilter)
 	{
 		List params = new ArrayList();
 
@@ -263,7 +271,7 @@ public class UnitManager
 			sb.append(" and uprh.parentPk is null");
 		}
 		
-		return PersistWrapper.readList(UnitQuery.class, sb.toString(), params.toArray());
+		return persistWrapper.readList(UnitQuery.class, sb.toString(), params.toArray());
 	}
 	
 	public static void changeUnitParent(UserContext userContext,
@@ -414,12 +422,12 @@ public class UnitManager
 		return persistWrapper.readList(ProjectQuery.class, sql, unitOID.getPk());
 	}
 
-	public static List<UnitInProjectQuery> getProjectAssignmentsForUnit(UnitOID unitOID)
+	public  List<UnitInProjectQuery> getProjectAssignmentsForUnit(UnitOID unitOID)
 	{
-		return PersistWrapper.readList(UnitInProjectQuery.class, UnitInProjectQuery.sql + " and u.pk = ? order by addedDate ", unitOID.getPk());
+		return persistWrapper.readList(UnitInProjectQuery.class, UnitInProjectQuery.sql + " and u.pk = ? order by addedDate ", unitOID.getPk());
 	}
 
-	public  UnitQuery addUnitBookMark(UserContext context, int unitPk, int projectPk, BookmarkModeEnum mode)throws Exception
+	public  UnitQuery addUnitBookMark(UserContext context, int unitPk, int projectPk, UnitBookmark.BookmarkModeEnum mode)throws Exception
 	{
 		UnitBookmark bookmark = persistWrapper.read(UnitBookmark.class,
 				"select * from unit_bookmark where userFk= ? and unitFk = ? and projectFk = ?", 
@@ -428,15 +436,15 @@ public class UnitManager
 		int pk;
 		if(bookmark != null)
 		{
-			pk=bookmark.getPk();
+			pk= (int) bookmark.getPk();
 			//bookmark is already there.
-			if(bookmark.getMode().equals(BookmarkModeEnum.ByUser.name()))
+			if(bookmark.getMode().equals(UnitBookmark.BookmarkModeEnum.ByUser.name()))
 			{
 				//already added by user , ignore
 			}
-			else if(bookmark.getMode().equals(BookmarkModeEnum.Auto.name()))
+			else if(bookmark.getMode().equals(UnitBookmark.BookmarkModeEnum.Auto.name()))
 			{
-				if(BookmarkModeEnum.ByUser.name().equals(mode.name()))
+				if(UnitBookmark.BookmarkModeEnum.ByUser.name().equals(mode.name()))
 				{
 					// upgrade to an ByUser bookmark
 					bookmark.setMode(mode.name());
@@ -452,7 +460,7 @@ public class UnitManager
 		}
 		else
 		{
-			if(BookmarkModeEnum.ByUser.name().equals(mode.name()))
+			if(UnitBookmark.BookmarkModeEnum.ByUser.name().equals(mode.name()))
 			{
 				//user is adding a bookmark. so just add
 				UnitBookmark bookmarkNew = new UnitBookmark();
@@ -468,7 +476,7 @@ public class UnitManager
 				// a new bookmark is getting auto added. 
 				List<UnitBookmark> currentList = persistWrapper.readList(UnitBookmark.class,
 						"select * from unit_bookmark where userFk = ? and mode = ? order by createdDate", 
-						context.getUser().getPk(), BookmarkModeEnum.Auto.name());
+						context.getUser().getPk(), UnitBookmark.BookmarkModeEnum.Auto.name());
 				if(currentList != null && currentList.size() > 9) // keep 10 auto bookmarks per user
 				{
 					//remove the first one and add the new one
@@ -560,8 +568,7 @@ public class UnitManager
 		
 	}
 	
-	public  void removeUnitBookmark(UserContext context, int unitPk, int projectPk)
-	{
+	public  void removeUnitBookmark(UserContext context, int unitPk, int projectPk) throws Exception {
 		UnitBookmark bookmark = persistWrapper.read(UnitBookmark.class,
 				"select * from unit_bookmark where userFk= ? and unitFk = ? and projectFk = ?", 
 				context.getUser().getPk(), unitPk, projectPk);

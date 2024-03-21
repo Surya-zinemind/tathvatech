@@ -5,8 +5,10 @@ import java.util.List;
 
 
 import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.unit.entity.EntityActions;
 import com.tathvatech.unit.entity.UnitInProject;
 import com.tathvatech.unit.entity.UnitInProjectH;
+import com.tathvatech.unit.enums.Actions;
 import com.tathvatech.unit.enums.UnitOriginType;
 import com.tathvatech.unit.oid.UnitInProjectOID;
 import com.tathvatech.user.OID.ProjectOID;
@@ -21,11 +23,13 @@ import org.springframework.stereotype.Repository;
 public class UnitInProjectDAO
 {
 	private Date now ;
+	private final EntityActions entityActions;
 	@Autowired
 	private PersistWrapper persistWrapper;
-	public UnitInProjectDAO()
+	public UnitInProjectDAO(EntityActions entityActions)
 	{
-		now = DateUtils.getNowDateForEffectiveDateFrom();
+        this.entityActions = entityActions;
+        now = DateUtils.getNowDateForEffectiveDateFrom();
 	}
 	
 	public UnitInProjectObj getUnitInProject(UnitInProjectOID oid)
@@ -101,11 +105,11 @@ public class UnitInProjectDAO
 			
 			EntityActions act = null;
 			if(actions != null)
-				act = EntityActions.createAction(context, new UnitInProjectOID(pk), actions);
+				act = entityActions.createAction(context, new UnitInProjectOID(pk), actions);
 
 			UnitInProjectH uprhNew = new UnitInProjectH();
 			if(act != null)
-				uprhNew.setActionPk(act.getPk());
+				uprhNew.setActionPk((int) act.getPk());
 			uprhNew.setCreatedBy((int) context.getUser().getPk());
 			uprhNew.setCreatedDate(new Date());
 			uprhNew.setEffectiveDateFrom(now);
@@ -150,11 +154,11 @@ public class UnitInProjectDAO
 
 				EntityActions act = null;
 				if(actions != null)
-					act = EntityActions.createAction(context, new UnitInProjectOID(obj.getPk()) ,actions);
+					act = entityActions.createAction(context, new UnitInProjectOID(obj.getPk()) ,actions);
 
 				UnitInProjectH uprhNew = new UnitInProjectH();
 				if(act != null)
-					uprhNew.setActionPk(act.getPk());
+					uprhNew.setActionPk((int) act.getPk());
 				uprhNew.setCreatedBy((int) context.getUser().getPk());
 				uprhNew.setCreatedDate(new Date());
 				uprhNew.setEffectiveDateFrom(now);
@@ -177,7 +181,7 @@ public class UnitInProjectDAO
 	
 	public void removeUnit(UserContext context, UnitInProjectObj unitInProject) throws Exception
 	{
-		EntityActions act = EntityActions.createAction(context, unitInProject.getOID(), new Actions[]{Actions.removeUnitFromProject});
+		EntityActions act = entityActions.createAction(context, unitInProject.getOID(), new Actions[]{Actions.removeUnitFromProject});
 
 		UnitInProjectH hRec = getHRecord(unitInProject.getOID(), now);
 		hRec.setEffectiveDateTo(new Date(now.getTime()-1000));
@@ -186,7 +190,7 @@ public class UnitInProjectDAO
 		UnitInProjectH hRecNew = hRec.clone();
 		hRecNew.setPk(0);
 		hRecNew.setStatus(UnitInProject.STATUS_REMOVED);
-		hRecNew.setActionPk(act.getPk());
+		hRecNew.setActionPk((int) act.getPk());
 		hRecNew.setCreatedBy((int) context.getUser().getPk());
 		hRecNew.setCreatedDate(new Date());
 		hRecNew.setEffectiveDateFrom(now);

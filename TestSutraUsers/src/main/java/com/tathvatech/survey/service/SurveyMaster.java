@@ -75,7 +75,7 @@ public class SurveyMaster
 	 * @param surveyPk
 	 * @return
 	 */
-	public static String getSurveyDefFileName(int _surveyPk)
+	public  String getSurveyDefFileName(int _surveyPk)
 			throws Exception
 	{
 		Survey sur = getSurveyByPk(_surveyPk);
@@ -143,9 +143,9 @@ public class SurveyMaster
 	 * @param surveyPk
 	 * @return
 	 */
-	public static Survey getSurveyByPk(int surveyPk) throws Exception
+	public  Survey getSurveyByPk(int surveyPk) throws Exception
 	{
-		Survey sur = persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
+		Survey sur = (Survey) persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
 		return sur;
 	}
 
@@ -176,7 +176,7 @@ public class SurveyMaster
         formMain.setResponsibleDivision(survey.getResponsibleDivision());
         formMain.setStatus(FormMain.STATUS_ACTIVE);
 
-		survey.setCreatedBy(user.getPk());
+		survey.setCreatedBy((int) user.getPk());
         survey.setDbTable(tableName);
 		survey.setDefFileName(fileName);
 		survey.setCreatedDate(new Date());
@@ -193,7 +193,7 @@ public class SurveyMaster
         int surveyPk = (int) persistWrapper.createEntity(survey);
 
 		// fetch the new survey back
-		survey = persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
+		survey = (Survey) persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
 		return survey;
 	}
 
@@ -216,11 +216,11 @@ public class SurveyMaster
 
         //table name identification
         String tableName = "TAB_RESPONSE";
-        int maxVersionNo = PersistWrapper.read(Integer.class, "select max(versionNo) from TAB_SURVEY where formType = 1 and formMainPk=?", survey.getFormMainPk());
+        int maxVersionNo = persistWrapper.read(Integer.class, "select max(versionNo) from TAB_SURVEY where formType = 1 and formMainPk=?", survey.getFormMainPk());
         
         newVersion.setFormType(survey.getFormType());
         newVersion.setAccountPk(survey.getAccountPk());
-        newVersion.setCreatedBy(user.getPk());
+        newVersion.setCreatedBy((int) user.getPk());
         newVersion.setCreatedDate(new Date());
         newVersion.setDbTable(tableName);
         newVersion.setDefFileName(fileName);
@@ -239,7 +239,7 @@ public class SurveyMaster
         int newSurveyPk = (int) persistWrapper.createEntity(newVersion);
 
 		// fetch the new survey back
-		survey = persistWrapper.readByPrimaryKey(Survey.class, newSurveyPk);
+		survey = (Survey) persistWrapper.readByPrimaryKey(Survey.class, newSurveyPk);
 		return survey;
 	}
 

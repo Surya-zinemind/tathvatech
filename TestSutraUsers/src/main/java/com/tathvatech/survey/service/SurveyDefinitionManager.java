@@ -21,6 +21,8 @@ import com.tathvatech.common.common.ApplicationProperties;
 import com.tathvatech.common.utils.SequenceIdGenerator;
 import com.tathvatech.forms.common.FormQuery;
 import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.entity.Survey;
+import com.tathvatech.survey.inf.SurveyItemBase;
 import com.tathvatech.user.OID.FormOID;
 import com.tathvatech.user.service.AccountServiceImpl;
 
@@ -49,7 +51,7 @@ public class SurveyDefinitionManager extends Object
     public SurveyDefinitionManager(Survey survey)throws Exception
     {
         this.survey = survey;
-        this.surveyDefinition = SurveyDefFactory.getSurveyDefinition(new FormOID(survey.getPk(), survey.getIdentityNumber()));
+        this.surveyDefinition = SurveyDefFactory.getSurveyDefinition(new FormOID((int) survey.getPk(), survey.getIdentityNumber()));
     }
     
     public SurveyDefinitionManager(FormOID formOID)throws Exception
