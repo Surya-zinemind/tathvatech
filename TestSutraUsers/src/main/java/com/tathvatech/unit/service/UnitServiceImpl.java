@@ -511,7 +511,7 @@ public class UnitServiceImpl implements UnitService{
     private  void copyProjectUsersToUnit(ProjectOID projectOID, UnitOID unitOID, WorkstationOID workstationOID,
                                                boolean copyDefaultTeam) throws Exception
     {
-        UnitInProjectObj unitInProject = UnitManager.getUnitInProject(unitOID, projectOID);
+        UnitInProjectObj unitInProject = unitManager.getUnitInProject(unitOID, projectOID);
 
         List<User> pWorkstationTesters = projectService.getUsersForProjectPartInRole((int) projectOID.getPk(),
                 new ProjectPartOID(unitInProject.getProjectPartPk(), null), workstationOID, User.ROLE_TESTER);
@@ -1304,7 +1304,7 @@ public class UnitServiceImpl implements UnitService{
             throw new AppException("Error in reading the Unit heirarchy, Please contact you administrator");
         }
 
-        List<UnitQuery> destProjectUnitList = UnitManager.getAllChildrenUnitsRecursive(rootUnitToOpen.getOID(),
+        List<UnitQuery> destProjectUnitList = unitManager.getAllChildrenUnitsRecursive(rootUnitToOpen.getOID(),
                 destinationProjectOID);
 
         openUnitRec(context, uprDAO, rootUnitToOpen, unitBeanMap, lastOpenProjectOID, destinationProjectOID,
@@ -1414,13 +1414,13 @@ public class UnitServiceImpl implements UnitService{
         }
 
         // now we have to open all chileren units of this unit
-        List<UnitQuery> children = UnitManager.getChildrenUnits(srcProjectOID, unitBean.getOID());
+        List<UnitQuery> children = unitManager.getChildrenUnits(srcProjectOID, unitBean.getOID());
         List<UnitBean> childrenUnits = new ArrayList<UnitBean>();
         for (Iterator iterator = children.iterator(); iterator.hasNext();)
         {
             UnitQuery unitQuery = (UnitQuery) iterator.next();
             UnitBean aBean = unitQuery.getUnitBean();
-            aBean.setProjectPk(destProjectOID.getPk());
+            aBean.setProjectPk((int) destProjectOID.getPk());
             childrenUnits.add(aBean);
 
         }
@@ -1464,7 +1464,7 @@ public class UnitServiceImpl implements UnitService{
                                                boolean includeChildren) throws Exception
     {
         return getWorkstationPercentCompleteInt(context, unitPk, projectOID, null, includeChildren);
-    }\public  HashMap<ProjectOID, Integer> getUnitCount(List<Integer> projectPks, boolean includeChildren)
+    }public  HashMap<ProjectOID, Integer> getUnitCount(List<Integer> projectPks, boolean includeChildren)
     {
         HashMap<ProjectOID, Integer> result = new HashMap<ProjectOID, Integer>();
         List<Object> params = new ArrayList<Object>();

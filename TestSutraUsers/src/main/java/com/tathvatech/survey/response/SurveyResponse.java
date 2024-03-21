@@ -74,7 +74,7 @@ public class SurveyResponse
 		responseStartTime = new Date();
 		ipaddress = "";
 		testProcPk = unitForm.getPk();
-		userPk = user.getPk();
+		userPk = (int) user.getPk();
 		this.user = user;
 		status = ResponseMasterNew.STATUS_INPROGRESS;
     }
@@ -304,7 +304,7 @@ public class SurveyResponse
 
 
 
-	@NoColumn
+
     public SurveyDefinition getSurveyDefinition()
     {
         return surveyDefinition;
@@ -335,7 +335,7 @@ public class SurveyResponse
      * @param item
      * @return
      *//*
-    @NoColumn
+
     public SurveyItemResponse getAnswer(SurveySaveItemBase sItem)
     {
         return (SurveyItemResponse)answerMap.get(sItem);
@@ -373,7 +373,7 @@ public class SurveyResponse
     	return ires;
     }
     
-	@NoColumn
+
     public User getUser() 
 	{
 		return user;
@@ -382,7 +382,7 @@ public class SurveyResponse
 	{
 		this.user = user;
 	}
-	@NoColumn
+
 	public ResponseFlags getFlag()
 	{
 		return flag;
