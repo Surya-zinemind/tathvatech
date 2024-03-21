@@ -1,8 +1,8 @@
 package com.tathvatech.forms.oid;
 
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.OID;
-import com.tathvatech.ts.core.common.WorkItem;
+
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.user.OID.OID;
 
 public class TestProcSectionOID extends OID implements WorkItem{
 
@@ -38,7 +38,7 @@ public class TestProcSectionOID extends OID implements WorkItem{
 	
 	@Override
 	public int hashCode() {
-		return super.getPk();
+		return (int) super.getPk();
 	}
 
 }

@@ -3,28 +3,7 @@ package com.tathvatech.report.request;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.tathvatech.testsutra.andon.AndonQueryFilter;
-import com.tathvatech.testsutra.equipment.report.EquipmentListFilter;
-import com.tathvatech.testsutra.hazardMaintenance.common.HazardMaintenanceQueryFilter;
-import com.tathvatech.testsutra.injury.common.InjuryReportQueryFilter;
-import com.tathvatech.testsutra.mrf.common.MrfQueryFilter;
-import com.tathvatech.testsutra.ncr.reports.ncritemlistreport.NcrCorrectiveActionReportFilter;
-import com.tathvatech.testsutra.ncr.reports.ncritemlistreport.NcrItemListReportFilter;
-import com.tathvatech.testsutra.ncr.reports.ncrsummaryreport.NcrSummaryReportFilter;
-import com.tathvatech.testsutra.ncr.service.NcrUnitListRequest;
-import com.tathvatech.testsutra.ncr.workspace.NcrGroupQueryFilterNew;
-import com.tathvatech.testsutra.nearmiss.common.NearMissQueryFilter;
-import com.tathvatech.testsutra.nearmiss.report.NearMissSummaryReportRequest;
-import com.tathvatech.testsutra.openitemv2.report.listreport.OpenItemListReportFilter;
-import com.tathvatech.testsutra.openitemv2.report.summaryreport.OpenItemStatusSummaryReportRequest;
-import com.tathvatech.testsutra.parts.report.PartListFilter;
-import com.tathvatech.testsutra.procurements.reports.suppliersitegroupreport.SupplierListReportFilter;
-import com.tathvatech.testsutra.purchaseOrders.common.PurchaseOrderFilterNew;
-import com.tathvatech.testsutra.ticketManagement.common.SupportTicketFilter;
-import com.tathvatech.testsutra.user.report.UserFilter;
-import com.tathvatech.testsutra.workstationReport.common.ProjectWorkstationFilter;
-import com.thirdi.surveyside.project.TestProcFilter;
-import com.thirdi.surveyside.project.testprocstatussummaryreport.TestProcStatusSummaryReportRequest;
+import com.tathvatech.forms.common.TestProcFilter;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)

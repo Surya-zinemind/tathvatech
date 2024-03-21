@@ -8,10 +8,13 @@ import java.util.List;
 import com.tathvatech.common.common.QueryObject;
 import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.common.exception.AppException;
+import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.common.TestProcFilter;
 
+import com.tathvatech.forms.enums.FormStatusEnum;
 import com.tathvatech.unit.common.UnitFormQuery;
 import com.tathvatech.unit.entity.UnitLocation;
+import com.tathvatech.unit.service.UnitManager;
 import com.tathvatech.user.OID.UnitOID;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.workstation.common.UnitInProjectObj;
@@ -19,6 +22,8 @@ import com.tathvatech.workstation.common.UnitInProjectObj;
 
 public class TestProcListReport
 {
+	private PersistWrapper persistWrapper;
+	private UnitManager unitManager;
 	UserContext context;
 	ReportRequest reportRequest;
 	private TestProcFilter filter;
@@ -27,14 +32,18 @@ public class TestProcListReport
 	private Date forecastTestCompletionDateFrom = null;
 	private Date forecastTestCompletionDateTo = null;
 
-	public TestProcListReport(UserContext context, TestProcFilter filter)
+	public TestProcListReport(UserContext context, TestProcFilter filter, PersistWrapper persistWrapper, UnitManager unitManager, UnitManager unitManager1)
 	{
-		this(context, ReportRequest.getSimpleReportRequestForFetchAllRows(ReportTypes.TestProcListReport, filter));
-	}
+		this(context, ReportRequest.getSimpleReportRequestForFetchAllRows(ReportTypes.TestProcListReport, filter), unitManager1);
+        this.persistWrapper = persistWrapper;
+        this.unitManager = unitManager;
+    }
 	
-	public TestProcListReport(UserContext context, ReportRequest reportRequest)
+	public TestProcListReport(PersistWrapper persistWrapper, UnitManager unitManager, UserContext context, ReportRequest reportRequest)
 	{
-		this.context = context;
+        this.persistWrapper = persistWrapper;
+        this.unitManager = unitManager;
+        this.context = context;
 		this.reportRequest = reportRequest;
 		this.filter = (TestProcFilter) reportRequest.getFilter();
 		
@@ -68,7 +77,14 @@ public class TestProcListReport
 		}
 		
 	}
-	
+
+	public TestProcListReport(UserContext context, TestProcFilter filter, UnitManager unitManager) {
+        this.unitManager = unitManager;
+    }
+
+	public TestProcListReport(UserContext context, TestProcFilter filter) {
+	}
+
 	public  ReportResponse runReport()
 	{
 		ReportResponse response = new ReportResponse();
@@ -79,7 +95,7 @@ public class TestProcListReport
 		{
 			// we need to find the count if the request is newRequest.
 			StringBuffer countQB = new StringBuffer("select count(*) from ( ").append(qb.getQuery()).append(" )data");
-			long totalRowCount = PersistWrapper.read(Long.class, countQB.toString(),
+			long totalRowCount = persistWrapper.read(Long.class, countQB.toString(),
 					(qb.getParams().size() > 0) ? qb.getParams().toArray(new Object[qb.getParams().size()]) : null);
 			response.setTotalRows(totalRowCount);
 		}
@@ -91,7 +107,7 @@ public class TestProcListReport
 			sql.append(" limit ").append(reportRequest.getStartIndex()).append(", ")
 					.append(reportRequest.getRowsToFetch());
 		}
-		List<UnitFormQuery> rows = PersistWrapper.readList(UnitFormQuery.class, sql.toString(),
+		List<UnitFormQuery> rows = persistWrapper.readList(UnitFormQuery.class, sql.toString(),
 				qb.getParams().toArray());
 
 		response.setReportData(rows);
@@ -102,7 +118,7 @@ public class TestProcListReport
 	public  List<UnitFormQuery> getTestProcs()
 	{
 		QueryObject q = getSql();
-		return PersistWrapper.readList(UnitFormQuery.class, q.getQuery(), (q.getParams().size() > 0)?q.getParams().toArray(new Object[q.getParams().size()]):null);
+		return persistWrapper.readList(UnitFormQuery.class, q.getQuery(), (q.getParams().size() > 0)?q.getParams().toArray(new Object[q.getParams().size()]):null);
 	}
 	
 	public QueryObject getSql()
@@ -176,7 +192,7 @@ public class TestProcListReport
 				{
 					throw new AppException("Project should be specified to include chileren of the selected unit");
 				}
-				UnitInProjectObj unit = UnitManager.getUnitInProject(filter.getUnitOID(), filter.getProjectOIDForUnitHeirarchy());
+				UnitInProjectObj unit = unitManager.getUnitInProject(filter.getUnitOID(), filter.getProjectOIDForUnitHeirarchy());
 				sb.append(" join (select upr.unitPk from unit_project_ref upr "
 						+ " join unit_project_ref_h uprh on uprh.unitInProjectPk = upr.pk and now() between uprh.effectiveDateFrom and uprh.effectiveDateTo and uprh.status != 'Removed' "
 						+ " where ( (upr.unitPk = ? and upr.projectPk = ?) or (upr.projectPk = ? and uprh.rootParentPk = ? and uprh.heiCode like ?) ) )units on units.unitPk = uth.unitPk ");

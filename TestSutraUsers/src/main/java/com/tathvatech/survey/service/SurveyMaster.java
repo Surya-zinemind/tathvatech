@@ -12,59 +12,37 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import com.tathvatech.common.common.ApplicationProperties;
+import com.tathvatech.common.email.EmailMessageInfo;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.common.exception.AppException;
+import com.tathvatech.common.utils.SequenceIdGenerator;
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.forms.common.FormQuery;
+import com.tathvatech.forms.entity.FormSection;
+import com.tathvatech.forms.oid.FormMainOID;
+import com.tathvatech.forms.response.ResponseMasterNew;
+import com.tathvatech.forms.service.TestProcManager;
+import com.tathvatech.project.entity.Project;
+import com.tathvatech.project.entity.ProjectForm;
+import com.tathvatech.project.service.ProjectService;
+import com.tathvatech.survey.entity.Survey;
+import com.tathvatech.unit.service.UnitManager;
+import com.tathvatech.user.Asynch.AsyncProcessor;
+import com.tathvatech.user.OID.*;
+import com.tathvatech.user.common.TestProcObj;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.Account;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.entity.UserQuery;
+import com.tathvatech.user.repository.UserRepository;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sarvasutra.etest.pdfprint.templatelocationconfig.ItemPrintAreaDef;
-import com.sarvasutra.etest.pdfprint.templatelocationconfig.PdfTemplatePrintLocationConfig;
-import com.tathvatech.testsutra.timetrack.common.WorkorderRequestBean;
-import com.tathvatech.testsutra.timetrack.service.TimeEntryManager;
-import com.tathvatech.testsutra.timetrack.service.WorkorderManager;
-import com.tathvatech.ts.caf.ApplicationProperties;
-import com.tathvatech.ts.caf.core.SequenceIdGenerator;
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.Account;
-import com.tathvatech.ts.core.accounts.AccountManager;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.accounts.UserOID;
-import com.tathvatech.ts.core.accounts.UserQuery;
-import com.tathvatech.ts.core.accounts.UserRepository;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.WorkItem;
-import com.tathvatech.ts.core.common.utils.AsyncProcessor;
-import com.tathvatech.ts.core.common.utils.EmailMessageInfo;
-import com.tathvatech.ts.core.project.FormMainOID;
-import com.tathvatech.ts.core.project.FormOID;
-import com.tathvatech.ts.core.project.FormSectionOID;
-import com.tathvatech.ts.core.project.ProjectForm;
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.project.TestProcOID;
-import com.tathvatech.ts.core.project.TestProcObj;
-import com.tathvatech.ts.core.project.TestProcSectionOID;
-import com.tathvatech.ts.core.project.TestProcSectionObj;
-import com.tathvatech.ts.core.survey.FormPrintFormat;
-import com.tathvatech.ts.core.survey.ObjectLock;
-import com.tathvatech.ts.core.survey.ObjectLockQuery;
-import com.tathvatech.ts.core.survey.Survey;
-import com.tathvatech.ts.core.survey.response.FormResponseMaster;
-import com.tathvatech.ts.core.survey.response.FormResponseOID;
-import com.tathvatech.ts.core.survey.response.ResponseMasterNew;
-import com.tathvatech.ts.report.ReportTypes;
-import com.tathvatech.ts.tasks.TasksDelegate;
-import com.thirdi.surveyside.project.FormFilter;
-import com.thirdi.surveyside.project.Project;
-import com.thirdi.surveyside.project.ProjectManager;
-import com.thirdi.surveyside.project.TestProcManager;
-import com.thirdi.surveyside.project.TestProcSectionDAO;
-import com.thirdi.surveyside.project.UnitBookmark;
-import com.thirdi.surveyside.project.UnitManager;
-import com.thirdi.surveyside.reportv2.ReportRequest;
-import com.thirdi.surveyside.reportv2.ReportResponse;
-import com.thirdi.surveyside.survey.response.SurveyResponseManager;
-import com.thirdi.surveyside.wizard.xml.SurveyDefFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Hari
@@ -74,9 +52,23 @@ import com.thirdi.surveyside.wizard.xml.SurveyDefFactory;
  */
 public class SurveyMaster
 {
-	private static final Logger logger = Logger.getLogger(SurveyMaster.class);
+	private static final Logger logger = LoggerFactory.getLogger(SurveyMaster.class);
+	private  final PersistWrapper persistWrapper;
+	private final ProjectService projectService;
+	private final SurveyResponseManager surveyResponseManager;
+	private final SequenceIdGenerator sequenceIdGenerator;
+	private final UnitManager unitManager;
 
-	// TODO:: implement a cache with this hashmap
+    public SurveyMaster(PersistWrapper persistWrapper, ProjectService projectService, SurveyResponseManager surveyResponseManager, SequenceIdGenerator sequenceIdGenerator, UnitManager unitManager) {
+        this.persistWrapper = persistWrapper;
+        this.projectService = projectService;
+        this.surveyResponseManager = surveyResponseManager;
+        this.sequenceIdGenerator = sequenceIdGenerator;
+        this.unitManager = unitManager;
+    }
+
+
+    // TODO:: implement a cache with this hashmap
 	// private static HashMap surveyMap = new HashMap();
 
 	/**
@@ -102,10 +94,10 @@ public class SurveyMaster
 	 * @return
 	 * @throws Exception
 	 */
-	private static boolean isSurveyNameExist(String surveyName)
+	private  boolean isSurveyNameExist(String surveyName)
 			throws Exception
 	{
-		List list = PersistWrapper.readList(
+		List list = persistWrapper.readList(
 				FormMain.class,
 						"select * from tab_forms_main where identityNumber =? ",
 						surveyName);
@@ -130,9 +122,9 @@ public class SurveyMaster
 	 * @return
 	 * @throws Exception
 	 */
-	private static boolean isSurveyNameExistForAnotherSurvey(String surveyName, FormMainOID formMainOID) throws Exception
+	private  boolean isSurveyNameExistForAnotherSurvey(String surveyName, FormMainOID formMainOID) throws Exception
 	{
-		List list = PersistWrapper.readList(
+		List list = persistWrapper.readList(
 						FormMain.class,
 						"select * from tab_forms_main where identityNumber =? and pk != ?",
 						surveyName, formMainOID.getPk());
@@ -153,7 +145,7 @@ public class SurveyMaster
 	 */
 	public static Survey getSurveyByPk(int surveyPk) throws Exception
 	{
-		Survey sur = PersistWrapper.readByPrimaryKey(Survey.class, surveyPk);
+		Survey sur = persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
 		return sur;
 	}
 
@@ -163,7 +155,7 @@ public class SurveyMaster
 	 * @param _fileName
 	 * @param tableName
 	 */
-	public static Survey createSurvey(UserContext context, Survey survey) throws Exception
+	public  Survey createSurvey(UserContext context, Survey survey) throws Exception
 	{
 		User user = (User)context.getUser();
 
@@ -173,7 +165,7 @@ public class SurveyMaster
 		}
 
         //survey def file name
-		String nextSurveySeq = SequenceIdGenerator.getNext(SequenceIdGenerator.SURVEYFILE, false);
+		String nextSurveySeq = sequenceIdGenerator.getNext(SequenceIdGenerator.SURVEYFILE, false);
         String fileName = "sd_" + new Date().getTime() + "_" + nextSurveySeq + ".xml";
 
         //table name identification
@@ -195,13 +187,13 @@ public class SurveyMaster
 		SurveyDefFactory.createSurveyDefFile(survey);
 
 
-        int surveyMainPk = PersistWrapper.createEntity(formMain);
+        int surveyMainPk = (int) persistWrapper.createEntity(formMain);
 
         survey.setFormMainPk(surveyMainPk);
-        int surveyPk = PersistWrapper.createEntity(survey);
+        int surveyPk = (int) persistWrapper.createEntity(survey);
 
 		// fetch the new survey back
-		survey = PersistWrapper.readByPrimaryKey(Survey.class, surveyPk);
+		survey = persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
 		return survey;
 	}
 
@@ -211,7 +203,7 @@ public class SurveyMaster
 	 * @param _fileName
 	 * @param tableName
 	 */
-	public static Survey createSurveyNewVersion(UserContext context, Survey newVersion, FormQuery baseRevision) throws Exception
+	public  Survey createSurveyNewVersion(UserContext context, Survey newVersion, FormQuery baseRevision) throws Exception
 	{
 		Survey survey = SurveyMaster.getSurveyByPk(baseRevision.getPk());
 		
@@ -219,7 +211,7 @@ public class SurveyMaster
 		User user = (User)context.getUser();
 
         //survey def file name
-		String nextSurveySeq = SequenceIdGenerator.getNext(SequenceIdGenerator.SURVEYFILE, false);
+		String nextSurveySeq = sequenceIdGenerator.getNext(SequenceIdGenerator.SURVEYFILE, false);
         String fileName = "sd_" + new Date().getTime() + "_" + nextSurveySeq + ".xml";
 
         //table name identification
@@ -244,10 +236,10 @@ public class SurveyMaster
 		SurveyDefFactory.createSurveyByCopy(newVersion, baseRevision.getPk());
 
 
-        int newSurveyPk = PersistWrapper.createEntity(newVersion);
+        int newSurveyPk = (int) persistWrapper.createEntity(newVersion);
 
 		// fetch the new survey back
-		survey = PersistWrapper.readByPrimaryKey(Survey.class, newSurveyPk);
+		survey = persistWrapper.readByPrimaryKey(Survey.class, newSurveyPk);
 		return survey;
 	}
 
@@ -257,7 +249,7 @@ public class SurveyMaster
 	 * @param _fileName
 	 * @param tableName
 	 */
-	public static Survey createSurveyByCopy(UserContext context, Survey survey, int sourceSurveyPk) throws Exception
+	public  Survey createSurveyByCopy(UserContext context, Survey survey, int sourceSurveyPk) throws Exception
 	{
 		User user = (User)context.getUser();
 
@@ -267,7 +259,7 @@ public class SurveyMaster
 		}
 
         //survey def file name
-		String nextSurveySeq = SequenceIdGenerator.getNext(SequenceIdGenerator.SURVEYFILE, false);
+		String nextSurveySeq = sequenceIdGenerator.getNext(SequenceIdGenerator.SURVEYFILE, false);
         String fileName = "sd_" + new Date().getTime() + "_" + nextSurveySeq + ".xml";
 
         //table name identification
@@ -289,13 +281,13 @@ public class SurveyMaster
 		SurveyDefFactory.createSurveyByCopy(survey, sourceSurveyPk);
 
 
-        int formMainPk = PersistWrapper.createEntity(formMain);
+        int formMainPk = (int) persistWrapper.createEntity(formMain);
 
         survey.setFormMainPk(formMainPk);
-        int surveyPk = PersistWrapper.createEntity(survey);
+        int surveyPk = (int) persistWrapper.createEntity(survey);
 
 		// fetch the new survey back
-		survey = PersistWrapper.readByPrimaryKey(Survey.class, surveyPk);
+		survey = persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
 		return survey;
 	}
 
@@ -305,7 +297,7 @@ public class SurveyMaster
 	 *
 	 * @param surveyDef
 	 */
-	public static void deleteSurvey(int surveyPk) throws Exception
+	public  void deleteSurvey(int surveyPk) throws Exception
 	{
 		List errors = new ArrayList();
 		
@@ -334,27 +326,27 @@ public class SurveyMaster
 		surveyConfig.setStatus(Survey.STATUS_DELETED);
 		PersistWrapper.update(surveyConfig);
 
-		Integer formCountInSet = PersistWrapper.read(Integer.class, 
+		Integer formCountInSet = persistWrapper.read(Integer.class,
 				"select count(*) from tab_survey where formMainPk = ? and status != ? ", surveyConfig.getFormMainPk(), Survey.STATUS_DELETED);
 		if(formCountInSet == 0)
 		{
-			FormMain formMain = PersistWrapper.readByPrimaryKey(FormMain.class, surveyConfig.getFormMainPk());
+			FormMain formMain = persistWrapper.readByPrimaryKey(FormMain.class, surveyConfig.getFormMainPk());
 			formMain.setIdentityNumber(surveyConfig.getIdentityNumber() + "-del-" + formMain.getPk());
-			PersistWrapper.update(formMain);
+			persistWrapper.update(formMain);
 		}
 
 	}
 
-	public static Survey updateSurvey(Survey survey) throws Exception
+	public  Survey updateSurvey(Survey survey) throws Exception
 	{
 		boolean nameCheck = isSurveyNameExistForAnotherSurvey(survey.getIdentityNumber(), new FormMainOID(survey.getFormMainPk()));
 		if(nameCheck)
 			throw new AppException("Duplicate form name, Please choose a different form name.");
 
-		PersistWrapper.update(survey);
+		persistWrapper.update(survey);
 		
 		// fetch the new survey back
-		survey = PersistWrapper.readByPrimaryKey(Survey.class, survey.getPk());
+		survey = persistWrapper.readByPrimaryKey(Survey.class, survey.getPk());
 		return survey;
 	}
 
@@ -457,9 +449,9 @@ public class SurveyMaster
 		return null;
 	}
 
-	public static FormQuery getLatestPublishedVersionOfForm(int formPk) throws Exception
+	public  FormQuery getLatestPublishedVersionOfForm(int formPk) throws Exception
 	{
-		Survey s = PersistWrapper.readByPrimaryKey(Survey.class, formPk);
+		Survey s = persistWrapper.readByPrimaryKey(Survey.class, formPk);
 		return getLatestPublishedVersionForForm(s.getFormMainPk());
 	}
 
@@ -481,7 +473,7 @@ public class SurveyMaster
 		return null;
 	}
 
-	public static void deleteSurveyVersion(UserContext context, int surveyVersionPk) throws Exception 
+	public  void deleteSurveyVersion(UserContext context, int surveyVersionPk) throws Exception
 	{
 		List errors = new ArrayList();
 		
@@ -492,7 +484,7 @@ public class SurveyMaster
 		}
 
 		surveyConfig.setStatus(Survey.STATUS_DELETED);
-		PersistWrapper.update(surveyConfig);
+		persistWrapper.update(surveyConfig);
 
 		//if there are no active versions of the form, delete the formMain
 		Integer formCountInSet = PersistWrapper.read(Integer.class, 
@@ -517,15 +509,15 @@ public class SurveyMaster
 //		PersistWrapper.deleteEntity(Survey.class, surveyVersionPk);
 	}
 
-	public static FormMain getFormMain(FormQuery formQuery) throws Exception 
+	public FormMain getFormMain(FormQuery formQuery) throws Exception
 	{
-		return PersistWrapper.read(FormMain.class, "select * from TAB_FORMS_MAIN where pk = (select formMainPk from TAB_SURVEY where pk=?)", formQuery.getPk());
+		return persistWrapper.read(FormMain.class, "select * from TAB_FORMS_MAIN where pk = (select formMainPk from TAB_SURVEY where pk=?)", formQuery.getPk());
 	}
 
-	public static void publishSurvey(UserContext context, int surveyPk, 
-			List<ProjectOID> projectUpgradeList, HashMap<ProjectOID, User> projectNotificationMap, HashMap<ProjectOID, List<Integer>> formsUpgradeMap)throws Exception
+	public  void publishSurvey(UserContext context, int surveyPk,
+									 List<ProjectOID> projectUpgradeList, HashMap<ProjectOID, User> projectNotificationMap, HashMap<ProjectOID, List<Integer>> formsUpgradeMap)throws Exception
 	{
-		Survey survey = PersistWrapper.readByPrimaryKey(Survey.class, surveyPk);
+		Survey survey = persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
 		if(!(Survey.STATUS_CLOSED.equals(survey.getStatus())))
 			return;
 		
@@ -535,7 +527,7 @@ public class SurveyMaster
 		survey.setApprovedDate(now);
 		survey.setEffectiveDate(now);
 		PersistWrapper.update(survey);
-		survey = PersistWrapper.readByPrimaryKey(Survey.class, surveyPk);
+		survey = persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
 		
 		supersedPreviousFormVersions(survey);
 		
@@ -544,7 +536,7 @@ public class SurveyMaster
 		notifyFormPublish(context, surveyPk, projectUpgradeList, projectNotificationMap, formsUpgradeMap);
 	}
 	
-	private static void notifyFormPublish(UserContext context, int surveyPk, 
+	private  void notifyFormPublish(UserContext context, int surveyPk,
 			List<ProjectOID> projectUpgradeList, HashMap<ProjectOID, User> projectNotificationMap, HashMap<ProjectOID, List<Integer>> formsUpgradeMap) throws Exception
 	{
 		FormQuery formQuery = SurveyMaster.getFormByPk(surveyPk);
@@ -576,7 +568,7 @@ public class SurveyMaster
 				.hasNext();) 
 		{
 			ProjectOID projectOID = (ProjectOID) iterator.next();
-			Project project = ProjectManager.getProject(projectOID.getPk());
+			Project project = projectService.getProject(projectOID.getPk());
 			User manager = projectNotificationMap.get(projectOID);
 			
 			FormVersionUpgradeForProjectTaskBean taskBean = new FormVersionUpgradeForProjectTaskBean();
@@ -606,9 +598,9 @@ public class SurveyMaster
 		
 	}
 
-	public static void applyFormUpgradePublish(UserContext context, int surveyPk, List projectListToUpgrade, List unitFormsListToUpgrade)throws Exception
+	public  void applyFormUpgradePublish(UserContext context, int surveyPk, List projectListToUpgrade, List unitFormsListToUpgrade)throws Exception
 	{
-		Survey survey = PersistWrapper.readByPrimaryKey(Survey.class, surveyPk);
+		Survey survey = persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
 		if(!(Survey.STATUS_OPEN.equals(survey.getStatus())))
 			throw new AppException("Form is still not published, it cannot be assigned to projects");
 	
@@ -618,7 +610,7 @@ public class SurveyMaster
 			for (Iterator iterator = projectListToUpgrade.iterator(); iterator.hasNext();)
 			{
 				Integer aProjectPk = (Integer) iterator.next();
-				List<ProjectForm> projectForms = PersistWrapper.readList(ProjectForm.class, 
+				List<ProjectForm> projectForms = persistWrapper.readList(ProjectForm.class,
 						"select * from TAB_PROJECT_FORMS where projectPk = ? and formPk in (select pk from TAB_SURVEY where formMainPk=?)", 
 						aProjectPk, survey.getFormMainPk());
 				for (Iterator iterator2 = projectForms.iterator(); iterator2.hasNext();)
@@ -631,7 +623,7 @@ public class SurveyMaster
 						// do the upgrade only if the formversion is lower
 						projectForm.setFormPk(survey.getPk());
 						projectForm.setAppliedByUserFk(context.getUser().getPk());
-						PersistWrapper.update(projectForm);
+						persistWrapper.update(projectForm);
 					}
 				}
 			}
@@ -654,9 +646,9 @@ public class SurveyMaster
 		}
 	}
 	
-	private static void supersedPreviousFormVersions(Survey survey) throws Exception
+	private void supersedPreviousFormVersions(Survey survey) throws Exception
 	{
-		List<Survey> previousVersions = PersistWrapper.readList(Survey.class, 
+		List<Survey> previousVersions = persistWrapper.readList(Survey.class,
 				"select * from TAB_SURVEY where formMainPk=? and versionNo < ?", survey.getFormMainPk(), survey.getVersionNo());
 		for (Iterator iterator = previousVersions.iterator(); iterator.hasNext();)
 		{
@@ -664,18 +656,18 @@ public class SurveyMaster
 			if(!(aSurvey.getStatus().equals(Survey.STATUS_DELETED)))
 			{
 				aSurvey.setSuperseded(1);
-				PersistWrapper.update(aSurvey);
+				persistWrapper.update(aSurvey);
 			}
 		}
 	}
 
-	public static UserQuery getAttributionUser(WorkItem workItem)throws Exception
+	public   UserQuery getAttributionUser(WorkItem workItem)throws Exception
 	{
 		if(EntityTypeEnum.TestProcSection == workItem.getEntityType())
 		{
 			TestProcSectionObj testProcSectionObj = new TestProcManager().getTestProcSection(new TestProcSectionOID(workItem.getPk()));
 			TestProcObj testProc = new TestProcManager().getTestProc(new TestProcSectionOID(workItem.getPk()));
-			ResponseMasterNew resp = SurveyResponseManager.getLatestResponseMasterForTest(testProc.getOID());
+			ResponseMasterNew resp = surveyResponseManager.getLatestResponseMasterForTest(testProc.getOID());
 
 			ObjectLock ol = getObjectLock(resp.getResponseId(), (int) testProcSectionObj.getFormSectionFk());
 			if(ol != null && ol.getAttributionUserFk() != null)
@@ -703,13 +695,13 @@ public class SurveyMaster
 		}
 	}
 
-	public static void resetAttribution(UserContext context, WorkItem workItem)throws Exception
+	public  void resetAttribution(UserContext context, WorkItem workItem)throws Exception
 	{
 		if(EntityTypeEnum.TestProcSection == workItem.getEntityType())
 		{
 			TestProcSectionObj testProcSectionObj = new TestProcManager().getTestProcSection(new TestProcSectionOID(workItem.getPk()));
 			TestProcObj testProc = new TestProcManager().getTestProc(new TestProcSectionOID(workItem.getPk()));
-			ResponseMasterNew resp = SurveyResponseManager.getLatestResponseMasterForTest(testProc.getOID());
+			ResponseMasterNew resp = surveyResponseManager.getLatestResponseMasterForTest(testProc.getOID());
 
 			ObjectLock ol = getObjectLock(resp.getResponseId(), (int) testProcSectionObj.getFormSectionFk());
 			ol.setAttributionUserFk(ol.getUserPk());
@@ -717,24 +709,24 @@ public class SurveyMaster
 		}
 	}
 
-	public static ObjectLock getObjectLock(int responseFk, int formSectionFk)
+	public  ObjectLock getObjectLock(int responseFk, int formSectionFk)
 	{
-		return PersistWrapper.read(ObjectLock.class, "select * from tab_sectionlock where responseFk = ? and formSectionFk = ? ", 
+		return persistWrapper.read(ObjectLock.class, "select * from tab_sectionlock where responseFk = ? and formSectionFk = ? ",
 				responseFk, formSectionFk);
 	}
 
-	public synchronized static ObjectLock lockSectionToEdit(UserContext context, User lockForUser, FormResponseOID responseOID, String sectionId)throws LockedByAnotherUserException, Exception
+	public synchronized  ObjectLock lockSectionToEdit(UserContext context, User lockForUser, FormResponseOID responseOID, String sectionId)throws LockedByAnotherUserException, Exception
 	{
-		FormResponseMaster respMaster = PersistWrapper.readByResponseId(FormResponseMaster.class, responseOID.getPk());
+		FormResponseMaster respMaster = persistWrapper.readByResponseId(FormResponseMaster.class, responseOID.getPk());
 		FormSection formSection = new FormDBManager().getFormSection(sectionId, respMaster.getSurveyPk());
 		
-		ObjectLock objectLock = PersistWrapper.read(ObjectLock.class, "select * from tab_sectionlock where " +
+		ObjectLock objectLock = persistWrapper.read(ObjectLock.class, "select * from tab_sectionlock where " +
 				"responseFk=? and sectionId=?", 
 				responseOID.getPk(), sectionId);
 		
 		if(objectLock != null)
 		{
-			User lockedBy = PersistWrapper.readByPrimaryKey(User.class, objectLock.getUserPk());
+			User lockedBy = persistWrapper.readByPrimaryKey(User.class, objectLock.getUserPk());
 			
 			objectLock.setLockedByUser(lockedBy);
 			
@@ -756,9 +748,9 @@ public class SurveyMaster
 			lock.setUserPk(lockForUser.getPk());
 			lock.setAttributionUserFk(lockForUser.getPk());
 			lock.setLockDate(new Date());
-			int newPk = PersistWrapper.createEntity(lock);
+			int newPk = persistWrapper.createEntity(lock);
 
-			ObjectLock newLock = PersistWrapper.readByPrimaryKey(ObjectLock.class, newPk);
+			ObjectLock newLock = persistWrapper.readByPrimaryKey(ObjectLock.class, newPk);
 			newLock.setLockedByUser(lockForUser);
 			
 			
@@ -772,7 +764,7 @@ public class SurveyMaster
 			
 			//add the unit to favourites
 			TestProcObj testProc = TestProcManager.getTestProc(resp.getTestProcPk());
-			UnitManager.addUnitBookMark(context, testProc.getUnitPk(), testProc.getProjectPk(), UnitBookmark.BookmarkModeEnum.Auto);
+			unitManager.addUnitBookMark(context, testProc.getUnitPk(), testProc.getProjectPk(), UnitBookmark.BookmarkModeEnum.Auto);
 			
 			
 			return newLock;
@@ -780,9 +772,9 @@ public class SurveyMaster
 	}
 	
 	
-	public static ObjectLockQuery getCurrentLock(FormResponseOID responseOID, String sectionId)throws Exception
+	public  ObjectLockQuery getCurrentLock(FormResponseOID responseOID, String sectionId)throws Exception
 	{
-		List<ObjectLockQuery> oList = PersistWrapper.readList(ObjectLockQuery.class,  ObjectLockQuery.sql + 
+		List<ObjectLockQuery> oList = persistWrapper.readList(ObjectLockQuery.class,  ObjectLockQuery.sql +
 				" and responseFk=? and sectionId=? order by pk desc", 
 				responseOID.getPk(), sectionId);
 		if(oList == null || oList.size() == 0)
@@ -798,9 +790,9 @@ public class SurveyMaster
 		}
 	}
 
-	public static List<String> getLockedSectionIds(User user, FormResponseOID responseOID)throws Exception
+	public  List<String> getLockedSectionIds(User user, FormResponseOID responseOID)throws Exception
 	{
-		List l = PersistWrapper.readList(ObjectLock.class, ObjectLockQuery.sql + 
+		List l = persistWrapper.readList(ObjectLock.class, ObjectLockQuery.sql +
 				" and userPk = ? and responseFk=?", 
 				user.getPk(), responseOID.getPk());
 
@@ -828,9 +820,9 @@ public class SurveyMaster
 		return l;
 	}
 
-	public static boolean isSectionLocked(User user, FormResponseOID responseOID, String sectionId)throws Exception
+	public  boolean isSectionLocked(User user, FormResponseOID responseOID, String sectionId)throws Exception
 	{
-		ObjectLock objectLock = PersistWrapper.read(ObjectLock.class, ObjectLockQuery.sql +
+		ObjectLock objectLock = persistWrapper.read(ObjectLock.class, ObjectLockQuery.sql +
 				" and userPk = ? and responseFk=? and sectionId=?", 
 				user.getPk(), responseOID.getPk(), sectionId);
 		if(objectLock == null)
@@ -839,9 +831,9 @@ public class SurveyMaster
 			return true;
 	}
 
-	public static void releaseSectionEditLock(UserContext context, User user, FormResponseOID responseOID, String sectionId)throws LockedByAnotherUserException, Exception
+	public  void releaseSectionEditLock(UserContext context, User user, FormResponseOID responseOID, String sectionId)throws LockedByAnotherUserException, Exception
 	{
-		ObjectLock objectLock = PersistWrapper.read(ObjectLock.class, ObjectLockQuery.sql +
+		ObjectLock objectLock = persistWrapper.read(ObjectLock.class, ObjectLockQuery.sql +
 				" and responseFk=? and sectionId=?", 
 				responseOID.getPk(), sectionId);
 		if(objectLock == null)
@@ -854,17 +846,17 @@ public class SurveyMaster
 			TestProcSectionObj tsObj = new TestProcSectionDAO().getTestProcSection(new TestProcOID(resp.getTestProcPk()), new FormSectionOID(objectLock.getFormSectionFk()));
 			TimeEntryManager.checkOutAllFromWorkOrder(context, tsObj.getOID());
 
-			PersistWrapper.deleteEntity(ObjectLock.class, objectLock.getPk());
+			persistWrapper.deleteEntity(ObjectLock.class, objectLock.getPk());
 		}
 		else
 		{
-			User lockedBy = PersistWrapper.readByPrimaryKey(User.class, objectLock.getUserPk());
+			User lockedBy = persistWrapper.readByPrimaryKey(User.class, objectLock.getUserPk());
 			objectLock.setLockedByUser(lockedBy);
 			throw new LockedByAnotherUserException(objectLock);
 		}
 	}
 
-	public static void releaseSectionEditLock(UserContext context, FormResponseOID responseOID, String sectionId)throws Exception
+	public  void releaseSectionEditLock(UserContext context, FormResponseOID responseOID, String sectionId)throws Exception
 	{
 		ObjectLock objectLock = PersistWrapper.read(ObjectLock.class, ObjectLockQuery.sql +
 				" and responseFk=? and sectionId=?", 
@@ -875,7 +867,7 @@ public class SurveyMaster
 			TestProcSectionObj tsObj = new TestProcSectionDAO().getTestProcSection(new TestProcOID(resp.getTestProcPk()), new FormSectionOID(objectLock.getFormSectionFk()));
 			TimeEntryManager.checkOutAllFromWorkOrder(context, tsObj.getOID());
 
-			PersistWrapper.deleteEntity(ObjectLock.class, objectLock.getPk());
+			persistWrapper.deleteEntity(ObjectLock.class, objectLock.getPk());
 		}
 	}
 
@@ -922,7 +914,7 @@ public class SurveyMaster
 		return null;
 	}
 
-	public static PdfTemplatePrintLocationConfig saveFormPrintTemplateLocationConfig(UserContext context, FormOID formOID, PdfTemplatePrintLocationConfig config) throws Exception
+	public  PdfTemplatePrintLocationConfig saveFormPrintTemplateLocationConfig(UserContext context, FormOID formOID, PdfTemplatePrintLocationConfig config) throws Exception
 	{
 		FormPrintFormat pf = getFormPrintFormat(formOID);
 		if(pf == null)
@@ -961,9 +953,9 @@ public class SurveyMaster
 		pf.setPrintAreaDef(s);
 
 		if(pf.getPk() == 0)
-			PersistWrapper.createEntity(pf);
+			persistWrapper.createEntity(pf);
 		else
-			PersistWrapper.update(pf);
+			persistWrapper.update(pf);
 		
 		
 		return getFormPrintTemplateLocationConfig(formOID);

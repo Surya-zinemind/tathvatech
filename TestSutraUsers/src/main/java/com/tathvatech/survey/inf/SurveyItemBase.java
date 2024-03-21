@@ -4,14 +4,18 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.jdom.Element;
+import com.tathvatech.survey.common.SurveyDefinitionBase;
+import com.tathvatech.user.service.AccountServiceImpl;
 
-import com.tathvatech.ts.core.survey.SurveyDefinitionBase;
+
+import org.apache.catalina.core.ContainerBase;
+import org.jdom2.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class SurveyItemBase {
-	
-	private static Logger logger = Logger.getLogger(SurveyItemBase.class);
+
+	private static final Logger logger = LoggerFactory.getLogger(SurveyItemBase.class);
 	
     private SurveyItemBase parent;
     

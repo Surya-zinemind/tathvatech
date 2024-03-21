@@ -3,8 +3,8 @@ package com.tathvatech.unit.common;
 import java.io.Serializable;
 import java.util.Date;
 
-import net.sf.persist.annotations.NoColumn;
-import net.sf.persist.annotations.NoTable;
+import com.tathvatech.user.OID.UnitOID;
+
 
 /**
  * This is the real UnitQuery with no project related information, 
@@ -12,7 +12,7 @@ import net.sf.persist.annotations.NoTable;
  * @author Hari
  *
  */
-@NoTable
+
 public class UnitEntityQuery implements Serializable
 {
     int pk;

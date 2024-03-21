@@ -1,10 +1,12 @@
 package com.tathvatech.unit.common;
 
+import com.tathvatech.unit.oid.UnitInProjectOID;
+
 import java.util.Date;
 
-import net.sf.persist.annotations.NoTable;
 
-@NoTable
+
+
 public class UnitInProjectQuery
 {
 	private int pk;

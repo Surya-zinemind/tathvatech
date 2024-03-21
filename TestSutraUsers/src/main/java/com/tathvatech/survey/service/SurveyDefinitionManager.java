@@ -17,32 +17,17 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import com.tathvatech.common.common.ApplicationProperties;
+import com.tathvatech.common.utils.SequenceIdGenerator;
+import com.tathvatech.forms.common.FormQuery;
 import com.tathvatech.survey.common.SurveyDefinition;
-import org.apache.log4j.Logger;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
+import com.tathvatech.user.OID.FormOID;
+import com.tathvatech.user.service.AccountServiceImpl;
 
-import com.tathvatech.ts.caf.ApplicationProperties;
-import com.tathvatech.ts.caf.core.SequenceIdGenerator;
-import com.tathvatech.ts.core.project.FormOID;
-import com.tathvatech.ts.core.survey.FormTypeEnum;
-import com.tathvatech.ts.core.survey.Survey;
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.surveyitem.SectionBase;
-import com.tathvatech.ts.core.survey.surveyitem.SurveyItemBase;
-import com.tathvatech.ts.core.survey.surveyitem.SurveyItemManager;
-import com.tathvatech.ts.core.survey.surveyitem.SurveyItemOrderComparator;
-import com.tathvatech.ts.core.survey.surveyitem.SurveyParamBase;
-import com.thirdi.surveyside.survey.Container;
-import com.thirdi.surveyside.survey.FormQuery;
-import com.thirdi.surveyside.survey.SurveyItem;
-import com.thirdi.surveyside.survey.SurveyMaster;
-import com.thirdi.surveyside.survey.SurveyNotEditableException;
-import com.thirdi.surveyside.survey.logic.Logic;
-import com.thirdi.surveyside.survey.surveyitem.SurveySaveItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.text.Document;
 
 /**
  * @author Hari
@@ -52,10 +37,11 @@ import com.thirdi.surveyside.survey.surveyitem.SurveySaveItem;
  */
 public class SurveyDefinitionManager extends Object
 {
-    private static final Logger logger = Logger.getLogger(SurveyDefinitionManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(SurveyDefinitionManager.class);
 
     private Survey survey;
     private SurveyDefinition surveyDefinition;
+    private SequenceIdGenerator sequenceIdGenerator;
 
     /**
      * @param survey
@@ -68,7 +54,7 @@ public class SurveyDefinitionManager extends Object
     
     public SurveyDefinitionManager(FormOID formOID)throws Exception
     {
-        this.survey = SurveyMaster.getSurveyByPk(formOID.getPk());
+        this.survey = SurveyMaster.getSurveyByPk((int) formOID.getPk());
         this.surveyDefinition = SurveyDefFactory.getSurveyDefinition(formOID);
     }
 
@@ -319,7 +305,7 @@ public class SurveyDefinitionManager extends Object
 		FileInputStream inStream = new FileInputStream(new File(surveyFileName));
 		InputStreamReader reader = new InputStreamReader(inStream, "UTF-8");
         SAXBuilder   builder = new SAXBuilder();
-		Document     surveyDoc = builder.build(reader);
+		Document surveyDoc = builder.build(reader);
 		reader.close();
 		inStream.close();
 
@@ -813,7 +799,7 @@ public class SurveyDefinitionManager extends Object
             logger.debug("Logic is of type" + logic.getClass().getName());
         }
 
-        String seq = SequenceIdGenerator.getNext(SequenceIdGenerator.LOGIC, false);
+        String seq = sequenceIdGenerator.getNext(SequenceIdGenerator.LOGIC, false);
         if (logger.isDebugEnabled())
         {
             logger.debug("Sequence number is - " + seq);

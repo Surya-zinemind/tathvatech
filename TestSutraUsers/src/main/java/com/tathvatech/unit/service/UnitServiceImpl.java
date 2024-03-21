@@ -1214,7 +1214,7 @@ public class UnitServiceImpl implements UnitService{
         // unit with a Del marker
         // this way the unitName can be re-used. users could create a new unit
         // with improper settings, then delete it and try to re-create it.
-        List<ProjectQuery> assignedProjects = UnitManager.getUnitAssignedProjects(new UnitOID(uprToDelete.getUnitPk()));
+        List<ProjectQuery> assignedProjects = unitManager.getUnitAssignedProjects(new UnitOID(uprToDelete.getUnitPk()));
         if (assignedProjects.size() == 1 && assignedProjects.get(0).getPk() == projectOID.getPk())
         {
             // this means the unit is assigned only to this project
@@ -1687,7 +1687,7 @@ public class UnitServiceImpl implements UnitService{
         }
 
         // process the children units of this unit.
-        List<UnitQuery> unitList = UnitManager.getChildrenUnits(sourceProjectOID, unitBeanToAdd.getOID());
+        List<UnitQuery> unitList = unitManager.getChildrenUnits(sourceProjectOID, unitBeanToAdd.getOID());
         for (Iterator iterator = unitList.iterator(); iterator.hasNext();)
         {
             UnitQuery cUnit = (UnitQuery) iterator.next();
@@ -1990,3 +1990,4 @@ public class UnitServiceImpl implements UnitService{
 
 
 }
+

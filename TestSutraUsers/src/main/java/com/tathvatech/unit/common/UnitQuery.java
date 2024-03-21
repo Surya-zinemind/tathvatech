@@ -1,17 +1,20 @@
 package com.tathvatech.unit.common;
 
+import com.tathvatech.forms.oid.FormAssignable;
+import com.tathvatech.site.oid.SiteGroupOID;
+import com.tathvatech.unit.entity.UnitInProject;
+import com.tathvatech.unit.enums.UnitOriginType;
+import com.tathvatech.user.OID.OID;
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.SupplierOID;
+import com.tathvatech.user.OID.UnitOID;
+
 import java.io.Serializable;
 import java.util.Date;
 
-import com.tathvatech.ts.core.FormAssignable;
-import com.tathvatech.ts.core.common.OID;
-import com.tathvatech.ts.core.part.SupplierOID;
-import com.tathvatech.ts.core.sites.SiteGroupOID;
 
-import net.sf.persist.annotations.NoColumn;
-import net.sf.persist.annotations.NoTable;
 
-@NoTable
+
 public class UnitQuery implements Serializable, FormAssignable
 {
     int unitPk;
@@ -86,7 +89,7 @@ public class UnitQuery implements Serializable, FormAssignable
 		this.unitOriginTypeString = unitOriginTypeString;
 	}
 
-	@NoColumn
+
 	public UnitOriginType getUnitOriginType() {
 		return unitOriginType;
 	}
@@ -451,7 +454,7 @@ public class UnitQuery implements Serializable, FormAssignable
 			+ " join TAB_PROJECT p on upr.projectPk = p.pk"
 			+ " left outer join (select pk, unitPk from unit_project_ref where projectPk = ? ) parentUnitPkRef on parentUnitPkRef.pk = uprh.parentPk"
 			+ " left outer join (select pk, unitPk from unit_project_ref where projectPk = ? ) rootParentUnitPkRef on rootParentUnitPkRef.pk = uprh.rootParentPk "
-			+ " left outer join (select unitPk, projectPk, projectName, projectDescription from unit_project_ref upr2, unit_project_ref_h uprh2, TAB_PROJECT p2 where uprh2.unitInProjectPk = upr2.pk and now() between uprh2.effectiveDateFrom and uprh2.effectiveDateTo and upr2.projectPk = p2.pk and uprh2.status = '"+UnitInProject.STATUS_OPEN+"' ) unitOpenInProjectTab on unitOpenInProjectTab.unitPk = u.pk "
+			+ " left outer join (select unitPk, projectPk, projectName, projectDescription from unit_project_ref upr2, unit_project_ref_h uprh2, TAB_PROJECT p2 where uprh2.unitInProjectPk = upr2.pk and now() between uprh2.effectiveDateFrom and uprh2.effectiveDateTo and upr2.projectPk = p2.pk and uprh2.status = '"+ UnitInProject.STATUS_OPEN+"' ) unitOpenInProjectTab on unitOpenInProjectTab.unitPk = u.pk "
 			+ " left outer join project_part on uprh.projectPartPk = project_part.pk "
 			+ " left outer join part_type on project_part.partTypePk = part_type.pk ";
 }

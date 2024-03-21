@@ -1,11 +1,11 @@
 package com.tathvatech.unit.enums;
 
-import com.tathvatech.ts.caf.activitylogging.BaseActions;
 
+import com.tathvatech.user.service.PlanSecurityManager;
 
 public enum Actions implements BaseActions{
 
-	createUnit(PlanSecurityManager.UNIT_CREATE, "Create Unit"), 
+	createUnit(PlanSecurityManager.UNIT_CREATE, "Create Unit"),
 	updateUnit(PlanSecurityManager.UNIT_EDIT, "Update Unit"),
 	deleteUnit(PlanSecurityManager.UNIT_EDIT, "Update Unit"),
 	addUnitToProject(PlanSecurityManager.ADD_UNIT_TO_PROJECT, "Add Unit to Project"),

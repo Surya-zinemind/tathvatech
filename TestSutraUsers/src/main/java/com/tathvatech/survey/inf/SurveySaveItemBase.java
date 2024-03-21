@@ -1,10 +1,7 @@
 package com.tathvatech.survey.inf;
 
-import com.tathvatech.ts.core.survey.response.AnswerPersistor;
-import com.tathvatech.ts.core.survey.response.SurveyItemResponse;
 
-
-
+import com.tathvatech.survey.response.SurveyItemResponse;
 
 public interface SurveySaveItemBase {
 

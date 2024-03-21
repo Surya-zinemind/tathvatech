@@ -1,6 +1,8 @@
 package com.tathvatech.unit.request;
 
-import com.tathvatech.ts.core.part.PartOID;
+
+import com.tathvatech.user.OID.PartOID;
+import com.tathvatech.user.OID.ProjectOID;
 
 public class SerialNumberFilter 
 {

@@ -1,28 +1,33 @@
 package com.tathvatech.unit.service;
 
+import com.tathvatech.common.common.QueryObject;
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.unit.common.UnitQuery;
+import com.tathvatech.unit.entity.UnitInProject;
+import com.tathvatech.workstation.common.UnitInProjectObj;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.tathvatech.testsutra.ncr.common.QueryObject;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.project.UnitInProject;
-import com.tathvatech.ts.core.project.UnitQuery;
-import com.thirdi.surveyside.project.UnitInProjectObj;
-import com.thirdi.surveyside.project.UnitManager;
+
 
 public class UnitInProjectListReport
 {
+	private final PersistWrapper persistWrapper;
+	private final UnitManager unitManager;
 	private UnitInProjectListReportRequest unitFilter;
-	public UnitInProjectListReport(UnitInProjectListReportRequest reportRequest)
+	public UnitInProjectListReport(PersistWrapper persistWrapper, UnitManager unitManager, UnitInProjectListReportRequest reportRequest)
 	{
-		this.unitFilter = reportRequest;
+        this.persistWrapper = persistWrapper;
+        this.unitManager = unitManager;
+        this.unitFilter = reportRequest;
 	}
 	
 	public List<UnitQuery> runReport()
 	{
 		QueryObject qb = getSql();
-		return PersistWrapper.readList(UnitQuery.class, qb.getQuery(), qb.getParams().toArray());
+		return persistWrapper.readList(UnitQuery.class, qb.getQuery(), qb.getParams().toArray());
 	}
 	
 	private QueryObject getSql()
@@ -131,7 +136,7 @@ public class UnitInProjectListReport
 		{
 			if(unitFilter.isAllChildrenRecursive())
 			{
-				UnitInProjectObj upr = UnitManager.getUnitInProject(unitFilter.getUnitOID(), unitFilter.getProjectOID());
+				UnitInProjectObj upr = unitManager.getUnitInProject(unitFilter.getUnitOID(), unitFilter.getProjectOID());
 				sb.append(" and ( (u.pk = ?) or (uprh.rootParentPk = ? and uprh.heiCode like ?) ) ");
 				params.add(unitFilter.getUnitOID().getPk());
 				params.add(upr.getRootParentPk());
@@ -158,7 +163,7 @@ public class UnitInProjectListReport
 		}
 		if(unitFilter.getParentUnitOID() != null)
 		{
-			UnitInProjectObj parentUPR = UnitManager.getUnitInProject(unitFilter.getParentUnitOID(), unitFilter.getProjectOID());
+			UnitInProjectObj parentUPR = unitManager.getUnitInProject(unitFilter.getParentUnitOID(), unitFilter.getProjectOID());
 			if(unitFilter.isAllChildrenRecursive())
 			{
 				sb.append(" and  (uprh.rootParentPk = ? and uprh.heiCode like ?)  ");

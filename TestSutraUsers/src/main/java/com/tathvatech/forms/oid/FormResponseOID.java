@@ -1,9 +1,10 @@
 package com.tathvatech.forms.oid;
 
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.OID;
 
-public class FormResponseOID extends OID{
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.user.OID.OID;
+
+public class FormResponseOID extends OID {
 
 	public FormResponseOID(int pk)
 	{
@@ -37,7 +38,7 @@ public class FormResponseOID extends OID{
 	
 	@Override
 	public int hashCode() {
-		return super.getPk();
+		return (int) super.getPk();
 	}
 
 }
