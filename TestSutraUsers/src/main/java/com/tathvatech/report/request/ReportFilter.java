@@ -7,9 +7,9 @@ import com.tathvatech.forms.common.TestProcFilter;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
-@JsonSubTypes({ @JsonSubTypes.Type(value = OpenItemListReportFilter.class, name = "OpenItemListReportFilter"),
+@JsonSubTypes({/* Uncomment later @JsonSubTypes.Type(value = OpenItemListReportFilter.class, name = "OpenItemListReportFilter"),
 		@JsonSubTypes.Type(value = OpenItemStatusSummaryReportRequest.class, name = "OpenItemStatusSummaryReportFilter"),
-		@JsonSubTypes.Type(value = TestProcFilter.class, name = "TestProcListReportFilter"),
+		*/@JsonSubTypes.Type(value = TestProcFilter.class, name = "TestProcListReportFilter")/*,
 		@JsonSubTypes.Type(value = TestProcStatusSummaryReportRequest.class, name = "TestProcStatusSummaryReportFilter"),
 		@JsonSubTypes.Type(value = UserFilter.class, name = "UserListReportFilter"),
 		@JsonSubTypes.Type(value = NcrItemListReportFilter.class, name = "NcrItemListReportFilter"),
@@ -28,7 +28,7 @@ import com.tathvatech.forms.common.TestProcFilter;
 		@JsonSubTypes.Type(value = SupportTicketFilter.class, name = "SupportTicketFilter"),
 		@JsonSubTypes.Type(value = EquipmentListFilter.class, name = "EquipmentListFilter"),
 		@JsonSubTypes.Type(value = NcrUnitListRequest.class, name = "NcrUnitListRequest"),
-		@JsonSubTypes.Type(value = AndonQueryFilter.class, name = "AndonQueryFilter") })
+		@JsonSubTypes.Type(value = AndonQueryFilter.class, name = "AndonQueryFilter")*/ })
 
 public abstract class ReportFilter
 {
