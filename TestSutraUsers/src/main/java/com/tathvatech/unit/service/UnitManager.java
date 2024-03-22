@@ -1,6 +1,7 @@
 package com.tathvatech.unit.service;
 
 import com.tathvatech.common.exception.AppException;
+import com.tathvatech.common.utils.Base62Util;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.project.common.ProjectQuery;
 import com.tathvatech.unit.common.UnitEntityQuery;
@@ -368,7 +369,7 @@ public class UnitManager
 		else
 		{
 			newLevel = selectedParent.getLevel() + 1;
-			newHeiCode = selectedParent.getHeiCode() + "." + Base62Util.encode(unitToChangeOID.getPk());
+			newHeiCode = selectedParent.getHeiCode() + "." + Base62Util.encode((int) unitToChangeOID.getPk());
 			newRootParentPk = selectedParent.getRootParentPk();
 			
 			unitToChange.setParentPk(selectedParent.getPk());

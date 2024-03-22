@@ -2,9 +2,10 @@ package com.tathvatech.forms.oid;
 
 
 import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.common.enums.WorkItem;
 import com.tathvatech.user.OID.OID;
 
-public class TestProcSectionOID extends OID implements WorkItem{
+public  class TestProcSectionOID extends OID implements WorkItem {
 
 	public TestProcSectionOID(int pk)
 	{

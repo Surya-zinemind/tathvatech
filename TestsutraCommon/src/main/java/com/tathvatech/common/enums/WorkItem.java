@@ -2,7 +2,7 @@ package com.tathvatech.common.enums;
 
 public interface WorkItem
 {
-	public int getPk();
+	public long getPk();
 	public EntityType getEntityType();
 }
 

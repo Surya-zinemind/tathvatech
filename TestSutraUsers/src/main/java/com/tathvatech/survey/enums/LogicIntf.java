@@ -6,7 +6,8 @@
  */
 package com.tathvatech.survey.enums;
 
-import org.jdom.Element;
+
+import org.jdom2.Element;
 
 /**
  * @author Hari

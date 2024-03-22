@@ -1,6 +1,10 @@
 package com.tathvatech.unit.request;
 
-import com.tathvatech.ts.core.part.ProjectPartOID;
+
+import com.tathvatech.project.oid.ProjectPartOID;
+import com.tathvatech.unit.enums.UnitSortOrder;
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.WorkstationOID;
 
 public class UnitFilterBean {
 	

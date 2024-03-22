@@ -3,6 +3,7 @@ package com.tathvatech.unit.service;
 import com.tathvatech.common.enums.EStatusEnum;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.exception.FormApprovedException;
+import com.tathvatech.common.utils.Base62Util;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.common.FormQuery;
 import com.tathvatech.forms.common.ProjectFormQuery;
@@ -38,6 +39,7 @@ import com.tathvatech.unit.entity.UnitLocation;
 import com.tathvatech.unit.enums.Actions;
 import com.tathvatech.unit.enums.CommonEnums;
 import com.tathvatech.unit.enums.UnitOriginType;
+import com.tathvatech.unit.request.UnitFilterBean;
 import com.tathvatech.unit.request.UnitInProjectListReportRequest;
 import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.TestProcObj;
@@ -294,7 +296,7 @@ public class UnitServiceImpl implements UnitService{
             throw new AppException("Unexpected error while creating a unit, Please contact support.");
         }
 
-        unitBean.setPk(unit.getPk());
+        unitBean.setPk((int) unit.getPk());
         unitBean.setCreatedBy(unit.getCreatedBy());
         unitBean.setCreatedDate(unit.getCreatedDate());
         unitBean.setLastUpdated(unit.getLastUpdated());
@@ -1372,7 +1374,7 @@ public class UnitServiceImpl implements UnitService{
         // remove this unit from the distinationUnitList
         UnitQuery toRemoveCheck = new UnitQuery();
         toRemoveCheck.setUnitPk(unitBean.getPk());
-        toRemoveCheck.setProjectPk(destProjectOID.getPk());
+        toRemoveCheck.setProjectPk((int) destProjectOID.getPk());
         destProjectUnitList.remove(toRemoveCheck);
 
         // if the unit is not part of the desination project, we need to add
@@ -1933,7 +1935,7 @@ public class UnitServiceImpl implements UnitService{
                 // unit contains this workstation
                 // remove any forms from the unit that are not there in the
                 // project
-                List<UnitFormQuery> uForms = TestProcManager.getTestProcsForItem(context, unit.getPk(),
+                List<UnitFormQuery> uForms = TestProcManager.getTestProcsForItem(context, (int) unit.getPk(),
                         projectQuery.getOID(), workstationQuery.getOID(), true);
                 for (Iterator iterator = uForms.iterator(); iterator.hasNext();)
                 {

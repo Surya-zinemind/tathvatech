@@ -103,7 +103,7 @@ public class UnitDAO
 				
 				EntityActions act = null;
 				if(actions != null)
-					act = createAction(context, new UnitOID(obj.getPk()), actions);
+					act = createAction(context, new UnitOID((int) obj.getPk()), actions);
 				
 				UnitH uHNew = new UnitH();
 				if(act != null)

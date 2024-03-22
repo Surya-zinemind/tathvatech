@@ -1,9 +1,10 @@
 package com.tathvatech.unit.enums;
 
 
+import com.tathvatech.common.enums.BaseActions;
 import com.tathvatech.user.service.PlanSecurityManager;
 
-public enum Actions implements BaseActions{
+public enum Actions implements BaseActions {
 
 	createUnit(PlanSecurityManager.UNIT_CREATE, "Create Unit"),
 	updateUnit(PlanSecurityManager.UNIT_EDIT, "Update Unit"),

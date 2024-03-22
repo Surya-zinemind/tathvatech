@@ -25,6 +25,10 @@ public class UnitInProjectListReport
         this.unitFilter = reportRequest;
 	}
 
+	public UnitInProjectListReport(UnitInProjectListReportRequest request, PersistWrapper persistWrapper, UnitManager unitManager) {
+        this.persistWrapper = persistWrapper;
+        this.unitManager = unitManager;
+    }
 
 
 	public List<UnitQuery> runReport()
