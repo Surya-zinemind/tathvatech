@@ -186,8 +186,8 @@ public class UnitServiceImpl implements UnitService{
         if (unitBean.getParentPk() != null && unitBean.getParentPk() != 0)
             parentOID = new UnitOID(unitBean.getParentPk());
 
-        boolean copyFormsConfig = !(boolean) commonServiceManager.getEntityPropertyValue(project.getOID(), ProjectPropertyEnum.DisableProjectFormCopyToUnits.getId(), Boolean.class);
-        boolean copyUsersConfig = !(boolean) commonServiceManager.getEntityPropertyValue(project.getOID(), ProjectPropertyEnum.DisableProjectUsersCopyToUnit.getId(), Boolean.class);
+        boolean copyFormsConfig = !(boolean) commonServiceManager.getEntityPropertyValue(project.getOID(), ProjectPropertyEnum.DisableProjectFormCopyToUnits.getId(),null,null, Boolean.class);
+        boolean copyUsersConfig = !(boolean) commonServiceManager.getEntityPropertyValue(project.getOID(), ProjectPropertyEnum.DisableProjectUsersCopyToUnit.getId(),null,null, Boolean.class);
 
         return createUnitInt(context, unitDAO, uprDAO, user, project, unitBean, parentOID,
                 createAsPlannedUnit,
@@ -454,7 +454,7 @@ public class UnitServiceImpl implements UnitService{
                 copyProjectFormsToUnit(context, projectOID, pForms, unitOID, workstationQuery.getOID());
 
             String defaultWorkstationStatusValue = (String) commonServiceManager.getEntityPropertyValue(projectOID,
-                    ProjectPropertyEnum.SetNewWorkstationsDefaultStatusTo.getId(), String.class);
+                    ProjectPropertyEnum.SetNewWorkstationsDefaultStatusTo.getId(), null,null,String.class);
             if (defaultWorkstationStatusValue != null && (!(UnitLocation.STATUS_WAITING.equals(defaultWorkstationStatusValue))))
             {
                 if(UnitLocation.STATUS_WAITING.equals(defaultWorkstationStatusValue) || UnitLocation.STATUS_IN_PROGRESS.equals(defaultWorkstationStatusValue)
@@ -782,8 +782,8 @@ public class UnitServiceImpl implements UnitService{
         if (unitBean.getParentPk() != null && unitBean.getParentPk() != 0)
             parentOID = new UnitOID(unitBean.getParentPk());
 
-        boolean copyFormsConfig = !(boolean) commonServiceManager.getEntityPropertyValue(projectOID, ProjectPropertyEnum.DisableProjectFormCopyToUnits.getId(), Boolean.class);
-        boolean copyUsersConfig = !(boolean) commonServiceManager.getEntityPropertyValue(projectOID, ProjectPropertyEnum.DisableProjectUsersCopyToUnit.getId(), Boolean.class);
+        boolean copyFormsConfig = !(boolean) commonServiceManager.getEntityPropertyValue(projectOID, ProjectPropertyEnum.DisableProjectFormCopyToUnits.getId(), null,null,Boolean.class);
+        boolean copyUsersConfig = !(boolean) commonServiceManager.getEntityPropertyValue(projectOID, ProjectPropertyEnum.DisableProjectUsersCopyToUnit.getId(),null,null, Boolean.class);
 
         return createUnitInt(context, unitDAO, uprDAO, user, project, unitBean, parentOID, false,
                 copyUsersConfig, copyFormsConfig, copyPartSpecificFormsToWorkstation, workstationOID, pendingReview);
@@ -1387,8 +1387,8 @@ public class UnitServiceImpl implements UnitService{
         UnitInProjectObj unitInProject = uprDAO.getUnitInProject(unitBean.getOID(), destProjectOID);
         if (unitInProject == null)
         {
-            boolean copyFormConfig = !(boolean) commonServiceManager.getEntityPropertyValue(destProjectOID, ProjectPropertyEnum.DisableProjectFormCopyToUnits.getId(), Boolean.class);
-            boolean copyUserConfig = !(boolean) commonServiceManager.getEntityPropertyValue(destProjectOID, ProjectPropertyEnum.DisableProjectUsersCopyToUnit.getId(), Boolean.class);
+            boolean copyFormConfig = !(boolean) commonServiceManager.getEntityPropertyValue(destProjectOID, ProjectPropertyEnum.DisableProjectFormCopyToUnits.getId(),null,null, Boolean.class);
+            boolean copyUserConfig = !(boolean) commonServiceManager.getEntityPropertyValue(destProjectOID, ProjectPropertyEnum.DisableProjectUsersCopyToUnit.getId(), null,null,Boolean.class);
 
             // add unit to the project, create the project_unit_ref entry
             unitInProject = addUnitToProjectInt(context, uprDAO, unitBean, destProjectOID,
@@ -1414,15 +1414,15 @@ public class UnitServiceImpl implements UnitService{
                 if (project.getPk() != destProjectOID.getPk())
                     throw new AppException(
                             String.format("Unit %s is open in project %s, Unit cannot be opened in this project",
-                                    unitBean.getOID().getDisplayText(), project.getDisplayString()));
+                                    unitBean.getOID().getDisplayText(), project.getDisplayText()));
             }
             if (UnitInProject.STATUS_PLANNED.equals(unitInProject.getStatus()))
             {
                 // the status is being changed from planned to open, so copy the
                 // workstation, users, forms etc.
                 // copy project workstations to unitworkstations
-                boolean copyFormConfig = !(boolean) commonServiceManager.getEntityPropertyValue(destProjectOID, ProjectPropertyEnum.DisableProjectFormCopyToUnits.getId(), Boolean.class);
-                boolean copyUserConfig = !(boolean) commonServiceManager.getEntityPropertyValue(destProjectOID, ProjectPropertyEnum.DisableProjectUsersCopyToUnit.getId(), Boolean.class);
+                boolean copyFormConfig = !(boolean) commonServiceManager.getEntityPropertyValue(destProjectOID, ProjectPropertyEnum.DisableProjectFormCopyToUnits.getId(), null,null,Boolean.class);
+                boolean copyUserConfig = !(boolean) commonServiceManager.getEntityPropertyValue(destProjectOID, ProjectPropertyEnum.DisableProjectUsersCopyToUnit.getId(),null,null, Boolean.class);
                 setWorkstationsAndTeamsOnUnitOpen(context, destProjectOID, unitBean.getOID(), unitInProject, copyUserConfig, copyFormConfig);
 
             }
@@ -1630,8 +1630,8 @@ public class UnitServiceImpl implements UnitService{
             throw new AppException("Error in reading the Unit heirarchy, Please contact you administrator");
         }
 
-        boolean copyFormConfig = !(boolean) commonServiceManager.getEntityPropertyValue(destinationProjectOID, ProjectPropertyEnum.DisableProjectFormCopyToUnits.getId(), Boolean.class);
-        boolean copyUserConfig = !(boolean) commonServiceManager.getEntityPropertyValue(destinationProjectOID, ProjectPropertyEnum.DisableProjectUsersCopyToUnit.getId(), Boolean.class);
+        boolean copyFormConfig = !(boolean) commonServiceManager.getEntityPropertyValue(destinationProjectOID, ProjectPropertyEnum.DisableProjectFormCopyToUnits.getId(), null,null,Boolean.class);
+        boolean copyUserConfig = !(boolean) commonServiceManager.getEntityPropertyValue(destinationProjectOID, ProjectPropertyEnum.DisableProjectUsersCopyToUnit.getId(),null,null, Boolean.class);
         addUnitToProjectRec(context, uprDAO, sourceProjectOID, destinationProjectOID, rootUnitBean, unitBeanMap,
                 addAsPlannedUnit, copyUserConfig, copyFormConfig);
     }
