@@ -94,40 +94,40 @@ public class UnitController {
         createUnit(context, createUnitRequest.getProjectPk(), createUnitRequest.getUnit(), createUnitRequest.isCreateAsPlannedUnit(),false);
     }
 
-   @PostMapping("/createUnits")
-   public UnitBean createUnits( @RequestBody CreateUnitsRequest createUnitsRequest)
+   public UnitBean createUnit( UserContext context, int projectPk, UnitBean unitBean, boolean createAsPlannedUnit, boolean pendingReview)
             throws Exception
     {
-        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            UnitOID lockableOID = null;
-            if (createUnitsRequest.getUnitBean().getParentPk() != null && createUnitsRequest.getUnitBean().getParentPk() != 0)
-            {
-                UnitOID parentOID = new UnitOID(createUnitsRequest.getUnitBean().getParentPk());
 
-                UnitInProjectObj parentUnit = unitManager.getUnitInProject(parentOID, new ProjectOID(createUnitsRequest.getProjectPk()));
-                Integer rootParentPk = parentUnit.getRootParentPk();
+        UnitOID lockableOID = null;
+        if (unitBean.getParentPk() != null && unitBean.getParentPk() != 0)
+        {
+            UnitOID parentOID = new UnitOID(unitBean.getParentPk());
 
-                UnitChangeSynchronizer sync = UnitChangeSynchronizer.getInstance();
-                lockableOID = sync.getLocableUnitOID(rootParentPk);
-            }
-            else
-            {
-                lockableOID = new UnitOID(0); // just a dummy unitOID to lock on we dont have to lock as this is a root unit we are creating.
-            }
+            UnitInProjectObj parentUnit = unitManager.getUnitInProject(parentOID, new ProjectOID(projectPk));
+            Integer rootParentPk = parentUnit.getRootParentPk();
 
-            UnitObj uobj;
-            synchronized (lockableOID)
-            {
+            UnitChangeSynchronizer sync = UnitChangeSynchronizer.getInstance();
+            lockableOID = sync.getLocableUnitOID(rootParentPk);
+        }
+        else
+        {
+            lockableOID = new UnitOID(0); // just a dummy unitOID to lock on we dont have to lock as this is a root unit we are creating.
+        }
 
-                // this starts a new transaction. DONT REMOVE this commit above.
-                //if removed, the transaction from second thread will not see the parent unit changes. as the first thread
-                // made these changes after the start of the transaction by the second thread.
-                // thus we will get non-unique records with 2 valid records in the unit_project_ref_h table.
+        UnitObj uobj;
+        synchronized (lockableOID)
+        {
 
-                uobj = unitService.createUnit(context, createUnitsRequest.getProjectPk(), createUnitsRequest.getUnitBean(), createUnitsRequest.isCreateAsPlannedUnit(), createUnitsRequest.isPendingReview());
+            // this starts a new transaction. DONT REMOVE this commit above.
+            //if removed, the transaction from second thread will not see the parent unit changes. as the first thread
+            // made these changes after the start of the transaction by the second thread.
+            // thus we will get non-unique records with 2 valid records in the unit_project_ref_h table.
 
-            }
-            return uobj.getUnitBean(new ProjectOID(createUnitsRequest.getProjectPk()));
+            uobj = unitService.createUnit(context, projectPk, unitBean, createAsPlannedUnit, pendingReview);
+
+        }
+
+        return uobj.getUnitBean(new ProjectOID(projectPk));
     }
    @PostMapping("/createUnitAtWorkstation")
    public  UnitBean createUnitAtWorkstation( @RequestBody CreateUnitAtWorkstationRequest createUnitAtWorkstationRequest)
