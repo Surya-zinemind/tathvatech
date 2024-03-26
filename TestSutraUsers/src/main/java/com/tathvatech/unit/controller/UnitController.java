@@ -87,23 +87,67 @@ public class UnitController {
         return unitService.getUnitsForProjectNew(unitFilter, null);
     }
    @PostMapping("/createUnit")
-   public  void createUnit(@RequestBody CreateUnitRequest createUnitRequest)
+   public void createUnit(@RequestBody CreateUnitRequest createUnitRequest)
             throws Exception
     {
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        createUnit(context, createUnitRequest.getProjectPk(), createUnitRequest.getUnit(), createUnitRequest.isCreateAsPlannedUnit(),false);
+        createUnit(context, createUnitRequest.getProjectPk(), createUnitRequest.getUnit(), createUnitRequest.isCreateAsPlannedUnit(), false);
     }
 
-   public UnitBean createUnit( UserContext context, int projectPk, UnitBean unitBean, boolean createAsPlannedUnit, boolean pendingReview)
+    public  UnitBean createUnit(UserContext context, int projectPk, UnitBean unitBean, boolean createAsPlannedUnit, boolean pendingReview)
             throws Exception
     {
 
-        UnitOID lockableOID = null;
-        if (unitBean.getParentPk() != null && unitBean.getParentPk() != 0)
-        {
-            UnitOID parentOID = new UnitOID(unitBean.getParentPk());
 
-            UnitInProjectObj parentUnit = unitManager.getUnitInProject(parentOID, new ProjectOID(projectPk));
+            UnitOID lockableOID = null;
+            if (unitBean.getParentPk() != null && unitBean.getParentPk() != 0)
+            {
+                UnitOID parentOID = new UnitOID(unitBean.getParentPk());
+
+                UnitInProjectObj parentUnit = unitManager.getUnitInProject(parentOID, new ProjectOID(projectPk));
+                Integer rootParentPk = parentUnit.getRootParentPk();
+
+                UnitChangeSynchronizer sync = UnitChangeSynchronizer.getInstance();
+                lockableOID = sync.getLocableUnitOID(rootParentPk);
+            }
+            else
+            {
+                lockableOID = new UnitOID(0); // just a dummy unitOID to lock on we dont have to lock as this is a root unit we are creating.
+            }
+
+            UnitObj uobj;
+            synchronized (lockableOID)
+            {
+
+                // this starts a new transaction. DONT REMOVE this commit above.
+                //if removed, the transaction from second thread will not see the parent unit changes. as the first thread
+                // made these changes after the start of the transaction by the second thread.
+                // thus we will get non-unique records with 2 valid records in the unit_project_ref_h table.
+
+                uobj =unitService.createUnit(context, projectPk, unitBean, createAsPlannedUnit, pendingReview);
+
+            }
+
+            return uobj.getUnitBean(new ProjectOID(projectPk));
+
+
+    }
+
+
+
+    @PostMapping("/createUnits")
+   public UnitBean createUnits( @RequestBody CreateUnitsRequest createUnitsRequest)
+
+            throws Exception
+    {
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        UnitOID lockableOID = null;
+        if (createUnitsRequest.getUnitBean().getParentPk() != null && createUnitsRequest.getUnitBean().getParentPk() != 0)
+        {
+            UnitOID parentOID = new UnitOID(createUnitsRequest.getUnitBean().getParentPk());
+
+            UnitInProjectObj parentUnit = unitManager.getUnitInProject(parentOID, new ProjectOID(createUnitsRequest.getProjectPk()));
             Integer rootParentPk = parentUnit.getRootParentPk();
 
             UnitChangeSynchronizer sync = UnitChangeSynchronizer.getInstance();
@@ -123,11 +167,11 @@ public class UnitController {
             // made these changes after the start of the transaction by the second thread.
             // thus we will get non-unique records with 2 valid records in the unit_project_ref_h table.
 
-            uobj = unitService.createUnit(context, projectPk, unitBean, createAsPlannedUnit, pendingReview);
+            uobj = unitService.createUnit(context,createUnitsRequest.getProjectPk(),createUnitsRequest.getUnitBean(), createUnitsRequest.isCreateAsPlannedUnit(), createUnitsRequest.isPendingReview());
 
         }
 
-        return uobj.getUnitBean(new ProjectOID(projectPk));
+        return uobj.getUnitBean(new ProjectOID(createUnitsRequest.getProjectPk()));
     }
    @PostMapping("/createUnitAtWorkstation")
    public  UnitBean createUnitAtWorkstation( @RequestBody CreateUnitAtWorkstationRequest createUnitAtWorkstationRequest)
@@ -235,7 +279,7 @@ public class UnitController {
             return unitService.getUsersForUnitInRole(getUsersForUnitInRoleRequest.getUnitPk(), getUsersForUnitInRoleRequest.getProjectOID(), getUsersForUnitInRoleRequest.getWorkstationOID(),getUsersForUnitInRoleRequest.getRoleName());
         }
     }
-    @PutMapping("/isUsersForUnitInRole")
+    @GetMapping("/isUsersForUnitInRole")
     public  boolean isUsersForUnitInRole(@RequestBody IsUsersForUnitInRoleRequest isUsersForUnitInRoleRequest)
     {
         if (dummyWorkstation.getPk() == isUsersForUnitInRoleRequest.getWorkstationOID().getPk())
@@ -308,13 +352,12 @@ public class UnitController {
             unitService.removeUnitFromProject(context, removeUnitFromProjectRequest.getUnitOID(),removeUnitFromProjectRequest.getProjectOID(), removeUnitFromProjectRequest.getDeleteUnitOption());
 
     }
-    public  void openUnit( UnitBean rootUnitToOpen, List<UnitBean> unitBeanAndChildrenList,
-                                ProjectOID lastOpenProjectOID, ProjectOID destinationProjectOID) throws Exception
+    @PutMapping("/openUnit")
+    public  void openUnit( @RequestBody OpenUnitRequest openUnitRequest) throws Exception
     {
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-            unitService.openUnit(context, rootUnitToOpen, unitBeanAndChildrenList, lastOpenProjectOID,
-                    destinationProjectOID);
+            unitService.openUnit(context, openUnitRequest.getRootUnitToOpen(), openUnitRequest.getUnitBeanAndChildrenList(), openUnitRequest.getLastOpenProjectOID(),openUnitRequest.getDestinationProjectOID());
 
     }
 
@@ -365,12 +408,12 @@ public class UnitController {
 
 
     }
-    public  void copyWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
-                                              WorkstationQuery workstationQuery, Integer[] selectedUnits) throws Exception
+    @PutMapping("/copyWorkstationToUnits")
+    public  void copyWorkstationToUnits( @RequestBody CopyWorkstationToUnitsRequest copyWorkstationToUnitsRequest) throws Exception
     {
 
-
-            unitService.copyWorkstationToUnits(context, projectQuery, workstationQuery, selectedUnits);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            unitService.copyWorkstationToUnits(context, copyWorkstationToUnitsRequest.getProjectQuery(), copyWorkstationToUnitsRequest.getWorkstationQuery(), copyWorkstationToUnitsRequest.getSelectedUnits());
 
     }
 
@@ -386,14 +429,13 @@ public class UnitController {
 
     }
 
-    public  void cascadeWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
-                                                 WorkstationQuery workstationQuery, Integer[] selectedUnitsForForm, Integer[] selectedUnitsForTeam)
+    @PutMapping("/cascadeWorkstationToUnits")
+    public  void cascadeWorkstationToUnits( @RequestBody CascadeWorkstationToUnitsRequest cascadeWorkstationToUnitsRequest)
             throws Exception
     {
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-
-            unitService.cascadeWorkstationToUnits(context, projectQuery, workstationQuery, selectedUnitsForForm,
-                    selectedUnitsForTeam);
+            unitService.cascadeWorkstationToUnits(context, cascadeWorkstationToUnitsRequest.getProjectQuery(),cascadeWorkstationToUnitsRequest.getWorkstationQuery(),cascadeWorkstationToUnitsRequest.getSelectedUnitsForForm(),cascadeWorkstationToUnitsRequest.getSelectedUnitsForTeam());
 
     }
 
