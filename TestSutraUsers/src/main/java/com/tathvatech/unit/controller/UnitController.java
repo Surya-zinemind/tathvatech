@@ -18,7 +18,7 @@ import com.tathvatech.unit.common.UnitQuery;
 import com.tathvatech.unit.dao.UnitInProjectDAO;
 import com.tathvatech.unit.enums.CommonEnums;
 import com.tathvatech.unit.enums.UnitOriginType;
-import com.tathvatech.unit.request.UnitFilterBean;
+import com.tathvatech.unit.request.*;
 import com.tathvatech.unit.service.UnitManager;
 import com.tathvatech.unit.service.UnitService;
 import com.tathvatech.unit.sync.UnitChangeSynchronizer;
@@ -35,8 +35,8 @@ import com.tathvatech.workstation.common.WorkstationQuery;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -54,20 +54,23 @@ public class UnitController {
     private final DummyWorkstation dummyWorkstation;
     private final ProjectService projectService;
 
-    public  List<UnitQuery> getUnitsBySerialNos(String[] serialNos, ProjectOID projectOID)
+    @GetMapping("/getUnitsBySerialNos")
+    public  List<UnitQuery> getUnitsBySerialNos(@RequestBody  GetUnitsBySerialNosRequest getUnitsBySerialNosRequest)
     {
-        return unitService.getUnitsBySerialNos(serialNos, projectOID);
+        return unitService.getUnitsBySerialNos(getUnitsBySerialNosRequest.getSerialNos(), getUnitsBySerialNosRequest.getProjectOID());
     }
 
-    public  List<UnitQuery> getUnitsByPks(int[] unitPks, ProjectOID projectOID)
+   @GetMapping("/getUnitsByPks")
+   public  List<UnitQuery> getUnitsByPks(@RequestBody GetUnitsByPksRequest getUnitsByPksRequest)
     {
-        return unitService.getUnitsByPks(unitPks, projectOID);
+        return unitService.getUnitsByPks(getUnitsByPksRequest.getUnitPks(), getUnitsByPksRequest.getProjectOID());
     }
 
-    public  List<UnitQuery> getUnitsForProject(UnitFilterBean unitFilter, UnitOID parent) throws Exception
+   @GetMapping("/getUnitsForProject")
+   public  List<UnitQuery> getUnitsForProject(@RequestBody GetUnitsForProjectRequest getUnitsForProjectRequest) throws Exception
     {
         // return unitService.getUnitsForProject(unitFilter, parent);
-        return unitService.getUnitsForProjectNew(unitFilter, parent);
+        return unitService.getUnitsForProjectNew(getUnitsForProjectRequest.getUnitFilter(), getUnitsForProjectRequest.getParent());
     }
 
     /**
@@ -77,32 +80,31 @@ public class UnitController {
      * @return
      * @throws Exception
      */
-    public  List<UnitQuery> getUnitsForProjectLinear(UnitFilterBean unitFilter) throws Exception
+  @GetMapping("/getUnitsForProjectLinear")
+   public  List<UnitQuery> getUnitsForProjectLinear(@RequestBody UnitFilterBean unitFilter) throws Exception
     {
         // return unitService.getUnitsForProjectLinear(unitFilter, false);
         return unitService.getUnitsForProjectNew(unitFilter, null);
     }
-    public  void createUnit(UserContext context, int projectPk, UnitBean unit, boolean createAsPlannedUnit)
+   @PostMapping("/createUnit")
+   public  void createUnit(@RequestBody CreateUnitRequest createUnitRequest)
             throws Exception
     {
-        createUnit(context, projectPk, unit, createAsPlannedUnit, false);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        createUnit(context, createUnitRequest.getProjectPk(), createUnitRequest.getUnit(), createUnitRequest.isCreateAsPlannedUnit(),false);
     }
 
-    public UnitBean createUnit(UserContext context, int projectPk, UnitBean unitBean, boolean createAsPlannedUnit, boolean pendingReview)
+   @PostMapping("/createUnits")
+   public UnitBean createUnits( @RequestBody CreateUnitsRequest createUnitsRequest)
             throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             UnitOID lockableOID = null;
-            if (unitBean.getParentPk() != null && unitBean.getParentPk() != 0)
+            if (createUnitsRequest.getUnitBean().getParentPk() != null && createUnitsRequest.getUnitBean().getParentPk() != 0)
             {
-                UnitOID parentOID = new UnitOID(unitBean.getParentPk());
+                UnitOID parentOID = new UnitOID(createUnitsRequest.getUnitBean().getParentPk());
 
-                UnitInProjectObj parentUnit = unitManager.getUnitInProject(parentOID, new ProjectOID(projectPk));
+                UnitInProjectObj parentUnit = unitManager.getUnitInProject(parentOID, new ProjectOID(createUnitsRequest.getProjectPk()));
                 Integer rootParentPk = parentUnit.getRootParentPk();
 
                 UnitChangeSynchronizer sync = UnitChangeSynchronizer.getInstance();
@@ -116,121 +118,60 @@ public class UnitController {
             UnitObj uobj;
             synchronized (lockableOID)
             {
-                con.commit();
+
                 // this starts a new transaction. DONT REMOVE this commit above.
                 //if removed, the transaction from second thread will not see the parent unit changes. as the first thread
                 // made these changes after the start of the transaction by the second thread.
                 // thus we will get non-unique records with 2 valid records in the unit_project_ref_h table.
 
-                uobj = unitService.createUnit(context, projectPk, unitBean, createAsPlannedUnit, pendingReview);
-                con.commit();
-            }
+                uobj = unitService.createUnit(context, createUnitsRequest.getProjectPk(), createUnitsRequest.getUnitBean(), createUnitsRequest.isCreateAsPlannedUnit(), createUnitsRequest.isPendingReview());
 
-            return uobj.getUnitBean(new ProjectOID(projectPk));
-        }
-        catch (Exception ex)
-        {
-            if(con != null)
-                con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            if(con != null)
-                con.rollback();
-        }
+            }
+            return uobj.getUnitBean(new ProjectOID(createUnitsRequest.getProjectPk()));
     }
-    public  UnitBean createUnitAtWorkstation(UserContext context, ProjectOID projectOID,
-                                             WorkstationOID workstationOID, UnitBean unit, boolean copyPartSpecificFormsToWorkstation,
-                                             boolean pendingReview)
+   @PostMapping("/createUnitAtWorkstation")
+   public  UnitBean createUnitAtWorkstation( @RequestBody CreateUnitAtWorkstationRequest createUnitAtWorkstationRequest)
             throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-            UnitObj unitObj = unitService.createUnitAtWorkstation(context, projectOID, workstationOID, unit, copyPartSpecificFormsToWorkstation, pendingReview);
-            return unitObj.getUnitBean(projectOID);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UnitObj unitObj = unitService.createUnitAtWorkstation(context, createUnitAtWorkstationRequest.getProjectOID(), createUnitAtWorkstationRequest.getWorkstationOID(), createUnitAtWorkstationRequest.getUnit(), createUnitAtWorkstationRequest.isCopyPartSpecificFormsToWorkstation(),createUnitAtWorkstationRequest.isPendingReview());
+            return unitObj.getUnitBean(createUnitAtWorkstationRequest.getProjectOID());
     }
 
-    public  void updateUnit(UserContext context, UnitObj unit) throws Exception
+    @PutMapping("/updateUnit")
+    public  void updateUnit( @RequestBody UnitObj unit) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-            unitService.updateUnit(context, unit);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        unitService.updateUnit(context, unit);
     }
 
-    public  void updateUnit(UnitObj unit) throws Exception
+    @PutMapping("/updateUnits")
+    public  void updateUnits(@RequestBody UnitObj unit) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-            unitService.updateUnit(unit);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+        unitService.updateUnit(unit);
     }
-    public  UnitObj getUnitByPk(UnitOID unitOID)
+    @GetMapping("/getUnitByPk")
+    public  UnitObj getUnitByPk(@RequestBody UnitOID unitOID)
     {
         return unitService.getUnitByPk(unitOID);
     }
 
-    public  UnitQuery getUnitQueryByPk(int unitPk, ProjectOID projectOID)
+    @GetMapping("/getUnitQueryByPk")
+    public  UnitQuery getUnitQueryByPk(@RequestBody  GetUnitQueryByPkRequest getUnitQueryByPkRequest)
     {
-        return unitService.getUnitQueryByPk(unitPk, projectOID);
+        return unitService.getUnitQueryByPk(getUnitQueryByPkRequest.getUnitPk(), getUnitQueryByPkRequest.getProjectOID());
     }
-    public  TestProcOID addFormToUnit(UserContext context, ProjectForm projectForm, int unitPk, ProjectOID projectOID,
-                                      WorkstationOID workstationOID, int formPk, String testName, boolean makeWorkstationInProgress, boolean reviewPending) throws Exception
+    @PostMapping("/addFormToUnit")
+    public  TestProcOID addFormToUnit(@RequestBody AddFormToUnitRequest addFormToUnitRequest) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-            UnitChangeSynchronizer sync = UnitChangeSynchronizer.getInstance();
-            UnitOID lockableOID = sync.getLocableUnitOID(unitPk);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UnitChangeSynchronizer sync = UnitChangeSynchronizer.getInstance();
+            UnitOID lockableOID = sync.getLocableUnitOID(addFormToUnitRequest.getFormPk());
 
             TestProcOID testProcOID = null;
             synchronized (lockableOID)
             {
-                con.commit();
+
                 // this starts a new transaction. DONT REMOVE this commit above.
                 //if removed, the transaction from second thread will not see the unit changes (adding unitworkstation and unitlocationEntries to unit).
                 //as the first thread made these changes after the start of the transaction by the second thread.
@@ -239,65 +180,26 @@ public class UnitController {
                // Fix after doing form
                // testProcOID = unitService.addFormToUnit(context, projectForm, unitPk, projectOID,
                       //  workstationOID, formPk, testName, makeWorkstationInProgress, reviewPending);
-                con.commit();
+
             }
-
             return testProcOID;
-        }
-        catch (Exception ex)
-        {
-            if(con != null)
-                con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            if(con != null)
-                con.rollback();
-        }
     }
 
-    public  void removeAllFormsFromUnit(UserContext context, int unitPk, ProjectOID projectOID,
-                                              WorkstationOID workstationOID) throws Exception
+   @DeleteMapping("/removeAllFormsFromUnit")
+   public  void removeAllFormsFromUnit( @RequestBody RemoveAllFormsFromUnitRequest removeAllFormsFromUnitRequest) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-            unitService.removeAllFormsFromUnit(context, unitPk, projectOID, workstationOID);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+            unitService.removeAllFormsFromUnit(context, removeAllFormsFromUnitRequest.getUnitPk(), removeAllFormsFromUnitRequest.getProjectOID(), removeAllFormsFromUnitRequest.getWorkstationOID());
+
     }
 
-    public  void deleteFormFromUnit(UserContext context, TestProcOID testProcOid) throws Exception
+   @DeleteMapping("/deleteFormFromUnit")
+   public  void deleteFormFromUnit( @RequestBody TestProcOID testProcOid) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        unitService.deleteTestProcFromUnit(context, testProcOid);
 
-            unitService.deleteTestProcFromUnit(context, testProcOid);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
     }
   /*  public  List<FormQuery> getAllFormsForUnit(UnitOID unitOID, ProjectOID projectOID) throws Exception
     {
@@ -309,360 +211,196 @@ public class UnitController {
     {
         return unitService.getFormsForUnit(new UnitOID(unitPk, null), projectOID, workstationOID);
     }*/
-    public  List<User> getUsersForUnit(ProjectOID projectOID, int unitPk, WorkstationOID workstationOID)
+   @GetMapping("/getUsersForUnit")
+   public  List<User> getUsersForUnit(@RequestBody GetUsersForUnitRequest getUsersForUnitRequest)
             throws Exception
     {
-        if (dummyWorkstation.getPk() == workstationOID.getPk())
+        if (dummyWorkstation.getPk() == getUsersForUnitRequest.getWorkstationOID().getPk())
         {
-            return projectService.getUsersForProject((int) projectOID.getPk(), workstationOID);
+            return projectService.getUsersForProject((int) getUsersForUnitRequest.getProjectOID().getPk(), getUsersForUnitRequest.getWorkstationOID());
         } else
         {
-            return unitService.getUsersForUnit(unitPk, projectOID, workstationOID);
+            return unitService.getUsersForUnit(getUsersForUnitRequest.getUnitPk(),getUsersForUnitRequest.getProjectOID(), getUsersForUnitRequest.getWorkstationOID());
         }
     }
 
-    public  List<User> getUsersForUnitInRole(int unitPk, ProjectOID projectOID, WorkstationOID workstationOID,
-                                                   String roleName) throws Exception
+    @GetMapping("/getUsersForUnitInRole")
+    public  List<User> getUsersForUnitInRole(@RequestBody GetUsersForUnitInRoleRequest getUsersForUnitInRoleRequest) throws Exception
     {
-        if (dummyWorkstation.getPk() == workstationOID.getPk())
+        if (dummyWorkstation.getPk() == getUsersForUnitInRoleRequest.getWorkstationOID().getPk())
         {
-            return unitService.getUsersForProjectInRole((int) projectOID.getPk(), workstationOID, roleName);
+            return unitService.getUsersForProjectInRole((int) getUsersForUnitInRoleRequest.getProjectOID().getPk(), getUsersForUnitInRoleRequest.getWorkstationOID(), getUsersForUnitInRoleRequest.getRoleName());
         } else
         {
-            return unitService.getUsersForUnitInRole(unitPk, projectOID, workstationOID, roleName);
+            return unitService.getUsersForUnitInRole(getUsersForUnitInRoleRequest.getUnitPk(), getUsersForUnitInRoleRequest.getProjectOID(), getUsersForUnitInRoleRequest.getWorkstationOID(),getUsersForUnitInRoleRequest.getRoleName());
         }
     }
-    public  boolean isUsersForUnitInRole(ProjectOID projectOID, int userPk, int unitPk,
-                                               WorkstationOID workstationOID, String roleName)
+    @PutMapping("/isUsersForUnitInRole")
+    public  boolean isUsersForUnitInRole(@RequestBody IsUsersForUnitInRoleRequest isUsersForUnitInRoleRequest)
     {
-        if (dummyWorkstation.getPk() == workstationOID.getPk())
+        if (dummyWorkstation.getPk() == isUsersForUnitInRoleRequest.getWorkstationOID().getPk())
         {
-            return projectService.isUsersForProjectInRole(userPk, projectOID, workstationOID, roleName);
+            return projectService.isUsersForProjectInRole(isUsersForUnitInRoleRequest.getUserPk(), isUsersForUnitInRoleRequest.getProjectOID(),isUsersForUnitInRoleRequest.getWorkstationOID(), isUsersForUnitInRoleRequest.getRoleName());
         } else
         {
-            return unitService.isUsersForUnitInRole(userPk, unitPk, projectOID, workstationOID, roleName);
+            return unitService.isUsersForUnitInRole(isUsersForUnitInRoleRequest.getUserPk(), isUsersForUnitInRoleRequest.getUnitPk(), isUsersForUnitInRoleRequest.getProjectOID(), isUsersForUnitInRoleRequest.getWorkstationOID(), isUsersForUnitInRoleRequest.getRoleName());
         }
     }
-    public  void removeAllUsersFromUnit(UserContext context, UnitOID unitOID, ProjectOID projectOID,
-                                              WorkstationOID workstationOID) throws Exception
+   @DeleteMapping("/removeAllUsersFromUnit")
+   public  void removeAllUsersFromUnit(@RequestBody RemoveAllUsersFromUnitRequest removeAllUsersFromUnitRequest) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        unitService.removeAllUsersFromUnit(context, removeAllUsersFromUnitRequest.getUnitOID(), removeAllUsersFromUnitRequest.getProjectOID(), removeAllUsersFromUnitRequest.getWorkstationOID());
 
-            unitService.removeAllUsersFromUnit(context, unitOID, projectOID, workstationOID);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
     }
-    public  void addTesterToUnit(UserContext context, int unitPk, ProjectOID projectOID,
-                                       WorkstationOID workstationOID, int userPk) throws Exception
+    @PostMapping("/addTesterToUnit")
+    public  void addTesterToUnit(@RequestBody AddTesterToUnitRequest addTesterToUnitRequest) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-            unitService.addTesterToUnit(context, unitPk, projectOID, workstationOID, userPk);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            unitService.addTesterToUnit(context, addTesterToUnitRequest.getUnitPk(), addTesterToUnitRequest.getProjectOID(), addTesterToUnitRequest.getWorkstationOID(), addTesterToUnitRequest.getUserPk());
+
     }
 
-    public  void addVerifierToUnit(UserContext context, int unitPk, ProjectOID projectOID,
-                                         WorkstationOID workstationOID, int userPk) throws Exception
+   @PostMapping("/addVerifierToUnit")
+   public  void addVerifierToUnit(@RequestBody AddVerifierToUnitRequest  addVerifierToUnitRequest) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-            unitService.addVerifierToUnit(context, unitPk, projectOID, workstationOID, userPk);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            unitService.addVerifierToUnit(context, addVerifierToUnitRequest.getUnitPk(), addVerifierToUnitRequest.getProjectOID(), addVerifierToUnitRequest.getWorkstationOID(),addVerifierToUnitRequest.getUserPk());
+
     }
 
-    public  void addApproverToUnit(UserContext context, int unitPk, ProjectOID projectOID,
-                                         WorkstationOID workstationOID, int userPk) throws Exception
+   @PostMapping("/addApproverToUnit")
+   public  void addApproverToUnit(@RequestBody AddApproverToUnitRequest addApproverToUnitRequest) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-            unitService.addApproverToUnit(context, unitPk, projectOID, workstationOID, userPk);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            unitService.addApproverToUnit(context, addApproverToUnitRequest.getUnitPk(), addApproverToUnitRequest.getProjectOID(), addApproverToUnitRequest.getWorkstationOID(), addApproverToUnitRequest.getUserPk());
+
     }
 
-    public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID projectOID,
-                                             WorkstationOID workstationOID, int userPk) throws Exception
+  @PostMapping("/addReadonlyUserToUnit")
+  public  void addReadonlyUserToUnit(@RequestBody  AddReadonlyUserToUnitRequest addReadonlyUserToUnitRequest) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-            unitService.addReadonlyUserToUnit(context, unitPk, projectOID, workstationOID, userPk);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            unitService.addReadonlyUserToUnit(context, addReadonlyUserToUnitRequest.getUnitPk(), addReadonlyUserToUnitRequest.getProjectOID(), addReadonlyUserToUnitRequest.getWorkstationOID(), addReadonlyUserToUnitRequest.getUserPk());
+
     }
-    public  List<UnitLocationQuery> getUnitLocationHistory(UnitOID unitOID, ProjectOID projectOID)
+   @GetMapping("/getUnitLocationHistory")
+   public  List<UnitLocationQuery> getUnitLocationHistory(@RequestBody GetUnitLocationHistoryRequest getUnitLocationHistoryRequest)
             throws Exception
     {
-        return unitService.getUnitLocationHistory(unitOID, projectOID);
+        return unitService.getUnitLocationHistory(getUnitLocationHistoryRequest.getUnitOID(), getUnitLocationHistoryRequest.getProjectOID());
     }
 
-    public  List<UnitLocationQuery> getUnitLocationHistory(UnitOID unitOID, ProjectOID projectOID,
-                                                                 boolean includeChildren) throws Exception
+   @GetMapping("/getUnitLocationHistorys")
+   public  List<UnitLocationQuery> getUnitLocationHistorys(@RequestBody GetUnitLocationHistorysRequest getUnitLocationHistorysRequest) throws Exception
     {
-        return unitService.getUnitLocationHistory(unitOID, projectOID, includeChildren);
+        return unitService.getUnitLocationHistory(getUnitLocationHistorysRequest.getUnitOID(),getUnitLocationHistorysRequest.getProjectOID(), getUnitLocationHistorysRequest.isIncludeChildren());
     }
-    public  void removeUnitFromProject(UserContext context, UnitOID unitOID, ProjectOID projectOID,
-                                             CommonEnums.DeleteOptionEnum deleteUnitOption) throws Exception
+   @DeleteMapping("/removeUnitFromProject")
+   public  void removeUnitFromProject(@RequestBody RemoveUnitFromProjectRequest removeUnitFromProjectRequest) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-            unitService.removeUnitFromProject(context, unitOID, projectOID, deleteUnitOption);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+            unitService.removeUnitFromProject(context, removeUnitFromProjectRequest.getUnitOID(),removeUnitFromProjectRequest.getProjectOID(), removeUnitFromProjectRequest.getDeleteUnitOption());
+
     }
-    public  void openUnit(UserContext context, UnitBean rootUnitToOpen, List<UnitBean> unitBeanAndChildrenList,
+    public  void openUnit( UnitBean rootUnitToOpen, List<UnitBean> unitBeanAndChildrenList,
                                 ProjectOID lastOpenProjectOID, ProjectOID destinationProjectOID) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
             unitService.openUnit(context, rootUnitToOpen, unitBeanAndChildrenList, lastOpenProjectOID,
                     destinationProjectOID);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
     }
 
-    public  void removeUserFromUnit(int userPk, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID,
-                                          String role) throws Exception
+   @DeleteMapping("/removeUserFromUnit")
+   public  void removeUserFromUnit(@RequestBody RemoveUserFromUnitRequest removeUserFromUnitRequest) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-            unitService.removeUserFromUnit(userPk, unitPk, projectOID, workstationOID, role);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
+            unitService.removeUserFromUnit(removeUserFromUnitRequest.getUserPk(),removeUserFromUnitRequest.getUnitPk(), removeUserFromUnitRequest.getProjectOID(), removeUserFromUnitRequest.getWorkstationOID(), removeUserFromUnitRequest.getRole());
+
     }
-    public  float getUnitPercentComplete(UserContext context, int unitPk, ProjectOID projectOID,
-                                               boolean includeChildren) throws Exception
+   @GetMapping("/getUnitPercentComplete")
+   public  float getUnitPercentComplete(@RequestBody GetUnitPercentCompleteRequest getUnitPercentCompleteRequest ) throws Exception
     {
-        return unitService.getUnitPercentComplete(context, unitPk, projectOID, includeChildren);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return unitService.getUnitPercentComplete(context,getUnitPercentCompleteRequest.getUnitPk(), getUnitPercentCompleteRequest.getProjectOID(), getUnitPercentCompleteRequest.isIncludeChildren());
     }
-    public  HashMap<ProjectOID, Integer> getUnitCount(List<Integer> projectPks, boolean includeChildren)
+   @GetMapping("/getUnitCount")
+   public  HashMap<ProjectOID, Integer> getUnitCount(@RequestBody GetUnitCountRequest getUnitCountRequest)
             throws Exception
     {
-        return unitService.getUnitCount(projectPks, includeChildren);
+        return unitService.getUnitCount(getUnitCountRequest.getProjectPks(), getUnitCountRequest.isIncludeChildren());
     }
 
-    public  int getUnitCount(int projectPk, boolean includeChildren) throws Exception
+   @GetMapping("/getUnitCounts")
+   public  int getUnitCounts(@RequestBody GetUnitCountsRequest getUnitCountsRequest) throws Exception
     {
-        return unitService.getUnitCount(projectPk, includeChildren);
+        return unitService.getUnitCount(getUnitCountsRequest.getProjectPk(), getUnitCountsRequest.isIncludeChildren());
     }
-    public  List<UnitQuery> getUnitsWithWorkstationsAssigned(ProjectOID projectOID, WorkstationOID workstationOID)
+    @GetMapping("/getUnitsWithWorkstationsAssigned")
+    public  List<UnitQuery> getUnitsWithWorkstationsAssigned(@RequestBody GetUnitsWithWorkstationsAssignedRequest getUnitsWithWorkstationsAssignedRequest)
     {
-        return unitService.getUnitsWithWorkstationsAssigned(projectOID, workstationOID);
+        return unitService.getUnitsWithWorkstationsAssigned(getUnitsWithWorkstationsAssignedRequest.getProjectOID(), getUnitsWithWorkstationsAssignedRequest.getWorkstationOID());
     }
 
-    public  List<UnitQuery> getUnitsWithWorkstationsAssigned(ProjectOID projectOID, ProjectPartOID projectPartOID,
-                                                                   WorkstationOID workstationOID)
+  @GetMapping("/getUnitsWithWorkstationsAssigneds")
+  public  List<UnitQuery> getUnitsWithWorkstationsAssigneds(@RequestBody GetUnitsWithWorkstationsAssignedsRequest getUnitsWithWorkstationsAssignedsRequest)
     {
-        return unitService.getUnitsWithWorkstationsAssigned(projectOID, projectPartOID, workstationOID);
+        return unitService.getUnitsWithWorkstationsAssigned(getUnitsWithWorkstationsAssignedsRequest.getProjectOID(), getUnitsWithWorkstationsAssignedsRequest.getProjectPartOID(),getUnitsWithWorkstationsAssignedsRequest.getWorkstationOID());
     }
-    public  void addUnitToProject(UserContext context, ProjectOID sourceProjectOID,
-                                        ProjectOID destinationProjectOID, UnitBean rootUnitBean, List<UnitBean> unitBeanAndChildrenList,
-                                        boolean addAsPlannedUnit) throws Exception
+    @PostMapping("/addUnitToProject")
+    public  void addUnitToProject( @RequestBody AddUnitToProjectRequest addUnitToProjectRequest) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-            unitService.addUnitToProject(context, sourceProjectOID, destinationProjectOID, rootUnitBean,
-                    unitBeanAndChildrenList, addAsPlannedUnit);
+            unitService.addUnitToProject(context,addUnitToProjectRequest.getSourceProjectOID(), addUnitToProjectRequest.getDestinationProjectOID(), addUnitToProjectRequest.getRootUnitBean(),
+                    addUnitToProjectRequest.getUnitBeanAndChildrenList(), addUnitToProjectRequest.isAddAsPlannedUnit());
 
-            con.commit();
-        }
-        catch (Exception ex)
-        {
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                logger.error("Count not rollback transaction", ex);
-            }
-            throw ex;
-        }
-        finally
-        {
-        }
+
     }
     public  void copyWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
                                               WorkstationQuery workstationQuery, Integer[] selectedUnits) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
             unitService.copyWorkstationToUnits(context, projectQuery, workstationQuery, selectedUnits);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
     }
 
 
 
-    public  void setWorkstationProjectPartTeamSetupToUnits(UserContext context, ProjectQuery projectQuery,
-                                                                 WorkstationQuery workstationQuery, ProjectPartOID projectPartOID, Integer[] selectedUnits,
-                                                                 boolean copyDefaultTeamIfNoProjectPartTeamIsSet) throws Exception
+    @PutMapping("/setWorkstationProjectPartTeamSetupToUnits")
+    public  void setWorkstationProjectPartTeamSetupToUnits( @RequestBody  SetWorkstationProjectPartTeamSetupToUnitsRequest setWorkstationProjectPartTeamSetupToUnitsRequest) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-            unitService.setWorkstationProjectPartTeamSetupToUnits(context, projectQuery, workstationQuery,
-                    projectPartOID, selectedUnits, copyDefaultTeamIfNoProjectPartTeamIsSet);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            unitService.setWorkstationProjectPartTeamSetupToUnits(context, setWorkstationProjectPartTeamSetupToUnitsRequest.getProjectQuery(), setWorkstationProjectPartTeamSetupToUnitsRequest.getWorkstationQuery(),
+                    setWorkstationProjectPartTeamSetupToUnitsRequest.getProjectPartOID(), setWorkstationProjectPartTeamSetupToUnitsRequest.getSelectedUnits(), setWorkstationProjectPartTeamSetupToUnitsRequest.isCopyDefaultTeamIfNoProjectPartTeamIsSet());
+
     }
 
     public  void cascadeWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
                                                  WorkstationQuery workstationQuery, Integer[] selectedUnitsForForm, Integer[] selectedUnitsForTeam)
             throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
             unitService.cascadeWorkstationToUnits(context, projectQuery, workstationQuery, selectedUnitsForForm,
                     selectedUnitsForTeam);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
     }
 
-    public  void deleteWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
-                                          WorkstationQuery workstationQuery, Integer[] selectedUnits) throws Exception
+    @DeleteMapping("/deleteWorkstationToUnits")
+    public  void deleteWorkstationToUnits( @RequestBody DeleteWorkstationToUnitsRequest deleteWorkstationToUnitsRequest) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
             // delete of workstation happens at the unit level where as the
             // cascade of forms happen at the car level also,
@@ -671,49 +409,24 @@ public class UnitController {
             // we change something in the UI to make it generic. dont know at
             // this point.
             List<UnitObj> units = new ArrayList();
-            for (int x = 0; x < selectedUnits.length; x++)
+            for (int x = 0; x < deleteWorkstationToUnitsRequest.getSelectedUnits().length; x++)
             {
-                UnitObj unit = unitService.getUnitByPk(new UnitOID(selectedUnits[x]));
+                UnitObj unit = unitService.getUnitByPk(new UnitOID(deleteWorkstationToUnitsRequest.getSelectedUnits()[x]));
                 if (unit != null)
                 {
                     units.add(unit);
                 }
             }
 
-            unitService.deleteWorkstationToUnits(context, projectQuery, workstationQuery,
+            unitService.deleteWorkstationToUnits(context, deleteWorkstationToUnitsRequest.getProjectQuery(), deleteWorkstationToUnitsRequest.getWorkstationQuery(),
                     units.toArray(new UnitObj[units.size()]));
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
     }
 
-    public  void removeWorkstationFromUnit(UserContext context, UnitOID unitOID, ProjectOID projectOID,
-                                                 WorkstationOID workstationOID) throws Exception
-    {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-            unitService.removeWorkstationFromUnit(context, unitOID, projectOID, workstationOID);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+    @DeleteMapping("/removeWorkstationFromUnit")
+    public  void removeWorkstationFromUnit( @RequestBody RemoveWorkstationFromUnitRequest removeWorkstationFromUnitRequest) throws Exception {
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        unitService.removeWorkstationFromUnit(context, removeWorkstationFromUnitRequest.getUnitOID(), removeWorkstationFromUnitRequest.getProjectOID(), removeWorkstationFromUnitRequest.getWorkstationOID());
     }
 
 }

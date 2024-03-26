@@ -1,7 +1,7 @@
 package com.tathvatech.report.request;
 
-import com.tathvatech.ts.report.ReportTypes;
 
+import com.tathvatech.report.enums.ReportTypes;
 
 public class ReportRequest
 {

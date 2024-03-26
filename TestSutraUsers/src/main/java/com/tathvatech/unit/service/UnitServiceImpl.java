@@ -32,10 +32,7 @@ import com.tathvatech.survey.service.SurveyResponseManager;
 import com.tathvatech.unit.common.*;
 import com.tathvatech.unit.dao.UnitDAO;
 import com.tathvatech.unit.dao.UnitInProjectDAO;
-import com.tathvatech.unit.entity.Unit;
-import com.tathvatech.unit.entity.UnitH;
-import com.tathvatech.unit.entity.UnitInProject;
-import com.tathvatech.unit.entity.UnitLocation;
+import com.tathvatech.unit.entity.*;
 import com.tathvatech.unit.enums.Actions;
 import com.tathvatech.unit.enums.CommonEnums;
 import com.tathvatech.unit.enums.UnitOriginType;
@@ -533,10 +530,10 @@ public class UnitServiceImpl implements UnitService{
             if (!(containsNow))
             {
                 UnitUser unitUser = new UnitUser();
-                unitUser.setProjectPk(projectOID.getPk());
-                unitUser.setUnitPk(unitOID.getPk());
-                unitUser.setWorkstationPk(workstationOID.getPk());
-                unitUser.setUserPk(pUser.getPk());
+                unitUser.setProjectPk((int) projectOID.getPk());
+                unitUser.setUnitPk((int) unitOID.getPk());
+                unitUser.setWorkstationPk((int) workstationOID.getPk());
+                unitUser.setUserPk((int) pUser.getPk());
                 unitUser.setRole(User.ROLE_TESTER);
                 persistWrapper.createEntity(unitUser);
             }
@@ -561,10 +558,10 @@ public class UnitServiceImpl implements UnitService{
             if (!(containsNow))
             {
                 UnitUser unitUser = new UnitUser();
-                unitUser.setProjectPk(projectOID.getPk());
-                unitUser.setUnitPk(unitOID.getPk());
-                unitUser.setWorkstationPk(workstationOID.getPk());
-                unitUser.setUserPk(pUser.getPk());
+                unitUser.setProjectPk((int) projectOID.getPk());
+                unitUser.setUnitPk((int) unitOID.getPk());
+                unitUser.setWorkstationPk((int) workstationOID.getPk());
+                unitUser.setUserPk((int) pUser.getPk());
                 unitUser.setRole(User.ROLE_VERIFY);
                 persistWrapper.createEntity(unitUser);
             }
@@ -589,10 +586,10 @@ public class UnitServiceImpl implements UnitService{
             if (!(containsNow))
             {
                 UnitUser unitUser = new UnitUser();
-                unitUser.setProjectPk(projectOID.getPk());
-                unitUser.setUnitPk(unitOID.getPk());
-                unitUser.setWorkstationPk(workstationOID.getPk());
-                unitUser.setUserPk(pUser.getPk());
+                unitUser.setProjectPk((int) projectOID.getPk());
+                unitUser.setUnitPk((int) unitOID.getPk());
+                unitUser.setWorkstationPk((int) workstationOID.getPk());
+                unitUser.setUserPk((int) pUser.getPk());
                 unitUser.setRole(User.ROLE_APPROVE);
                 persistWrapper.createEntity(unitUser);
             }
@@ -1089,13 +1086,17 @@ public class UnitServiceImpl implements UnitService{
     }
 
     public  void removeAllUsersFromUnit(UserContext context, UnitOID unitOID, ProjectOID projectOID,
-                                              WorkstationOID workstationOID) throws Exception
+                                              WorkstationOID workstationOID)
     {
-        persistWrapper.delete("delete from TAB_UNIT_USERS where unitPk=? and projectPk = ? and workstationPk=?",
-                unitOID.getPk(), projectOID.getPk(), workstationOID.getPk());
+        try {
+            persistWrapper.delete("delete from TAB_UNIT_USERS where unitPk=? and projectPk = ? and workstationPk=?",
+                    unitOID.getPk(), projectOID.getPk(), workstationOID.getPk());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
     public  void addTesterToUnit(UserContext context, int unitPk, ProjectOID projectOID,
-                                       WorkstationOID workstationOID, int userPk) throws Exception
+                                       WorkstationOID workstationOID, int userPk)
     {
         // check if the it is already there..
         UnitUser uu = persistWrapper.read(UnitUser.class,
@@ -1104,13 +1105,17 @@ public class UnitServiceImpl implements UnitService{
         if (uu == null)
         {
             UnitUser pUser = new UnitUser();
-            pUser.setProjectPk(projectOID.getPk());
+            pUser.setProjectPk((int) projectOID.getPk());
             pUser.setUnitPk(unitPk);
-            pUser.setWorkstationPk(workstationOID.getPk());
+            pUser.setWorkstationPk((int) workstationOID.getPk());
             pUser.setUserPk(userPk);
             pUser.setRole(User.ROLE_TESTER);
 
-            persistWrapper.createEntity(pUser);
+            try {
+                persistWrapper.createEntity(pUser);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -1124,9 +1129,9 @@ public class UnitServiceImpl implements UnitService{
         if (uu == null)
         {
             UnitUser pUser = new UnitUser();
-            pUser.setProjectPk(projectOID.getPk());
+            pUser.setProjectPk((int) projectOID.getPk());
             pUser.setUnitPk(unitPk);
-            pUser.setWorkstationPk(workstationOID.getPk());
+            pUser.setWorkstationPk((int) workstationOID.getPk());
             pUser.setUserPk(userPk);
             pUser.setRole(User.ROLE_VERIFY);
 
@@ -1144,9 +1149,9 @@ public class UnitServiceImpl implements UnitService{
         if (uu == null)
         {
             UnitUser pUser = new UnitUser();
-            pUser.setProjectPk(projectOID.getPk());
+            pUser.setProjectPk((int) projectOID.getPk());
             pUser.setUnitPk(unitPk);
-            pUser.setWorkstationPk(workstationOID.getPk());
+            pUser.setWorkstationPk((int) workstationOID.getPk());
             pUser.setUserPk(userPk);
             pUser.setRole(User.ROLE_APPROVE);
 
@@ -1164,9 +1169,9 @@ public class UnitServiceImpl implements UnitService{
         if (uu == null)
         {
             UnitUser pUser = new UnitUser();
-            pUser.setProjectPk(projectOID.getPk());
+            pUser.setProjectPk((int) projectOID.getPk());
             pUser.setUnitPk(unitPk);
-            pUser.setWorkstationPk(workstationOID.getPk());
+            pUser.setWorkstationPk((int) workstationOID.getPk());
             pUser.setUserPk(userPk);
             pUser.setRole(User.ROLE_READONLY);
 
@@ -1716,7 +1721,7 @@ public class UnitServiceImpl implements UnitService{
         }
     }
     public  void copyWorkstationToUnits(UserContext context, ProjectQuery projectQuery,
-                                              WorkstationQuery workstationQuery, Integer[] selectedUnits) throws Exception
+                                              WorkstationQuery workstationQuery, Integer[] selectedUnits)
     {
         int workstationPk = (int) workstationQuery.getPk();
 
@@ -1725,14 +1730,23 @@ public class UnitServiceImpl implements UnitService{
         {
             int unitPk = selectedUnits[i];
             UnitObj unit = getUnitByPk(new UnitOID(unitPk));
-            List unitWorkstations = workstationService.getWorkstationsForUnit(unit.getOID(), projectQuery.getOID());
+            List unitWorkstations = null;
+            try {
+                unitWorkstations = workstationService.getWorkstationsForUnit(unit.getOID(), projectQuery.getOID());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
 
             if (unitWorkstations.contains(workstationQuery))
             {
             } else
             {
                 // unit does not contain that workstation
-                workstationService.addWorkstationToUnit(context, projectQuery.getOID(), unit.getOID(), workstationQuery.getOID());
+                try {
+                    workstationService.addWorkstationToUnit(context, projectQuery.getOID(), unit.getOID(), workstationQuery.getOID());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }

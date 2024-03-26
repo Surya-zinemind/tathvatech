@@ -12,11 +12,15 @@ import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.common.TestProcFilter;
 
 import com.tathvatech.forms.enums.FormStatusEnum;
+import com.tathvatech.report.enums.ReportTypes;
+import com.tathvatech.report.request.ReportRequest;
+import com.tathvatech.report.response.ReportResponse;
 import com.tathvatech.unit.common.UnitFormQuery;
 import com.tathvatech.unit.entity.UnitLocation;
 import com.tathvatech.unit.service.UnitManager;
 import com.tathvatech.user.OID.UnitOID;
 import com.tathvatech.user.common.UserContext;
+import com.tathvatech.workstation.common.DummyWorkstation;
 import com.tathvatech.workstation.common.UnitInProjectObj;
 
 
@@ -24,6 +28,7 @@ public class TestProcListReport
 {
 	private PersistWrapper persistWrapper;
 	private UnitManager unitManager;
+	private DummyWorkstation dummyWorkstation;
 	UserContext context;
 	ReportRequest reportRequest;
 	private TestProcFilter filter;
@@ -85,7 +90,10 @@ public class TestProcListReport
 	public TestProcListReport(UserContext context, TestProcFilter filter) {
 	}
 
-	public  ReportResponse runReport()
+	public TestProcListReport(UserContext context, ReportRequest simpleReportRequestForFetchAllRows, UnitManager unitManager1) {
+	}
+
+	public ReportResponse runReport()
 	{
 		ReportResponse response = new ReportResponse();
 		response.setStartIndex(reportRequest.getStartIndex());
@@ -166,7 +174,7 @@ public class TestProcListReport
 		+ " join TAB_UNIT u on uth.unitPk = u.pk "
 		+ " join TAB_UNIT_H uh on uh.unitPk = u.pk and now() between uh.effectiveDateFrom and uh.effectiveDateTo"
 		+ " join TAB_PROJECT p on uth.projectPk = p.pk "
-		+ " join TAB_WORKSTATION w on uth.workstationPk = w.pk and w.pk != " + DummyWorkstation.getPk() + ""
+		+ " join TAB_WORKSTATION w on uth.workstationPk = w.pk and w.pk != " + dummyWorkstation.getPk() + ""
 		+ " join TAB_UNIT_WORKSTATIONS uw on uth.unitPk = uW.unitPk and uth.projectPk = uw.projectPk and uth.workstationPk = uw.workstationPk "
 		+ " join site on w.sitePk = site.pk"
 		+ " join TAB_SURVEY f on tfa.formFk = f.pk "

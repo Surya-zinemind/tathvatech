@@ -15,8 +15,8 @@ import java.util.List;
 
 public class UnitInProjectListReport
 {
-	private final PersistWrapper persistWrapper;
-	private final UnitManager unitManager;
+	private  PersistWrapper persistWrapper;
+	private  UnitManager unitManager;
 	private UnitInProjectListReportRequest unitFilter;
 	public UnitInProjectListReport(PersistWrapper persistWrapper, UnitManager unitManager, UnitInProjectListReportRequest reportRequest)
 	{
@@ -30,8 +30,11 @@ public class UnitInProjectListReport
         this.unitManager = unitManager;
     }
 
+    public UnitInProjectListReport(UnitInProjectListReportRequest request) {
+    }
 
-	public List<UnitQuery> runReport()
+
+    public List<UnitQuery> runReport()
 	{
 		QueryObject qb = getSql();
 		return persistWrapper.readList(UnitQuery.class, qb.getQuery(), qb.getParams().toArray());
