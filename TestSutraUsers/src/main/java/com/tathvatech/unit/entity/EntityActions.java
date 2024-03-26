@@ -17,6 +17,8 @@ import com.tathvatech.user.common.UserContext;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 /**
@@ -29,7 +31,9 @@ import jakarta.persistence.Table;
 @Table(name="entity_actions")
 public class EntityActions extends AbstractEntity implements Serializable
 {
-	private PersistWrapper persistWrapper = null;
+	@Transient
+	@Autowired
+	private PersistWrapper persistWrapper;
 	@Id
 	private long pk; // this pk goes into the _h records as actionPk, if another object gets an _h records because one object was modified, the same actionId gets both _h records.
 	private int objectPk;

@@ -24,8 +24,6 @@ public class UnitInProjectDAO
 {
 	private Date now ;
 	@Autowired
-	private  EntityActions entityActions;
-	@Autowired
 	private PersistWrapper persistWrapper;
 	public UnitInProjectDAO()
 	{
@@ -83,6 +81,7 @@ public class UnitInProjectDAO
 	
 	public  UnitInProjectObj saveUnitInProject(UserContext context, UnitInProjectObj obj, Actions[]  actions) throws Exception
 	{
+		EntityActions entityActions = new EntityActions();
 		UnitInProject upr = null;
 		if(obj.getPk() > 0)
 			upr = (UnitInProject) persistWrapper.readByPrimaryKey(UnitInProject.class, obj.getPk());
@@ -105,6 +104,7 @@ public class UnitInProjectDAO
 			
 			
 			EntityActions act = null;
+
 			if(actions != null)
 				act = entityActions.createAction(context, new UnitInProjectOID(pk), actions);
 
@@ -182,6 +182,7 @@ public class UnitInProjectDAO
 	
 	public void removeUnit(UserContext context, UnitInProjectObj unitInProject) throws Exception
 	{
+		EntityActions entityActions = new EntityActions();
 		EntityActions act = entityActions.createAction(context, unitInProject.getOID(), new Actions[]{Actions.removeUnitFromProject});
 
 		UnitInProjectH hRec = getHRecord(unitInProject.getOID(), now);

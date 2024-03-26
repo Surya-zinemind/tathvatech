@@ -49,6 +49,8 @@ import com.tathvatech.workstation.common.WorkstationQuery;
 import com.tathvatech.workstation.entity.UnitWorkstation;
 import com.tathvatech.workstation.service.WorkstationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -58,7 +60,6 @@ import java.util.*;
 public class UnitServiceImpl implements UnitService{
 
     private final PersistWrapper persistWrapper;
-    private final WorkstationService workstationService;
     private final AndonManager andonManager;
     private final UnitManager unitManager;
     private final ProjectTemplateManager projectTemplateManager;
@@ -67,6 +68,9 @@ public class UnitServiceImpl implements UnitService{
     private final CommonServiceManager commonServiceManager;
     private final SurveyMaster surveyMaster;
     private final SurveyDefFactory surveyDefFactory;
+    @Lazy
+    @Autowired
+    private  WorkstationService workstationService;
 
 
     public  List<UnitQuery> getUnitsBySerialNos(String[] serialNos, ProjectOID projectOID)

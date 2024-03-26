@@ -36,6 +36,7 @@ import com.tathvatech.user.entity.Account;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.user.entity.UserQuery;
 import com.tathvatech.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.binary.Base64;
 
 
@@ -43,6 +44,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Hari
@@ -50,6 +52,8 @@ import org.slf4j.LoggerFactory;
  *         TODO To change the template for this generated type comment go to
  *         Window - Preferences - Java - Code Style - Code Templates
  */
+@Service
+@RequiredArgsConstructor
 public class SurveyMaster
 {
 	private static final Logger logger = LoggerFactory.getLogger(SurveyMaster.class);
@@ -59,16 +63,10 @@ public class SurveyMaster
 	private final SequenceIdGenerator sequenceIdGenerator;
 	private final UnitManager unitManager;
 
-    public SurveyMaster(PersistWrapper persistWrapper, ProjectService projectService, SurveyResponseManager surveyResponseManager, SequenceIdGenerator sequenceIdGenerator, UnitManager unitManager) {
-        this.persistWrapper = persistWrapper;
-        this.projectService = projectService;
-        this.surveyResponseManager = surveyResponseManager;
-        this.sequenceIdGenerator = sequenceIdGenerator;
-        this.unitManager = unitManager;
-    }
 
 
-    // TODO:: implement a cache with this hashmap
+
+// TODO:: implement a cache with this hashmap
 	// private static HashMap surveyMap = new HashMap();
 
 	/**

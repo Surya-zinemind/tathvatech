@@ -22,6 +22,8 @@ import com.tathvatech.user.OID.UnitOID;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 /**
@@ -34,6 +36,8 @@ import jakarta.persistence.Table;
 @Table(name="TAB_UNIT")
 public class Unit  extends AbstractEntity implements Serializable,TestableEntity
 {
+	@Transient
+	@Autowired
 	private  UnitManagerCore unitManagerCore;
 	@Id
 	private long pk;

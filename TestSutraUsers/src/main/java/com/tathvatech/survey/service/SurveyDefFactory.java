@@ -22,6 +22,7 @@ import org.jdom2.output.XMLOutputter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 
 import java.io.File;
@@ -43,6 +44,7 @@ import java.sql.Statement;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
+@Service
 public class SurveyDefFactory
 {
     private static final Logger logger = LoggerFactory.getLogger(SurveyDefFactory.class);
