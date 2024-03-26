@@ -52,6 +52,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -808,7 +809,8 @@ public class UnitServiceImpl implements UnitService{
         // fetch the new project back
         return unit;
     }
-    public  void updateUnit(UnitObj unit) throws Exception
+@Transactional
+public  void updateUnit(UnitObj unit) throws Exception
     {
         if (isUnitNameExistForAnotherUnit(unit))
         {
@@ -1099,7 +1101,8 @@ public class UnitServiceImpl implements UnitService{
             throw new RuntimeException(e);
         }
     }
-    public  void addTesterToUnit(UserContext context, int unitPk, ProjectOID projectOID,
+ @Transactional
+ public  void addTesterToUnit(UserContext context, int unitPk, ProjectOID projectOID,
                                        WorkstationOID workstationOID, int userPk)
     {
         // check if the it is already there..
@@ -1123,7 +1126,8 @@ public class UnitServiceImpl implements UnitService{
         }
     }
 
-    public  void addVerifierToUnit(UserContext context, int unitPk, ProjectOID projectOID,
+  @Transactional
+  public  void addVerifierToUnit(UserContext context, int unitPk, ProjectOID projectOID,
                                          WorkstationOID workstationOID, int userPk) throws Exception
     {
         // check if the it is already there..
@@ -1143,7 +1147,8 @@ public class UnitServiceImpl implements UnitService{
         }
     }
 
-    public  void addApproverToUnit(UserContext context, int unitPk, ProjectOID projectOID,
+  @Transactional
+  public  void addApproverToUnit(UserContext context, int unitPk, ProjectOID projectOID,
                                          WorkstationOID workstationOID, int userPk) throws Exception
     {
         // check if the it is already there..
@@ -1163,7 +1168,8 @@ public class UnitServiceImpl implements UnitService{
         }
     }
 
-    public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID projectOID,
+@Transactional
+public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID projectOID,
                                              WorkstationOID workstationOID, int userPk) throws Exception
     {
         // check if the it is already there..
@@ -1472,7 +1478,8 @@ public class UnitServiceImpl implements UnitService{
                 "delete from TAB_UNIT_USERS where unitPk=? and workstationPk=? and userPk = ? and role = ?",
                 unitOID.getPk(), wsOID.getPk(), userOID.getPk(), role);
     }
-    public  void removeUserFromUnit(int userPk, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID,
+   @Transactional
+   public  void removeUserFromUnit(int userPk, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID,
                                           String role) throws Exception
     {
         // I think we need not do any check for this.. the user was there
