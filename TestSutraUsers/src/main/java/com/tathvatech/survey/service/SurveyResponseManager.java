@@ -40,10 +40,12 @@ public class SurveyResponseManager
 	private final PersistWrapper persistWrapper;
 
 	private final DummyWorkstation dummyWorkstation;
+	private  final TestProcDAO testProcDAO;
 
-    public SurveyResponseManager(PersistWrapper persistWrapper, DummyWorkstation dummyWorkstation) {
+    public SurveyResponseManager(PersistWrapper persistWrapper, DummyWorkstation dummyWorkstation, TestProcDAO testProcDAO) {
         this.persistWrapper = persistWrapper;
         this.dummyWorkstation = dummyWorkstation;
+        this.testProcDAO = testProcDAO;
     }
 
     public  void changeResponseStatus(UserContext userContext, int responseId, String responseStatus)
@@ -2185,7 +2187,7 @@ public class SurveyResponseManager
 	{
 		try 
 		{
-			TestProcObj tp = new TestProcDAO().getTestProc((int) testProcOID.getPk());
+			TestProcObj tp = testProcDAO.getTestProc((int) testProcOID.getPk());
 			if(tp == null)
 				logger.error("Null testproc at pk - " + testProcOID.getPk());
 			

@@ -4,6 +4,7 @@ import com.tathvatech.common.enums.EStatusEnum;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.common.ProjectFormQuery;
+
 import com.tathvatech.forms.dao.TestProcDAO;
 import com.tathvatech.forms.response.ResponseMasterNew;
 import com.tathvatech.openitem.andon.service.AndonManager;
@@ -42,6 +43,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,6 +57,7 @@ public class WorkstationServiceImpl implements WorkstationService{
     
     private final PersistWrapper persistWrapper;
 
+    private final TestProcDAO testProcDAO;
     private final SiteService siteService;
     
     private final AccountService accountService;
@@ -77,61 +80,64 @@ public class WorkstationServiceImpl implements WorkstationService{
     @Autowired
     private  AndonManager andonManager;
 
-  /*  public Workstation createWorkstation(UserContext context, Workstation workstation) throws Exception
-    {
-        Account acc = (Account) context.getAccount();
-        User user = (User) context.getUser();
 
-        Site site = siteService.getSite(workstation.getSitePk());
-        if (site == null)
-            throw new AppException("Invalid Site selected.");
 
-        if (isWorkstationNameExist(acc, site, workstation.getWorkstationName()))
-        {
-            throw new AppException("Duplicate workstation name, Please choose a different workstation name.");
-        }
 
-        int pk;
-        synchronized (WorkstationOrderNoController.class)
-        {
-            int maxOrderNo = persistWrapper.read(Integer.class, "select ifnull(max(orderNo),0) from TAB_WORKSTATION");
-            workstation.setOrderNo(maxOrderNo + 1);
-            workstation.setAccountPk((int) acc.getPk());
-            workstation.setCreatedBy((int) user.getPk());
-            workstation.setCreatedDate(new Date());
-            workstation.setStatus(Workstation.STATUS_OPEN);
-            workstation.setEstatus(EStatusEnum.Active.getValue());
-            workstation.setUpdatedBy((int) user.getPk());
-            pk = (int) persistWrapper.createEntity(workstation);
-        }
-        // fetch the new project back
-        workstation = (Workstation) persistWrapper.readByPrimaryKey(Workstation.class, pk);
-        return workstation;
+    /*  public Workstation createWorkstation(UserContext context, Workstation workstation) throws Exception
+      {
+          Account acc = (Account) context.getAccount();
+          User user = (User) context.getUser();
 
-    }
-    public  Workstation updateWorkstation(UserContext context, Workstation workstation) throws Exception
-    {
-        Account acc = (Account) context.getAccount();
-        User user = (User) context.getUser();
+          Site site = siteService.getSite(workstation.getSitePk());
+          if (site == null)
+              throw new AppException("Invalid Site selected.");
 
-        Site site = siteService.getSite(workstation.getSitePk());
-        if (site == null)
-            throw new AppException("Invalid Site selected.");
+          if (isWorkstationNameExist(acc, site, workstation.getWorkstationName()))
+          {
+              throw new AppException("Duplicate workstation name, Please choose a different workstation name.");
+          }
 
-        if (isWorkstationNameExistForAnotherWorkstation(acc, site, workstation.getWorkstationName(),
-                (int) workstation.getPk()))
-        {
-            throw new AppException("Another workstation with the name specified exists, Please choose another name.");
-        }
+          int pk;
+          synchronized (WorkstationOrderNoController.class)
+          {
+              int maxOrderNo = persistWrapper.read(Integer.class, "select ifnull(max(orderNo),0) from TAB_WORKSTATION");
+              workstation.setOrderNo(maxOrderNo + 1);
+              workstation.setAccountPk((int) acc.getPk());
+              workstation.setCreatedBy((int) user.getPk());
+              workstation.setCreatedDate(new Date());
+              workstation.setStatus(Workstation.STATUS_OPEN);
+              workstation.setEstatus(EStatusEnum.Active.getValue());
+              workstation.setUpdatedBy((int) user.getPk());
+              pk = (int) persistWrapper.createEntity(workstation);
+          }
+          // fetch the new project back
+          workstation = (Workstation) persistWrapper.readByPrimaryKey(Workstation.class, pk);
+          return workstation;
 
-        workstation.setUpdatedBy((int) context.getUser().getPk());
-        persistWrapper.update(workstation);
+      }
+      public  Workstation updateWorkstation(UserContext context, Workstation workstation) throws Exception
+      {
+          Account acc = (Account) context.getAccount();
+          User user = (User) context.getUser();
 
-        // fetch the new project back
-        workstation = (Workstation) persistWrapper.readByPrimaryKey(Workstation.class, workstation.getPk());
-        return workstation;
-        
-    }*/
+          Site site = siteService.getSite(workstation.getSitePk());
+          if (site == null)
+              throw new AppException("Invalid Site selected.");
+
+          if (isWorkstationNameExistForAnotherWorkstation(acc, site, workstation.getWorkstationName(),
+                  (int) workstation.getPk()))
+          {
+              throw new AppException("Another workstation with the name specified exists, Please choose another name.");
+          }
+
+          workstation.setUpdatedBy((int) context.getUser().getPk());
+          persistWrapper.update(workstation);
+
+          // fetch the new project back
+          workstation = (Workstation) persistWrapper.readByPrimaryKey(Workstation.class, workstation.getPk());
+          return workstation;
+
+      }*/
     private  boolean isWorkstationNameExist(Account acc, Site site, String workstationName) throws Exception
     {
         List list = persistWrapper.readList(Workstation.class,
@@ -645,8 +651,8 @@ public class WorkstationServiceImpl implements WorkstationService{
     {
         try
         {
-            TestProcDAO dao = new TestProcDAO();
-            TestProcObj testProc = dao.getTestProc((int) testProcOID.getPk());
+
+            TestProcObj testProc = testProcDAO.getTestProc((int) testProcOID.getPk());
             UnitLocation currentRec = getUnitWorkstation(testProc.getUnitPk(),
                     new ProjectOID(testProc.getProjectPk(), null),
                     new WorkstationOID(testProc.getWorkstationPk(), null));
@@ -670,8 +676,8 @@ public class WorkstationServiceImpl implements WorkstationService{
     {
         try
         {
-            TestProcDAO dao = new TestProcDAO();
-            TestProcObj testProc = dao.getTestProc((int) testProcOID.getPk());
+
+            TestProcObj testProc = testProcDAO.getTestProc((int) testProcOID.getPk());
             UnitLocation currentRec = getUnitWorkstation(testProc.getUnitPk(),
                     new ProjectOID(testProc.getProjectPk(), null),
                     new WorkstationOID(testProc.getWorkstationPk(), null));
@@ -695,8 +701,8 @@ public class WorkstationServiceImpl implements WorkstationService{
     {
         try
         {
-            TestProcDAO dao = new TestProcDAO();
-            TestProcObj testProc = dao.getTestProc((int) testProcOID.getPk());
+
+            TestProcObj testProc = testProcDAO.getTestProc((int) testProcOID.getPk());
             UnitLocation currentRec = getUnitWorkstation(testProc.getUnitPk(),
                     new ProjectOID(testProc.getProjectPk(), null),
                     new WorkstationOID(testProc.getWorkstationPk(), null));
@@ -720,8 +726,8 @@ public class WorkstationServiceImpl implements WorkstationService{
     {
         try
         {
-            TestProcDAO dao = new TestProcDAO();
-            TestProcObj testProc = dao.getTestProc((int) testProcOID.getPk());
+
+            TestProcObj testProc = testProcDAO.getTestProc((int) testProcOID.getPk());
             UnitLocation currentRec = getUnitWorkstation(testProc.getUnitPk(),
                     new ProjectOID(testProc.getProjectPk(), null),
                     new WorkstationOID(testProc.getWorkstationPk(), null));
