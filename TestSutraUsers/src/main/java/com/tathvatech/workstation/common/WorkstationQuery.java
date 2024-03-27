@@ -5,11 +5,8 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.tathvatech.user.OID.SiteOID;
 import com.tathvatech.user.OID.TSBeanBase;
 import com.tathvatech.user.OID.WorkstationOID;
-import com.tathvatech.user.entity.Site;
-import com.tathvatech.user.entity.SiteCache;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.workstation.inf.WorkstationOrderComparable;
 
@@ -120,7 +117,7 @@ public class WorkstationQuery extends TSBeanBase implements WorkstationOrderComp
 	
 	public WorkstationOID getOID()
 	{
-		return new WorkstationOID((int) pk, getDisplayString());
+		return new WorkstationOID(Math.toIntExact(pk), getDisplayString());
 	}
 	
 	@Override
@@ -139,7 +136,7 @@ public class WorkstationQuery extends TSBeanBase implements WorkstationOrderComp
 	@Override
 	public int hashCode()
 	{
-		return (int) pk;
+		return Math.toIntExact(pk);
 	}
 	@Override
 	public String toString() {
