@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Objects;
 
 
-@Service
+@Service("unitManager")
 @RequiredArgsConstructor
 public class UnitManager
 {

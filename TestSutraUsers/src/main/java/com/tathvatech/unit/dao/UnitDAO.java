@@ -15,17 +15,18 @@ import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class UnitDAO
 {
 	Date now;
 
-	@Autowired
-	private  PersistWrapper persistWrapper;
-	public UnitDAO()
-	{
 
+	private final PersistWrapper persistWrapper;
+	public UnitDAO(PersistWrapper persistWrapper)
+	{
+        this.persistWrapper = persistWrapper;
         now = DateUtils.getNowDateForEffectiveDateFrom();
 	}
 
@@ -39,6 +40,7 @@ public class UnitDAO
 		// there are few duplicate units in the system now. need to clean up that . so the limit 0, 1
 		return persistWrapper.read(UnitObj.class, fetchSql + " and uh.unitName = ? limit 0, 1 ", unitName);
 	}
+	@Transactional
 	public  UnitObj saveUnit(UserContext context, UnitObj obj, Actions[]  actions) throws Exception
 	{
 		Unit u = null;

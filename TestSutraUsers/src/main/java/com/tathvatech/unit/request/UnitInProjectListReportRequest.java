@@ -8,7 +8,9 @@ import com.tathvatech.user.OID.PartOID;
 import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.UnitOID;
 import com.tathvatech.user.OID.WorkstationOID;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UnitInProjectListReportRequest 
 {
 	ProjectOID projectOID;
@@ -52,6 +54,9 @@ public class UnitInProjectListReportRequest
 		this.showProjectPartsAssignedOnly = showProjectPartsAssignedOnly;
 		this.parentUnitOID = parentUnitOID;
 		this.allChildrenRecursive = allChildrenRecursive;
+	}
+
+	public UnitInProjectListReportRequest() {
 	}
 
 	public ProjectOID getProjectOID()

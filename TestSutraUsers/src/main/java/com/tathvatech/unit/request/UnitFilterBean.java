@@ -22,8 +22,10 @@ public class UnitFilterBean {
 	Boolean showProjectPartsAssignedOnly; // if this is set, the filter should show only the units with partPk added to the ProjectPart setup.
 	
 	WorkstationOID unitsAtWorkstationOID; // return only the units where the unit_location entry is inprogress.
-	
-	
+
+	public UnitFilterBean() {
+	}
+
 	public UnitFilterBean(ProjectOID projectoid)
 	{
 		this.projectoid = projectoid;

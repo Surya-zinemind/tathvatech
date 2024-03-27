@@ -6,18 +6,32 @@ import com.tathvatech.unit.common.UnitQuery;
 import com.tathvatech.unit.entity.UnitInProject;
 import com.tathvatech.unit.request.UnitInProjectListReportRequest;
 import com.tathvatech.workstation.common.UnitInProjectObj;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 
-
+@Service
 public class UnitInProjectListReport
 {
-	private  PersistWrapper persistWrapper;
-	private  UnitManager unitManager;
-	private UnitInProjectListReportRequest unitFilter;
+
+	private final  PersistWrapper persistWrapper;
+	private final UnitManager unitManager;
+
+
+	private  UnitInProjectListReportRequest unitFilter;
+
+	public UnitInProjectListReportRequest getUnitFilter() {
+		return unitFilter;
+	}
+
+	public void setUnitFilter(UnitInProjectListReportRequest unitFilter) {
+		this.unitFilter = unitFilter;
+	}
+
 	public UnitInProjectListReport(PersistWrapper persistWrapper, UnitManager unitManager, UnitInProjectListReportRequest reportRequest)
 	{
         this.persistWrapper = persistWrapper;
@@ -25,16 +39,9 @@ public class UnitInProjectListReport
         this.unitFilter = reportRequest;
 	}
 
-	public UnitInProjectListReport(UnitInProjectListReportRequest request, PersistWrapper persistWrapper, UnitManager unitManager) {
-        this.persistWrapper = persistWrapper;
-        this.unitManager = unitManager;
-    }
-
-    public UnitInProjectListReport(UnitInProjectListReportRequest request) {
-    }
 
 
-    public List<UnitQuery> runReport()
+	public List<UnitQuery> runReport()
 	{
 		QueryObject qb = getSql();
 		return persistWrapper.readList(UnitQuery.class, qb.getQuery(), qb.getParams().toArray());

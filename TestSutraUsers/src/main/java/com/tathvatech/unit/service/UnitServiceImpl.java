@@ -69,6 +69,8 @@ public class UnitServiceImpl implements UnitService{
     private final CommonServiceManager commonServiceManager;
     private final SurveyMaster surveyMaster;
     private final SurveyDefFactory surveyDefFactory;
+    private final  UnitInProjectListReport report;
+    private final UnitDAO unitDAO;
     @Lazy
     @Autowired
     private  WorkstationService workstationService;
@@ -163,14 +165,14 @@ public class UnitServiceImpl implements UnitService{
         request.setUnitsAtWorkstationOID(unitFilter.getUnitsAtWorkstationOID());
         request.setParentUnitOID(parent);
 
-        UnitInProjectListReport report = new UnitInProjectListReport(request);
+        report.setUnitFilter(request);
         return report.runReport();
     }
 
     public  UnitObj createUnit(UserContext context, int projectPk, UnitBean unitBean, boolean createAsPlannedUnit, boolean pendingReview)
             throws Exception
     {
-        UnitDAO unitDAO = new UnitDAO();
+
         UnitInProjectDAO uprDAO = new UnitInProjectDAO();
 
         Project project = (Project) persistWrapper.readByPrimaryKey(Project.class, projectPk);
@@ -767,7 +769,7 @@ public class UnitServiceImpl implements UnitService{
                                                   boolean copyPartSpecificFormsToWorkstation, boolean pendingReview)
             throws Exception
     {
-        UnitDAO unitDAO = new UnitDAO();
+
         UnitInProjectDAO uprDAO = new UnitInProjectDAO();
 
         Project project = (Project) persistWrapper.readByPrimaryKey(Project.class, projectOID.getPk());
@@ -804,7 +806,7 @@ public class UnitServiceImpl implements UnitService{
             throw new AppException("Duplicate unit name, Please choose a different unit name.");
         }
 
-        UnitDAO unitDAO = new UnitDAO();
+
         unit = unitDAO.saveUnit(context, unit, new Actions[] { Actions.updateUnit });
         // fetch the new project back
         return unit;
@@ -840,7 +842,7 @@ public  void updateUnit(UnitObj unit) throws Exception
 
     public UnitObj getUnitByPk(UnitOID unitOID)
     {
-        return new UnitDAO().getUnit(unitOID.getPk());
+        return unitDAO.getUnit(unitOID.getPk());
     }
 
     public  UnitQuery getUnitQueryByPk(int unitPk, ProjectOID projectOID)

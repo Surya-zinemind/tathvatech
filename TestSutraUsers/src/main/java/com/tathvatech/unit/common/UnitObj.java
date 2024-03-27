@@ -16,6 +16,7 @@ import com.tathvatech.unit.service.UnitManagerCore;
 import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.SupplierOID;
 import com.tathvatech.user.OID.UnitOID;
+import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Transient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,6 @@ import java.util.Date;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-
 public class UnitObj extends AbstractEntity implements TestableEntity
 {
 
@@ -48,7 +48,7 @@ public class UnitObj extends AbstractEntity implements TestableEntity
 	private String displayName;
 	private String unitDescription;
 	private String status;
-	private int estatus;
+	private Integer estatus;
 
 	@Override
 	public long getPk() {
@@ -169,11 +169,11 @@ public class UnitObj extends AbstractEntity implements TestableEntity
 		this.status = status;
 	}
 
-	public int getEstatus() {
+	public Integer getEstatus() {
 		return estatus;
 	}
 
-	public void setEstatus(int estatus) {
+	public void setEstatus(Integer estatus) {
 		this.estatus = estatus;
 	}
 
