@@ -50,7 +50,6 @@ public class TestProcManager
 	private final WorkstationService workstationService;
 
 	private final SurveyResponseManager surveyResponseManager;
-	private final TestProcDAO testProcDAO;
 
 	/*public  void activateTestProcs(UserContext userContext,
 										 List<UnitFormQuery> formsToActivate) throws Exception
@@ -137,9 +136,9 @@ public class TestProcManager
 	}
 
 
-	public  TestProcObj getTestProc(int testProcPk) throws Exception
+	public static TestProcObj getTestProc(int testProcPk) throws Exception 
 	{
-		return testProcDAO.getTestProc(testProcPk);
+		return new TestProcDAO().getTestProc(testProcPk);
 	}
 	
 	/*public  UnitFormQuery getTestProcQuery(int testProcPk)

@@ -16,11 +16,6 @@ import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,26 +26,22 @@ import java.util.Objects;
 import java.util.logging.Logger;
 
 
-
-
-
-@Repository
 public class TestProcDAO
 {
-	private final PersistWrapper persistWrapper ;
 	@Autowired
-	@Lazy
+	private PersistWrapper persistWrapper;
+
+	@Autowired
 	private SurveyMaster surveyMaster;
 	Logger logger = Logger.getLogger(String.valueOf(TestProcDAO.class));
 	Date now;
+	
+	public TestProcDAO()
+	{
+		now = DateUtils.getNowDateForEffectiveDateFrom();
+	}
 
-    public TestProcDAO(PersistWrapper persistWrapper) {
-        this.persistWrapper = persistWrapper;
-		this.now = DateUtils.getNowDateForEffectiveDateFrom();
-    }
-
-
-    public TestProcObj getTestProc(int testProcPk)
+	public TestProcObj getTestProc(int testProcPk)
 	{
 		return persistWrapper.read(TestProcObj.class, fetchSql + " and ut.pk = ?", testProcPk);
 	}
@@ -209,7 +200,7 @@ public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 					
 
 					UnitTestProcH uHNew = new UnitTestProcH();
-					uHNew.setUnitTestProcFk((int) obj.getPk());
+					uHNew.setUnitTestProcFk(obj.getPk());
 					uHNew.setName(obj.getName());
 					uHNew.setProjectPk(obj.getProjectPk());
 					uHNew.setUnitPk(obj.getUnitPk());
@@ -225,7 +216,7 @@ public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 				}
 			}
 			
-			obj = getTestProc((int) obj.getPk());
+			obj = getTestProc(obj.getPk());
 
 			return obj;
 		}
@@ -311,7 +302,6 @@ public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 		}
 	}
 
-	@Transactional
 	public void deleteTestProc(UserContext context, TestProcOID testProcOID) throws Exception
 	{
 		logger.info("deleteTestProc:: testprocOID:" + testProcOID.getLoggingString());
@@ -334,7 +324,6 @@ public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 		}
 	}
 
-	@Transactional
 	public void deleteAllTestProcsMatching(UserContext context, UnitOID unitOID, ProjectOID projectOID,
 										   WorkstationOID workstationOID) throws Exception
 	{
