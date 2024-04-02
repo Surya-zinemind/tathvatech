@@ -37,17 +37,17 @@ public class TestProcListReport
 	private Date forecastTestCompletionDateFrom = null;
 	private Date forecastTestCompletionDateTo = null;
 
-	public TestProcListReport(UserContext context, TestProcFilter filter, PersistWrapper persistWrapper, UnitManager unitManager, UnitManager unitManager1)
+	public TestProcListReport(UserContext context, TestProcFilter filter, PersistWrapper persistWrapper, UnitManager unitManager, DummyWorkstation dummyWorkstation)
 	{
-		this(context, ReportRequest.getSimpleReportRequestForFetchAllRows(ReportTypes.TestProcListReport, filter), unitManager1);
+		this(context, ReportRequest.getSimpleReportRequestForFetchAllRows(ReportTypes.TestProcListReport, filter));
         this.persistWrapper = persistWrapper;
         this.unitManager = unitManager;
+		this.dummyWorkstation=dummyWorkstation;
     }
 	
-	public TestProcListReport(PersistWrapper persistWrapper, UnitManager unitManager, UserContext context, ReportRequest reportRequest)
+	public TestProcListReport(UserContext context, ReportRequest reportRequest)
 	{
-        this.persistWrapper = persistWrapper;
-        this.unitManager = unitManager;
+
         this.context = context;
 		this.reportRequest = reportRequest;
 		this.filter = (TestProcFilter) reportRequest.getFilter();
@@ -81,16 +81,6 @@ public class TestProcListReport
 			}
 		}
 		
-	}
-
-	public TestProcListReport(UserContext context, TestProcFilter filter, UnitManager unitManager) {
-        this.unitManager = unitManager;
-    }
-
-	public TestProcListReport(UserContext context, TestProcFilter filter) {
-	}
-
-	public TestProcListReport(UserContext context, ReportRequest simpleReportRequestForFetchAllRows, UnitManager unitManager1) {
 	}
 
 	public ReportResponse runReport()

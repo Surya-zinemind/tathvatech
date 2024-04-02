@@ -24,9 +24,10 @@ public class UnitInProjectDAO
 {
 	private Date now ;
 	@Autowired
-	private PersistWrapper persistWrapper;
-	public UnitInProjectDAO()
+	private final PersistWrapper persistWrapper;
+	public UnitInProjectDAO(PersistWrapper persistWrapper)
 	{
+        this.persistWrapper = persistWrapper;
 
         now = DateUtils.getNowDateForEffectiveDateFrom();
 	}

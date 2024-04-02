@@ -59,7 +59,8 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class UnitServiceImpl implements UnitService{
-
+    private final UnitInProjectDAO unitInProjectDAO;
+    private final TestProcManager testProcManager;
     private final PersistWrapper persistWrapper;
     private final AndonManager andonManager;
     private final UnitManager unitManager;
@@ -173,7 +174,7 @@ public class UnitServiceImpl implements UnitService{
             throws Exception
     {
 
-        UnitInProjectDAO uprDAO = new UnitInProjectDAO();
+
 
         Project project = (Project) persistWrapper.readByPrimaryKey(Project.class, projectPk);
 
@@ -196,7 +197,7 @@ public class UnitServiceImpl implements UnitService{
         boolean copyFormsConfig = !(boolean) commonServiceManager.getEntityPropertyValue(project.getOID(), ProjectPropertyEnum.DisableProjectFormCopyToUnits.getId(),null,null, Boolean.class);
         boolean copyUsersConfig = !(boolean) commonServiceManager.getEntityPropertyValue(project.getOID(), ProjectPropertyEnum.DisableProjectUsersCopyToUnit.getId(),null,null, Boolean.class);
 
-        return createUnitInt(context, unitDAO, uprDAO, user, project, unitBean, parentOID,
+        return createUnitInt(context, unitDAO, unitInProjectDAO, user, project, unitBean, parentOID,
                 createAsPlannedUnit,
                 copyUsersConfig, copyFormsConfig, false, null, pendingReview);
     }
@@ -770,7 +771,7 @@ public class UnitServiceImpl implements UnitService{
             throws Exception
     {
 
-        UnitInProjectDAO uprDAO = new UnitInProjectDAO();
+
 
         Project project = (Project) persistWrapper.readByPrimaryKey(Project.class, projectOID.getPk());
 
@@ -792,7 +793,7 @@ public class UnitServiceImpl implements UnitService{
         boolean copyFormsConfig = !(boolean) commonServiceManager.getEntityPropertyValue(projectOID, ProjectPropertyEnum.DisableProjectFormCopyToUnits.getId(), null,null,Boolean.class);
         boolean copyUsersConfig = !(boolean) commonServiceManager.getEntityPropertyValue(projectOID, ProjectPropertyEnum.DisableProjectUsersCopyToUnit.getId(),null,null, Boolean.class);
 
-        return createUnitInt(context, unitDAO, uprDAO, user, project, unitBean, parentOID, false,
+        return createUnitInt(context, unitDAO, unitInProjectDAO, user, project, unitBean, parentOID, false,
                 copyUsersConfig, copyFormsConfig, copyPartSpecificFormsToWorkstation, workstationOID, pendingReview);
     }
     public  UnitObj updateUnit(UserContext context, UnitObj unit) throws Exception
@@ -1223,11 +1224,11 @@ public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID p
         // this is because as soon as a workstation is activated, a dummy
         // response is entered into TAB_RESPONSE
         // to coordinate save/submit between tablets..
-        UnitInProjectDAO uprDAO = new UnitInProjectDAO();
-        UnitInProjectObj uprToDelete = uprDAO.getUnitInProject(unitOID, projectOID);
+
+        UnitInProjectObj uprToDelete = unitInProjectDAO.getUnitInProject(unitOID, projectOID);
         if (CommonEnums.DeleteOptionEnum.MoveChildrenToRoot == deleteUnitOption)
         {
-            List<UnitInProjectObj> childs = uprDAO.getDirectChildren(uprToDelete.getOID());
+            List<UnitInProjectObj> childs = unitInProjectDAO.getDirectChildren(uprToDelete.getOID());
             for (Iterator iterator = childs.iterator(); iterator.hasNext();)
             {
                 UnitInProjectObj upr = (UnitInProjectObj) iterator.next();
@@ -1235,7 +1236,7 @@ public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID p
             }
         } else if (CommonEnums.DeleteOptionEnum.DeleteTree == deleteUnitOption)
         {
-            List<UnitInProjectObj> childs = uprDAO.getAllChildrenInTree(uprToDelete.getOID());
+            List<UnitInProjectObj> childs = unitInProjectDAO.getAllChildrenInTree(uprToDelete.getOID());
             for (int i = 0; i < childs.size(); i++)
             {
                 removeUnitFromProjectInt(context, childs.get(i));
@@ -1296,12 +1297,12 @@ public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID p
 
         persistWrapper.delete("delete from TAB_UNIT_USERS where unitPk=? and projectPk = ?",
                 unitInProjectObj.getUnitPk(), unitInProjectObj.getProjectPk());
-        new UnitInProjectDAO().removeUnit(context, unitInProjectObj);
+        unitInProjectDAO.removeUnit(context, unitInProjectObj);
     }
     public  void openUnit(UserContext context, UnitBean rootUnitToOpen, List<UnitBean> unitBeanAndChildrenList,
                                 ProjectOID lastOpenProjectOID, ProjectOID destinationProjectOID) throws Exception
     {
-        UnitInProjectDAO uprDAO = new UnitInProjectDAO();
+
 
         HashMap<UnitOID, UnitBean> unitBeanMap = new HashMap<>();
         for (Iterator iterator = unitBeanAndChildrenList.iterator(); iterator.hasNext();)
@@ -1340,7 +1341,7 @@ public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID p
         List<UnitQuery> destProjectUnitList = unitManager.getAllChildrenUnitsRecursive(rootUnitToOpen.getOID(),
                 destinationProjectOID);
 
-        openUnitRec(context, uprDAO, rootUnitToOpen, unitBeanMap, lastOpenProjectOID, destinationProjectOID,
+        openUnitRec(context,unitInProjectDAO, rootUnitToOpen, unitBeanMap, lastOpenProjectOID, destinationProjectOID,
                 destProjectUnitList);
 
         // what ever is remaining in the destProjectUnitList are the ones that
@@ -1603,7 +1604,7 @@ public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID p
                                         ProjectOID destinationProjectOID, UnitBean rootUnitBean, List<UnitBean> unitBeanAndChildrenList,
                                         boolean addAsPlannedUnit) throws Exception
     {
-        UnitInProjectDAO uprDAO = new UnitInProjectDAO();
+
 
         HashMap<UnitOID, UnitBean> unitBeanMap = new HashMap<>();
         for (Iterator iterator = unitBeanAndChildrenList.iterator(); iterator.hasNext();)
@@ -1645,7 +1646,7 @@ public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID p
 
         boolean copyFormConfig = !(boolean) commonServiceManager.getEntityPropertyValue(destinationProjectOID, ProjectPropertyEnum.DisableProjectFormCopyToUnits.getId(), null,null,Boolean.class);
         boolean copyUserConfig = !(boolean) commonServiceManager.getEntityPropertyValue(destinationProjectOID, ProjectPropertyEnum.DisableProjectUsersCopyToUnit.getId(),null,null, Boolean.class);
-        addUnitToProjectRec(context, uprDAO, sourceProjectOID, destinationProjectOID, rootUnitBean, unitBeanMap,
+        addUnitToProjectRec(context, unitInProjectDAO, sourceProjectOID, destinationProjectOID, rootUnitBean, unitBeanMap,
                 addAsPlannedUnit, copyUserConfig, copyFormConfig);
     }
 
@@ -1767,14 +1768,14 @@ public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID p
                                                                  WorkstationQuery workstationQuery, ProjectPartOID projectPartOID, Integer[] selectedUnits,
                                                                  boolean copyDefaultTeamIfNoProjectPartTeamIsSet) throws Exception
     {
-        UnitInProjectDAO uprDAO = new UnitInProjectDAO();
+
         // teams
         for (int i = 0; i < selectedUnits.length; i++)
         {
             int unitPk = selectedUnits[i];
             UnitObj unit = getUnitByPk(new UnitOID(unitPk));
 
-            UnitInProjectObj unitInProject = uprDAO.getUnitInProject(unit.getOID(), projectQuery.getOID());
+            UnitInProjectObj unitInProject =unitInProjectDAO.getUnitInProject(unit.getOID(), projectQuery.getOID());
             if (unitInProject == null)
                 throw new AppException("Unit is not associated with the project, Team cannot be set.");
 
@@ -1796,14 +1797,14 @@ public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID p
                                                  WorkstationQuery workstationQuery, Integer[] selectedUnitsForForm, Integer[] selectedUnitsForTeam)
             throws Exception
     {
-        UnitInProjectDAO uprDAO = new UnitInProjectDAO();
+
         // teams
         for (int i = 0; i < selectedUnitsForTeam.length; i++)
         {
             int unitPk = selectedUnitsForTeam[i];
             UnitObj unit = getUnitByPk(new UnitOID(unitPk));
 
-            UnitInProjectObj unitInProject = uprDAO.getUnitInProject(unit.getOID(), projectQuery.getOID());
+            UnitInProjectObj unitInProject = unitInProjectDAO.getUnitInProject(unit.getOID(), projectQuery.getOID());
             if (unitInProject == null)
                 throw new AppException("Unit is not associated with the project, It cannot opened.");
 
@@ -1837,7 +1838,7 @@ public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID p
             int unitPk = selectedUnitsForForm[i];
             UnitObj unit = getUnitByPk(new UnitOID(unitPk));
 
-            UnitInProjectObj unitInProject = uprDAO.getUnitInProject(unit.getOID(), projectQuery.getOID());
+            UnitInProjectObj unitInProject = unitInProjectDAO.getUnitInProject(unit.getOID(), projectQuery.getOID());
             if (unitInProject == null)
                 throw new AppException("Unit is not associated with the project, It cannot opened.");
 
@@ -1859,7 +1860,7 @@ public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID p
                 // form inside the testproc.
                 List<ProjectFormQuery> pForms = projectTemplateManager.getTestProcsForProjectPart(projectQuery.getOID(),
                         new ProjectPartOID(unitInProject.getProjectPartPk(), null), workstationQuery.getPk());
-                List<UnitFormQuery> uForms = TestProcManager.getTestProcsForItem(context, unitPk, projectQuery.getOID(),
+                List<UnitFormQuery> uForms = testProcManager.getTestProcsForItem(context, unitPk, projectQuery.getOID(),
                         workstationQuery.getOID(), false);
                 for (Iterator iterator = pForms.iterator(); iterator.hasNext();)
                 {
@@ -1901,7 +1902,7 @@ public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID p
                 // we have to re-fetch the unit forms list here, else,
                 // the forms upgrades will get removed as they are not part of
                 // the unit list fetched earlier
-                uForms = TestProcManager.getTestProcsForItem(context, unitPk, projectQuery.getOID(),
+                uForms = testProcManager.getTestProcsForItem(context, unitPk, projectQuery.getOID(),
                         workstationQuery.getOID(), false);
                 for (Iterator iterator = uForms.iterator(); iterator.hasNext();)
                 {
@@ -1962,7 +1963,7 @@ public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID p
                 // unit contains this workstation
                 // remove any forms from the unit that are not there in the
                 // project
-                List<UnitFormQuery> uForms = TestProcManager.getTestProcsForItem(context, (int) unit.getPk(),
+                List<UnitFormQuery> uForms = testProcManager.getTestProcsForItem(context, (int) unit.getPk(),
                         projectQuery.getOID(), workstationQuery.getOID(), true);
                 for (Iterator iterator = uForms.iterator(); iterator.hasNext();)
                 {
