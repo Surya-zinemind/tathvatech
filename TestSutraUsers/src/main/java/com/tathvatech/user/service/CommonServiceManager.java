@@ -54,6 +54,11 @@ public class CommonServiceManager
 			e.printStackTrace();
 		}
 	}
+	public Object getObjectByPk(Class class1, int pk)
+	{
+
+		return persistWrapper.readByPrimaryKey(class1, pk);
+	}
 	
 	public <T> Object getEntityPropertyValue(OID entityOID, String property, Integer intParam1, String stringParam1, Class<T> type)
 	{

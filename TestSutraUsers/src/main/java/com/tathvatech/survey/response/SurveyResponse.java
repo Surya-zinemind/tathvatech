@@ -10,8 +10,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import com.tathvatech.forms.oid.FormResponseOID;
+import com.tathvatech.forms.response.FormResponseStats;
 import com.tathvatech.forms.response.ResponseMasterNew;
 import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.entity.ResponseFlags;
+import com.tathvatech.survey.enums.AnswerPersistor;
+import com.tathvatech.survey.inf.SurveyItemBase;
+import com.tathvatech.survey.inf.SurveySaveItemBase;
+import com.tathvatech.unit.common.UnitQuery;
+import com.tathvatech.unit.entity.UnitTestProc;
 import com.tathvatech.user.entity.User;
 
 
@@ -34,7 +42,7 @@ public class SurveyResponse
     public static final String STATUS_COMPLETE = "Complete";
 	//Uncommet and fix this
     
-   /* private int responseId;
+ private int responseId;
     private int testProcPk;
     private int surveyPk; 
     private int userPk;
@@ -73,8 +81,8 @@ public class SurveyResponse
 		this(sd);
 		responseStartTime = new Date();
 		ipaddress = "";
-		testProcPk = unitForm.getPk();
-		userPk = user.getPk();
+		testProcPk = (int) unitForm.getPk();
+		userPk = (int) user.getPk();
 		this.user = user;
 		status = ResponseMasterNew.STATUS_INPROGRESS;
     }
@@ -304,7 +312,7 @@ public class SurveyResponse
 
 
 
-	@NoColumn
+
     public SurveyDefinition getSurveyDefinition()
     {
         return surveyDefinition;
@@ -315,11 +323,7 @@ public class SurveyResponse
     	this.surveyDefinition = sDef;
     }
     
-    *//**
-     * @param question
-     * @param answer
-     * @throws Exception
-     *//*
+
     public void addAnswer(SurveySaveItemBase sItem, SurveyItemResponse answer)
     {
         AnswerPersistor ap = sItem.getPersistor(answer);
@@ -331,19 +335,14 @@ public class SurveyResponse
         }
     }
 
-    *//**
-     * @param item
-     * @return
-     *//*
-    @NoColumn
+
+
     public SurveyItemResponse getAnswer(SurveySaveItemBase sItem)
     {
         return (SurveyItemResponse)answerMap.get(sItem);
     }
 
-    *//**
-     * @param ssItem
-     *//*
+
     public void clearAnswer(SurveySaveItemBase ssItem)
     {
         answerMap.remove(ssItem);
@@ -353,12 +352,7 @@ public class SurveyResponse
     {
     	return answerMap;
     }
-    
-    *//**
-     * use with caution, there could be duplicate surveyItem ids across different forms.
-     * @param itemId
-     * @return
-     *//*
+
     public SurveyItemResponse getAnswerBySurveyItemId(String itemId)
     {
     	SurveyItemResponse ires = null;
@@ -373,7 +367,7 @@ public class SurveyResponse
     	return ires;
     }
     
-	@NoColumn
+
     public User getUser() 
 	{
 		return user;
@@ -382,7 +376,7 @@ public class SurveyResponse
 	{
 		this.user = user;
 	}
-	@NoColumn
+
 	public ResponseFlags getFlag()
 	{
 		return flag;
@@ -395,5 +389,5 @@ public class SurveyResponse
 	public FormResponseOID getOID()
 	{
 		return new FormResponseOID(responseId);
-	}*/
+	}
 }

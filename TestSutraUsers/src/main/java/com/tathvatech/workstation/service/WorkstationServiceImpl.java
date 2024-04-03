@@ -6,6 +6,7 @@ import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.common.ProjectFormQuery;
 import com.tathvatech.forms.dao.TestProcDAO;
 import com.tathvatech.forms.response.ResponseMasterNew;
+import com.tathvatech.forms.service.TestProcManager;
 import com.tathvatech.openitem.andon.service.AndonManager;
 import com.tathvatech.project.common.ProjectUserQuery;
 import com.tathvatech.project.entity.Project;
@@ -52,7 +53,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class WorkstationServiceImpl implements WorkstationService{
     private static final Logger logger = LoggerFactory.getLogger(WorkstationServiceImpl.class);
-    
+    private final TestProcManager testProcManager;
+
     private final PersistWrapper persistWrapper;
 
     private final SiteService siteService;
@@ -551,7 +553,7 @@ public class WorkstationServiceImpl implements WorkstationService{
 
             // if response is in inprogress status, we need to change it to
             // paused status
-            List<UnitFormQuery> currentLocationTestList = TestProcManager.getTestProcsForItem(userContext, unitPk,
+            List<UnitFormQuery> currentLocationTestList = testProcManager.getTestProcsForItem(userContext, unitPk,
                     projectOID, workstationOID, false);
             for (Iterator iterator = currentLocationTestList.iterator(); iterator.hasNext();)
             {
@@ -577,7 +579,7 @@ public class WorkstationServiceImpl implements WorkstationService{
         {
             // create the placeholder response and workflow entries for the
             // forms associated to that unit in that location
-            List<UnitFormQuery> currentLocationTestList = TestProcManager.getTestProcsForItem(userContext, unitPk,
+            List<UnitFormQuery> currentLocationTestList = testProcManager.getTestProcsForItem(userContext, unitPk,
                     projectOID, workstationOID, false);
             for (Iterator iterator = currentLocationTestList.iterator(); iterator.hasNext();)
             {
@@ -791,13 +793,13 @@ public class WorkstationServiceImpl implements WorkstationService{
     {
         List<UnitFormQuery> fm = null;
         //Uncomment and fix it while doing form
-       /* if (workstationOID == null)
+        if (workstationOID == null)
         {
-            fm = TestProcManager.getTestProcsForItem(context, unitPk, projectOID, includeChildren);
+            fm = testProcManager.getTestProcsForItem(context, unitPk, projectOID, includeChildren);
         } else
         {
-            fm = TestProcManager.getTestProcsForItem(context, unitPk, projectOID, workstationOID, includeChildren);
-        }*/
+            fm = testProcManager.getTestProcsForItem(context, unitPk, projectOID, workstationOID, includeChildren);
+        }
         int formCount = 0;
         float percenCompleteAccumulator = 0f;
         for (Iterator iterator = fm.iterator(); iterator.hasNext();)

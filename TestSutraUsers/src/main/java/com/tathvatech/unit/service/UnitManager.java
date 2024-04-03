@@ -1,11 +1,20 @@
 package com.tathvatech.unit.service;
 
 import com.tathvatech.common.exception.AppException;
+import com.tathvatech.common.utils.Base62Util;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.project.common.ProjectQuery;
+import com.tathvatech.unit.common.UnitEntityQuery;
+import com.tathvatech.unit.common.UnitInProjectQuery;
+import com.tathvatech.unit.common.UnitQuery;
 import com.tathvatech.unit.dao.UnitInProjectDAO;
+import com.tathvatech.unit.entity.Unit;
+import com.tathvatech.unit.entity.UnitBookmark;
 import com.tathvatech.unit.entity.UnitInProject;
+import com.tathvatech.unit.enums.Actions;
 import com.tathvatech.unit.oid.UnitInProjectOID;
+import com.tathvatech.unit.request.SerialNumberFilter;
+import com.tathvatech.unit.request.UnitEntityListReportRequest;
 import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.UnitOID;
 import com.tathvatech.user.common.UserContext;
@@ -23,7 +32,7 @@ import java.util.List;
 import java.util.Objects;
 
 
-@Service
+@Service("unitManager")
 @RequiredArgsConstructor
 public class UnitManager
 {
@@ -99,8 +108,8 @@ public class UnitManager
 			logger.error("Exception changing unit order", e);
 			throw new AppException("Could not change unit order, please try again later");
 		}
-	}*/
-
+	}
+*/
 	/*public static void moveUnitOrderDown(UserContext context, UnitOID unitOID, ProjectOID projectOID)
 	{
 		UnitInProjectDAO uprDAO = unitInProjectDAO;
@@ -126,7 +135,7 @@ public class UnitManager
 			throw new AppException("Could not change unit order, please try again later");
 		}
 	}
-	
+	*/
 	public  List<UnitQuery> getChildrenUnits(ProjectOID projectOID, UnitOID parentUnitOID)
 	{
 		if(parentUnitOID == null)
@@ -174,7 +183,7 @@ public class UnitManager
 	{
 		try
 		{
-			UnitInProjectObj unitInProject = UnitManager.getUnitInProject(parentUnitOID, projectOID);
+			UnitInProjectObj unitInProject = getUnitInProject(parentUnitOID, projectOID);
 
 			String sql = UnitQuery.sql + " where 1 = 1 and ( (u.pk = ?) or (uprh.rootParentPk = ? and uprh.heiCode like ?) ) ";
 			List<UnitQuery> children = persistWrapper.readList(UnitQuery.class,
@@ -194,11 +203,11 @@ public class UnitManager
 		return null;
 	}
 	
-	public static Unit getUnitBySerialNo(String serialNo)
+	public  Unit getUnitBySerialNo(String serialNo)
 	{
 		try 
 		{
-			List<Unit> units = PersistWrapper.readList(Unit.class, "select u.* from TAB_UNIT u "
+			List<Unit> units = persistWrapper.readList(Unit.class, "select u.* from TAB_UNIT u "
 					+ " join TAB_UNIT_H uh on uh.unitPk = u.pk and now() between uh.effectiveDateFrom and uh.effectiveDateTo"
 					+ " where uh.serialNo = ?", serialNo);
 			
@@ -219,7 +228,7 @@ public class UnitManager
 		return null;
 	}
 
-	public static List<UnitQuery> getUnits(SerialNumberFilter serialNumberFilter)
+	public  List<UnitQuery> getUnits(SerialNumberFilter serialNumberFilter)
 	{
 		List params = new ArrayList();
 
@@ -263,10 +272,10 @@ public class UnitManager
 			sb.append(" and uprh.parentPk is null");
 		}
 		
-		return PersistWrapper.readList(UnitQuery.class, sb.toString(), params.toArray());
+		return persistWrapper.readList(UnitQuery.class, sb.toString(), params.toArray());
 	}
 	
-	public static void changeUnitParent(UserContext userContext,
+	public  void changeUnitParent(UserContext userContext,
 			UnitOID selectedParent, UnitOID unitToChangeOID, ProjectOID projectOID) throws Exception
 	{
 		UnitInProjectDAO uprDAO = unitInProjectDAO;
@@ -314,8 +323,8 @@ public class UnitManager
 		changeUnitParentInt(userContext, uprDAO, selectedParentUPROID, childUPR.getOID(), projectOID);
 		
 		return;
-	}*/
-	/*
+	}
+
 	private static void changeUnitParentInt(UserContext userContext, UnitInProjectDAO uprDAO, 
 			UnitInProjectOID selectedParentOID, UnitInProjectOID unitToChangeOID, ProjectOID projectOID) throws Exception
 	{
@@ -360,7 +369,7 @@ public class UnitManager
 		else
 		{
 			newLevel = selectedParent.getLevel() + 1;
-			newHeiCode = selectedParent.getHeiCode() + "." + Base62Util.encode(unitToChangeOID.getPk());
+			newHeiCode = selectedParent.getHeiCode() + "." + Base62Util.encode((int) unitToChangeOID.getPk());
 			newRootParentPk = selectedParent.getRootParentPk();
 			
 			unitToChange.setParentPk(selectedParent.getPk());
@@ -402,11 +411,11 @@ public class UnitManager
 	}
 	
 
-	*//**
+	/**
 	 * This method does not consider the status of the unit inside the project. so i think it does not work properly... check before using it.
 	 * @param unitOID
 	 * @return
-	 *//*
+	 */
 	public  List<ProjectQuery> getUnitAssignedProjects(UnitOID unitOID)
 	{
 		String sql = ProjectQuery.fetchSQL 
@@ -414,12 +423,12 @@ public class UnitManager
 		return persistWrapper.readList(ProjectQuery.class, sql, unitOID.getPk());
 	}
 
-	public static List<UnitInProjectQuery> getProjectAssignmentsForUnit(UnitOID unitOID)
+	public  List<UnitInProjectQuery> getProjectAssignmentsForUnit(UnitOID unitOID)
 	{
-		return PersistWrapper.readList(UnitInProjectQuery.class, UnitInProjectQuery.sql + " and u.pk = ? order by addedDate ", unitOID.getPk());
+		return persistWrapper.readList(UnitInProjectQuery.class, UnitInProjectQuery.sql + " and u.pk = ? order by addedDate ", unitOID.getPk());
 	}
 
-	public  UnitQuery addUnitBookMark(UserContext context, int unitPk, int projectPk, BookmarkModeEnum mode)throws Exception
+	public  UnitQuery addUnitBookMark(UserContext context, int unitPk, int projectPk, UnitBookmark.BookmarkModeEnum mode)throws Exception
 	{
 		UnitBookmark bookmark = persistWrapper.read(UnitBookmark.class,
 				"select * from unit_bookmark where userFk= ? and unitFk = ? and projectFk = ?", 
@@ -428,15 +437,15 @@ public class UnitManager
 		int pk;
 		if(bookmark != null)
 		{
-			pk=bookmark.getPk();
+			pk= (int) bookmark.getPk();
 			//bookmark is already there.
-			if(bookmark.getMode().equals(BookmarkModeEnum.ByUser.name()))
+			if(bookmark.getMode().equals(UnitBookmark.BookmarkModeEnum.ByUser.name()))
 			{
 				//already added by user , ignore
 			}
-			else if(bookmark.getMode().equals(BookmarkModeEnum.Auto.name()))
+			else if(bookmark.getMode().equals(UnitBookmark.BookmarkModeEnum.Auto.name()))
 			{
-				if(BookmarkModeEnum.ByUser.name().equals(mode.name()))
+				if(UnitBookmark.BookmarkModeEnum.ByUser.name().equals(mode.name()))
 				{
 					// upgrade to an ByUser bookmark
 					bookmark.setMode(mode.name());
@@ -452,7 +461,7 @@ public class UnitManager
 		}
 		else
 		{
-			if(BookmarkModeEnum.ByUser.name().equals(mode.name()))
+			if(UnitBookmark.BookmarkModeEnum.ByUser.name().equals(mode.name()))
 			{
 				//user is adding a bookmark. so just add
 				UnitBookmark bookmarkNew = new UnitBookmark();
@@ -468,7 +477,7 @@ public class UnitManager
 				// a new bookmark is getting auto added. 
 				List<UnitBookmark> currentList = persistWrapper.readList(UnitBookmark.class,
 						"select * from unit_bookmark where userFk = ? and mode = ? order by createdDate", 
-						context.getUser().getPk(), BookmarkModeEnum.Auto.name());
+						context.getUser().getPk(), UnitBookmark.BookmarkModeEnum.Auto.name());
 				if(currentList != null && currentList.size() > 9) // keep 10 auto bookmarks per user
 				{
 					//remove the first one and add the new one
@@ -491,7 +500,7 @@ public class UnitManager
 		
 	}
 	
-	public static UnitQuery getBookmarkedUnit(int pk)
+	public  UnitQuery getBookmarkedUnit(int pk)
 	{
 		StringBuffer sb = new StringBuffer("select u.pk as unitPk, upr.unitOriginType as unitOriginTypeString, "
 				+ " part_revision.pk as partRevisionPk, part_revision.revision as partRevision, "
@@ -519,7 +528,7 @@ public class UnitManager
 				+ " left outer join project_part on uprh.projectPartPk = project_part.pk "
 				+ " left outer join part_type on project_part.partTypePk = part_type.pk "
 				+ " where ubkm.pk = ?");
-		return PersistWrapper.read(UnitQuery.class, sb.toString(),pk);
+		return persistWrapper.read(UnitQuery.class, sb.toString(),pk);
 		
 	}
 	
@@ -560,14 +569,13 @@ public class UnitManager
 		
 	}
 	
-	public  void removeUnitBookmark(UserContext context, int unitPk, int projectPk)
-	{
+	public  void removeUnitBookmark(UserContext context, int unitPk, int projectPk) throws Exception {
 		UnitBookmark bookmark = persistWrapper.read(UnitBookmark.class,
 				"select * from unit_bookmark where userFk= ? and unitFk = ? and projectFk = ?", 
 				context.getUser().getPk(), unitPk, projectPk);
 		
 		if(bookmark != null)
 			persistWrapper.deleteEntity(bookmark);
-	}*/
+	}
 	
 }

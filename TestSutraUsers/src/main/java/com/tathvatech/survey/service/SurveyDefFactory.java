@@ -10,13 +10,21 @@ import com.tathvatech.common.common.ApplicationProperties;
 import com.tathvatech.common.common.ServiceLocator;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.entity.Survey;
 import com.tathvatech.unit.service.UnitManager;
 import com.tathvatech.user.OID.FormOID;
+
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import javax.swing.text.Document;
-import javax.swing.text.Element;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -36,20 +44,25 @@ import java.sql.Statement;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
+@Service
 public class SurveyDefFactory
 {
     private static final Logger logger = LoggerFactory.getLogger(SurveyDefFactory.class);
 
-//    private static ReferenceMap defMap = new ReferenceMap(ReferenceMap.SOFT, ReferenceMap.SOFT);
+    @Autowired
+    private SurveyMaster surveyMaster;
+  // private static ReferenceMap defMap = new ReferenceMap(ReferenceMap.SOFT, ReferenceMap.SOFT);
     
-   /* public static SurveyDefinition getSurveyDefinition(FormOID surveyOID) throws Exception
+/*
+   public  SurveyDefinition getSurveyDefinition(FormOID surveyOID) throws Exception
     {
+
         SurveyDefinition surveyDef = null;
 //        surveyDef = (SurveyDefinition) defMap.get(surveyOID.getPk());
 //        if(surveyDef != null)
 //        	return surveyDef;
         
-    	Survey survey = SurveyMaster.getSurveyByPk(surveyOID.getPk());
+    	Survey survey = surveyMaster.getSurveyByPk((int) surveyOID.getPk());
         if(survey == null)
         {
             logger.warn("Survey not found, pk - " + surveyOID.getPk());
@@ -76,8 +89,8 @@ public class SurveyDefFactory
 		{
 			FileInputStream inStream = new FileInputStream(new File(surveyDefFile));
 			InputStreamReader reader = new InputStreamReader(inStream, "UTF-8");
-	        SAXBuilder   builder = new SAXBuilder();
-			Document     doc = builder.build(reader);
+	        SAXBuilder builder = new SAXBuilder();
+			Document     doc = (Document) builder.build(reader);
 			reader.close();
 			inStream.close();
 
@@ -95,6 +108,7 @@ public class SurveyDefFactory
 //		defMap.put(surveyOID.getPk(), surveyDef);
         return surveyDef;
     }
+*/
 
     public static void createSurveyDefFile(Survey survey)throws Exception
     {
@@ -116,7 +130,7 @@ public class SurveyDefFactory
             XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
             FileOutputStream outStream = new FileOutputStream(fullFilePath, false);
             OutputStreamWriter writer = new OutputStreamWriter(outStream, "UTF-8");
-            outputter.output(surveyDoc, writer);
+            outputter.output((org.jdom2.Document) surveyDoc, writer);
             writer.close();
             outStream.close();
         }
@@ -131,13 +145,13 @@ public class SurveyDefFactory
         }
     }
 
-    public static void createSurveyByCopy(Survey survey, int sourceSurveyPk)throws Exception
+    public  void createSurveyByCopy(Survey survey, int sourceSurveyPk)throws Exception
     {
         String filePath = ApplicationProperties.getFormDefRoot();
 
         try
 		{
-            String surveyDefFile = SurveyMaster.getSurveyDefFileName(sourceSurveyPk);
+            String surveyDefFile = surveyMaster.getSurveyDefFileName(sourceSurveyPk);
 
             if(surveyDefFile == null || surveyDefFile.trim().length() == 0)
             {
@@ -148,7 +162,7 @@ public class SurveyDefFactory
     		FileInputStream inStream = new FileInputStream(new File(surveyDefFile));
     		InputStreamReader reader = new InputStreamReader(inStream, "UTF-8");
             SAXBuilder   builder = new SAXBuilder();
-    		Document doc = builder.build(reader);
+    		Document doc = (Document) builder.build(reader);
     		reader.close();
     		inStream.close();
 
@@ -161,7 +175,7 @@ public class SurveyDefFactory
             XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
             FileOutputStream outStream = new FileOutputStream(newFullFilePath, false);
             OutputStreamWriter writer = new OutputStreamWriter(outStream, "UTF-8");
-            outputter.output(doc, writer);
+            outputter.output((org.jdom2.Document) doc, writer);
             writer.close();
             outStream.close();
         }
@@ -177,9 +191,7 @@ public class SurveyDefFactory
     }
 
 
-    *//**
-     * @param tableName
-     *//*
+
     private static void createSurveyTables(String tableName)throws Exception
     {
         String mainTableSql = "create table "+ tableName + " (responseId varchar(25), surveyPk varchar(25), responseTime datetime, ipaddress varchar(20),  respondentPk varchar(25), lastSurveyItem varchar(25), status varchar(20), responseMode varchar(20))";
@@ -232,15 +244,15 @@ public class SurveyDefFactory
         }
     }
 
-    public static SurveyDefinitionManager getSurveyDefinitionManager(int surveyPk) throws Exception
+  /*  public  SurveyDefinitionManager getSurveyDefinitionManager(int surveyPk) throws Exception
     {
-        Survey survey = SurveyMaster.getSurveyByPk(surveyPk);
+        Survey survey = surveyMaster.getSurveyByPk(surveyPk);
         SurveyDefinitionManager surveyMgr = new SurveyDefinitionManager(survey);
 
 		return surveyMgr;
-    }
+    }*/
 
-    public static SurveyDefinitionManager getSurveyDefinitionManager(SurveyDefinition surveyDef) throws Exception
+    /*public  SurveyDefinitionManager getSurveyDefinitionManager(SurveyDefinition surveyDef) throws Exception
     {
         SurveyDefinitionManager surveyMgr = null;
 

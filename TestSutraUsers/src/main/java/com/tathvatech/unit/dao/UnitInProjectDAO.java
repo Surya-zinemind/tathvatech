@@ -5,8 +5,10 @@ import java.util.List;
 
 
 import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.unit.entity.EntityActions;
 import com.tathvatech.unit.entity.UnitInProject;
 import com.tathvatech.unit.entity.UnitInProjectH;
+import com.tathvatech.unit.enums.Actions;
 import com.tathvatech.unit.enums.UnitOriginType;
 import com.tathvatech.unit.oid.UnitInProjectOID;
 import com.tathvatech.user.OID.ProjectOID;
@@ -22,10 +24,12 @@ public class UnitInProjectDAO
 {
 	private Date now ;
 	@Autowired
-	private PersistWrapper persistWrapper;
-	public UnitInProjectDAO()
+	private final PersistWrapper persistWrapper;
+	public UnitInProjectDAO(PersistWrapper persistWrapper)
 	{
-		now = DateUtils.getNowDateForEffectiveDateFrom();
+        this.persistWrapper = persistWrapper;
+
+        now = DateUtils.getNowDateForEffectiveDateFrom();
 	}
 	
 	public UnitInProjectObj getUnitInProject(UnitInProjectOID oid)
@@ -71,14 +75,14 @@ public class UnitInProjectDAO
 		}
 		
 	}
-	//uncommment later
-	/*public  UnitInProjectObj saveUnitInProject(UserContext context, UnitInProjectObj obj) throws Exception
+	public  UnitInProjectObj saveUnitInProject(UserContext context, UnitInProjectObj obj) throws Exception
 	{
 		return saveUnitInProject(context, obj, null);
-	}*/
+	}
 	
-	/*public  UnitInProjectObj saveUnitInProject(UserContext context, UnitInProjectObj obj, Actions[]  actions) throws Exception
+	public  UnitInProjectObj saveUnitInProject(UserContext context, UnitInProjectObj obj, Actions[]  actions) throws Exception
 	{
+		EntityActions entityActions = new EntityActions();
 		UnitInProject upr = null;
 		if(obj.getPk() > 0)
 			upr = (UnitInProject) persistWrapper.readByPrimaryKey(UnitInProject.class, obj.getPk());
@@ -101,12 +105,13 @@ public class UnitInProjectDAO
 			
 			
 			EntityActions act = null;
+
 			if(actions != null)
-				act = EntityActions.createAction(context, new UnitInProjectOID(pk), actions);
+				act = entityActions.createAction(context, new UnitInProjectOID(pk), actions);
 
 			UnitInProjectH uprhNew = new UnitInProjectH();
 			if(act != null)
-				uprhNew.setActionPk(act.getPk());
+				uprhNew.setActionPk((int) act.getPk());
 			uprhNew.setCreatedBy((int) context.getUser().getPk());
 			uprhNew.setCreatedDate(new Date());
 			uprhNew.setEffectiveDateFrom(now);
@@ -151,11 +156,11 @@ public class UnitInProjectDAO
 
 				EntityActions act = null;
 				if(actions != null)
-					act = EntityActions.createAction(context, new UnitInProjectOID(obj.getPk()) ,actions);
+					act = entityActions.createAction(context, new UnitInProjectOID(obj.getPk()) ,actions);
 
 				UnitInProjectH uprhNew = new UnitInProjectH();
 				if(act != null)
-					uprhNew.setActionPk(act.getPk());
+					uprhNew.setActionPk((int) act.getPk());
 				uprhNew.setCreatedBy((int) context.getUser().getPk());
 				uprhNew.setCreatedDate(new Date());
 				uprhNew.setEffectiveDateFrom(now);
@@ -178,7 +183,8 @@ public class UnitInProjectDAO
 	
 	public void removeUnit(UserContext context, UnitInProjectObj unitInProject) throws Exception
 	{
-		EntityActions act = EntityActions.createAction(context, unitInProject.getOID(), new Actions[]{Actions.removeUnitFromProject});
+		EntityActions entityActions = new EntityActions();
+		EntityActions act = entityActions.createAction(context, unitInProject.getOID(), new Actions[]{Actions.removeUnitFromProject});
 
 		UnitInProjectH hRec = getHRecord(unitInProject.getOID(), now);
 		hRec.setEffectiveDateTo(new Date(now.getTime()-1000));
@@ -187,13 +193,13 @@ public class UnitInProjectDAO
 		UnitInProjectH hRecNew = hRec.clone();
 		hRecNew.setPk(0);
 		hRecNew.setStatus(UnitInProject.STATUS_REMOVED);
-		hRecNew.setActionPk(act.getPk());
+		hRecNew.setActionPk((int) act.getPk());
 		hRecNew.setCreatedBy((int) context.getUser().getPk());
 		hRecNew.setCreatedDate(new Date());
 		hRecNew.setEffectiveDateFrom(now);
 		hRecNew.setEffectiveDateTo(DateUtils.getMaxDate());
 		persistWrapper.createEntity(hRecNew);
-	} */
+	}
 
 	public List<UnitInProjectObj> getDirectChildren(UnitInProjectOID oid)
 	{
