@@ -51,9 +51,9 @@ public class SurveyDefFactory
 
     @Autowired
     private SurveyMaster surveyMaster;
-  // private static ReferenceMap defMap = new ReferenceMap(ReferenceMap.SOFT, ReferenceMap.SOFT);
+   private static ReferenceMap defMap = new ReferenceMap(ReferenceMap.SOFT, ReferenceMap.SOFT);
     
-/*
+
    public  SurveyDefinition getSurveyDefinition(FormOID surveyOID) throws Exception
     {
 
@@ -108,7 +108,7 @@ public class SurveyDefFactory
 //		defMap.put(surveyOID.getPk(), surveyDef);
         return surveyDef;
     }
-*/
+
 
     public static void createSurveyDefFile(Survey survey)throws Exception
     {
@@ -244,20 +244,20 @@ public class SurveyDefFactory
         }
     }
 
-  /*  public  SurveyDefinitionManager getSurveyDefinitionManager(int surveyPk) throws Exception
+    public  SurveyDefinitionManager getSurveyDefinitionManager(int surveyPk) throws Exception
     {
         Survey survey = surveyMaster.getSurveyByPk(surveyPk);
         SurveyDefinitionManager surveyMgr = new SurveyDefinitionManager(survey);
 
 		return surveyMgr;
-    }*/
+    }
 
-    /*public  SurveyDefinitionManager getSurveyDefinitionManager(SurveyDefinition surveyDef) throws Exception
+    public  SurveyDefinitionManager getSurveyDefinitionManager(SurveyDefinition surveyDef) throws Exception
     {
         SurveyDefinitionManager surveyMgr = null;
 
         surveyMgr = new SurveyDefinitionManager(surveyDef.getSurveyConfig());
 
 		return surveyMgr;
-    }*/
+    }
 }

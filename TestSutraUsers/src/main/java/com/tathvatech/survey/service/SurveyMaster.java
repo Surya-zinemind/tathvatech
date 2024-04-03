@@ -22,7 +22,7 @@ import com.tathvatech.forms.common.FormQuery;
 import com.tathvatech.forms.entity.FormSection;
 import com.tathvatech.forms.oid.FormMainOID;
 import com.tathvatech.forms.response.ResponseMasterNew;
-import com.tathvatech.forms.service.TestProcManager;
+import com.tathvatech.forms.service.TestProcService;
 import com.tathvatech.project.entity.Project;
 import com.tathvatech.project.entity.ProjectForm;
 import com.tathvatech.project.service.ProjectService;
@@ -59,7 +59,7 @@ public class SurveyMaster
 	private static final Logger logger = LoggerFactory.getLogger(SurveyMaster.class);
 	private  final PersistWrapper persistWrapper;
 	private final ProjectService projectService;
-	private final SurveyResponseManager surveyResponseManager;
+	private final SurveyResponseService surveyResponseService;
 	private final SequenceIdGenerator sequenceIdGenerator;
 	private final UnitManager unitManager;
 
@@ -92,7 +92,7 @@ public class SurveyMaster
 	 * @return
 	 * @throws Exception
 	 */
-	/*private  boolean isSurveyNameExist(String surveyName)
+	private  boolean isSurveyNameExist(String surveyName)
 			throws Exception
 	{
 		List list = persistWrapper.readList(
@@ -108,7 +108,7 @@ public class SurveyMaster
 		{
 			return false;
 		}
-	}*/
+	}
 
 	/**
 	 * Check if the name exists for a survey other than the one specified as the
@@ -120,7 +120,7 @@ public class SurveyMaster
 	 * @return
 	 * @throws Exception
 	 */
-	/*private  boolean isSurveyNameExistForAnotherSurvey(String surveyName, FormMainOID formMainOID) throws Exception
+	private  boolean isSurveyNameExistForAnotherSurvey(String surveyName, FormMainOID formMainOID) throws Exception
 	{
 		List list = persistWrapper.readList(
 						FormMain.class,
@@ -135,7 +135,7 @@ public class SurveyMaster
 		{
 			return true;
 		}
-	}*/
+	}
 
 	/**
 	 * @param surveyPk
@@ -147,13 +147,8 @@ public class SurveyMaster
 		return sur;
 	}
 
-	/**
-	 * @param account
-	 * @param _surveyName
-	 * @param _fileName
-	 * @param tableName
-	 */
-	/*public  Survey createSurvey(UserContext context, Survey survey) throws Exception
+
+	public  Survey createSurvey(UserContext context, Survey survey) throws Exception
 	{
 		User user = (User)context.getUser();
 
@@ -195,12 +190,12 @@ public class SurveyMaster
 		return survey;
 	}
 
-	*//**
+	/**
 	 * @param account
 	 * @param _surveyName
 	 * @param _fileName
 	 * @param tableName
-	 *//*
+	 */
 	public  Survey createSurveyNewVersion(UserContext context, Survey newVersion, FormQuery baseRevision) throws Exception
 	{
 		Survey survey = SurveyMaster.getSurveyByPk(baseRevision.getPk());
@@ -241,12 +236,12 @@ public class SurveyMaster
 		return survey;
 	}
 
-	*//**
+	/**
 	 * @param account
 	 * @param _surveyName
 	 * @param _fileName
 	 * @param tableName
-	 *//*
+	 */
 	public  Survey createSurveyByCopy(UserContext context, Survey survey, int sourceSurveyPk) throws Exception
 	{
 		User user = (User)context.getUser();
@@ -289,12 +284,12 @@ public class SurveyMaster
 		return survey;
 	}
 
-	*//**
+	/**
 	 * mark the survey status as deleted.// the survey list will not show these
 	 * items . a complete removal should be done manually.
 	 *
 	 * @param surveyDef
-	 *//*
+	 */
 	public  void deleteSurvey(int surveyPk) throws Exception
 	{
 		List errors = new ArrayList();
@@ -633,7 +628,7 @@ public class SurveyMaster
 			for (Iterator iterator = unitFormsListToUpgrade.iterator(); iterator.hasNext();)
 			{
 				Integer aUnitFormPk = (Integer) iterator.next();
-				TestProcObj uForm = TestProcManager.getTestProc(aUnitFormPk);
+				TestProcObj uForm = TestProcServiceImpl.getTestProc(aUnitFormPk);
 				
 				Survey current = getSurveyByPk(uForm.getFormPk());
 				if(current.getVersionNo() < survey.getPk())
@@ -663,9 +658,9 @@ public class SurveyMaster
 	{
 		if(EntityTypeEnum.TestProcSection == workItem.getEntityType())
 		{
-			TestProcSectionObj testProcSectionObj = new TestProcManager().getTestProcSection(new TestProcSectionOID(workItem.getPk()));
-			TestProcObj testProc = new TestProcManager().getTestProc(new TestProcSectionOID(workItem.getPk()));
-			ResponseMasterNew resp = surveyResponseManager.getLatestResponseMasterForTest(testProc.getOID());
+			TestProcSectionObj testProcSectionObj = new TestProcServiceImpl().getTestProcSection(new TestProcSectionOID(workItem.getPk()));
+			TestProcObj testProc = new TestProcServiceImpl().getTestProc(new TestProcSectionOID(workItem.getPk()));
+			ResponseMasterNew resp = surveyResponseService.getLatestResponseMasterForTest(testProc.getOID());
 
 			ObjectLock ol = getObjectLock(resp.getResponseId(), (int) testProcSectionObj.getFormSectionFk());
 			if(ol != null && ol.getAttributionUserFk() != null)
@@ -680,9 +675,9 @@ public class SurveyMaster
 	{
 		if(EntityTypeEnum.TestProcSection == workItem.getEntityType())
 		{
-			TestProcSectionObj testProcSectionObj = new TestProcManager().getTestProcSection(new TestProcSectionOID(workItem.getPk()));
-			TestProcObj testProc = new TestProcManager().getTestProc(new TestProcSectionOID(workItem.getPk()));
-			ResponseMasterNew resp = SurveyResponseManager.getLatestResponseMasterForTest(testProc.getOID());
+			TestProcSectionObj testProcSectionObj = new TestProcServiceImpl().getTestProcSection(new TestProcSectionOID(workItem.getPk()));
+			TestProcObj testProc = new TestProcServiceImpl().getTestProc(new TestProcSectionOID(workItem.getPk()));
+			ResponseMasterNew resp = surveyResponseService.getLatestResponseMasterForTest(testProc.getOID());
 
 			ObjectLock ol = getObjectLock(resp.getResponseId(), (int) testProcSectionObj.getFormSectionFk());
 			if(attributeToUserOID != null)
@@ -697,9 +692,9 @@ public class SurveyMaster
 	{
 		if(EntityTypeEnum.TestProcSection == workItem.getEntityType())
 		{
-			TestProcSectionObj testProcSectionObj = new TestProcManager().getTestProcSection(new TestProcSectionOID(workItem.getPk()));
-			TestProcObj testProc = new TestProcManager().getTestProc(new TestProcSectionOID(workItem.getPk()));
-			ResponseMasterNew resp = surveyResponseManager.getLatestResponseMasterForTest(testProc.getOID());
+			TestProcSectionObj testProcSectionObj = new TestProcServiceImpl().getTestProcSection(new TestProcSectionOID(workItem.getPk()));
+			TestProcObj testProc = new TestProcServiceImpl().getTestProc(new TestProcSectionOID(workItem.getPk()));
+			ResponseMasterNew resp = surveyResponseService.getLatestResponseMasterForTest(testProc.getOID());
 
 			ObjectLock ol = getObjectLock(resp.getResponseId(), (int) testProcSectionObj.getFormSectionFk());
 			ol.setAttributionUserFk(ol.getUserPk());
@@ -712,8 +707,8 @@ public class SurveyMaster
 		return persistWrapper.read(ObjectLock.class, "select * from tab_sectionlock where responseFk = ? and formSectionFk = ? ",
 				responseFk, formSectionFk);
 	}
-*/
-	/*public synchronized  ObjectLock lockSectionToEdit(UserContext context, User lockForUser, FormResponseOID responseOID, String sectionId)throws LockedByAnotherUserException, Exception
+
+	public synchronized  ObjectLock lockSectionToEdit(UserContext context, User lockForUser, FormResponseOID responseOID, String sectionId)throws LockedByAnotherUserException, Exception
 	{
 		FormResponseMaster respMaster = persistWrapper.readByResponseId(FormResponseMaster.class, responseOID.getPk());
 		FormSection formSection = new FormDBManager().getFormSection(sectionId, respMaster.getSurveyPk());
@@ -753,7 +748,7 @@ public class SurveyMaster
 			
 			
 			//create the workorder for this section if not already created
-			ResponseMasterNew resp = SurveyResponseManager.getResponseMaster(responseOID.getPk());
+			ResponseMasterNew resp = surveyResponseService.getResponseMaster(responseOID.getPk());
 			TestProcSectionObj tsObj = new TestProcSectionDAO().getTestProcSection(new TestProcOID(resp.getTestProcPk()), new FormSectionOID(newLock.getFormSectionFk()));
 			WorkorderRequestBean woBean = new WorkorderRequestBean(tsObj.getOID());
 			WorkorderManager.createWorkorder(context, woBean);
@@ -761,7 +756,7 @@ public class SurveyMaster
 			
 			
 			//add the unit to favourites
-			TestProcObj testProc = TestProcManager.getTestProc(resp.getTestProcPk());
+			TestProcObj testProc = TestProcServiceImpl.getTestProc(resp.getTestProcPk());
 			unitManager.addUnitBookMark(context, testProc.getUnitPk(), testProc.getProjectPk(), UnitBookmark.BookmarkModeEnum.Auto);
 			
 			
@@ -840,7 +835,7 @@ public class SurveyMaster
 		}
 		else if(objectLock.getUserPk() == user.getPk())
 		{
-			ResponseMasterNew resp = SurveyResponseManager.getResponseMaster(objectLock.getResponseFk());
+			ResponseMasterNew resp = surveyResponseService.getResponseMaster(objectLock.getResponseFk());
 			TestProcSectionObj tsObj = new TestProcSectionDAO().getTestProcSection(new TestProcOID(resp.getTestProcPk()), new FormSectionOID(objectLock.getFormSectionFk()));
 			TimeEntryManager.checkOutAllFromWorkOrder(context, tsObj.getOID());
 
@@ -861,7 +856,7 @@ public class SurveyMaster
 				responseOID.getPk(), sectionId);
 		if(objectLock !=null)
 		{
-			ResponseMasterNew resp = SurveyResponseManager.getResponseMaster(objectLock.getResponseFk());
+			ResponseMasterNew resp = surveyResponseService.getResponseMaster(objectLock.getResponseFk());
 			TestProcSectionObj tsObj = new TestProcSectionDAO().getTestProcSection(new TestProcOID(resp.getTestProcPk()), new FormSectionOID(objectLock.getFormSectionFk()));
 			TimeEntryManager.checkOutAllFromWorkOrder(context, tsObj.getOID());
 
@@ -957,6 +952,6 @@ public class SurveyMaster
 		
 		
 		return getFormPrintTemplateLocationConfig(formOID);
-	}*/
+	}
 
 }

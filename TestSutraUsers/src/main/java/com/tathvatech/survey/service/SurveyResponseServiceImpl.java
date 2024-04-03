@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import com.tathvatech.common.common.ServiceLocator;
+import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.user.utils.Sqls;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.dao.TestProcDAO;
@@ -33,19 +34,19 @@ import org.springframework.stereotype.Service;
  *         Window - Preferences - Java - Code Style - Code Templates
  */
 @Service
-public class SurveyResponseManager
+public class SurveyResponseServiceImpl implements SurveyResponseService
 {
-	private static final Logger logger = LoggerFactory.getLogger(SurveyResponseManager.class);
-	
+	private static final Logger logger = LoggerFactory.getLogger(SurveyResponseServiceImpl.class);
+
 	private final PersistWrapper persistWrapper;
 
 	private final DummyWorkstation dummyWorkstation;
 
-    public SurveyResponseManager(PersistWrapper persistWrapper, DummyWorkstation dummyWorkstation) {
+    public SurveyResponseServiceImpl(PersistWrapper persistWrapper, DummyWorkstation dummyWorkstation) {
         this.persistWrapper = persistWrapper;
         this.dummyWorkstation = dummyWorkstation;
     }
-
+	@Override
     public  void changeResponseStatus(UserContext userContext, int responseId, String responseStatus)
 			throws Exception
 	{
@@ -93,8 +94,8 @@ public class SurveyResponseManager
 			}
 		}
 	}
-//Fix this while working on forms
-	/*private static void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
+
+private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 	{
 		surveyQuestions.add(aItem);
 		if (aItem instanceof Container)
@@ -107,12 +108,11 @@ public class SurveyResponseManager
 			}
 		}
 	}
-    
-	*/
-	/**
-	 * 
-	 */
-	/*public static SurveyResponse ceateDummyResponse(UserContext context, SurveyResponse surveyResponse) throws Exception
+
+
+
+	@Override
+	public  SurveyResponse ceateDummyResponse(UserContext context, SurveyResponse surveyResponse) throws Exception
 	{
 		SurveyDefinition surveyDef = surveyResponse.getSurveyDefinition();
 		String tableName = surveyDef.getSurveyConfig().getDbTable();
@@ -195,16 +195,16 @@ public class SurveyResponseManager
 			// pStmt.setString(1, surveyResponse.getLastSurveyItemId());
 			// pStmt.setLong(2, responseId);
 			// pStmt.execute();
-			
-			
-			//new reload the surveyResponse 
-			surveyResponse = SurveyResponseManager.getSurveyResponse(surveyDef, responseId);
 
-			
+
+			//new reload the surveyResponse
+			surveyResponse = SurveyResponseServiceImpl.getSurveyResponse(surveyDef, responseId);
+
+
 			//and get the percent complete and number of comments at the form level and save
-			FormResponseStats responseStat = SurveyResponseManager.getCommentCountAndPercentComplete(surveyDef.getQuestions(), surveyResponse); 
+			FormResponseStats responseStat = SurveyResponseServiceImpl.getCommentCountAndPercentComplete(surveyDef.getQuestions(), surveyResponse);
 
-			
+
 			pStmt = conn.prepareStatement("update TAB_RESPONSE set userPk=?, "
 					+ "percentComplete = ?, "
 					+ "noOfComments=?, "
@@ -228,11 +228,11 @@ public class SurveyResponseManager
 			pStmt.execute();
 
 			surveyResponse.setResponseStats(responseStat);
-			
+
 			//add a workflow entry with the new responseId and the same status.. that way the response will be pickedup when
 			// clicking through from the myassignments table.
-			
-			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, context.getUser().getPk(), surveyResponse.getResponseId(), 
+
+			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, context.getUser().getPk(), surveyResponse.getResponseId(),
 					surveyResponse.getTestProcPk(), ResponseMasterNew.STATUS_INPROGRESS, null);
 
 			return surveyResponse;
@@ -268,13 +268,14 @@ public class SurveyResponseManager
 			{
 			}
 		}
-	}*/
-	
+	}
+
 	/**
-     * This function  
+     * This function
      */
-	/*public static SurveyResponse updateSurveyResponse(UserContext context, Project project, TestableEntity unit, SurveyDefinition surveyDef,
-			int responseId, HashMap<SurveySaveItemBase,SurveyItemResponse> surveyItemResponseMap, List sectionsToSave) throws Exception
+	@Override
+	public  SurveyResponse updateSurveyResponse(UserContext context, Project project, TestableEntity unit, SurveyDefinition surveyDef,
+												int responseId, HashMap<SurveySaveItemBase, SurveyItemResponse> surveyItemResponseMap, List sectionsToSave) throws Exception
 	{
 		List allQuestionsToSave = new ArrayList();
 
@@ -289,20 +290,20 @@ public class SurveyResponseManager
 		}
 		saveSurveyItems(responseId, surveyDef, surveyItemResponseMap, allQuestionsToSave);
 
-		//new load the surveyResponse 
-		SurveyResponse surveyResponse = SurveyResponseManager.getSurveyResponse(surveyDef, responseId);
+		//new load the surveyResponse
+		SurveyResponse surveyResponse = SurveyResponseServiceImpl.getSurveyResponse(surveyDef, responseId);
 		TestProcObj testProc = TestProcManager.getTestProc(surveyResponse.getTestProcPk());
-	
-		saveSectionResponses((User) context.getUser(), surveyResponse.getUser(), project, unit, 
-				surveyResponse, sectionsToSave, true);
-		
-		//and get the percent complete and number of comments at the form level and save
-		FormResponseStats responseStat = SurveyResponseManager.getCommentCountAndPercentComplete(surveyResponse.getSurveyDefinition().getQuestions(), surveyResponse); 
 
-		ActivityLogQuery aLog = new ActivityLogQuery(context.getUser().getPk(), Actions.saveForm, 
-				"Form Saved", new Date(), new Date(), project.getPk(), testProc.getPk(), unit.getPk(), testProc.getWorkstationPk(), 
+		saveSectionResponses((User) context.getUser(), surveyResponse.getUser(), project, unit,
+				surveyResponse, sectionsToSave, true);
+
+		//and get the percent complete and number of comments at the form level and save
+		FormResponseStats responseStat = SurveyResponseServiceImpl.getCommentCountAndPercentComplete(surveyResponse.getSurveyDefinition().getQuestions(), surveyResponse);
+
+		ActivityLogQuery aLog = new ActivityLogQuery(context.getUser().getPk(), Actions.saveForm,
+				"Form Saved", new Date(), new Date(), project.getPk(), testProc.getPk(), unit.getPk(), testProc.getWorkstationPk(),
 				surveyResponse.getSurveyPk(), null, surveyResponse.getResponseId());
-		
+
 		aLog.setTotalQCount(responseStat.getTotalQCount());
 		aLog.setTotalACount(responseStat.getTotalACount());
 		aLog.setPassCount(responseStat.getPassCount());
@@ -312,25 +313,26 @@ public class SurveyResponseManager
 		aLog.setCommentsCount(responseStat.getCommentsCount());
 		ActivityLoggingDelegate.logActivity(aLog);
 
-		
-		//new reload the surveyResponse 
-		surveyResponse = SurveyResponseManager.getSurveyResponse(surveyResponse.getSurveyDefinition(), surveyResponse.getResponseId());
-		
-		
+
+		//new reload the surveyResponse
+		surveyResponse = SurveyResponseServiceImpl.getSurveyResponse(surveyResponse.getSurveyDefinition(), surveyResponse.getResponseId());
+
+
 		//add the unit to favourites
 		UnitManager.addUnitBookMark(context, testProc.getUnitPk(), testProc.getProjectPk(), UnitBookmark.BookmarkModeEnum.Auto);
 
 		return surveyResponse;
 	}
-	
-	*//**
-     * Save all the questions with in the sections . 
-     *//*
-	public static SurveyResponse saveSectionResponses(UserContext context, Project project, TestableEntity unit, 
+
+	/**
+     * Save all the questions with in the sections .
+	 */
+	@Override
+	public  SurveyResponse saveSectionResponses(UserContext context, Project project, TestableEntity unit,
 			SurveyResponse surveyResponse, List sectionsToSave) throws Exception
 	{
 		List allQuestionsToSave = new ArrayList();
-		
+
 		// get the questions from the sections to a linear list
 		if(sectionsToSave != null)
 		{
@@ -340,20 +342,17 @@ public class SurveyResponseManager
 				getChildrenQuestions(aItem, allQuestionsToSave);
 			}
 		}
-		return saveQuestionResponses((User)context.getUser(), (User)context.getUser(), project, unit, 
+		return saveQuestionResponses((User)context.getUser(), (User)context.getUser(), project, unit,
 				surveyResponse, sectionsToSave, allQuestionsToSave);
 	}
-	
-	*//**
-     * save specific questions with in the sections, provide the list of questions to be saved.
-     * the list should not be sections
-     *//*
-	public static SurveyResponse saveSpecificQuestionResponse(UserContext context, Project project, TestableEntity mItem, 
-			SurveyResponse surveyResponse, List questions) throws Exception
+
+	@Override
+	public  SurveyResponse saveSpecificQuestionResponse(UserContext context, Project project, TestableEntity mItem,
+														SurveyResponse surveyResponse, List questions) throws Exception
 	{
-		List<String> lockedSectionIds = SurveyMaster.getLockedSectionIds((User) context.getUser(), 
+		List<String> lockedSectionIds = SurveyMaster.getLockedSectionIds((User) context.getUser(),
 				surveyResponse.getOID());
-		
+
 		List validQuestionsToSave = new ArrayList();
 		// find the container sections
 		if(questions != null && questions.size() > 0)
@@ -394,29 +393,30 @@ public class SurveyResponseManager
 					}
 				}
 			}
-			
+
 			//save
-			return saveQuestionResponses((User)context.getUser(), (User)context.getUser(), project, mItem, 
+			return saveQuestionResponses((User)context.getUser(), (User)context.getUser(), project, mItem,
 					surveyResponse, containerSections, validQuestionsToSave);
 		}
-		
+
 		//nothing to do here
 		return surveyResponse;
 	}
-	
-	*//**
+
+	/**
      * allQuestionstoSave will be saved.. the sectionsToRecalc should be the list of sections which hold any the questions to save.
      * when ever a question is saved, the section level stats need to be recalculated. I dont want to find the sections from the questionList
      * because, in some cases, the sectionlist is already supplied by the client. so why to re-calculate it.
-     * 
+     *
      * recordSaveAsUser is the tester who saved the form in most cases, But if the verifier or approver editing a response, the performed by user should not change,
-     * but the activity log can note that the action was performed by the verifier or approver. 
-     * 
-     *//*
-	private static SurveyResponse saveQuestionResponses(User actionPerformedByUser, User recordSaveAsUser, Project project, TestableEntity mItem, 
+     * but the activity log can note that the action was performed by the verifier or approver.
+     *
+	 */
+
+	private  SurveyResponse saveQuestionResponses(User actionPerformedByUser, User recordSaveAsUser, Project project, TestableEntity mItem,
 			SurveyResponse surveyResponse, Collection sectionsToReCalc, List allQuestionsToSave) throws Exception
 	{
-		
+
 		SurveyDefinition surveyDef = surveyResponse.getSurveyDefinition();
 		Survey survey = surveyDef.getSurveyConfig();
 		TestProcObj testProc = TestProcManager.getTestProc(surveyResponse.getTestProcPk());
@@ -488,7 +488,7 @@ public class SurveyResponseManager
 						stmt.execute(deleteSql[i]);
 					}
 				}
-				
+
 				// let is update the lastUpdated date on the FormItemResponse entity for this. we can base the answerdate on this
 				FormItemResponse itemResp = getFormItemResponse(responseId, sItem.getSurveyItemId(), true);
 				itemResp.setLastUpdated(new Date());
@@ -507,10 +507,10 @@ public class SurveyResponseManager
 			// pStmt.setString(1, surveyResponse.getLastSurveyItemId());
 			// pStmt.setLong(2, responseId);
 			// pStmt.execute();
-			
-			
-			//new reload the surveyResponse 
-			surveyResponse = SurveyResponseManager.getSurveyResponse(surveyDef, responseId);
+
+
+			//new reload the surveyResponse
+			surveyResponse = SurveyResponseServiceImpl.getSurveyResponse(surveyDef, responseId);
 
 			//save the SectionResponses for the sections saved in this submit
 			if(sectionsToReCalc != null)
@@ -518,16 +518,16 @@ public class SurveyResponseManager
 				for (Iterator iterator = sectionsToReCalc.iterator(); iterator.hasNext();)
 				{
 					Section aSection = (Section) iterator.next();
-					
+
 					FormSection formSection = new FormDBManager().getFormSection(aSection.getSurveyItemId(), surveyResponse.getSurveyPk());
-					
-					FormResponseStats responseStat = SurveyResponseManager.getCommentCountAndPercentComplete(aSection.getChildren(), surveyResponse); 
-					
-					SectionResponse sectionResponse = persistWrapper.read(SectionResponse.class, 
-							"select * from TAB_SECTION_RESPONSE where responseId = ? and sectionId = ?", 
+
+					FormResponseStats responseStat = SurveyResponseServiceImpl.getCommentCountAndPercentComplete(aSection.getChildren(), surveyResponse);
+
+					SectionResponse sectionResponse = persistWrapper.read(SectionResponse.class,
+							"select * from TAB_SECTION_RESPONSE where responseId = ? and sectionId = ?",
 							surveyResponse.getResponseId(), aSection.getSurveyItemId());
-					
-//					persistWrapper.delete("delete from TAB_SECTION_RESPONSE where responseId = ? and sectionId = ?", 
+
+//					persistWrapper.delete("delete from TAB_SECTION_RESPONSE where responseId = ? and sectionId = ?",
 //							surveyResponse.getResponseId(), aSection.getSurveyItemId());
 					if(sectionResponse != null)
 					{
@@ -547,11 +547,11 @@ public class SurveyResponseManager
 						sectionResponse.setDimentionalFailCount(responseStat.getDimentionalFailCount());
 						sectionResponse.setNaCount(responseStat.getNaCount());
 						persistWrapper.update(sectionResponse);
-						
-						ActivityLogQuery aLog = new ActivityLogQuery(actionPerformedByUser.getPk(), Actions.saveSection, 
-								"Section Saved", new Date(), new Date(), project.getPk(), testProc.getPk(), mItem.getPk(), testProc.getWorkstationPk(), 
+
+						ActivityLogQuery aLog = new ActivityLogQuery(actionPerformedByUser.getPk(), Actions.saveSection,
+								"Section Saved", new Date(), new Date(), project.getPk(), testProc.getPk(), mItem.getPk(), testProc.getWorkstationPk(),
 								surveyResponse.getSurveyPk(), sectionResponse.getSectionId(), surveyResponse.getResponseId());
-						
+
 						aLog.setTotalQCount(responseStat.getTotalQCount());
 						aLog.setTotalACount(responseStat.getTotalACount());
 						aLog.setPassCount(responseStat.getPassCount());
@@ -586,10 +586,10 @@ public class SurveyResponseManager
 						}
 						persistWrapper.createEntity(sectionResponse);
 
-						ActivityLogQuery aLog = new ActivityLogQuery(actionPerformedByUser.getPk(), Actions.saveSection, 
-								"Section Saved", new Date(), new Date(), project.getPk(), testProc.getPk(), mItem.getPk(), testProc.getWorkstationPk(), 
+						ActivityLogQuery aLog = new ActivityLogQuery(actionPerformedByUser.getPk(), Actions.saveSection,
+								"Section Saved", new Date(), new Date(), project.getPk(), testProc.getPk(), mItem.getPk(), testProc.getWorkstationPk(),
 								surveyResponse.getSurveyPk(), sectionResponse.getSectionId(), surveyResponse.getResponseId());
-						
+
 						aLog.setTotalQCount(responseStat.getTotalQCount());
 						aLog.setTotalACount(responseStat.getTotalACount());
 						aLog.setPassCount(responseStat.getPassCount());
@@ -599,12 +599,12 @@ public class SurveyResponseManager
 						aLog.setCommentsCount(responseStat.getCommentsCount());
 						ActivityLoggingDelegate.logActivity(aLog);
 					}
-					
+
 				}
-			}			
-			
+			}
+
 			//and get the percent complete and number of comments at the form level and save
-			FormResponseStats responseStat = SurveyResponseManager.getCommentCountAndPercentComplete(surveyDef.getQuestions(), surveyResponse); 
+			FormResponseStats responseStat = SurveyResponseServiceImpl.getCommentCountAndPercentComplete(surveyDef.getQuestions(), surveyResponse);
 
 			pStmt = conn.prepareStatement("update TAB_RESPONSE set userPk=?, "
 					+ "percentComplete = ?, "
@@ -627,12 +627,12 @@ public class SurveyResponseManager
 			pStmt.setInt(9, responseStat.getNaCount());
 			pStmt.setLong(10, responseId);
 			pStmt.execute();
-			
 
-			ActivityLogQuery aLog = new ActivityLogQuery(actionPerformedByUser.getPk(), Actions.saveForm, 
-					"Form Saved", new Date(), new Date(), project.getPk(), testProc.getPk(), mItem.getPk(), testProc.getWorkstationPk(), 
+
+			ActivityLogQuery aLog = new ActivityLogQuery(actionPerformedByUser.getPk(), Actions.saveForm,
+					"Form Saved", new Date(), new Date(), project.getPk(), testProc.getPk(), mItem.getPk(), testProc.getWorkstationPk(),
 					surveyResponse.getSurveyPk(), null, surveyResponse.getResponseId());
-			
+
 			aLog.setTotalQCount(responseStat.getTotalQCount());
 			aLog.setTotalACount(responseStat.getTotalACount());
 			aLog.setPassCount(responseStat.getPassCount());
@@ -642,9 +642,9 @@ public class SurveyResponseManager
 			aLog.setCommentsCount(responseStat.getCommentsCount());
 			ActivityLoggingDelegate.logActivity(aLog);
 
-			
+
 			surveyResponse.setResponseStats(responseStat);
-			
+
 			//add the unit to favourites
 			UserContextImpl context = new UserContextImpl(TimeZone.getTimeZone(actionPerformedByUser.getTimezone()));
 			context.setUser(actionPerformedByUser);
@@ -687,7 +687,7 @@ public class SurveyResponseManager
 		}
 	}
 
-	private static void saveSurveyItems(int responseId, SurveyDefinition surveyDef, HashMap<SurveySaveItemBase, SurveyItemResponse> surveyItemResponseMap, List allQuestionsToSave) throws Exception
+	private  void saveSurveyItems(int responseId, SurveyDefinition surveyDef, HashMap<SurveySaveItemBase, SurveyItemResponse> surveyItemResponseMap, List allQuestionsToSave) throws Exception
 	{
 		String tableName = surveyDef.getSurveyConfig().getDbTable();
 
@@ -765,8 +765,8 @@ public class SurveyResponseManager
 						stmt.execute(deleteSql[i]);
 					}
 				}
-				
-				
+
+
 				// let is update the lastUpdated date on the FormItemResponse entity for this. we can base the answerdate on this
 				FormItemResponse itemResp = getFormItemResponse(responseId, sItem.getSurveyItemId(), true);
 				itemResp.setLastUpdated(new Date());
@@ -807,7 +807,7 @@ public class SurveyResponseManager
 		}
 	}
 
-	private static void saveSectionResponses(User actionPerformedByUser, User recordSaveAsUser, Project project, TestableEntity unit, 
+	private  void saveSectionResponses(User actionPerformedByUser, User recordSaveAsUser, Project project, TestableEntity unit,
 			SurveyResponse surveyResponse, List sectionsToSave, boolean dontChangeSubmittedUserAndCompletionDate)throws Exception
 	{
 		//save the SectionResponses for the sections saved in this submit
@@ -819,13 +819,13 @@ public class SurveyResponseManager
 				Section aSection = (Section) iterator.next();
 				FormSection formSection = new FormDBManager().getFormSection(aSection.getSurveyItemId(), surveyResponse.getSurveyPk());
 
-				FormResponseStats responseStat = SurveyResponseManager.getCommentCountAndPercentComplete(aSection.getChildren(), surveyResponse); 
-				
-				SectionResponse sectionResponse = persistWrapper.read(SectionResponse.class, 
-						"select * from TAB_SECTION_RESPONSE where responseId = ? and sectionId = ?", 
+				FormResponseStats responseStat = SurveyResponseServiceImpl.getCommentCountAndPercentComplete(aSection.getChildren(), surveyResponse);
+
+				SectionResponse sectionResponse = persistWrapper.read(SectionResponse.class,
+						"select * from TAB_SECTION_RESPONSE where responseId = ? and sectionId = ?",
 						surveyResponse.getResponseId(), aSection.getSurveyItemId());
-				
-//				persistWrapper.delete("delete from TAB_SECTION_RESPONSE where responseId = ? and sectionId = ?", 
+
+//				persistWrapper.delete("delete from TAB_SECTION_RESPONSE where responseId = ? and sectionId = ?",
 //						surveyResponse.getResponseId(), aSection.getSurveyItemId());
 				if(sectionResponse != null)
 				{
@@ -850,11 +850,11 @@ public class SurveyResponseManager
 
 					//start date should not be reset when updating as existing one as it is the date of first save of the section
 					persistWrapper.update(sectionResponse);
-					
-					ActivityLogQuery aLog = new ActivityLogQuery(actionPerformedByUser.getPk(), Actions.saveSection, 
-							"Section Saved", new Date(), new Date(), project.getPk(), testProc.getPk(), unit.getPk(), testProc.getWorkstationPk(), 
+
+					ActivityLogQuery aLog = new ActivityLogQuery(actionPerformedByUser.getPk(), Actions.saveSection,
+							"Section Saved", new Date(), new Date(), project.getPk(), testProc.getPk(), unit.getPk(), testProc.getWorkstationPk(),
 							surveyResponse.getSurveyPk(), sectionResponse.getSectionId(), surveyResponse.getResponseId());
-					
+
 					aLog.setTotalQCount(responseStat.getTotalQCount());
 					aLog.setTotalACount(responseStat.getTotalACount());
 					aLog.setPassCount(responseStat.getPassCount());
@@ -889,10 +889,10 @@ public class SurveyResponseManager
 					}
 					persistWrapper.createEntity(sectionResponse);
 
-					ActivityLogQuery aLog = new ActivityLogQuery(actionPerformedByUser.getPk(), Actions.saveSection, 
-							"Section Saved", new Date(), new Date(), project.getPk(), testProc.getPk(), unit.getPk(), testProc.getWorkstationPk(), 
+					ActivityLogQuery aLog = new ActivityLogQuery(actionPerformedByUser.getPk(), Actions.saveSection,
+							"Section Saved", new Date(), new Date(), project.getPk(), testProc.getPk(), unit.getPk(), testProc.getWorkstationPk(),
 							surveyResponse.getSurveyPk(), sectionResponse.getSectionId(), surveyResponse.getResponseId());
-					
+
 					aLog.setTotalQCount(responseStat.getTotalQCount());
 					aLog.setTotalACount(responseStat.getTotalACount());
 					aLog.setPassCount(responseStat.getPassCount());
@@ -902,12 +902,12 @@ public class SurveyResponseManager
 					aLog.setCommentsCount(responseStat.getCommentsCount());
 					ActivityLoggingDelegate.logActivity(aLog);
 				}
-				
+
 			}
-		}			
+		}
 	}
-	
-	private static void setResponseStats(FormResponseStats responseStat, User actionPerformedByUser, User recordSaveAsUser, 
+
+	private  void setResponseStats(FormResponseStats responseStat, User actionPerformedByUser, User recordSaveAsUser,
 			SurveyDefinition surveyDef, SurveyResponse surveyResponse)throws Exception
 	{
 		int responseId = surveyResponse.getResponseId();
@@ -922,7 +922,7 @@ public class SurveyResponseManager
 		try
 		{
 			conn = ServiceLocator.locate().getConnection();
-	
+
 			pStmt = conn.prepareStatement("update TAB_RESPONSE set userPk=?, "
 					+ "percentComplete = ?, "
 					+ "noOfComments=?, "
@@ -944,7 +944,7 @@ public class SurveyResponseManager
 			pStmt.setInt(9, responseStat.getNaCount());
 			pStmt.setLong(10, responseId);
 			pStmt.execute();
-			
+
 			surveyResponse.setResponseStats(responseStat);
 		}
 		catch (SQLException e)
@@ -978,32 +978,33 @@ public class SurveyResponseManager
 			{
 			}
 		}
-		
+
 	}
-	
-	public static void finalizeSurveyResponse(UserContext userContext, SurveyDefinition surveyDef, int responseId)
+	@Override
+	public  void finalizeSurveyResponse(UserContext userContext, SurveyDefinition surveyDef, int responseId)
 			throws Exception
 	{
 		finalizeSurveyResponseImpl(userContext, surveyDef, responseId, new Date());
-		
+
 		saveResponseStateAsSubmitRecord(userContext, responseId, SubmissionTypeEnum.Final);
 	}
-
-	public static void finalizeSurveyResponse(UserContext userContext, SurveyDefinition surveyDef, int responseId,
-			Date responseCompleteTime)throws Exception
+	@Override
+	public  void finalizeSurveyResponse(UserContext userContext, SurveyDefinition surveyDef, int responseId,
+										Date responseCompleteTime)throws Exception
 	{
 		finalizeSurveyResponseImpl(userContext, surveyDef, responseId, responseCompleteTime);
-		
+
 		saveResponseStateAsSubmitRecord(userContext, responseId, SubmissionTypeEnum.Final);
 	}
-	*//**
+	/**
 	 * @param sd
 	 * @param responseId
-	 *//*
-	private static void finalizeSurveyResponseImpl(UserContext userContext, SurveyDefinition surveyDef, int responseId,
-			Date responseCompleteTime) throws Exception
+	 */
+	@Override
+	public void finalizeSurveyResponseImpl(UserContext userContext, SurveyDefinition surveyDef, int responseId,
+										   Date responseCompleteTime) throws Exception
 	{
-		SurveyResponse sResponse = SurveyResponseManager.getSurveyResponse(surveyDef, responseId);
+		SurveyResponse sResponse = SurveyResponseServiceImpl.getSurveyResponse(surveyDef, responseId);
 
 		if (logger.isDebugEnabled())
 		{
@@ -1033,7 +1034,7 @@ public class SurveyResponseManager
 
 			stmt.execute();
 
-			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_SUBMIT, userContext.getUser().getPk(), sResponse.getResponseId(), 
+			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_SUBMIT, userContext.getUser().getPk(), sResponse.getResponseId(),
 					sResponse.getTestProcPk(), ResponseMasterNew.STATUS_COMPLETE, null);
 
 		}
@@ -1069,8 +1070,8 @@ public class SurveyResponseManager
 		TestProcObj testProc = TestProcManager.getTestProc(sResponse.getTestProcPk());
 		UnitManager.addUnitBookMark(userContext, testProc.getUnitPk(), testProc.getProjectPk(), UnitBookmark.BookmarkModeEnum.Auto);
 	}
-
-	public static void markResponseAsOld(UserContext context, ResponseMasterNew response)throws Exception
+	@Override
+	public  void markResponseAsOld(UserContext context, ResponseMasterNew response)throws Exception
 	{
 		String sql = Sqls.markResponseAsOldOrCurrent;
 		sql = sql.replaceAll("<tableName>", "TAB_RESPONSE");
@@ -1115,32 +1116,33 @@ public class SurveyResponseManager
 			}
 		}
 	}
-	
-	
-	*//**
+
+
+	/**
 	 * saves the current state of the response as a JSON adds it as an attachment to the testproc.
 	 * @param context
 	 * @param surveyResponse
 	 * @return
 	 * @throws Exception
-	 *//*
-    public static void saveResponseStateAsSubmitRecord(UserContext context,
-    	    int responseId, ResponseSubmissionBookmark.SubmissionTypeEnum submissionType) throws Exception
+	 */
+	@Override
+    public  void saveResponseStateAsSubmitRecord(UserContext context,
+												 int responseId, ResponseSubmissionBookmark.SubmissionTypeEnum submissionType) throws Exception
     {
 		ResponseMasterNew respM = getResponseMaster(responseId);
 		TestProcObj tp = new TestProcManager().getTestProc(respM.getTestProcPk());
 		Boolean saveResponseState = (Boolean) new CommonServicesDelegate().getEntityPropertyValue(new ProjectOID(tp.getProjectPk()), ProjectPropertyEnum.SaveResponseStateOnFormSubmit.getId(), Boolean.class);
 		if(saveResponseState == null || saveResponseState == false)
 			return;
-		
-		
+
+
     	SurveyResponse sResponse = getSurveyResponse(responseId);
     	List<SectionResponseQuery> sectionResponses = getSectionResponseSummary(sResponse.getSurveyDefinition(), responseId);
-    	
-    			
+
+
 	    //create the ResponseSubmissionHistoryRecord
 		String revisionNo = null;
-		
+
 	    //get the FormResponseBean and then save this as a backup to save the inetrim/final submitted response state.
 		Boolean createRevisionNoOnFormSubmit = (Boolean) new CommonServicesDelegate().getEntityPropertyValue(new ProjectOID(tp.getProjectPk()), ProjectPropertyEnum.CreateRevisionNoForFormSubmit.getId(), Boolean.class);
 		if(createRevisionNoOnFormSubmit != null && true == createRevisionNoOnFormSubmit)
@@ -1177,13 +1179,13 @@ public class SurveyResponseManager
 					subSeqStr = "0"+subSeq;
 				else
 					subSeqStr = ""+subSeq;
-				
+
 				revisionNo = currentMainSeq + "." +  subSeqStr;
 			}
 		}
 
-		
-		
+
+
 		//prepare the form response serialize bean with all values to save.
 		FormResponseStateSerializeBean serializeBean = new FormResponseStateSerializeBean();
 		serializeBean.setResponseMaster(respM);
@@ -1209,7 +1211,7 @@ public class SurveyResponseManager
 			serializeBean.setVerifiedBy(sResponse.getVerifiedBy());
 			serializeBean.setApprovedBy(sResponse.getApprovedBy());
 
-			
+
 			HashMap<String, SimpleSurveyItemResponse> answers = new HashMap<>();
 			for (Iterator iterator = sResponse.getSurveyItemAnswerMap().keySet().iterator(); iterator.hasNext();)
 			{
@@ -1219,8 +1221,8 @@ public class SurveyResponseManager
 			}
 			serializeBean.setAnswerMap(answers);
 		}
-		
-		
+
+
 		//now save this serialized response state into the database.
 		ObjectMapper jm = new ObjectMapper();
         String objRep = jm.writeValueAsString(serializeBean);
@@ -1236,24 +1238,25 @@ public class SurveyResponseManager
 		respSubmission.setResponseJSON(objRep);
 		respSubmission.setEstatus(EStatusEnum.Active.getValue());
 		int respSubmissionPk = persistWrapper.createEntity(respSubmission);
-	}    
-	
-	
+	}
+
+
     public static List<ResponseSubmissionBookmark> getResponseSubmissionBookmarks(TestProcOID testprocOID)
     {
-    	return persistWrapper.readList(ResponseSubmissionBookmark.class, 
+    	return persistWrapper.readList(ResponseSubmissionBookmark.class,
     			"select * from RESPONSE_SUBMISSION_BOOKMARK where testProcFk = ? order by createdDate", testprocOID.getPk());
     }
 
     public static ResponseSubmissionBookmark getLastResponseSubmissionBookmark(TestProcOID testprocOID)
     {
-    	return persistWrapper.read(ResponseSubmissionBookmark.class, 
+    	return persistWrapper.read(ResponseSubmissionBookmark.class,
     			"select * from RESPONSE_SUBMISSION_BOOKMARK where testProcFk = ? order by createdDate desc limit 0, 1", testprocOID.getPk());
     }
-    *//**
-     * 
-     *//*
-	public static SurveyResponse copyResponse(UserContext context, int responseIdToCopy) throws Exception
+    /**
+     *
+	 */
+	@Override
+	public  SurveyResponse copyResponse(UserContext context, int responseIdToCopy) throws Exception
 	{
 		SurveyResponse surveyResponse = getSurveyResponse(responseIdToCopy);
 		SurveyDefinition surveyDef = surveyResponse.getSurveyDefinition();
@@ -1384,12 +1387,12 @@ public class SurveyResponseManager
 				}
 			}
 
-			//new reload the surveyResponse 
-			surveyResponse = SurveyResponseManager.getSurveyResponse(surveyDef, responseId);
+			//new reload the surveyResponse
+			surveyResponse = SurveyResponseServiceImpl.getSurveyResponse(surveyDef, responseId);
 
-			
+
 			//copy the SectionResponses to the new Response
-			List <SectionResponse> srl= persistWrapper.readList(SectionResponse.class, 
+			List <SectionResponse> srl= persistWrapper.readList(SectionResponse.class,
 					"select * from TAB_SECTION_RESPONSE where responseId = ?", oldResponseId);
 			for (Iterator iterator = srl.iterator(); iterator.hasNext();)
 			{
@@ -1397,14 +1400,14 @@ public class SurveyResponseManager
 				sectionResponse.setResponseId(responseId); // the new responseId
 				persistWrapper.createEntity(sectionResponse);
 			}
-			
-			
+
+
 			if(true)
 			{
 				//load the current itemresponselist into memory.
 				//now update the ones in the database with the new responseId
-				//now insert the ones in memory into the database with no changes so that we have the relation with the old id maintained. 
-				List<FormItemResponse> currentItemRespList = persistWrapper.readList(FormItemResponse.class, 
+				//now insert the ones in memory into the database with no changes so that we have the relation with the old id maintained.
+				List<FormItemResponse> currentItemRespList = persistWrapper.readList(FormItemResponse.class,
 						"select * from TAB_ITEM_RESPONSE where responseId = ?", oldResponseId);
 
 				persistWrapper.executeUpdate("update TAB_ITEM_RESPONSE set responseId = ? where responseId = ?", responseId, oldResponseId);
@@ -1417,7 +1420,7 @@ public class SurveyResponseManager
 				}
 			}
 			//the if (false) below was the old code, we were losing the history against the old response. so I have introduced the new block
-			// in if(true) above. 
+			// in if(true) above.
 			// all this is changing when we introduce the user level tracking of changes against the line item response.
 			if(false)
 			{
@@ -1426,16 +1429,16 @@ public class SurveyResponseManager
 				// so for now I am changing the responseId to the new one.
 				persistWrapper.executeUpdate("update TAB_ITEM_RESPONSE set responseId = ? where responseId = ?", responseId, oldResponseId);
 			}
-			
-			
+
+
 
 			//add a workflow entry with the new responseId and the same status.. that way the response will be pickedup when
 			// clicking through from the myassignments table.
 
-		///**** this should be the responsibility of the caller.. else we create these records unnecessarly.	
-			
-//			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, context.getUser().getPk(), surveyResponse.getResponseId(), 
-//					surveyResponse.getUnitPk(), surveyResponse.getWorkstationPk(), 
+		///**** this should be the responsibility of the caller.. else we create these records unnecessarly.
+
+//			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, context.getUser().getPk(), surveyResponse.getResponseId(),
+//					surveyResponse.getUnitPk(), surveyResponse.getWorkstationPk(),
 //					surveyDef.getSurveyConfig().getPk(), ResponseMasterNew.STATUS_INPROGRESS, null);
 
 			return surveyResponse;
@@ -1472,16 +1475,16 @@ public class SurveyResponseManager
 			}
 		}
 	}
-*/
-	/*public static SurveyResponse getSurveyResponse(int responseId) throws Exception
+	@Override
+	public  SurveyResponse getSurveyResponse(int responseId) throws Exception
 	{
 		ResponseMasterNew respM = getResponseMaster(responseId);
 		SurveyDefinition sd = SurveyDefFactory.getSurveyDefinition(new FormOID(respM.getFormPk(), null));
 		SurveyResponse resp = getSurveyResponse(sd, responseId);
 		return resp;
 	}
-	
-	public static SurveyResponse getSurveyResponse(SurveyDefinition surveyDef, int responseId) throws Exception
+	@Override
+	public  SurveyResponse getSurveyResponse(SurveyDefinition surveyDef, int responseId) throws Exception
 	{
 		SurveyResponse response = null;
 
@@ -1525,13 +1528,13 @@ public class SurveyResponseManager
 			if (rs.next())
 			{
 				response = new SurveyResponse(surveyDef);
-				
+
 				response.setResponseId(responseId);
 				response.setTestProcPk(rs.getInt("testProcPk"));
 				response.setResponseRefNo(rs.getString("responseRefNo"));
 				response.setTestProcPk(rs.getInt("testProcPk"));
 				response.setSurveyPk(rs.getInt("surveyPk"));
-				
+
 
 				FormResponseStats responseStat = new FormResponseStats();
 				responseStat.setCommentsCount(rs.getInt("noOfComments"));
@@ -1544,7 +1547,7 @@ public class SurveyResponseManager
 				responseStat.setPercentCompleteLegacy(rs.getInt("percentComplete"));
 
 				response.setResponseStats(responseStat);
-				
+
 				Date date = new Date(((Timestamp) rs.getObject("responseStartTime")).getTime());
 				response.setResponseStartTime(date);
 
@@ -1578,7 +1581,7 @@ public class SurveyResponseManager
 				{
 					response.setVerifiedBy(persistWrapper.readByPrimaryKey(User.class, rs.getInt("verifiedBy")));
 				}
-				
+
 				ResponseFlags flag = new ResponseFlags();
 				flag.setPk(rs.getInt("flagTab.pk"));
 				flag.setFlag(rs.getString("flagTab.flag"));
@@ -1666,12 +1669,12 @@ public class SurveyResponseManager
 		}
 		return response;
 	}
-
-	public static SurveyItemResponse getSurveyItemResponse(SurveyDefinition surveyDef, int responseId, String surveyItemId) throws Exception
+	@Override
+	public  SurveyItemResponse getSurveyItemResponse(SurveyDefinition surveyDef, int responseId, String surveyItemId) throws Exception
 	{
 		SurveySaveItem sItem = null;
 		SurveyItemResponse itemResponse = SurveyItemResponseFactory.getSurveyItemResponse(sItem);
-		
+
 		String tabName = surveyDef.getSurveyConfig().getDbTable();
 
 		String detailSql = Sqls.responseDetailSql;
@@ -1695,7 +1698,7 @@ public class SurveyResponseManager
 			while (rs.next())
 			{
 				String questionId = rs.getString("questionId");
-				
+
 				if (sItem == null)
 				{
 					sItem = (SurveySaveItem) surveyDef.getQuestion(questionId);
@@ -1741,13 +1744,13 @@ public class SurveyResponseManager
 	}
 
 
-
-	public static SurveyItemResponse getSurveyItemResponse(SurveyItem sItem, String surveyItemId,
-			int responseId)
+	@Override
+	public  SurveyItemResponse getSurveyItemResponse(SurveyItem sItem, String surveyItemId,
+													 int responseId)
 	{
 		if(!(sItem instanceof SurveySaveItem))
 			return null;
-		
+
 		String detailSql = Sqls.sSurveyItemResponseDetailSql;
 
 		if (logger.isDebugEnabled())
@@ -1808,9 +1811,9 @@ public class SurveyResponseManager
 			}
 		}
 	}
-
-	public static List getSurveyItemResponse(SurveyDefinition surveyDef, String surveyItemId,
-			ResponseMaster[] responseMasterSet) throws Exception
+@Override
+	public  List getSurveyItemResponse(SurveyDefinition surveyDef, String surveyItemId,
+									   ResponseMaster[] responseMasterSet) throws Exception
 	{
 		String detailSql = Sqls.sSurveyItemResponseDetailSql;
 
@@ -1879,12 +1882,12 @@ public class SurveyResponseManager
 			{
 			}
 		}
-	}*/
+	}
 
 	/**
 	 * count of responses recieved for a survey between the given dates.
 	 * includes the responses recieved on the start and end date
-	 * 
+	 *
 	 * @param startDate
 	 * @param endDate
 	 */
@@ -1952,21 +1955,22 @@ public class SurveyResponseManager
 	// }
 	// return count;
 	// }
-
-	/*public static List<String> getResponseStatusSetForForm(UserContext context, Survey survey) throws Exception
+	@Override
+	public  List<String> getResponseStatusSetForForm(UserContext context, Survey survey) throws Exception
 	{
 		return persistWrapper.readList(String.class, "select status from TAB_RESPONSE where surveyPk=?", survey.getPk());
 	}
-*/
+
 	/**
 	 * returns all the responseMaster records for a survey by a respondent in
 	 * descenting order of responseTime
-	 * 
+	 *
 	 * @param surveyPk
 	 * @param respondentPk
 	 * @return
 	 */
-	/*public static List getResponseMastersForRespondent(int surveyPk, int respondentPk) throws Exception
+	@Override
+	public  List getResponseMastersForRespondent(int surveyPk, int respondentPk) throws Exception
 	{
 		Survey survey = SurveyMaster.getSurveyByPk(surveyPk);
 
@@ -2034,13 +2038,14 @@ public class SurveyResponseManager
 		}
 		return responseMasterList;
 	}
-*/
+
 	/**
 	 * @param
 	 * @param
 	 * @return
 	 */
-	/*public static ResponseMaster getResponseMaster(int surveyPk, String responseId) throws Exception
+	@Override
+	public  ResponseMaster getResponseMaster(int surveyPk, String responseId) throws Exception
 	{
 		Survey survey = SurveyMaster.getSurveyByPk(surveyPk);
 
@@ -2107,7 +2112,7 @@ public class SurveyResponseManager
 		return rMaster;
 	}
 
-*/
+
 //	public static String getLastResponseReferenceNoFromDevice(String devicePk) throws Exception
 //	{
 //		Connection conn = null;
@@ -2161,14 +2166,15 @@ public class SurveyResponseManager
 //	}
 
 	// ///////////////// for testsutra
-	/*public static ResponseMasterNew getResponseMaster(int responseId) throws Exception
+	@Override
+	public  ResponseMasterNew getResponseMaster(int responseId) throws Exception
 	{
 		String sql = ResponseMasterNew.fetchQuery+ " and responseId = ? ";
 
 		ResponseMasterNew response =  persistWrapper.read(ResponseMasterNew.class, sql, responseId);
-		
+
 		// this is a minor hack.. since the response is created the moment the form is opened (support multiple people working at the same time)
-		// if an form is submitted with no questions answered, the prepared by will be shown as empty which would end up as a bug.  
+		// if an form is submitted with no questions answered, the prepared by will be shown as empty which would end up as a bug.
 		//TODO.. the real fix would be to have some temp token generated for the response when the form is opened and sync based on that..
 		int count = persistWrapper.read(Integer.class, "select count(*) from TAB_RESPONSE_desc where responseId =?", responseId);
 		if(response != null && count == 0)
@@ -2177,18 +2183,18 @@ public class SurveyResponseManager
 			response.setPreparedByLastName("");
 			response.setPreparedByPk(0);
 		}
-		
+
 		return response;
 	}
-*/
+	@Override
 	public  ResponseMasterNew getLatestResponseMasterForTest(TestProcOID testProcOID) throws Exception
 	{
-		try 
+		try
 		{
 			TestProcObj tp = new TestProcDAO().getTestProc((int) testProcOID.getPk());
 			if(tp == null)
 				logger.error("Null testproc at pk - " + testProcOID.getPk());
-			
+
 			String sql = ResponseMasterNew.fetchQuery
 					+ " and res.testProcPk=? and res.surveyPk = ? and res.current = 1 order by responseId";
 
@@ -2204,7 +2210,7 @@ public class SurveyResponseManager
 				logger.warn("Dupliate responses returned for testId:" +testProcOID.getPk());
 				return responses.get(responses.size()-1);
 			}
-		} catch (Exception e) 
+		} catch (Exception e)
 		{
 			logger.error(String.format(
 					"Error returning the current response for testPk:%d", testProcOID.getPk()), e);
@@ -2213,7 +2219,7 @@ public class SurveyResponseManager
 	}
 
 
-	/*public static ResponseMasterNew[] getLatestResponseMastersForUnitInWorkstation(UnitOID unitOID, ProjectOID projectOID, WorkstationOID workstationOID) throws Exception
+	public static ResponseMasterNew[] getLatestResponseMastersForUnitInWorkstation(UnitOID unitOID, ProjectOID projectOID, WorkstationOID workstationOID) throws Exception
 	{
 		String sql	= "select res.responseId, res.responseRefNo, "
 				+ " res.surveyPk as formPk, res.testProcPk as testProcPk, "
@@ -2242,7 +2248,8 @@ public class SurveyResponseManager
 	}
 
 	//returns the Response entry for a previous form revision on a testProc.
-	public static ResponseMasterNew getResponseMasterForTestHistoryRecord(TestProcOID testProcOID, FormOID formOID)
+	@Override
+	public  ResponseMasterNew getResponseMasterForTestHistoryRecord(TestProcOID testProcOID, FormOID formOID)
 	{
 		String sql = ResponseMasterNew.fetchQuery
 				+ " and res.testProcPk=? and res.surveyPk = ? order by responseId desc limit 0, 1";
@@ -2250,8 +2257,8 @@ public class SurveyResponseManager
 		return persistWrapper.read(ResponseMasterNew.class, sql, testProcOID.getPk(), formOID.getPk());
 	}
 
-	
-	public static void verifyResponse(UserContext userContext, SurveyResponse sResponse, String comments)
+	@Override
+	public  void verifyResponse(UserContext userContext, SurveyResponse sResponse, String comments)
 			throws Exception
 	{
 		String sql = Sqls.verityResponse;
@@ -2271,7 +2278,7 @@ public class SurveyResponseManager
 
 			stmt.execute();
 
-			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_VERIFIED, userContext.getUser().getPk(), sResponse.getResponseId(), 
+			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_VERIFIED, userContext.getUser().getPk(), sResponse.getResponseId(),
 					sResponse.getTestProcPk(), ResponseMasterNew.STATUS_VERIFIED, comments);
 
 		}
@@ -2302,8 +2309,8 @@ public class SurveyResponseManager
 			}
 		}
 	}
-*/
-	/*public static void rejectResponse(UserContext userContext, SurveyResponse sResponse, String comments)
+	@Override
+	public  void rejectResponse(UserContext userContext, SurveyResponse sResponse, String comments)
 			throws Exception
 	{
 		String sql = Sqls.changeResponseStatus;
@@ -2321,24 +2328,24 @@ public class SurveyResponseManager
 			stmt.setLong(2, sResponse.getResponseId());
 
 			stmt.execute();
-			
-			//when copyResponse is called, the new response is created as current, the existing one is marked as old 
+
+			//when copyResponse is called, the new response is created as current, the existing one is marked as old
 			ResponseMasterNew responseMaster = getResponseMaster(sResponse.getResponseId());
 			markResponseAsOld(userContext, responseMaster);
-			
-			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_VERIFY_REJECTED, userContext.getUser().getPk(), sResponse.getResponseId(), 
+
+			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_VERIFY_REJECTED, userContext.getUser().getPk(), sResponse.getResponseId(),
 					sResponse.getTestProcPk(), ResponseMasterNew.STATUS_REJECTED, comments);
 
 
 			//create a copy of the response and mark it as incomplete so that the tester can
 			//carry on editing the form and resubmitting it
-			SurveyResponse newResponse = SurveyResponseManager.copyResponse(userContext, sResponse.getResponseId());
-			
+			SurveyResponse newResponse = SurveyResponseServiceImpl.copyResponse(userContext, sResponse.getResponseId());
+
 			//create the FormResponseClientSubmissionRevision entry if its there for the unit.
 			updateFormResponseClientSubmissionRevisionOnNewResponse(userContext, sResponse.getResponseId(), newResponse.getResponseId());
-			
+
 			//now create the workflow entry for the new copied response to continue
-			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, userContext.getUser().getPk(), newResponse.getResponseId(), 
+			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, userContext.getUser().getPk(), newResponse.getResponseId(),
 					newResponse.getTestProcPk(), ResponseMasterNew.STATUS_INPROGRESS, comments);
 		}
 		catch (SQLException e)
@@ -2369,7 +2376,7 @@ public class SurveyResponseManager
 		}
 	}
 
-	private static void updateFormResponseClientSubmissionRevisionOnNewResponse(UserContext userContext,
+	private  void updateFormResponseClientSubmissionRevisionOnNewResponse(UserContext userContext,
 			int currentResponseId, int newResponseId) throws Exception
 	{
 		FormResponseClientSubmissionRev currentRev = getFormClientSubmissionRevision(currentResponseId);
@@ -2378,10 +2385,10 @@ public class SurveyResponseManager
 		else
 		{
 			Date now = new Date();
-			
+
 			currentRev.setEffectiveDateTo(new Date(now.getTime() - 1000));
 			persistWrapper.update(currentRev);
-			
+
 			FormResponseClientSubmissionRev newRev = new FormResponseClientSubmissionRev();
 			newRev.setCreatedBy(currentRev.getCreatedBy());
 			newRev.setCreatedDate(now);
@@ -2392,8 +2399,8 @@ public class SurveyResponseManager
 			persistWrapper.createEntity(newRev);
 		}
 	}
-
-	public static void approveResponse(UserContext userContext,  ResponseMasterNew resp, String comments)
+	@Override
+	public  void approveResponse(UserContext userContext, ResponseMasterNew resp, String comments)
 			throws Exception
 	{
 		String sql = Sqls.approveResponse;
@@ -2414,7 +2421,7 @@ public class SurveyResponseManager
 			stmt.execute();
 
 
-			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_APPROVED, userContext.getUser().getPk(), resp.getResponseId(), 
+			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_APPROVED, userContext.getUser().getPk(), resp.getResponseId(),
 					resp.getTestProcPk(), ResponseMasterNew.STATUS_APPROVED, comments);
 
 		}
@@ -2445,8 +2452,8 @@ public class SurveyResponseManager
 			}
 		}
 	}
-
-	public static void approveResponseWithComments(UserContext userContext,  ResponseMasterNew resp, String comments)
+@Override
+public  void approveResponseWithComments(UserContext userContext, ResponseMasterNew resp, String comments)
 			throws Exception
 	{
 		String sql = Sqls.approveResponseWithComments;
@@ -2467,7 +2474,7 @@ public class SurveyResponseManager
 			stmt.execute();
 
 
-			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_APPROVED_WITH_COMMENTS, userContext.getUser().getPk(), resp.getResponseId(), 
+			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_APPROVED_WITH_COMMENTS, userContext.getUser().getPk(), resp.getResponseId(),
 					resp.getTestProcPk(), ResponseMasterNew.STATUS_APPROVED_WITH_COMMENTS, comments);
 
 		}
@@ -2498,8 +2505,8 @@ public class SurveyResponseManager
 			}
 		}
 	}
-
-	public static void rejectApproval(UserContext userContext, SurveyResponse sResponse, String comments)
+@Override
+public  void rejectApproval(UserContext userContext, SurveyResponse sResponse, String comments)
 			throws Exception
 	{
 		String sql = Sqls.changeResponseStatus;
@@ -2518,22 +2525,22 @@ public class SurveyResponseManager
 
 			stmt.execute();
 
-			//when copyResponse is called, the new response is created as current, the existing one is marked as old 
+			//when copyResponse is called, the new response is created as current, the existing one is marked as old
 			ResponseMasterNew responseMaster = getResponseMaster(sResponse.getResponseId());
 			markResponseAsOld(userContext, responseMaster);
-			
-			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_APPROVE_REJECTED, userContext.getUser().getPk(), sResponse.getResponseId(), 
+
+			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_APPROVE_REJECTED, userContext.getUser().getPk(), sResponse.getResponseId(),
 					sResponse.getTestProcPk(), ResponseMasterNew.STATUS_REJECTED, comments);
 
-			//create a copy of the response and mark it as incomplete so that the tester can 
+			//create a copy of the response and mark it as incomplete so that the tester can
 			//carry on editing the form and resubmitting it
 			SurveyResponse newResponse = copyResponse(userContext, sResponse.getResponseId());
-			
+
 			//create the FormResponseClientSubmissionRevision entry if its there for the unit.
 			updateFormResponseClientSubmissionRevisionOnNewResponse(userContext, sResponse.getResponseId(), newResponse.getResponseId());
-			
+
 			//now create the workflow entry for the new copied response to continue
-			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, userContext.getUser().getPk(), newResponse.getResponseId(), 
+			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, userContext.getUser().getPk(), newResponse.getResponseId(),
 					newResponse.getTestProcPk(), ResponseMasterNew.STATUS_INPROGRESS, comments);
 		}
 		catch (SQLException e)
@@ -2563,8 +2570,8 @@ public class SurveyResponseManager
 			}
 		}
 	}
-
-	public static void reopenApprovedForm(UserContext userContext, SurveyResponse sResponse, String comments)
+	@Override
+	public  void reopenApprovedForm(UserContext userContext, SurveyResponse sResponse, String comments)
 			throws Exception
 	{
 		String sql = Sqls.changeResponseStatus;
@@ -2583,35 +2590,35 @@ public class SurveyResponseManager
 
 			stmt.execute();
 
-			//when copyResponse is called, the new response is created as current, the existing one is marked as old 
+			//when copyResponse is called, the new response is created as current, the existing one is marked as old
 			ResponseMasterNew responseMaster = getResponseMaster(sResponse.getResponseId());
 			markResponseAsOld(userContext, responseMaster);
-			
-			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_APPROVE_REJECTED, userContext.getUser().getPk(), sResponse.getResponseId(), 
+
+			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_APPROVE_REJECTED, userContext.getUser().getPk(), sResponse.getResponseId(),
 					sResponse.getTestProcPk(), ResponseMasterNew.STATUS_REJECTED, comments);
 
 			//create a copy of the response and mark it as incomplete so that the tester can
 			//carry on editing the form and resubmitting it
 			SurveyResponse newResponse = copyResponse(userContext, sResponse.getResponseId());
-			
+
 			//create the FormResponseClientSubmissionRevision entry if its there for the unit.
 			updateFormResponseClientSubmissionRevisionOnNewResponse(userContext, sResponse.getResponseId(), newResponse.getResponseId());
-			
+
 			//now create the workflow entry for the new copied response to continue
-			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, userContext.getUser().getPk(), newResponse.getResponseId(), 
+			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, userContext.getUser().getPk(), newResponse.getResponseId(),
 					newResponse.getTestProcPk(), ResponseMasterNew.STATUS_INPROGRESS, comments);
-			
+
 			// now we have to re-open the workstation
 			TestProcObj unitForm = TestProcManager.getTestProc(newResponse.getTestProcPk());
 			UnitLocation ul = ProjectManager.getUnitWorkstation(unitForm.getUnitPk(), new ProjectOID(unitForm.getProjectPk(), null), new WorkstationOID(unitForm.getWorkstationPk(), null));
-			
+
 			if(ul != null && UnitLocation.STATUS_COMPLETED.equals(ul.getStatus()))
 			{
 				ProjectDelegate.setUnitWorkstationStatus(
 						userContext,
 						new ProjectOID(unitForm.getProjectPk(), null), unitForm.getUnitPk(), new WorkstationOID(unitForm.getWorkstationPk(), null), UnitLocation.STATUS_IN_PROGRESS);
 			}
-				
+
 		}
 		catch (SQLException e)
 		{
@@ -2641,15 +2648,16 @@ public class SurveyResponseManager
 		}
 	}
 
-	*//**
+	/**
 	 * calculates the PercentComplete and Comments count for the sItems.. It takes all the children of the
 	 * items and looks at the answer fom the surveyResponse and calculates the value.
 	 * This is used to calculate the values at the whole survey level or at a section level (any question level will work).
 	 * @param sItems
 	 * @param surveyResponse
 	 * @return
-	 *//*
-	public static FormResponseStats getCommentCountAndPercentComplete(List sItems, SurveyResponse surveyResponse)
+	 */
+	@Override
+	public  FormResponseStats getCommentCountAndPercentComplete(List sItems, SurveyResponse surveyResponse)
 	{
 		int totalQCount = 0;
 		int totalACount = 0;
@@ -2658,10 +2666,10 @@ public class SurveyResponseManager
 		int failCount = 0;
 		int dimentionalFailCount = 0; // where the item is marked as isNumeric
 		int naCount = 0;
-		
+
 		List surveyQuestions = new ArrayList();
 		surveyQuestions = getAllChildrenRecursive(sItems, surveyQuestions);
-		
+
 		for (Iterator iterator = surveyQuestions.iterator(); iterator.hasNext();)
 		{
 			SurveyItem	sItem = (SurveyItem) iterator.next();
@@ -2675,7 +2683,7 @@ public class SurveyResponseManager
 				{
 					continue;
 				}
-				
+
 				SurveyItemResponse sItemResponse = (surveyResponse== null)?null:surveyResponse.getAnswer((SurveySaveItem)sItem);
 				if(sItemResponse != null)
 				{
@@ -2687,7 +2695,7 @@ public class SurveyResponseManager
 						boolean passFailAnswered = answerStatus.isPassFailAnswered();
 						boolean actualAnswered = answerStatus.isActualAnswered();
 
-						// if pass/fail is there the question is answered only if it is checked 
+						// if pass/fail is there the question is answered only if it is checked
 						//else if actual field is there it should be answered if to have the question answered
 						//else if comment is there, comment should be entered to consider the question as answered.
 						if(bom.isShowPassFail())
@@ -2705,7 +2713,7 @@ public class SurveyResponseManager
 							if(commentAnswered)
 								totalACount++;
 						}
-						
+
 						if(commentAnswered)
 							commentsCount++;
 						if(answerStatus.isPassSelected())
@@ -2729,13 +2737,13 @@ public class SurveyResponseManager
 				}
 			}
 		}
-		
+
 		int percentComplete = 0;
 		if(totalQCount > 0)
 		{
-			percentComplete = totalACount*100/totalQCount; 
+			percentComplete = totalACount*100/totalQCount;
 		}
-		
+
 		FormResponseStats ret = new FormResponseStats();
 		ret.setTotalACount(totalACount);
 		ret.setTotalQCount(totalQCount);
@@ -2746,12 +2754,12 @@ public class SurveyResponseManager
 		ret.setCommentsCount(commentsCount);
 		return ret;
 	}
-	
 
-	public static QuestionResponseStatus getAnswerStatValue(SurveySaveItem sItem, SurveyItemResponse sItemResponse)
+	@Override
+	public  QuestionResponseStatus getAnswerStatValue(SurveySaveItem sItem, SurveyItemResponse sItemResponse)
 	{
 		QuestionResponseStatus resultStatus = new QuestionResponseStatus();
-		
+
 		if(sItem instanceof BaseInspectionLineItemAnswerType)
 		{
 			BaseInspectionLineItemAnswerType bom = (BaseInspectionLineItemAnswerType)sItem;
@@ -2761,7 +2769,7 @@ public class SurveyResponseManager
 			}
 			else
 			{
-				return resultStatus; 
+				return resultStatus;
 			}
 		}
 		else
@@ -2772,10 +2780,10 @@ public class SurveyResponseManager
 			}
 			else
 			{
-				return resultStatus; 
+				return resultStatus;
 			}
 		}
-		
+
 		if(sItemResponse != null)
 		{
 			if(sItem instanceof BaseInspectionLineItemAnswerType)
@@ -2786,7 +2794,7 @@ public class SurveyResponseManager
 				boolean passFailAnswered = answerStatus.isPassFailAnswered();
 				boolean actualAnswered = answerStatus.isActualAnswered();
 
-				// if pass/fail is there the question is answered only if it is checked 
+				// if pass/fail is there the question is answered only if it is checked
 				//else if actual field is there it should be answered if to have the question answered
 				//else if comment is there, comment should be entered to consider the question as answered.
 				if(bom.isShowPassFail())
@@ -2804,13 +2812,13 @@ public class SurveyResponseManager
 					if(commentAnswered)
 						resultStatus.setAnswered(true);
 				}
-				
+
 				if(commentAnswered)
 					resultStatus.setCommentEntered(true);
-				
+
 				if(answerStatus.isPassSelected())
 					resultStatus.setResult(ResultStatusEnum.Pass);
-				
+
 				if(answerStatus.isFailSelected())
 				{
 					resultStatus.setResult(ResultStatusEnum.Fail);
@@ -2828,13 +2836,13 @@ public class SurveyResponseManager
 				// it hits return from the top itself
 			}
 		}
-	
+
 		return resultStatus;
 	}
-	
-	
-	
-	private static List getAllChildrenRecursive(List sItems, List outList)
+
+
+
+	private  List getAllChildrenRecursive(List sItems, List outList)
 	{
 		for (Iterator iterator = sItems.iterator(); iterator.hasNext();)
 		{
@@ -2853,20 +2861,20 @@ public class SurveyResponseManager
 
 //	public static boolean hasResponseCreated(int testProcPk)throws Exception
 //	{
-//		int responseCount = persistWrapper.read(Integer.class, 
+//		int responseCount = persistWrapper.read(Integer.class,
 //				"select count(responseId) from TAB_RESPONSE where testProcPk=?",
 //				testProcPk);
-//		
+//
 //		if(responseCount > 0)
 //			return true;
 //		else
 //			return false;
 //	}
-
-	public static List<SectionResponseQuery> getSectionResponseSummary(SurveyDefinition sd)
+@Override
+	public  List<SectionResponseQuery> getSectionResponseSummary(SurveyDefinition sd)
 	{
 		List<SectionResponseQuery> returnList = new ArrayList<SectionResponseQuery>();
-		
+
 		for (Iterator iterator = sd.getQuestions().iterator(); iterator.hasNext();)
 		{
 			SurveyItem aItem = (SurveyItem) iterator.next();
@@ -2881,14 +2889,14 @@ public class SurveyResponseManager
 		}
 		return returnList;
 	}
-
-	public static List<SectionResponseQuery> getSectionResponseSummary(SurveyDefinition sd, int responseId)throws Exception
+	@Override
+	public  List<SectionResponseQuery> getSectionResponseSummary(SurveyDefinition sd, int responseId)throws Exception
 	{
 		FormResponseMaster resp = persistWrapper.readByResponseId(FormResponseMaster.class, responseId);
-		return persistWrapper.readList(SectionResponseQuery.class, SectionResponseQuery.SQL + " where tfa.testProcFk = ?", resp.getTestProcPk()); 
+		return persistWrapper.readList(SectionResponseQuery.class, SectionResponseQuery.SQL + " where tfa.testProcFk = ?", resp.getTestProcPk());
 	}
-
-	public static SectionResponseQuery getSectionResponseSummary(SurveyDefinition sd, int responseId, String sectionId)throws Exception
+	@Override
+	public  SectionResponseQuery getSectionResponseSummary(SurveyDefinition sd, int responseId, String sectionId)throws Exception
 	{
 		SectionResponseQuery sqr = new SectionResponseQuery();
 
@@ -2896,8 +2904,8 @@ public class SurveyResponseManager
 		sqr.setSectionId(aItem.getSurveyItemId());
 		sqr.setName(((Section) aItem).getQuestionText());
 		sqr.setDescription(((Section) aItem).getDescription());
-		
-		SectionResponseQuery sq = persistWrapper.read(SectionResponseQuery.class, SectionResponseQuery.SQL + " where resp.responseId = ? and formSec.sectionId = ?", responseId, sectionId); 
+
+		SectionResponseQuery sq = persistWrapper.read(SectionResponseQuery.class, SectionResponseQuery.SQL + " where resp.responseId = ? and formSec.sectionId = ?", responseId, sectionId);
 		if(sq != null)
 		{
 			sqr.setNoOfComments(sq.getNoOfComments());
@@ -2913,18 +2921,18 @@ public class SurveyResponseManager
 		}
 		return sq;
 	}
-
-	public static SectionResponseQuery getSectionResponseSummary(int responseId, String sectionId)throws Exception
+	@Override
+	public  SectionResponseQuery getSectionResponseSummary(int responseId, String sectionId)throws Exception
 	{
-		return persistWrapper.read(SectionResponseQuery.class, SectionResponseQuery.SQL + " where resp.responseId = ? and formSec.sectionId = ?", responseId, sectionId); 
+		return persistWrapper.read(SectionResponseQuery.class, SectionResponseQuery.SQL + " where resp.responseId = ? and formSec.sectionId = ?", responseId, sectionId);
 	}
-	
-	public static FormItemResponse getFormItemResponse(FormItemResponseOID formItemResponseOID)
+	@Override
+	public  FormItemResponse getFormItemResponse(FormItemResponseOID formItemResponseOID)
 	{
 		return	persistWrapper.readByPrimaryKey(FormItemResponse.class, formItemResponseOID.getPk());
 	}
-
-	public static HashMap<String, FormItemResponse> getFormItemResponses(int responseId)
+	@Override
+	public  HashMap<String, FormItemResponse> getFormItemResponses(int responseId)
 	{
 		HashMap<String, FormItemResponse> rMap = new HashMap<String, FormItemResponse>();
 		List<FormItemResponse> itemResponseList = persistWrapper.readList(FormItemResponse.class, "select * from TAB_ITEM_RESPONSE USE INDEX (responseId_indx) where responseId = ?", responseId);
@@ -2933,16 +2941,16 @@ public class SurveyResponseManager
 			FormItemResponse formItemResponse = (FormItemResponse) iterator.next();
 			rMap.put(formItemResponse.getQuestionId(), formItemResponse);
 		}
-		
+
 		return rMap;
 	}
-	
-	public static FormItemResponse getFormItemResponse(int responseId, String surveyItemId, boolean createIfNoExist) throws Exception
+	@Override
+	public  FormItemResponse getFormItemResponse(int responseId, String surveyItemId, boolean createIfNoExist) throws Exception
 	{
 		FormItemResponse itemResponse = persistWrapper.read(FormItemResponse.class, "select * from TAB_ITEM_RESPONSE where responseId = ? and questionId=?", responseId, surveyItemId);
 		if(itemResponse != null)
 			return itemResponse;
-		
+
 		if(itemResponse == null && createIfNoExist)
 		{
 			itemResponse = new FormItemResponse();
@@ -2954,26 +2962,27 @@ public class SurveyResponseManager
 
 		return itemResponse;
 	}
-
-	public static FormItemResponse createFormItemResponse(int responseId, String surveyItemId) throws Exception
+	@Override
+	public  FormItemResponse createFormItemResponse(int responseId, String surveyItemId) throws Exception
 	{
 		return getFormItemResponse(responseId, surveyItemId, true);
 	}
-	
-	*//**
+
+	/**
 	 * VA stands for Verifier approver comments.
 	 * @param userContext
 	 * @param responseMaster
 	 * @param vCommentToAdd
 	 * @param aCommentToAdd
 	 * @throws Exception
-	 *//*
-	public static void addToResponseVAComments(UserContext userContext,	ResponseMasterNew responseMaster, String vCommentToAdd,
-			String aCommentToAdd) throws Exception
+	 */
+	@Override
+	public  void addToResponseVAComments(UserContext userContext, ResponseMasterNew responseMaster, String vCommentToAdd,
+										 String aCommentToAdd) throws Exception
 	{
 		if(vCommentToAdd == null && aCommentToAdd == null)
 			return;
-		
+
 		DateFormat dateTimeFormatter = new SimpleDateFormat("dd-MM-yy HH:mm:ss");
 		dateTimeFormatter.setTimeZone(TimeZone.getTimeZone(ApplicationProperties.getDefaultTimezone()));
 		Date now = new Date();
@@ -3012,30 +3021,30 @@ public class SurveyResponseManager
 		}
 		query = new StringBuffer(query.substring(0, query.length() - 1));
 		query.append(" where responseId=" + responseMaster.getResponseId());
-		
+
 		persistWrapper.delete(query.toString(), params.toArray(new Object[params.size()]));
 	}
-
-	public static FormResponseClientSubmissionRev getFormClientSubmissionRevision(int responseId)
+	@Override
+	public  FormResponseClientSubmissionRev getFormClientSubmissionRevision(int responseId)
 	{
-		return persistWrapper.read(FormResponseClientSubmissionRev.class, 
+		return persistWrapper.read(FormResponseClientSubmissionRev.class,
 				"select * from RESPONSE_CLIENT_SUBMISSION_REV where responseId = ? and now() between effectiveDateFrom and effectiveDateTo", responseId);
 	}
-
-	public static FormResponseClientSubmissionRev saveFormClientSubmissionRevision(UserContext context, int responseId, String revision) throws Exception
+	@Override
+	public  FormResponseClientSubmissionRev saveFormClientSubmissionRevision(UserContext context, int responseId, String revision) throws Exception
 	{
 		Date now = new Date();
-		
+
 		FormResponseClientSubmissionRev current = getFormClientSubmissionRevision(responseId);
 		if(current != null && current.getSubmissionRevision() != null && current.getSubmissionRevision().equals(revision)) // its the same, dont have to create a new record
 			return current;
-		
+
 		if(current != null)
 		{
 			current.setEffectiveDateTo(new Date(now.getTime() - 1000));
 			persistWrapper.update(current);
 		}
-		
+
 		FormResponseClientSubmissionRev newR = new FormResponseClientSubmissionRev();
 		newR.setResponseId(responseId);
 		newR.setCreatedBy(context.getUser().getPk());
@@ -3044,17 +3053,17 @@ public class SurveyResponseManager
 		newR.setEffectiveDateTo(DateUtils.getMaxDate());
 		newR.setSubmissionRevision(revision);
 		int newPk = persistWrapper.createEntity(newR);
-		
+
 		return persistWrapper.readByPrimaryKey(FormResponseClientSubmissionRev.class, newPk);
 
 	}
 
-	
-	public static FormResponseBean getFormResponseBean(UserContext context, int responseId)throws Exception
+	@Override
+	public  FormResponseBean getFormResponseBean(UserContext context, int responseId)throws Exception
 	{
 		try
 		{
-			ResponseMasterNew respMaster = SurveyResponseDelegate.getResponseMaster(responseId);
+			ResponseMasterNew respMaster =getResponseMaster(responseId);
 			TestProcObj testProc = (TestProcObj) TestProcManager.getTestProc(respMaster.getTestProcPk());
 			if (testProc.getFormPk() != respMaster.getFormPk())
 			{
@@ -3070,14 +3079,13 @@ public class SurveyResponseManager
 			SurveyDefinition surveyDefinition = SurveyDefFactory
 					.getSurveyDefinition(new FormOID(testProc.getFormPk(), null));
 			Survey survey = surveyDefinition.getSurveyConfig();
-			SurveyResponse surveyResponse = SurveyResponseDelegate.getSurveyResponse(surveyDefinition, responseId);
-			List<SectionResponseQuery> sectionSummaryList = SurveyResponseDelegate
-					.getSectionResponseSummary(surveyDefinition, responseId);
+			SurveyResponse surveyResponse = getSurveyResponse(surveyDefinition, responseId);
+			List<SectionResponseQuery> sectionSummaryList = getSectionResponseSummary(surveyDefinition, responseId);
 			FormResponseBean formResponseBean = new FormResponseBean();
 			formResponseBean.setVersionKey(respMaster.getLastUpdated().getTime());
 			if (surveyResponse != null)
 			{
-				FormResponseStats stats = SurveyResponseManager
+				FormResponseStats stats = SurveyResponseServiceImpl
 						.getCommentCountAndPercentComplete(surveyDefinition.getQuestions(), surveyResponse);
 				formResponseBean.setResponseId(surveyResponse.getResponseId());
 				formResponseBean.setFormPk(survey.getPk());
@@ -3089,7 +3097,7 @@ public class SurveyResponseManager
 						surveyResponse.getUser().getFirstName() + " " + surveyResponse.getUser().getLastName());
 				formResponseBean.setResponseRefNo(surveyResponse.getResponseRefNo());
 				formResponseBean.setResponseStats(stats);
-				
+
 				List<FormItemResponseBase> itemResponses = new ArrayList<FormItemResponseBase>();
 				for (SectionResponseQuery sectionResponseQuery : sectionSummaryList)
 				{
@@ -3101,7 +3109,7 @@ public class SurveyResponseManager
 
 					List<SurveyItem> sec = new ArrayList<SurveyItem>();
 					sec.add((SurveyItem) surveyDefinition.getQuestion(sectionResponseQuery.getSectionId()));
-					FormResponseStats sstats = SurveyResponseManager.getCommentCountAndPercentComplete(sec,
+					FormResponseStats sstats = SurveyResponseServiceImpl.getCommentCountAndPercentComplete(sec,
 							surveyResponse);
 
 					sectionResponseBean.setTotalQCount(sstats.getTotalQCount());
@@ -3178,13 +3186,13 @@ public class SurveyResponseManager
 		}
 
 	}
-	
-	public static void saveSyncErrorResponse(UserContext context, int responseId,
-			FormResponseBean formResponseBean)throws Exception
+	@Override
+	public  void saveSyncErrorResponse(UserContext context, int responseId,
+									   FormResponseBean formResponseBean)throws Exception
 	{
-		EntityVersionReview currentObj = persistWrapper.read(EntityVersionReview.class, 
+		EntityVersionReview currentObj = persistWrapper.read(EntityVersionReview.class,
 				"select * from entity_review_version where entityPk=? and entityType=? and createdBy = ? and status = ? ",
-				responseId, EntityTypeEnum.Response.getValue(), context.getUser().getPk(), 
+				responseId, EntityTypeEnum.Response.getValue(), context.getUser().getPk(),
 				EntityVersionReview.ReviewStatus.Pending.name());
 		if(currentObj != null)
 		{
@@ -3193,7 +3201,7 @@ public class SurveyResponseManager
 
 	        currentObj.setUpdatedDate(new Date());
 	        currentObj.setObjectJson(objRep);
-			
+
 			persistWrapper.update(currentObj);
 		}
 		else
@@ -3213,28 +3221,28 @@ public class SurveyResponseManager
 		}
 	}
 
-	
-	public static List<EntityVersionReviewProxy> getEntityRevisionsForReview(int responseId) throws Exception
+	@Override
+	public  List<EntityVersionReviewProxy> getEntityRevisionsForReview(int responseId) throws Exception
 	{
-		List<EntityVersionReviewProxy> revs = persistWrapper.readList(EntityVersionReviewProxy.class, 
+		List<EntityVersionReviewProxy> revs = persistWrapper.readList(EntityVersionReviewProxy.class,
 				EntityVersionReviewProxy.sql + " and evr.entityPk=? and evr.entityType=? and evr.status = ? ",
-				responseId, EntityTypeEnum.Response.getValue(), 
+				responseId, EntityTypeEnum.Response.getValue(),
 				EntityVersionReview.ReviewStatus.Pending.name());
-		
+
 		return revs;
 	}
-
-	public static EntityVersionReviewProxy getEntityRevisionForReview(UserOID userOID, int responseId) throws Exception
+	@Override
+	public  EntityVersionReviewProxy getEntityRevisionForReview(UserOID userOID, int responseId) throws Exception
 	{
-		EntityVersionReviewProxy currentObj = persistWrapper.read(EntityVersionReviewProxy.class, 
+		EntityVersionReviewProxy currentObj = persistWrapper.read(EntityVersionReviewProxy.class,
 				EntityVersionReviewProxy.sql + " and evr.entityPk=? and evr.entityType=? and evr.createdBy = ? and evr.status = ? ",
-				responseId, EntityTypeEnum.Response.getValue(), userOID.getPk(), 
+				responseId, EntityTypeEnum.Response.getValue(), userOID.getPk(),
 				EntityVersionReview.ReviewStatus.Pending.name());
-		
+
 		return currentObj;
 	}
-	
-	public static FormResponseBean getFormResponseBeanForSyncErrorReview(int entityVersionReviewPk) throws Exception
+	@Override
+	public  FormResponseBean getFormResponseBeanForSyncErrorReview(int entityVersionReviewPk) throws Exception
 	{
 		EntityVersionReview currentObj = persistWrapper.readByPrimaryKey(EntityVersionReview.class, entityVersionReviewPk);
 		if(currentObj == null)
@@ -3245,9 +3253,9 @@ public class SurveyResponseManager
 		FormResponseBean bean = jm.readValue(currentObj.getObjectJson(), FormResponseBean.class);
 		return bean;
 	}
-	
-	public static void removeEntityReviewEntry(int reviewEntityPk)
+	@Override
+	public  void removeEntityReviewEntry(int reviewEntityPk)
 	{
 		persistWrapper.deleteEntity(EntityVersionReview.class, reviewEntityPk);
-	}*/
+	}
 }

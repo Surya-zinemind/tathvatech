@@ -6,7 +6,7 @@ import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.common.ProjectFormQuery;
 import com.tathvatech.forms.dao.TestProcDAO;
 import com.tathvatech.forms.response.ResponseMasterNew;
-import com.tathvatech.forms.service.TestProcManager;
+import com.tathvatech.forms.service.TestProcServiceImpl;
 import com.tathvatech.openitem.andon.service.AndonManager;
 import com.tathvatech.project.common.ProjectUserQuery;
 import com.tathvatech.project.entity.Project;
@@ -18,7 +18,7 @@ import com.tathvatech.project.service.ProjectTemplateManager;
 import com.tathvatech.site.entity.ACL;
 import com.tathvatech.site.entity.ProjectSiteConfig;
 import com.tathvatech.site.service.SiteService;
-import com.tathvatech.survey.service.SurveyResponseManager;
+import com.tathvatech.survey.service.SurveyResponseService;
 import com.tathvatech.unit.common.UnitFormQuery;
 import com.tathvatech.unit.common.UnitLocationQuery;
 import com.tathvatech.unit.entity.UnitLocation;
@@ -53,7 +53,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class WorkstationServiceImpl implements WorkstationService{
     private static final Logger logger = LoggerFactory.getLogger(WorkstationServiceImpl.class);
-    private final TestProcManager testProcManager;
+    private final TestProcServiceImpl testProcService;
 
     private final PersistWrapper persistWrapper;
 
@@ -63,7 +63,7 @@ public class WorkstationServiceImpl implements WorkstationService{
 
     private final ProjectService projectService;
 
-    private final SurveyResponseManager surveyResponseManager;
+    private final SurveyResponseService surveyResponseService;
 
     private final ProjectTemplateManager projectTemplateManager;
 
@@ -795,10 +795,10 @@ public class WorkstationServiceImpl implements WorkstationService{
         //Uncomment and fix it while doing form
         if (workstationOID == null)
         {
-            fm = testProcManager.getTestProcsForItem(context, unitPk, projectOID, includeChildren);
+            fm = testProcService.getTestProcsForItem(context, unitPk, projectOID, includeChildren);
         } else
         {
-            fm = testProcManager.getTestProcsForItem(context, unitPk, projectOID, workstationOID, includeChildren);
+            fm = testProcService.getTestProcsForItem(context, unitPk, projectOID, workstationOID, includeChildren);
         }
         int formCount = 0;
         float percenCompleteAccumulator = 0f;
@@ -806,7 +806,7 @@ public class WorkstationServiceImpl implements WorkstationService{
         {
             UnitFormQuery formQuery = (UnitFormQuery) iterator.next();
             formCount++;
-            final ResponseMasterNew formResponse = surveyResponseManager
+            final ResponseMasterNew formResponse = surveyResponseService
                     .getLatestResponseMasterForTest(formQuery.getOID());
 
             if (formResponse != null)

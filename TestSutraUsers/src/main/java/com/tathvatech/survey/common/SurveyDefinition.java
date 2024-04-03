@@ -49,7 +49,7 @@ public class SurveyDefinition implements SurveyDefinitionBase
 
     }
 
-   /* public SurveyDefinition(Survey survey, Element rootElement)
+   public SurveyDefinition(Survey survey, Element rootElement)
     {
         this.surveyConfig = survey;
 
@@ -349,5 +349,5 @@ public class SurveyDefinition implements SurveyDefinitionBase
 		}
         
     }
-*/
+
 }

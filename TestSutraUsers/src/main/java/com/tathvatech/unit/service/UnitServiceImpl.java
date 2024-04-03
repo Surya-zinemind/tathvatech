@@ -5,30 +5,23 @@ import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.exception.FormApprovedException;
 import com.tathvatech.common.utils.Base62Util;
 import com.tathvatech.common.wrapper.PersistWrapper;
-import com.tathvatech.forms.common.FormQuery;
 import com.tathvatech.forms.common.ProjectFormQuery;
 import com.tathvatech.forms.common.TestProcMatchMaker;
 import com.tathvatech.forms.dao.TestProcDAO;
 import com.tathvatech.forms.response.ResponseMasterNew;
-import com.tathvatech.forms.service.TestProcManager;
+import com.tathvatech.forms.service.TestProcServiceImpl;
 import com.tathvatech.openitem.andon.service.AndonManager;
 import com.tathvatech.project.common.ProjectQuery;
 import com.tathvatech.project.common.ProjectUserQuery;
 import com.tathvatech.project.entity.Project;
-import com.tathvatech.project.entity.ProjectForm;
 import com.tathvatech.project.entity.ProjectPart;
 import com.tathvatech.project.enums.ProjectPropertyEnum;
 import com.tathvatech.project.oid.ProjectPartOID;
 import com.tathvatech.project.service.ProjectService;
 import com.tathvatech.project.service.ProjectTemplateManager;
-import com.tathvatech.survey.common.SurveyDefinition;
-import com.tathvatech.survey.common.SurveyForm;
-import com.tathvatech.survey.controller.SurveyResponseDelegate;
-import com.tathvatech.survey.entity.Survey;
-import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.survey.service.SurveyDefFactory;
 import com.tathvatech.survey.service.SurveyMaster;
-import com.tathvatech.survey.service.SurveyResponseManager;
+import com.tathvatech.survey.service.SurveyResponseService;
 import com.tathvatech.unit.common.*;
 import com.tathvatech.unit.dao.UnitDAO;
 import com.tathvatech.unit.dao.UnitInProjectDAO;
@@ -60,12 +53,12 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UnitServiceImpl implements UnitService{
     private final UnitInProjectDAO unitInProjectDAO;
-    private final TestProcManager testProcManager;
+    private final TestProcServiceImpl testProcService;
     private final PersistWrapper persistWrapper;
     private final AndonManager andonManager;
     private final UnitManager unitManager;
     private final ProjectTemplateManager projectTemplateManager;
-    private final SurveyResponseManager surveyResponseManager;
+    private final SurveyResponseService surveyResponseService;
     private final ProjectService projectService;
     private final CommonServiceManager commonServiceManager;
     private final SurveyMaster surveyMaster;
@@ -1008,7 +1001,7 @@ public  void updateUnit(UnitObj unit) throws Exception
     public  void deleteTestProcFromUnit(UserContext context, TestProcOID testProcOID) throws Exception
     {
         // see if there are any responses for that form
-        ResponseMasterNew respM = surveyResponseManager.getLatestResponseMasterForTest(testProcOID);
+        ResponseMasterNew respM = surveyResponseService.getLatestResponseMasterForTest(testProcOID);
         if (respM != null
                 && (ResponseMasterNew.STATUS_APPROVED.equals(respM.getStatus()) || ResponseMasterNew.STATUS_APPROVED_WITH_COMMENTS.equals(respM.getStatus()))
         )
@@ -1861,7 +1854,7 @@ public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID p
                 // form inside the testproc.
                 List<ProjectFormQuery> pForms = projectTemplateManager.getTestProcsForProjectPart(projectQuery.getOID(),
                         new ProjectPartOID(unitInProject.getProjectPartPk(), null), workstationQuery.getPk());
-                List<UnitFormQuery> uForms = testProcManager.getTestProcsForItem(context, unitPk, projectQuery.getOID(),
+                List<UnitFormQuery> uForms = testProcService.getTestProcsForItem(context, unitPk, projectQuery.getOID(),
                         workstationQuery.getOID(), false);
                 for (Iterator iterator = pForms.iterator(); iterator.hasNext();)
                 {
@@ -1903,7 +1896,7 @@ public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID p
                 // we have to re-fetch the unit forms list here, else,
                 // the forms upgrades will get removed as they are not part of
                 // the unit list fetched earlier
-                uForms = testProcManager.getTestProcsForItem(context, unitPk, projectQuery.getOID(),
+                uForms = testProcService.getTestProcsForItem(context, unitPk, projectQuery.getOID(),
                         workstationQuery.getOID(), false);
                 for (Iterator iterator = uForms.iterator(); iterator.hasNext();)
                 {
@@ -1964,7 +1957,7 @@ public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID p
                 // unit contains this workstation
                 // remove any forms from the unit that are not there in the
                 // project
-                List<UnitFormQuery> uForms = testProcManager.getTestProcsForItem(context, (int) unit.getPk(),
+                List<UnitFormQuery> uForms = testProcService.getTestProcsForItem(context, (int) unit.getPk(),
                         projectQuery.getOID(), workstationQuery.getOID(), true);
                 for (Iterator iterator = uForms.iterator(); iterator.hasNext();)
                 {
