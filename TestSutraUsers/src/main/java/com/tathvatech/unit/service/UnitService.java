@@ -75,7 +75,7 @@ public interface UnitService {
 
     void removeUserFromUnit(int userPk, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID, String role) throws Exception;
 
-    void updateUnit(UnitObj unit) throws Exception;
+   // void updateUnit(UnitObj unit) throws Exception;
 
     List<UnitLocationQuery> getUnitLocationHistory(UnitOID unitOID, ProjectOID projectOID, boolean includeChildren) throws Exception;
 

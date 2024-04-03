@@ -812,7 +812,8 @@ public class UnitServiceImpl implements UnitService{
         // fetch the new project back
         return unit;
     }
-@Transactional
+    //Unable to locate persister issue is there sice its trying to update UnitObj
+/*@Transactional
 public  void updateUnit(UnitObj unit) throws Exception
     {
         if (isUnitNameExistForAnotherUnit(unit))
@@ -822,7 +823,7 @@ public  void updateUnit(UnitObj unit) throws Exception
         }
 
         persistWrapper.update(unit);
-    }
+    }*/
 
     public  boolean isUnitNameExistForAnotherUnit(UnitObj unit) throws Exception
     {

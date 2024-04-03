@@ -188,12 +188,13 @@ public class UnitController {
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         unitService.updateUnit(context, unit);
     }
+    //Unable to locate persister issue is there sice its trying toupdate UnitObj
 
-    @PutMapping("/updateUnits")
+    /*@PutMapping("/updateUnits")
     public  void updateUnits(@RequestBody UnitObj unit) throws Exception
     {
         unitService.updateUnit(unit);
-    }
+    }*/
     @GetMapping("/getUnitByPk")
     public  UnitObj getUnitByPk(@RequestBody UnitOID unitOID)
     {
