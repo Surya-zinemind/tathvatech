@@ -1,0 +1,49 @@
+/*
+ * Created on Oct 2, 2005
+ *
+ * TODO To change the template for this generated file go to
+ * Window - Preferences - Java - Code Style - Code Templates
+ */
+package com.tathvatech.survey.common;
+
+import com.sarvasutra.etest.FormDesignListener;
+import com.tathvatech.ts.core.survey.Option;
+import com.tathvatech.ts.core.survey.response.SurveyItemResponse;
+import com.tathvatech.ts.core.utils.OptionList;
+import com.thirdi.surveyside.survey.ExpectedNumericValue;
+import com.thirdi.surveyside.survey.response.InspectionLineItemAnswerStatus;
+import com.vaadin.ui.Table;
+
+
+/**
+ * @author Hari
+ * 
+ *         TODO To change the template for this generated type comment go to
+ *         Window - Preferences - Java - Code Style - Code Templates
+ */
+public interface BaseInspectionLineItemAnswerType
+{
+	public String getSurveyItemId();
+	
+	public int getDataType();
+	public String getUnit();
+	public boolean isShowPassFail();
+	public boolean isShowNotApplicable();
+	public boolean isShowActualValue();
+	public boolean isShowComments();
+	public String getExpectedValue();
+	public ExpectedNumericValue getExpectedUpperLower();
+	public void setImageAttachCol(String columnName);
+	public Section getEnclosingSection();
+	
+	public OptionList getCustomFields();
+	public Option[] getResponseFieldOptions();
+	public Option[] getActualFieldOptions();
+	public Option[] getAdditionalMandatoryFieldOptions();
+
+	 public void addItemToDesignViewInt(Table table, boolean isPreviewMode, String addAfterItemId, FormDesignListener formDesignListener);
+	 public void drawDesignViewInt(String tableRowId, boolean isPreviewMode, FormDesignListener formDesignListener);
+
+	public InspectionLineItemAnswerStatus getAnswerStatus(SurveyItemResponse sItemResponse);
+
+}
