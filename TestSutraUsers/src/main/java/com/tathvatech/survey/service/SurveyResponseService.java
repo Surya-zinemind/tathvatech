@@ -1,14 +1,25 @@
 package com.tathvatech.survey.service;
 
+import com.tathvatech.forms.response.FormResponseStats;
 import com.tathvatech.forms.response.ResponseMasterNew;
+import com.tathvatech.project.entity.Project;
+import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.entity.Survey;
+import com.tathvatech.survey.inf.SurveySaveItemBase;
+import com.tathvatech.survey.response.SurveyItemResponse;
 import com.tathvatech.survey.response.SurveyResponse;
+import com.tathvatech.unit.common.TestableEntity;
 import com.tathvatech.user.OID.FormItemResponseOID;
 import com.tathvatech.user.OID.FormOID;
 import com.tathvatech.user.OID.TestProcOID;
 import com.tathvatech.user.OID.UserOID;
 import com.tathvatech.user.common.UserContext;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+
+import static com.tathvatech.common.enums.EntityTypeEnum.ResponseSubmissionBookmark;
 
 public interface SurveyResponseService {
     void changeResponseStatus(UserContext userContext, int responseId, String responseStatus)

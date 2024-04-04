@@ -1,24 +1,52 @@
 package com.tathvatech.forms.service;
 
+import com.tathvatech.common.enums.EStatusEnum;
+import com.tathvatech.common.exception.AppException;
+import com.tathvatech.common.utils.ListStringUtil;
+import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.common.FormQuery;
 import com.tathvatech.forms.common.ObjectScheduleRequestBean;
+import com.tathvatech.forms.common.TestProcFilter;
+import com.tathvatech.forms.dao.EntityScheduleDAO;
+import com.tathvatech.forms.dao.TestProcDAO;
+import com.tathvatech.forms.entity.EntitySchedule;
+import com.tathvatech.forms.oid.TestProcSectionOID;
+import com.tathvatech.forms.report.TestProcListReport;
+import com.tathvatech.survey.entity.Survey;
 import com.tathvatech.unit.common.UnitFormQuery;
-import com.tathvatech.user.OID.OID;
-import com.tathvatech.user.OID.ProjectOID;
-import com.tathvatech.user.OID.TestProcOID;
-import com.tathvatech.user.OID.UnitOID;
+import com.tathvatech.unit.dao.UnitInProjectDAO;
+import com.tathvatech.unit.entity.UnitLocation;
+import com.tathvatech.unit.service.UnitManager;
+import com.tathvatech.unit.service.UnitService;
+import com.tathvatech.user.OID.*;
+import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.utils.DateUtils;
+import com.tathvatech.workstation.common.UnitInProjectObj;
+import com.tathvatech.workstation.entity.UnitWorkstation;
+import lombok.RequiredArgsConstructor;
+import com.tathvatech.workstation.oid.UnitWorkstationOID;
+import com.tathvatech.survey.service.SurveyMaster;
+import com.tathvatech.unit.service.UnitManager;
+import com.tathvatech.user.service.CommonServiceManager;
+import java.util.*;
 
-import java.util.List;
-
+@RequiredArgsConstructor
 public class FormServiceImpl implements  FormService{
+    private final TestProcService testProcService;
+    private final PersistWrapper persistWrapper;
+    private final SurveyMaster surveyMaster;
+    private final UnitManager unitManager;
+    private final CommonServiceManager commonServiceManager;
+    private final UnitInProjectDAO unitInProjectDAO;
+    private UnitFormQuery unitFormQuery;
     @Override
     public  void saveTestProcSchedule(UserContext context, TestProcOID testProcOID,
                                             ObjectScheduleRequestBean objectScheduleRequestBean) throws Exception
     {
         Date now = DateUtils.getNowDateForEffectiveDateFrom();
 
-        UnitFormQuery testProc = TestProcServiceImpl.getTestProcQuery(testProcOID.getPk());
+        UnitFormQuery testProc = testProcService.getTestProcQuery((int) testProcOID.getPk());
         if (Objects.equals(objectScheduleRequestBean.getStartForecast(), testProc.getForecastStartDate())
                 && Objects.equals(objectScheduleRequestBean.getEndForecast(), testProc.getForecastEndDate())
                 && Objects.equals(objectScheduleRequestBean.getHoursEstimate(), testProc.getForecastHours()))
@@ -26,7 +54,7 @@ public class FormServiceImpl implements  FormService{
             return;
         } else
         {
-            EntitySchedule es = PersistWrapper.read(EntitySchedule.class,
+            EntitySchedule es = persistWrapper.read(EntitySchedule.class,
                     "select * from entity_schedule where objectPk = ? and objectType = ? and now() between effectiveDateFrom and effectiveDateTo",
                     objectScheduleRequestBean.getObjectOID().getPk(),
                     objectScheduleRequestBean.getObjectOID().getEntityType().getValue());
@@ -34,16 +62,16 @@ public class FormServiceImpl implements  FormService{
             if (es == null)
             {
                 es = new EntitySchedule();
-                es.setObjectPk(objectScheduleRequestBean.getObjectOID().getPk());
+                es.setObjectPk((int) objectScheduleRequestBean.getObjectOID().getPk());
                 es.setObjectType(objectScheduleRequestBean.getObjectOID().getEntityType().getValue());
-                es.setCreatedBy(context.getUser().getPk());
+                es.setCreatedBy((int) context.getUser().getPk());
                 es.setCreatedDate(new Date());
                 es.setForecastStartDate(objectScheduleRequestBean.getStartForecast());
                 es.setForecastEndDate(objectScheduleRequestBean.getEndForecast());
                 es.setEstimateHours(objectScheduleRequestBean.getHoursEstimate());
                 es.setEffectiveDateFrom(now);
                 es.setEffectiveDateTo(DateUtils.getMaxDate());
-                PersistWrapper.createEntity(es);
+                persistWrapper.createEntity(es);
             } else
             {
                 Calendar calEx = new GregorianCalendar();
@@ -64,24 +92,24 @@ public class FormServiceImpl implements  FormService{
                     es.setForecastStartDate(objectScheduleRequestBean.getStartForecast());
                     es.setForecastEndDate(objectScheduleRequestBean.getEndForecast());
                     es.setEstimateHours(objectScheduleRequestBean.getHoursEstimate());
-                    PersistWrapper.update(es);
+                    persistWrapper.update(es);
                 } else
                 {
                     // invalidate old and create new
                     es.setEffectiveDateTo(new Date(now.getTime() - 1000));
-                    PersistWrapper.update(es);
+                    persistWrapper.update(es);
 
                     EntitySchedule esNew = new EntitySchedule();
-                    esNew.setObjectPk(objectScheduleRequestBean.getObjectOID().getPk());
+                    esNew.setObjectPk((int) objectScheduleRequestBean.getObjectOID().getPk());
                     esNew.setObjectType(objectScheduleRequestBean.getObjectOID().getEntityType().getValue());
-                    esNew.setCreatedBy(context.getUser().getPk());
+                    esNew.setCreatedBy((int) context.getUser().getPk());
                     esNew.setCreatedDate(new Date());
                     esNew.setForecastStartDate(objectScheduleRequestBean.getStartForecast());
                     esNew.setForecastEndDate(objectScheduleRequestBean.getEndForecast());
                     esNew.setEstimateHours(objectScheduleRequestBean.getHoursEstimate());
                     esNew.setEffectiveDateFrom(now);
                     esNew.setEffectiveDateTo(DateUtils.getMaxDate());
-                    PersistWrapper.createEntity(esNew);
+                    persistWrapper.createEntity(esNew);
                 }
             }
         }
@@ -199,7 +227,7 @@ public class FormServiceImpl implements  FormService{
     {
         List<WorkstationOID> workstations = new ArrayList<WorkstationOID>();
 
-        UnitInProjectObj unitInProject = new UnitInProjectDAO().getUnitInProject(unitOIDToMoveTo, projectOIDToMoveTo);
+        UnitInProjectObj unitInProject = unitInProjectDAO.getUnitInProject(unitOIDToMoveTo, projectOIDToMoveTo);
         if (unitInProject == null)
             throw new AppException("Invalid target unit, or target unit is not part of the project.");
 
@@ -222,7 +250,7 @@ public class FormServiceImpl implements  FormService{
             TestProcOID testProcOID = (TestProcOID) iterator.next();
 
             TestProcDAO dao = new TestProcDAO();
-            TestProcObj testProc = dao.getTestProc(testProcOID.getPk());
+            TestProcObj testProc = dao.getTestProc((int) testProcOID.getPk());
 
             if (testProc.getUnitPk() == unitOIDToMoveTo.getPk())
                 continue;
@@ -231,7 +259,7 @@ public class FormServiceImpl implements  FormService{
             if (testProc.getProjectPk() != projectOIDToMoveTo.getPk())
                 throw new AppException("You can only move a form within the same project.");
 
-            Survey form = SurveyMaster.getSurveyByPk(testProc.getFormPk());
+            Survey form = surveyMaster.getSurveyByPk(testProc.getFormPk());
             UnitFormQuery targetTest = targetUnitTestMap
                     .get(testProc.getName() + "-" + form.getFormMainPk() + "-" + testProc.getWorkstationPk());
             if (targetTest != null)
@@ -250,24 +278,24 @@ public class FormServiceImpl implements  FormService{
             if (!(workstations.contains(new WorkstationOID(testProc.getWorkstationPk()))))
             {
                 // if the workstation is not there on the unit, add it
-                UnitWorkstation existingOne = PersistWrapper.read(UnitWorkstation.class,
+                UnitWorkstation existingOne = persistWrapper.read(UnitWorkstation.class,
                         "select * from TAB_UNIT_WORKSTATIONS where unitPk=? and projectPk = ? and workstationPk=?",
                         unitOIDToMoveTo.getPk(), projectOIDToMoveTo.getPk(), testProc.getWorkstationPk());
                 if (existingOne == null)
                 {
                     UnitWorkstation pForm = new UnitWorkstation();
                     pForm.setEstatus(EStatusEnum.Active.getValue());
-                    pForm.setUpdatedBy(userContext.getUser().getPk());
-                    pForm.setProjectPk(projectOIDToMoveTo.getPk());
-                    pForm.setUnitPk(unitOIDToMoveTo.getPk());
+                    pForm.setUpdatedBy((int) userContext.getUser().getPk());
+                    pForm.setProjectPk((int) projectOIDToMoveTo.getPk());
+                    pForm.setUnitPk((int) unitOIDToMoveTo.getPk());
                     pForm.setWorkstationPk(testProc.getWorkstationPk());
 
-                    PersistWrapper.createEntity(pForm);
+                    persistWrapper.createEntity(pForm);
                 }
                 workstations.add(new WorkstationOID(testProc.getWorkstationPk()));
             }
 
-            testProc.setUnitPk(unitOIDToMoveTo.getPk());
+            testProc.setUnitPk((int) unitOIDToMoveTo.getPk());
             dao.saveTestProc(userContext, testProc);
         }
 
@@ -329,8 +357,8 @@ public class FormServiceImpl implements  FormService{
         HashMap<String, UnitFormQuery> targetUnitTestMap = new HashMap<String, UnitFormQuery>();
         if (selectedTestProcs.size() > 0)
         {
-            TestProcObj aTest = new TestProcDAO().getTestProc(selectedTestProcs.get(0).getPk());
-            int rootUnitPk = UnitManager.getRootUnitPk(new UnitOID(aTest.getUnitPk()),
+            TestProcObj aTest = new TestProcDAO().getTestProc((int) selectedTestProcs.get(0).getPk());
+            int rootUnitPk = unitManager.getRootUnitPk(new UnitOID(aTest.getUnitPk()),
                     new ProjectOID(aTest.getProjectPk()));
 
             // load the forms in the target unit. and put it into a hashmap for
@@ -352,9 +380,9 @@ public class FormServiceImpl implements  FormService{
             TestProcOID testProcOID = (TestProcOID) iterator.next();
 
             TestProcDAO dao = new TestProcDAO();
-            TestProcObj testProc = dao.getTestProc(testProcOID.getPk());
+            TestProcObj testProc = dao.getTestProc((int) testProcOID.getPk());
 
-            Survey form = SurveyMaster.getSurveyByPk(testProc.getFormPk());
+            Survey form = surveyMaster.getSurveyByPk(testProc.getFormPk());
 
             if ("Append text to existing test name".equals(renameOption) || "Rename test".equals(renameOption))
             {
@@ -394,7 +422,7 @@ public class FormServiceImpl implements  FormService{
                 for (Iterator iterator2 = referencesToAdd.iterator(); iterator2.hasNext();)
                 {
                     OID oid = (OID) iterator2.next();
-                    CommonServiceManager.createEntityReference(userContext, testProcOID, oid);
+                    commonServiceManager.createEntityReference(userContext, testProcOID, oid);
                 }
             }
         }
@@ -403,8 +431,8 @@ public class FormServiceImpl implements  FormService{
     @Override
     public  List<UnitFormQuery> getTestProcsByForm(FormQuery formQuery) throws Exception
     {
-        List<UnitFormQuery> l = PersistWrapper.readList(UnitFormQuery.class,
-                UnitFormQuery.sql + " and tfa.formFk in "
+        List<UnitFormQuery> l = persistWrapper.readList(UnitFormQuery.class,
+                unitFormQuery.sql + " and tfa.formFk in "
                         + "(select pk from TAB_SURVEY where formMainPk=? and formType = 1) order by unitPk desc",
                 formQuery.getFormMainPk());
 

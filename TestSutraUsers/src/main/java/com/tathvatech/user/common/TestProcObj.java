@@ -36,7 +36,7 @@ public class TestProcObj
 	{
 		this.projectPk = projectPk;
 	}
-	public int getUnitPk()
+	public UnitOID getUnitPk()
 	{
 		return unitPk;
 	}

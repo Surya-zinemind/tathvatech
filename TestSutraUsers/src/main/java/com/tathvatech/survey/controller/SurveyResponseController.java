@@ -15,12 +15,33 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.forms.oid.FormResponseOID;
+import com.tathvatech.project.service.ProjectService;
+import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.entity.Survey;
+import com.tathvatech.survey.response.SurveyItemResponse;
+import com.tathvatech.survey.service.SurveyMaster;
+import com.tathvatech.unit.common.UnitLocationQuery;
+import com.tathvatech.unit.entity.UnitLocation;
+import com.tathvatech.unit.enums.Actions;
+import com.tathvatech.unit.service.UnitManager;
+
+import com.tathvatech.common.exception.AppException;
 import com.tathvatech.forms.response.ResponseMasterNew;
 import com.tathvatech.forms.service.TestProcService;
+import com.tathvatech.project.entity.Project;
 import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.survey.service.SurveyResponseService;
+import com.tathvatech.unit.common.UnitObj;
+import com.tathvatech.unit.entity.UnitInProject;
+import com.tathvatech.unit.service.UnitService;
 import com.tathvatech.user.OID.*;
+import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.workstation.common.UnitInProjectObj;
+import com.tathvatech.workstation.service.WorkstationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,35 +62,21 @@ public class SurveyResponseController
 
 	private final TestProcService testProcService;
 	private final SurveyResponseService surveyResponseService;
-
-
+    private final UnitManager unitManager;
+     private final UnitService unitService;
+    private final ProjectService projectService;
+    private final SurveyMaster surveyMaster;
+    private final WorkstationService workstationService;
+	private final PersistWrapper persistWrapper;
     /**
      * Called when the workstation is changed to in progress
      */
     public SurveyResponse ceateDummyResponse(UserContext context,
 											 SurveyResponse surveyResponse) throws Exception
     {
-		Connection conn = null;
-		try
-		{
-		    conn = ServiceLocator.locate().getConnection();
-		    conn.setAutoCommit(false);
-
-		    SurveyResponse resp = surveyResponseService.ceateDummyResponse(context,
+		SurveyResponse resp = surveyResponseService.ceateDummyResponse(context,
 			    surveyResponse);
-		    
-			conn.commit();
-	
-		    return resp;
-		}
-		catch (Exception ex)
-		{
-		    conn.rollback();
-		    throw ex;
-		}
-		finally
-		{
-		}
+        return resp;
     }
     
     
@@ -79,24 +86,20 @@ public class SurveyResponseController
     public  SurveyResponse savePageResponse(UserContext context, 
 	    SurveyResponse surveyResponse) throws Exception
     {
-		Connection conn = null;
-		try
-		{
-		    conn = ServiceLocator.locate().getConnection();
-		    conn.setAutoCommit(false);
+
 		    
 		    TestProcObj testProc = testProcService.getTestProc(surveyResponse.getTestProcPk());
 		    if(surveyResponse.getSurveyPk() != testProc.getFormPk())
 		    {
 		    	throw new AppException("Invalid checksheet, Form cannot be submitted: TP-" + surveyResponse.getTestProcPk());
 		    }
-		    UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(testProc.getUnitPk()));
-		    UnitInProjectObj upr = UnitManager.getUnitInProject(new UnitOID(testProc.getUnitPk()), new ProjectOID(testProc.getProjectPk()));
+		    UnitObj unit =unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
+		    UnitInProjectObj upr = unitManager.getUnitInProject(new UnitOID(testProc.getUnitPk()), new ProjectOID(testProc.getProjectPk()));
 		    if(UnitInProject.STATUS_CLOSED.equals(upr.getStatus()))
 		    {
 		    	throw new AppException("Unit is complete, You cannot submit any changes to the form");
 		    }
-		    Project project = ProjectManager.getProject(testProc.getProjectPk());
+		    Project project = projectService.getProject(testProc.getProjectPk());
 		    if(Project.STATUS_CLOSED.equals(project.getStatus()))
 		    {
 		    	throw new AppException("Project is closed, You cannot submit any changes to the form");
@@ -112,7 +115,7 @@ public class SurveyResponseController
 		    }
 		    
 		    //check the workstation status.
-			UnitLocationQuery unitWorkstation = ProjectDelegate.getUnitWorkstationStatus(testProc.getUnitPk(), new ProjectOID(testProc.getProjectPk(), null), new WorkstationOID(testProc.getWorkstationPk(), null));
+			UnitLocationQuery unitWorkstation = workstationService.getUnitWorkstationStatus(testProc.getUnitPk(), new ProjectOID(testProc.getProjectPk(), null), new WorkstationOID(testProc.getWorkstationPk(), null));
 			if(UnitLocation.STATUS_COMPLETED.equals(unitWorkstation.getStatus()))
 			{
 				throw new AppException("Workstation is complete for the unit, Form cannot be saved or submitted");
@@ -143,26 +146,15 @@ public class SurveyResponseController
 					testProc.getPk(), ResponseMasterNew.STATUS_INPROGRESS, null);
 
 			//record workstation save
-			ProjectManager.recordWorkstationSave(testProc.getOID());
+			workstationService.recordWorkstationSave(testProc.getOID());
 			
 			//TODO lines below is added for testing purpose. we create sync error record when a normal save is done.
 			//This needs to be removed.
 //			FormResponseBean formResponseBean = getFormResponseBean(context, resp.getResponseId());
 //			saveSyncErrorResponse(context, resp.getResponseId(), formResponseBean);
 
-			
-			conn.commit();
-	
-		    return resp;
-		}
-		catch (Exception ex)
-		{
-		    conn.rollback();
-		    throw ex;
-		}
-		finally
-		{
-		}
+		return resp;
+
     }
     
     
@@ -178,32 +170,15 @@ public class SurveyResponseController
     public  SurveyResponse submitInterimResponse(UserContext context, 
     	    SurveyResponse surveyResponse) throws Exception
     {
-		Connection conn = null;
-		try
-		{
-		    conn = ServiceLocator.locate().getConnection();
-		    conn.setAutoCommit(false);
+
 		    
     	
 		    SurveyResponse sResponseAfterSave = savePageResponse(context, surveyResponse);
 		    
 		    
 		    surveyResponseService.saveResponseStateAsSubmitRecord(context, sResponseAfterSave.getResponseId(), ResponseSubmissionBookmark.SubmissionTypeEnum.Interim);
-
-			conn.commit();
-    	
-	    	return sResponseAfterSave;
-		}
-		catch (Exception ex)
-		{
-			ex.printStackTrace();
-		    conn.rollback();
-		    throw ex;
-		}
-		finally
-		{
-		}
-	}    
+			return sResponseAfterSave;
+	}
 
     /**
      * save a specific set of questions and not a complete section.
@@ -211,24 +186,20 @@ public class SurveyResponseController
     public  SurveyResponse saveQuestionResponses(UserContext context, 
 	    SurveyResponse surveyResponse, List questionsToSave) throws Exception
     {
-		Connection conn = null;
-		try
-		{
-		    conn = ServiceLocator.locate().getConnection();
-		    conn.setAutoCommit(false);
+
 		    
 		    TestProcObj testProc = testProcService.getTestProc(surveyResponse.getTestProcPk());
 		    if(surveyResponse.getSurveyPk() != testProc.getFormPk())
 		    {
 		    	throw new AppException("Invalid checksheet, Form cannot be submitted: TP-" + surveyResponse.getTestProcPk());
 		    }
-		    UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(testProc.getUnitPk()));
-		    UnitInProjectObj upr = UnitManager.getUnitInProject(new UnitOID(testProc.getUnitPk()), new ProjectOID(testProc.getProjectPk()));
+		    UnitObj unit = unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
+		    UnitInProjectObj upr = unitManager.getUnitInProject(new UnitOID(testProc.getUnitPk()), new ProjectOID(testProc.getProjectPk()));
 		    if(UnitInProject.STATUS_CLOSED.equals(upr.getStatus()))
 		    {
 		    	throw new AppException("Unit/Car is complete, You cannot submit any changes to the form");
 		    }
-		    Project project = ProjectManager.getProject(testProc.getProjectPk());
+		    Project project = projectService.getProject(testProc.getProjectPk());
 		    if(Project.STATUS_CLOSED.equals(project.getStatus()))
 		    {
 		    	throw new AppException("Project is closed, You cannot submit any changes to the form");
@@ -244,7 +215,7 @@ public class SurveyResponseController
 		    }
 		    
 		    //check the workstation status.
-			UnitLocationQuery unitWorkstation = ProjectDelegate.getUnitWorkstationStatus(testProc.getUnitPk(), new ProjectOID(testProc.getProjectPk(), null), new WorkstationOID(testProc.getWorkstationPk(), null));
+			UnitLocationQuery unitWorkstation = workstationService.getUnitWorkstationStatus(testProc.getUnitPk(), new ProjectOID(testProc.getProjectPk(), null), new WorkstationOID(testProc.getWorkstationPk(), null));
 			if(UnitLocation.STATUS_COMPLETED.equals(unitWorkstation.getStatus()))
 			{
 				throw new AppException("Workstation is complete for the unit, Form cannot be saved or submitted");
@@ -263,21 +234,12 @@ public class SurveyResponseController
 					testProc.getPk(), ResponseMasterNew.STATUS_INPROGRESS, null);
 
 			//record workstation save
-			ProjectManager.recordWorkstationSave(testProc.getOID());
+			workstationService.recordWorkstationSave(testProc.getOID());
 			
-			conn.commit();
+
 	
 		    return resp;
-		}
-		catch (Exception ex)
-		{
-			ex.printStackTrace();
-		    conn.rollback();
-		    throw ex;
-		}
-		finally
-		{
-		}
+
     }
 
     /**
@@ -287,9 +249,7 @@ public class SurveyResponseController
     public  void finalizeSurveyResponse(UserContext userContext, SurveyDefinition surveyDef,
 	    SurveyResponse surveyResponse) throws Exception
     {
-		Connection conn = null;
-	    conn = ServiceLocator.locate().getConnection();
-	    conn.setAutoCommit(false);
+
 
 	    TestProcObj testProc = testProcService.getTestProc(surveyResponse.getTestProcPk());
 	    if(surveyResponse.getSurveyPk() != testProc.getFormPk())
@@ -298,13 +258,13 @@ public class SurveyResponseController
 	    }
 		try
 		{
-			UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(testProc.getUnitPk()));
-		    UnitInProjectObj upr = UnitManager.getUnitInProject(new UnitOID(testProc.getUnitPk()), new ProjectOID(testProc.getProjectPk()));
+			UnitObj unit = unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
+		    UnitInProjectObj upr = unitManager.getUnitInProject(new UnitOID(testProc.getUnitPk()), new ProjectOID(testProc.getProjectPk()));
 		    if(UnitInProject.STATUS_CLOSED.equals(upr.getStatus()))
 		    {
 		    	throw new AppException("Unit is complete, You cannot submit any changes to the form");
 		    }
-		    Project project = ProjectManager.getProject(testProc.getProjectPk());
+		    Project project = projectService.getProject(testProc.getProjectPk());
 		    if(Project.STATUS_CLOSED.equals(project.getStatus()))
 		    {
 		    	throw new AppException("Project is closed, You cannot submit any changes to the form");
@@ -334,7 +294,7 @@ public class SurveyResponseController
 			}
 		    
 		    //check the workstation status.
-			UnitLocationQuery unitWorkstation = ProjectDelegate.getUnitWorkstationStatus(testProc.getUnitPk(), new ProjectOID(testProc.getProjectPk(), null), new WorkstationOID(testProc.getWorkstationPk(), null));
+			UnitLocationQuery unitWorkstation = workstationService.getUnitWorkstationStatus(testProc.getUnitPk(), new ProjectOID(testProc.getProjectPk(), null), new WorkstationOID(testProc.getWorkstationPk(), null));
 			if(UnitLocation.STATUS_COMPLETED.equals(unitWorkstation.getStatus()))
 			{
 				throw new AppException("Workstation is complete for the unit, Form cannot be submitted");
@@ -413,7 +373,7 @@ public class SurveyResponseController
 				{
 					try
 					{
-						SurveyMaster.releaseSectionEditLock(userContext, (User) userContext.getUser(), 
+						surveyMaster.releaseSectionEditLock(userContext, (User) userContext.getUser(),
 								surveyResponse.getOID(), aItem.getSurveyItemId());
 					}
 					catch(LockedByAnotherUserException lx)
@@ -426,7 +386,7 @@ public class SurveyResponseController
 			}
 			
 			
-		    conn.commit();
+
 		}
 		catch(AppException ax)
 		{
@@ -440,7 +400,7 @@ public class SurveyResponseController
 				{
 					try
 					{
-						SurveyMaster.releaseSectionEditLock(userContext, (User) userContext.getUser(), 
+						surveyMaster.releaseSectionEditLock(userContext, (User) userContext.getUser(),
 								surveyResponse.getOID(), aItem.getSurveyItemId());
 					}
 					catch(LockedByAnotherUserException lx)
@@ -451,18 +411,10 @@ public class SurveyResponseController
 					}
 				}
 			}
-			conn.commit();
+
 			throw ax;
 		}
-		catch (Exception ex)
-		{
-			ex.printStackTrace();
-		    conn.rollback();
-		    throw ex;
-		}
-		finally
-		{
-		}
+
     }
 
     public  List<ResponseSubmissionBookmark> getResponseSubmissionBookmarks(TestProcOID testprocOID)
@@ -487,19 +439,15 @@ public class SurveyResponseController
     public  long importSurveyResponse(UserContext userContext, SurveyDefinition surveyDef,
 	    SurveyResponse surveyResponse) throws Exception
     {
-	Connection conn = null;
-	try
-	{
-	    conn = ServiceLocator.locate().getConnection();
-	    conn.setAutoCommit(false);
+
 	    
 	    TestProcObj testProc = testProcService.getTestProc(surveyResponse.getTestProcPk());
 	    if(surveyResponse.getSurveyPk() != testProc.getFormPk())
 	    {
 	    	throw new AppException("Invalid checksheet, Form cannot be submitted: TP-" + surveyResponse.getTestProcPk());
 	    }
-	    UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(testProc.getUnitPk()));
-	    Project project = ProjectManager.getProject(testProc.getProjectPk());
+	    UnitObj unit = unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
+	    Project project = projectService.getProject(testProc.getProjectPk());
 
 	    SurveyResponse resp = surveyResponseService.saveSectionResponses(userContext, project, unit,
 		    surveyResponse, surveyDef.getQuestions());
@@ -514,18 +462,10 @@ public class SurveyResponseController
 		    resp.getResponseId(),
 		    surveyResponse.getResponseCompleteTime());
 
-	    conn.commit();
+
 
 	    return resp.getResponseId();
-	}
-	catch (Exception ex)
-	{
-	    conn.rollback();
-	    throw ex;
-	}
-	finally
-	{
-	}
+
     }
 
     *//**
@@ -539,11 +479,7 @@ public class SurveyResponseController
     public  SurveyResponse updateSurveyResponse(UserContext userContext, SurveyDefinition surveyDef,
 	    SurveyResponse surveyResponse) throws Exception
     {
-		Connection conn = null;
-		try
-		{
-		    conn = ServiceLocator.locate().getConnection();
-		    conn.setAutoCommit(false);
+
 		    
 		    if(ResponseMasterNew.STATUS_COMPLETE.equals(surveyResponse.getStatus()) || ResponseMasterNew.STATUS_VERIFIED.equals(surveyResponse.getStatus()))
 		    {
@@ -554,13 +490,13 @@ public class SurveyResponseController
 		    }
 		    
 		    TestProcObj testProc = testProcService.getTestProc(surveyResponse.getTestProcPk());
-		    UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(testProc.getUnitPk()));
-		    UnitInProjectObj upr = UnitManager.getUnitInProject(new UnitOID(testProc.getUnitPk()), new ProjectOID(testProc.getProjectPk()));
+		    UnitObj unit = unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
+		    UnitInProjectObj upr = unitManager.getUnitInProject(new UnitOID(testProc.getUnitPk()), new ProjectOID(testProc.getProjectPk()));
 		    if(UnitInProject.STATUS_CLOSED.equals(upr.getStatus()))
 		    {
 		    	throw new AppException("Unit is complete, You cannot submit any changes to the form");
 		    }
-		    Project project = ProjectManager.getProject(testProc.getProjectPk());
+		    Project project = projectService.getProject(testProc.getProjectPk());
 		    if(Project.STATUS_CLOSED.equals(project.getStatus()))
 		    {
 		    	throw new AppException("Project is closed, You cannot submit any changes to the form");
@@ -576,7 +512,7 @@ public class SurveyResponseController
 		    }
 		    
 		    //check the workstation status.
-			UnitLocationQuery unitWorkstation = ProjectDelegate.getUnitWorkstationStatus(testProc.getUnitPk(), new ProjectOID(testProc.getProjectPk(), null), new WorkstationOID(testProc.getWorkstationPk(), null));
+			UnitLocationQuery unitWorkstation =workstationService.getUnitWorkstationStatus(testProc.getUnitPk(), new ProjectOID(testProc.getProjectPk(), null), new WorkstationOID(testProc.getWorkstationPk(), null));
 			if(UnitLocation.STATUS_COMPLETED.equals(unitWorkstation.getStatus()))
 			{
 				throw new AppException("Workstation is complete for the unit, Form cannot be saved or submitted");
@@ -608,26 +544,26 @@ public class SurveyResponseController
 				List<FormResponseDesc> itemResponses = PersistWrapper.readList(FormResponseDesc.class, "select * from TAB_RESPONSE_desc where responseId = ?", surveyResponse.getResponseId());
 				respMaster.setResponseId(0);
 				respMaster.setCurrent(true);
-				int newResponseId = PersistWrapper.createEntity(respMaster);
+				int newResponseId = persistWrapper.createEntity(respMaster);
 				
 				for (Iterator iterator = sections.iterator(); iterator.hasNext();) 
 				{
 					SectionResponse sectionResponse = (SectionResponse) iterator.next();
 					sectionResponse.setPk(0);
 					sectionResponse.setResponseId(newResponseId);
-					PersistWrapper.createEntity(sectionResponse);
+					persistWrapper.createEntity(sectionResponse);
 				}
 				for (Iterator iterator = itemResponses.iterator(); iterator.hasNext();) 
 				{
 					FormResponseDesc formResponseDesc = (FormResponseDesc) iterator.next();
 					formResponseDesc.setResponseId(newResponseId);
-					PersistWrapper.createEntity(formResponseDesc);
+					persistWrapper.createEntity(formResponseDesc);
 				}
 				
 				// TODO:: hack hack. here since the responseId changes, the FormItemResponse reference will be lost since the
 				// responseId is changed.. we should actually have the copy archieved and the current one continued.. but that need to be tested properly.
 				// so for now I am changing the responseId to the new one.
-				PersistWrapper.executeUpdate("update TAB_ITEM_RESPONSE set responseId = ? where responseId = ?", newResponseId, surveyResponse.getResponseId());
+				persistWrapper.executeUpdate("update TAB_ITEM_RESPONSE set responseId = ? where responseId = ?", newResponseId, surveyResponse.getResponseId());
 
 				SurveyResponse newResponse = surveyResponseService.updateSurveyResponse(userContext, project, unit, surveyDef,
 					    newResponseId, surveyResponse.getSurveyItemAnswerMap(), surveyDef.getQuestions());
@@ -641,21 +577,12 @@ public class SurveyResponseController
 				responseToReturn = surveyResponseService.getSurveyResponse(newResponseId);
 			}
 			//record workstation save
-			ProjectManager.recordWorkstationSave(testProc.getOID());
+			workstationService.recordWorkstationSave(testProc.getOID());
 			
-			conn.commit();
+
 
 			return responseToReturn;
-		}
-		catch (Exception ex)
-		{
-			ex.printStackTrace();
-		    conn.rollback();
-		    throw ex;
-		}
-		finally
-		{
-		}
+
     }
 
     public  List getSurveyItemResponse(SurveyDefinition surveyDef,
@@ -748,74 +675,47 @@ public class SurveyResponseController
     public  void verifyResponse(UserContext userContext,
 	    SurveyResponse sResponse, String comments) throws Exception
     {
-		Connection conn = null;
-		try
-		{
-		    conn = ServiceLocator.locate().getConnection();
-		    conn.setAutoCommit(false);
-	
+
+
 			surveyResponseService.verifyResponse(userContext,
 				    sResponse, comments);
 			TestProcObj testProc = testProcService.getTestProc(sResponse.getTestProcPk());
-		    UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(testProc.getUnitPk()));
-		    Project project = ProjectManager.getProject(testProc.getProjectPk());
-		    ActivityLogQuery aLog = new ActivityLogQuery(userContext.getUser().getPk(), Actions.verifyForm, 
-					"Form Verified", new Date(), new Date(), project.getPk(), testProc.getPk(), unit.getPk(), testProc.getWorkstationPk(), 
+		    UnitObj unit =unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
+		    Project project = projectService.getProject(testProc.getProjectPk());
+		    ActivityLogQuery aLog = new ActivityLogQuery(userContext.getUser().getPk(), Actions.verifyForm,
+					"Form Verified", new Date(), new Date(), project.getPk(), testProc.getPk(), unit.getPk(), testProc.getWorkstationPk(),
 					sResponse.getSurveyPk(), null, sResponse.getResponseId());
 			ActivityLoggingDelegate.logActivity(aLog);
-	
-		    conn.commit();
-		}
-		catch (Exception ex)
-		{
-		    conn.rollback();
-		    throw ex;
-		}
-		finally
-		{
-		}
+
+
+
+
     }
 
     public  void rejectResponse(UserContext userContext,
 	    SurveyResponse sResponse, String comments) throws Exception
     {
-		Connection conn = null;
-		try
-		{
-		    conn = ServiceLocator.locate().getConnection();
-		    conn.setAutoCommit(false);
+
 	
 			surveyResponseService.rejectResponse(userContext,
 				    sResponse, comments);
 			TestProcObj testProc = testProcService.getTestProc(sResponse.getTestProcPk());
-		    UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(testProc.getUnitPk()));
-		    Project project = ProjectManager.getProject(testProc.getProjectPk());
+		    UnitObj unit = unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
+		    Project project = projectService.getProject(testProc.getProjectPk());
 			ActivityLogQuery aLog = new ActivityLogQuery(userContext.getUser().getPk(), Actions.rejectVerifyForm, 
 					"Form Verification Rejected", new Date(), new Date(), project.getPk(), testProc.getPk(), 
 					unit.getPk(), testProc.getWorkstationPk(), 
 					sResponse.getSurveyPk(), null, sResponse.getResponseId());
 			ActivityLoggingDelegate.logActivity(aLog);
 	
-		    conn.commit();
-		}
-		catch (Exception ex)
-		{
-		    conn.rollback();
-		    throw ex;
-		}
-		finally
-		{
-		}
+
+
     }
 
     public  void approveResponse(UserContext userContext,
     		ResponseMasterNew resp, String comments) throws Exception
     {
-		Connection conn = null;
-		try
-		{
-		    conn = ServiceLocator.locate().getConnection();
-		    conn.setAutoCommit(false);
+
 	
 	    	surveyResponseService.approveResponse(userContext, resp, comments);
 	    	TestProcObj testProc = testProcService.getTestProc(resp.getTestProcPk());
@@ -827,26 +727,13 @@ public class SurveyResponseController
 	    				testProc.getFormPk(), null, resp.getResponseId());
 	    	ActivityLoggingDelegate.logActivity(aLog);
 	
-		    conn.commit();
-		}
-		catch (Exception ex)
-		{
-		    conn.rollback();
-		    throw ex;
-		}
-		finally
-		{
-		}
+
     }
 
     public  void approveResponseWithComments(UserContext userContext,
     		ResponseMasterNew resp, String comments) throws Exception
     {
-		Connection conn = null;
-		try
-		{
-		    conn = ServiceLocator.locate().getConnection();
-		    conn.setAutoCommit(false);
+
 	
 	    	surveyResponseService.approveResponseWithComments(userContext, resp, comments);
 	    	TestProcObj testProc = testProcService.getTestProc(resp.getTestProcPk());
@@ -858,119 +745,68 @@ public class SurveyResponseController
 	    				testProc.getFormPk(), null, resp.getResponseId());
 	    	ActivityLoggingDelegate.logActivity(aLog);
 	
-		    conn.commit();
-		}
-		catch (Exception ex)
-		{
-		    conn.rollback();
-		    throw ex;
-		}
-		finally
-		{
-		}
+
     }
 
 	public  void approveResponseInBulk(UserContext userContext, List<AssignedTestsQuery> selectedList, String comment) throws Exception
 	{
 
-		Connection conn = null;
-		try
-		{
-		    conn = ServiceLocator.locate().getConnection();
-		    conn.setAutoCommit(false);
+
 	
-    		for (Iterator iterator = selectedList.iterator(); iterator.hasNext();)
-			{
+    		for (Iterator iterator = selectedList.iterator(); iterator.hasNext();) {
 				AssignedTestsQuery assignedTestsQuery = (AssignedTestsQuery) iterator.next();
 
 				ResponseMasterNew resp = surveyResponseService.getResponseMaster(assignedTestsQuery.getResponseId());
-				
-		    	surveyResponseService.approveResponse(userContext, resp, comment);
-			    
-		    	TestProcObj testProc = testProcService.getTestProc(resp.getTestProcPk());
 
-			    ActivityLogQuery aLog = new ActivityLogQuery(userContext.getUser().getPk(), Actions.approveForm, 
-		    				"Form Approved", new Date(), new Date(), testProc.getProjectPk(), testProc.getPk(), 
-		    				testProc.getUnitPk(), testProc.getWorkstationPk(), 
-		    				resp.getFormPk(), null, resp.getResponseId());
-		    	ActivityLoggingDelegate.logActivity(aLog);
+				surveyResponseService.approveResponse(userContext, resp, comment);
+
+				TestProcObj testProc = testProcService.getTestProc(resp.getTestProcPk());
+
+				ActivityLogQuery aLog = new ActivityLogQuery(userContext.getUser().getPk(), Actions.approveForm,
+						"Form Approved", new Date(), new Date(), testProc.getProjectPk(), testProc.getPk(),
+						testProc.getUnitPk(), testProc.getWorkstationPk(),
+						resp.getFormPk(), null, resp.getResponseId());
+				ActivityLoggingDelegate.logActivity(aLog);
 			}
-	
-		    conn.commit();
-		}
-		catch (Exception ex)
-		{
-		    conn.rollback();
-		    throw ex;
-		}
-		finally
-		{
-		}
 	}
 	
     
     public  void rejectApproval(UserContext userContext,
 	    SurveyResponse sResponse, String comments) throws Exception
     {
-		Connection conn = null;
-		try
-		{
-		    conn = ServiceLocator.locate().getConnection();
-		    conn.setAutoCommit(false);
+
 	
 			surveyResponseService.rejectApproval(userContext,
 				    sResponse, comments);
 			TestProcObj testProc = testProcService.getTestProc(sResponse.getTestProcPk());
-		    UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(testProc.getUnitPk()));
-		    Project project = ProjectManager.getProject(testProc.getProjectPk());
+		    UnitObj unit =unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
+		    Project project = projectService.getProject(testProc.getProjectPk());
 			ActivityLogQuery aLog = new ActivityLogQuery(userContext.getUser().getPk(), Actions.rejectApproveForm, 
 					"Form Approval Rejected", new Date(), new Date(), project.getPk(), testProc.getPk(), 
 					testProc.getUnitPk(), testProc.getWorkstationPk(), 
 					sResponse.getSurveyPk(), null, sResponse.getResponseId());
 			ActivityLoggingDelegate.logActivity(aLog);
 	
-		    conn.commit();
-		}
-		catch (Exception ex)
-		{
-		    conn.rollback();
-		    throw ex;
-		}
-		finally
-		{
-		}
+
     }
     
 
     public  void reopenApproved(UserContext userContext, SurveyResponse sResponse, String comments) throws Exception
     {
-		Connection conn = null;
-		try
-		{
-		    conn = ServiceLocator.locate().getConnection();
-		    conn.setAutoCommit(false);
+
 	
 	    	surveyResponseService.reopenApprovedForm(userContext,
 	    		    sResponse, comments);
 	    	TestProcObj testProc = testProcService.getTestProc(sResponse.getTestProcPk());
-		    UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(testProc.getUnitPk()));
-		    Project project = ProjectManager.getProject(testProc.getProjectPk());
+		    UnitObj unit = unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
+		    Project project = projectService.getProject(testProc.getProjectPk());
 	    	ActivityLogQuery aLog = new ActivityLogQuery(userContext.getUser().getPk(), Actions.rejectApproveForm, 
 	    			"Approved form reopened", new Date(), new Date(), project.getPk(), testProc.getPk(), 
 	    			testProc.getUnitPk(), testProc.getWorkstationPk(), 
 	    			sResponse.getSurveyPk(), null, sResponse.getResponseId());
 	    	ActivityLoggingDelegate.logActivity(aLog);
 	
-		    conn.commit();
-		}
-		catch (Exception ex)
-		{
-		    conn.rollback();
-		    throw ex;
-		}
-		finally
-		{
-		}
+
     }
         
     
@@ -1056,24 +892,11 @@ public class SurveyResponseController
 	public  void addToResponseVAComments(UserContext userContext,	ResponseMasterNew responseMaster, String vCommentToAdd,
 			String aCommentToAdd) throws Exception 
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
     		surveyResponseService.addToResponseVAComments(userContext, responseMaster, vCommentToAdd, aCommentToAdd);
     		
-            con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-	    finally
-	    {
-	    }
+
 	}
 
 //	public  String addToSurveyItemResponseComment(UserContext userContext,	int responseId, String surveyItemId,
@@ -1105,62 +928,24 @@ public class SurveyResponseController
 	}
 
 	
-	public  FormItemResponse createFormItemResponse(int responseId, String surveyItemId)
-	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+	public  FormItemResponse createFormItemResponse(int responseId, String surveyItemId) throws Exception {
+
 
     		FormItemResponse r = surveyResponseService.createFormItemResponse(responseId, surveyItemId);
-			con.commit();
+
 			return r;
-        }
-        catch(Exception ex)
-        {
-        	ex.printStackTrace();
-        }
-	    finally
-	    {
-        	try {
-				con.rollback();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	    }
-        return null;
 	}
 
-	public  FormItemResponse getFormItemResponse(int responseId, String surveyItemId, boolean createIfNoExist)
-	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+	public  FormItemResponse getFormItemResponse(int responseId, String surveyItemId, boolean createIfNoExist) throws Exception {
+
 
     		FormItemResponse r = surveyResponseService.getFormItemResponse(responseId, surveyItemId, createIfNoExist);
-			con.commit();
+
 			return r;
-        }
-        catch(Exception ex)
-        {
-        	ex.printStackTrace();
-        	try {
-				con.rollback();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-        }
-	    finally
-	    {
-	    }
-        return null;
+
+
 	}
-	
+
 	public  HashMap<String, FormItemResponse> getFormItemResponses(int responseId)
 	{
 		return	surveyResponseService.getFormItemResponses(responseId);
@@ -1174,56 +959,23 @@ public class SurveyResponseController
 	
 	public  FormResponseClientSubmissionRev saveFormClientSubmissionRevision(UserContext context, int responseId, String revision) throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
             FormResponseClientSubmissionRev r = surveyResponseService.saveFormClientSubmissionRevision(context, responseId, revision);
-			con.commit();
+
 			return r;
-        }
-        catch(Exception ex)
-        {
-        	ex.printStackTrace();
-        	try {
-				con.rollback();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-        	throw ex;
-        }
-	    finally
-	    {
-	    }
+
 	}
 
 
 	public  void saveSyncErrorResponse(UserContext context, int responseId, FormResponseBean formResponseBean) throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
             surveyResponseService.saveSyncErrorResponse(context, responseId, formResponseBean);
-			con.commit();
-        }
-        catch(Exception ex)
-        {
-        	ex.printStackTrace();
-        	try {
-				con.rollback();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-        	throw ex;
-        }
-	    finally
-	    {
-	    }
+
+
+
 	}
 	
 	public  FormResponseBean getFormResponseBean(UserContext context, int responseId)throws Exception

@@ -11,7 +11,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-
+import com.tathvatech.common.enums.WorkItem;
+import com.tathvatech.forms.oid.FormResponseOID;
+import com.tathvatech.forms.oid.TestProcSectionOID;
+import com.tathvatech.forms.service.TestProcServiceImpl;
+import com.tathvatech.report.enums.ReportTypes;
+import com.tathvatech.report.request.ReportRequest;
+import com.tathvatech.report.response.ReportResponse;
 import com.tathvatech.common.common.ApplicationProperties;
 import com.tathvatech.common.email.EmailMessageInfo;
 import com.tathvatech.common.enums.EntityTypeEnum;
@@ -27,6 +33,7 @@ import com.tathvatech.project.entity.Project;
 import com.tathvatech.project.entity.ProjectForm;
 import com.tathvatech.project.service.ProjectService;
 import com.tathvatech.survey.entity.Survey;
+import com.tathvatech.unit.entity.UnitBookmark;
 import com.tathvatech.unit.service.UnitManager;
 import com.tathvatech.user.Asynch.AsyncProcessor;
 import com.tathvatech.user.OID.*;
@@ -46,6 +53,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+
+
 /**
  * @author Hari
  *
@@ -62,6 +71,9 @@ public class SurveyMaster
 	private final SurveyResponseService surveyResponseService;
 	private final SequenceIdGenerator sequenceIdGenerator;
 	private final UnitManager unitManager;
+	private final SurveyMaster surveyMaster;
+	private final SurveyDefFactory surveyDefFactory;
+   private final TestProcService testProcService;
 
 
 
@@ -198,7 +210,7 @@ public class SurveyMaster
 	 */
 	public  Survey createSurveyNewVersion(UserContext context, Survey newVersion, FormQuery baseRevision) throws Exception
 	{
-		Survey survey = SurveyMaster.getSurveyByPk(baseRevision.getPk());
+		Survey survey = surveyMaster.getSurveyByPk(baseRevision.getPk());
 		
 		Account account = (Account)context.getAccount();
 		User user = (User)context.getUser();
@@ -226,7 +238,7 @@ public class SurveyMaster
         newVersion.setVersionNo(maxVersionNo+1);
         newVersion.setStatus(Survey.STATUS_CLOSED);
         
-		SurveyDefFactory.createSurveyByCopy(newVersion, baseRevision.getPk());
+		surveyDefFactory.createSurveyByCopy(newVersion, baseRevision.getPk());
 
 
         int newSurveyPk = (int) persistWrapper.createEntity(newVersion);
@@ -263,7 +275,7 @@ public class SurveyMaster
         formMain.setResponsibleDivision(survey.getResponsibleDivision());
         formMain.setStatus(FormMain.STATUS_ACTIVE);
 
-		survey.setCreatedBy(user.getPk());
+		survey.setCreatedBy((int) user.getPk());
         survey.setDbTable(tableName);
 		survey.setDefFileName(fileName);
 		survey.setCreatedDate(new Date());
@@ -271,7 +283,7 @@ public class SurveyMaster
 		survey.setStatus(Survey.STATUS_CLOSED);
 
 		
-		SurveyDefFactory.createSurveyByCopy(survey, sourceSurveyPk);
+		surveyDefFactory.createSurveyByCopy(survey, sourceSurveyPk);
 
 
         int formMainPk = (int) persistWrapper.createEntity(formMain);
@@ -280,7 +292,7 @@ public class SurveyMaster
         int surveyPk = (int) persistWrapper.createEntity(survey);
 
 		// fetch the new survey back
-		survey = persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
+		survey = (Survey) persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
 		return survey;
 	}
 
@@ -294,7 +306,7 @@ public class SurveyMaster
 	{
 		List errors = new ArrayList();
 		
-		Survey surveyConfig = SurveyMaster.getSurveyByPk(surveyPk);
+		Survey surveyConfig = surveyMaster.getSurveyByPk(surveyPk);
 		int masterPk = surveyConfig.getFormMainPk();
 
 		if(!(Survey.STATUS_CLOSED.equals(surveyConfig.getStatus())))
@@ -317,7 +329,7 @@ public class SurveyMaster
 			throw new AppException((String[])errors.toArray(new String[errors.size()]));
 		
 		surveyConfig.setStatus(Survey.STATUS_DELETED);
-		PersistWrapper.update(surveyConfig);
+		persistWrapper.update(surveyConfig);
 
 		Integer formCountInSet = persistWrapper.read(Integer.class,
 				"select count(*) from tab_survey where formMainPk = ? and status != ? ", surveyConfig.getFormMainPk(), Survey.STATUS_DELETED);
@@ -339,7 +351,7 @@ public class SurveyMaster
 		persistWrapper.update(survey);
 		
 		// fetch the new survey back
-		survey = persistWrapper.readByPrimaryKey(Survey.class, survey.getPk());
+		survey = (Survey) persistWrapper.readByPrimaryKey(Survey.class, survey.getPk());
 		return survey;
 	}
 
@@ -444,7 +456,7 @@ public class SurveyMaster
 
 	public  FormQuery getLatestPublishedVersionOfForm(int formPk) throws Exception
 	{
-		Survey s = persistWrapper.readByPrimaryKey(Survey.class, formPk);
+		Survey s = (Survey) persistWrapper.readByPrimaryKey(Survey.class, formPk);
 		return getLatestPublishedVersionForForm(s.getFormMainPk());
 	}
 
@@ -470,7 +482,7 @@ public class SurveyMaster
 	{
 		List errors = new ArrayList();
 		
-		Survey surveyConfig = SurveyMaster.getSurveyByPk(surveyVersionPk);
+		Survey surveyConfig = surveyMaster.getSurveyByPk(surveyVersionPk);
 		if(!(Survey.STATUS_CLOSED.equals(surveyConfig.getStatus())))
 		{
 			throw new AppException("Only a form in draft status can be deleted.");
@@ -480,14 +492,14 @@ public class SurveyMaster
 		persistWrapper.update(surveyConfig);
 
 		//if there are no active versions of the form, delete the formMain
-		Integer formCountInSet = PersistWrapper.read(Integer.class, 
+		Integer formCountInSet = persistWrapper.read(Integer.class,
 				"select count(*) from tab_survey where formMainPk = ? and status != ? ", surveyConfig.getFormMainPk(), Survey.STATUS_DELETED);
 		if(formCountInSet == 0)
 		{
-			FormMain formMain = PersistWrapper.readByPrimaryKey(FormMain.class, surveyConfig.getFormMainPk());
+			FormMain formMain = persistWrapper.readByPrimaryKey(FormMain.class, surveyConfig.getFormMainPk());
 			formMain.setIdentityNumber(surveyConfig.getIdentityNumber() + "-del-" + formMain.getPk());
 			formMain.setStatus(FormMain.STATUS_DELETED);
-			PersistWrapper.update(formMain);
+			persistWrapper.update(formMain);
 		}
 
 		
@@ -510,17 +522,17 @@ public class SurveyMaster
 	public  void publishSurvey(UserContext context, int surveyPk,
 									 List<ProjectOID> projectUpgradeList, HashMap<ProjectOID, User> projectNotificationMap, HashMap<ProjectOID, List<Integer>> formsUpgradeMap)throws Exception
 	{
-		Survey survey = persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
+		Survey survey = (Survey) persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
 		if(!(Survey.STATUS_CLOSED.equals(survey.getStatus())))
 			return;
 		
 		survey.setStatus(Survey.STATUS_OPEN);
-		survey.setApprovedBy(context.getUser().getPk());
+		survey.setApprovedBy((int) context.getUser().getPk());
 		Date now = new Date();
 		survey.setApprovedDate(now);
 		survey.setEffectiveDate(now);
-		PersistWrapper.update(survey);
-		survey = persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
+		persistWrapper.update(survey);
+		survey = (Survey) persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
 		
 		supersedPreviousFormVersions(survey);
 		
@@ -593,7 +605,7 @@ public class SurveyMaster
 
 	public  void applyFormUpgradePublish(UserContext context, int surveyPk, List projectListToUpgrade, List unitFormsListToUpgrade)throws Exception
 	{
-		Survey survey = persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
+		Survey survey = (Survey) persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
 		if(!(Survey.STATUS_OPEN.equals(survey.getStatus())))
 			throw new AppException("Form is still not published, it cannot be assigned to projects");
 	
@@ -614,7 +626,7 @@ public class SurveyMaster
 					if(current.getVersionNo() < survey.getPk())
 					{
 						// do the upgrade only if the formversion is lower
-						projectForm.setFormPk(survey.getPk());
+						projectForm.setFormPk((int) survey.getPk());
 						projectForm.setAppliedByUserFk(context.getUser().getPk());
 						persistWrapper.update(projectForm);
 					}
@@ -628,7 +640,7 @@ public class SurveyMaster
 			for (Iterator iterator = unitFormsListToUpgrade.iterator(); iterator.hasNext();)
 			{
 				Integer aUnitFormPk = (Integer) iterator.next();
-				TestProcObj uForm = TestProcServiceImpl.getTestProc(aUnitFormPk);
+				TestProcObj uForm = testProcService.getTestProc(aUnitFormPk);
 				
 				Survey current = getSurveyByPk(uForm.getFormPk());
 				if(current.getVersionNo() < survey.getPk())
@@ -658,8 +670,8 @@ public class SurveyMaster
 	{
 		if(EntityTypeEnum.TestProcSection == workItem.getEntityType())
 		{
-			TestProcSectionObj testProcSectionObj = new TestProcServiceImpl().getTestProcSection(new TestProcSectionOID(workItem.getPk()));
-			TestProcObj testProc = new TestProcServiceImpl().getTestProc(new TestProcSectionOID(workItem.getPk()));
+			TestProcSectionObj testProcSectionObj = testProcService.getTestProcSection(new TestProcSectionOID((int) workItem.getPk()));
+			TestProcObj testProc =testProcService.getTestProc(new TestProcSectionOID((int) workItem.getPk()));
 			ResponseMasterNew resp = surveyResponseService.getLatestResponseMasterForTest(testProc.getOID());
 
 			ObjectLock ol = getObjectLock(resp.getResponseId(), (int) testProcSectionObj.getFormSectionFk());
@@ -671,12 +683,12 @@ public class SurveyMaster
 		return null;
 	}
 
-	public static void setAttribution(UserContext context, WorkItem workItem, UserOID attributeToUserOID)throws Exception
+	public void setAttribution(UserContext context, WorkItem workItem, UserOID attributeToUserOID)throws Exception
 	{
 		if(EntityTypeEnum.TestProcSection == workItem.getEntityType())
 		{
-			TestProcSectionObj testProcSectionObj = new TestProcServiceImpl().getTestProcSection(new TestProcSectionOID(workItem.getPk()));
-			TestProcObj testProc = new TestProcServiceImpl().getTestProc(new TestProcSectionOID(workItem.getPk()));
+			TestProcSectionObj testProcSectionObj = testProcService.getTestProcSection(new TestProcSectionOID((int) workItem.getPk()));
+			TestProcObj testProc = testProcService.getTestProc(new TestProcSectionOID((int) workItem.getPk()));
 			ResponseMasterNew resp = surveyResponseService.getLatestResponseMasterForTest(testProc.getOID());
 
 			ObjectLock ol = getObjectLock(resp.getResponseId(), (int) testProcSectionObj.getFormSectionFk());
@@ -692,13 +704,13 @@ public class SurveyMaster
 	{
 		if(EntityTypeEnum.TestProcSection == workItem.getEntityType())
 		{
-			TestProcSectionObj testProcSectionObj = new TestProcServiceImpl().getTestProcSection(new TestProcSectionOID(workItem.getPk()));
-			TestProcObj testProc = new TestProcServiceImpl().getTestProc(new TestProcSectionOID(workItem.getPk()));
+			TestProcSectionObj testProcSectionObj = testProcService.getTestProcSection(new TestProcSectionOID((int) workItem.getPk()));
+			TestProcObj testProc =testProcService.getTestProc(new TestProcSectionOID((int) workItem.getPk()));
 			ResponseMasterNew resp = surveyResponseService.getLatestResponseMasterForTest(testProc.getOID());
 
 			ObjectLock ol = getObjectLock(resp.getResponseId(), (int) testProcSectionObj.getFormSectionFk());
 			ol.setAttributionUserFk(ol.getUserPk());
-			PersistWrapper.update(ol);
+			persistWrapper.update(ol);
 		}
 	}
 
@@ -741,14 +753,14 @@ public class SurveyMaster
 			lock.setUserPk(lockForUser.getPk());
 			lock.setAttributionUserFk(lockForUser.getPk());
 			lock.setLockDate(new Date());
-			int newPk = persistWrapper.createEntity(lock);
+			int newPk = Math.toIntExact(persistWrapper.createEntity(lock));
 
 			ObjectLock newLock = persistWrapper.readByPrimaryKey(ObjectLock.class, newPk);
 			newLock.setLockedByUser(lockForUser);
 			
 			
 			//create the workorder for this section if not already created
-			ResponseMasterNew resp = surveyResponseService.getResponseMaster(responseOID.getPk());
+			ResponseMasterNew resp = surveyResponseService.getResponseMaster((int) responseOID.getPk());
 			TestProcSectionObj tsObj = new TestProcSectionDAO().getTestProcSection(new TestProcOID(resp.getTestProcPk()), new FormSectionOID(newLock.getFormSectionFk()));
 			WorkorderRequestBean woBean = new WorkorderRequestBean(tsObj.getOID());
 			WorkorderManager.createWorkorder(context, woBean);
@@ -756,7 +768,7 @@ public class SurveyMaster
 			
 			
 			//add the unit to favourites
-			TestProcObj testProc = TestProcServiceImpl.getTestProc(resp.getTestProcPk());
+			TestProcObj testProc = testProcService.getTestProc(resp.getTestProcPk());
 			unitManager.addUnitBookMark(context, testProc.getUnitPk(), testProc.getProjectPk(), UnitBookmark.BookmarkModeEnum.Auto);
 			
 			

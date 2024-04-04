@@ -6,13 +6,42 @@
  */
 package com.tathvatech.survey.service;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.List;
+import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Date;
 
+import com.tathvatech.common.common.ApplicationProperties;
+import com.tathvatech.forms.oid.FormResponseOID;
+import com.tathvatech.survey.entity.ResponseFlags;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tathvatech.common.utils.SequenceIdGenerator;
+import com.tathvatech.common.common.ErrorCode;
 import com.tathvatech.common.common.ServiceLocator;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.common.exception.AppException;
+import com.tathvatech.forms.entity.FormSection;
+import com.tathvatech.forms.response.FormResponseStats;
+import com.tathvatech.project.entity.Project;
+import com.tathvatech.project.enums.ProjectPropertyEnum;
+import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.entity.Survey;
+import com.tathvatech.survey.enums.AnswerPersistor;
+import com.tathvatech.survey.inf.SurveyItemBase;
+import com.tathvatech.survey.inf.SurveySaveItemBase;
+import com.tathvatech.survey.response.SurveyItemResponse;
 import com.tathvatech.survey.response.SurveyResponse;
+import com.tathvatech.unit.common.TestableEntity;
+import com.tathvatech.unit.entity.UnitBookmark;
+import com.tathvatech.unit.entity.UnitLocation;
+import com.tathvatech.unit.enums.Actions;
+import com.tathvatech.unit.response.ResponseUnit;
+import com.tathvatech.unit.service.UnitManager;
+import com.tathvatech.user.common.UserContextImpl;
+import com.tathvatech.user.entity.Site;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.service.CommonServicesDelegate;
 import com.tathvatech.user.utils.Sqls;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.dao.TestProcDAO;
@@ -26,6 +55,8 @@ import com.tathvatech.workstation.common.DummyWorkstation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import static com.tathvatech.common.enums.EntityTypeEnum.ResponseSubmissionBookmark;
 
 /**
  * @author Hari
@@ -41,10 +72,20 @@ public class SurveyResponseServiceImpl implements SurveyResponseService
 	private final PersistWrapper persistWrapper;
 
 	private final DummyWorkstation dummyWorkstation;
-
-    public SurveyResponseServiceImpl(PersistWrapper persistWrapper, DummyWorkstation dummyWorkstation) {
+	private final SurveyResponseService surveyResponseService;
+	private final SurveyDefFactory surveyDefFactory;
+	private final UnitManager unitManager;
+	private final SurveyMaster surveyMaster;
+	private final CommonServicesDelegate commonServicesDelegate;
+	private SequenceIdGenerator sequenceIdGenerator;
+    public SurveyResponseServiceImpl(PersistWrapper persistWrapper, DummyWorkstation dummyWorkstation, SurveyResponseService surveyResponseService, SurveyDefFactory surveyDefFactory, UnitManager unitManager, SurveyMaster surveyMaster, CommonServicesDelegate commonServicesDelegate) {
         this.persistWrapper = persistWrapper;
         this.dummyWorkstation = dummyWorkstation;
+        this.surveyResponseService = surveyResponseService;
+        this.surveyDefFactory = surveyDefFactory;
+        this.unitManager = unitManager;
+        this.surveyMaster = surveyMaster;
+        this.commonServicesDelegate = commonServicesDelegate;
     }
 	@Override
     public  void changeResponseStatus(UserContext userContext, int responseId, String responseStatus)
@@ -135,11 +176,11 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 				User user = surveyResponse.getUser();
 				rootSQL = Sqls.responseMasterInsertWithoutRespondent;
 				pStmt = conn.prepareStatement(rootSQL);
-				pStmt.setInt(1, surveyDef.getSurveyConfig().getPk());
+				pStmt.setInt(1, (int) surveyDef.getSurveyConfig().getPk());
 				pStmt.setObject(2, new Timestamp(timeStamp.getTime()));
 				pStmt.setString(3, ipAddress);
 
-				pStmt.setInt(4, user.getPk());
+				pStmt.setInt(4, (int) user.getPk());
 				pStmt.setString(5, surveyResponse.getResponseRefNo());
 				pStmt.setString(6, SurveyResponse.STATUS_INCOMPLETE);
 				pStmt.setString(7, surveyResponse.getResponseMode());
@@ -198,11 +239,11 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 
 
 			//new reload the surveyResponse
-			surveyResponse = SurveyResponseServiceImpl.getSurveyResponse(surveyDef, responseId);
+			surveyResponse = surveyResponseService.getSurveyResponse(surveyDef, responseId);
 
 
 			//and get the percent complete and number of comments at the form level and save
-			FormResponseStats responseStat = SurveyResponseServiceImpl.getCommentCountAndPercentComplete(surveyDef.getQuestions(), surveyResponse);
+			FormResponseStats responseStat =surveyResponseService.getCommentCountAndPercentComplete(surveyDef.getQuestions(), surveyResponse);
 
 
 			pStmt = conn.prepareStatement("update TAB_RESPONSE set userPk=?, "
@@ -215,7 +256,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 					+ "dimentionalFailCount=?, "
 					+ "naCount=? "
 					+ "where responseId=?");
-			pStmt.setInt(1, context.getUser().getPk());
+			pStmt.setInt(1, (int) context.getUser().getPk());
 			pStmt.setInt(2, responseStat.getPercentComplete());
 			pStmt.setInt(3, responseStat.getCommentsCount());
 			pStmt.setInt(4, responseStat.getTotalQCount());
@@ -291,14 +332,14 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 		saveSurveyItems(responseId, surveyDef, surveyItemResponseMap, allQuestionsToSave);
 
 		//new load the surveyResponse
-		SurveyResponse surveyResponse = SurveyResponseServiceImpl.getSurveyResponse(surveyDef, responseId);
+		SurveyResponse surveyResponse =surveyResponseService.getSurveyResponse(surveyDef, responseId);
 		TestProcObj testProc = TestProcManager.getTestProc(surveyResponse.getTestProcPk());
 
 		saveSectionResponses((User) context.getUser(), surveyResponse.getUser(), project, unit,
 				surveyResponse, sectionsToSave, true);
 
 		//and get the percent complete and number of comments at the form level and save
-		FormResponseStats responseStat = SurveyResponseServiceImpl.getCommentCountAndPercentComplete(surveyResponse.getSurveyDefinition().getQuestions(), surveyResponse);
+		FormResponseStats responseStat = surveyResponseService.getCommentCountAndPercentComplete(surveyResponse.getSurveyDefinition().getQuestions(), surveyResponse);
 
 		ActivityLogQuery aLog = new ActivityLogQuery(context.getUser().getPk(), Actions.saveForm,
 				"Form Saved", new Date(), new Date(), project.getPk(), testProc.getPk(), unit.getPk(), testProc.getWorkstationPk(),
@@ -315,11 +356,11 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 
 
 		//new reload the surveyResponse
-		surveyResponse = SurveyResponseServiceImpl.getSurveyResponse(surveyResponse.getSurveyDefinition(), surveyResponse.getResponseId());
+		surveyResponse = surveyResponseService.getSurveyResponse(surveyResponse.getSurveyDefinition(), surveyResponse.getResponseId());
 
 
 		//add the unit to favourites
-		UnitManager.addUnitBookMark(context, testProc.getUnitPk(), testProc.getProjectPk(), UnitBookmark.BookmarkModeEnum.Auto);
+		unitManager.addUnitBookMark(context, testProc.getUnitPk(), testProc.getProjectPk(), UnitBookmark.BookmarkModeEnum.Auto);
 
 		return surveyResponse;
 	}
@@ -350,7 +391,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 	public  SurveyResponse saveSpecificQuestionResponse(UserContext context, Project project, TestableEntity mItem,
 														SurveyResponse surveyResponse, List questions) throws Exception
 	{
-		List<String> lockedSectionIds = SurveyMaster.getLockedSectionIds((User) context.getUser(),
+		List<String> lockedSectionIds = surveyMaster.getLockedSectionIds((User) context.getUser(),
 				surveyResponse.getOID());
 
 		List validQuestionsToSave = new ArrayList();
@@ -510,7 +551,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 
 
 			//new reload the surveyResponse
-			surveyResponse = SurveyResponseServiceImpl.getSurveyResponse(surveyDef, responseId);
+			surveyResponse =surveyResponseService.getSurveyResponse(surveyDef, responseId);
 
 			//save the SectionResponses for the sections saved in this submit
 			if(sectionsToReCalc != null)
@@ -521,7 +562,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 
 					FormSection formSection = new FormDBManager().getFormSection(aSection.getSurveyItemId(), surveyResponse.getSurveyPk());
 
-					FormResponseStats responseStat = SurveyResponseServiceImpl.getCommentCountAndPercentComplete(aSection.getChildren(), surveyResponse);
+					FormResponseStats responseStat = surveyResponseService.getCommentCountAndPercentComplete(aSection.getChildren(), surveyResponse);
 
 					SectionResponse sectionResponse = persistWrapper.read(SectionResponse.class,
 							"select * from TAB_SECTION_RESPONSE where responseId = ? and sectionId = ?",
@@ -604,7 +645,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 			}
 
 			//and get the percent complete and number of comments at the form level and save
-			FormResponseStats responseStat = SurveyResponseServiceImpl.getCommentCountAndPercentComplete(surveyDef.getQuestions(), surveyResponse);
+			FormResponseStats responseStat = surveyResponseService.getCommentCountAndPercentComplete(surveyDef.getQuestions(), surveyResponse);
 
 			pStmt = conn.prepareStatement("update TAB_RESPONSE set userPk=?, "
 					+ "percentComplete = ?, "
@@ -616,7 +657,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 					+ "dimentionalFailCount=?, "
 					+ "naCount=? "
 					+ "where responseId=?");
-			pStmt.setInt(1, recordSaveAsUser.getPk());
+			pStmt.setInt(1, (int) recordSaveAsUser.getPk());
 			pStmt.setInt(2, responseStat.getPercentComplete());
 			pStmt.setInt(3, responseStat.getCommentsCount());
 			pStmt.setInt(4, responseStat.getTotalQCount());
@@ -650,7 +691,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 			context.setUser(actionPerformedByUser);
 			Site site= SiteDelegate.getSite(actionPerformedByUser.getSitePk());
 			context.setSite(site);
-			UnitManager.addUnitBookMark(context, testProc.getUnitPk(), testProc.getProjectPk(), UnitBookmark.BookmarkModeEnum.Auto);
+			unitManager.addUnitBookMark(context, testProc.getUnitPk(), testProc.getProjectPk(), UnitBookmark.BookmarkModeEnum.Auto);
 
 			return surveyResponse;
 		}
@@ -819,7 +860,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 				Section aSection = (Section) iterator.next();
 				FormSection formSection = new FormDBManager().getFormSection(aSection.getSurveyItemId(), surveyResponse.getSurveyPk());
 
-				FormResponseStats responseStat = SurveyResponseServiceImpl.getCommentCountAndPercentComplete(aSection.getChildren(), surveyResponse);
+				FormResponseStats responseStat = surveyResponseService.getCommentCountAndPercentComplete(aSection.getChildren(), surveyResponse);
 
 				SectionResponse sectionResponse = persistWrapper.read(SectionResponse.class,
 						"select * from TAB_SECTION_RESPONSE where responseId = ? and sectionId = ?",
@@ -933,7 +974,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 					+ "dimentionalFailCount=?, "
 					+ "naCount=? "
 					+ "where responseId=?");
-			pStmt.setInt(1, recordSaveAsUser.getPk());
+			pStmt.setInt(1, (int) recordSaveAsUser.getPk());
 			pStmt.setInt(2, responseStat.getPercentComplete());
 			pStmt.setInt(3, responseStat.getCommentsCount());
 			pStmt.setInt(4, responseStat.getTotalQCount());
@@ -1004,7 +1045,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 	public void finalizeSurveyResponseImpl(UserContext userContext, SurveyDefinition surveyDef, int responseId,
 										   Date responseCompleteTime) throws Exception
 	{
-		SurveyResponse sResponse = SurveyResponseServiceImpl.getSurveyResponse(surveyDef, responseId);
+		SurveyResponse sResponse = surveyResponseService.getSurveyResponse(surveyDef, responseId);
 
 		if (logger.isDebugEnabled())
 		{
@@ -1068,7 +1109,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 
 		//add the unit to favourites
 		TestProcObj testProc = TestProcManager.getTestProc(sResponse.getTestProcPk());
-		UnitManager.addUnitBookMark(userContext, testProc.getUnitPk(), testProc.getProjectPk(), UnitBookmark.BookmarkModeEnum.Auto);
+		unitManager.addUnitBookMark(userContext, testProc.getUnitPk(), testProc.getProjectPk(), UnitBookmark.BookmarkModeEnum.Auto);
 	}
 	@Override
 	public  void markResponseAsOld(UserContext context, ResponseMasterNew response)throws Exception
@@ -1131,7 +1172,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
     {
 		ResponseMasterNew respM = getResponseMaster(responseId);
 		TestProcObj tp = new TestProcManager().getTestProc(respM.getTestProcPk());
-		Boolean saveResponseState = (Boolean) new CommonServicesDelegate().getEntityPropertyValue(new ProjectOID(tp.getProjectPk()), ProjectPropertyEnum.SaveResponseStateOnFormSubmit.getId(), Boolean.class);
+		Boolean saveResponseState = (Boolean) commonServicesDelegate.getEntityPropertyValue(new ProjectOID(tp.getProjectPk()), ProjectPropertyEnum.SaveResponseStateOnFormSubmit.getId(), Boolean.class);
 		if(saveResponseState == null || saveResponseState == false)
 			return;
 
@@ -1159,12 +1200,12 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 			 *//*
 			if(ResponseSubmissionBookmark.SubmissionTypeEnum.Final == submissionType)
 			{
-				int finalSeq = SequenceIdGenerator.getNextSequence(EntityTypeEnum.ResponseSubmissionBookmark.name(), ""+respM.getTestProcPk(), ResponseSubmissionBookmark.SubmissionTypeEnum.Final.name(), null, null);
+				int finalSeq = sequenceIdGenerator.getNextSequence(ResponseSubmissionBookmark.name(), ""+respM.getTestProcPk(), ResponseSubmissionBookmark.SubmissionTypeEnum.Final.name(), null, null);
 				revisionNo = finalSeq+"";
 			}
 			else if(ResponseSubmissionBookmark.SubmissionTypeEnum.Interim == submissionType)
 			{
-				Integer currentMainSeq = SequenceIdGenerator.getCurrentSequence(EntityTypeEnum.ResponseSubmissionBookmark.name(), ""+respM.getTestProcPk(), ResponseSubmissionBookmark.SubmissionTypeEnum.Final.name(), null, null);
+				Integer currentMainSeq = sequenceIdGenerator.getCurrentSequence(ResponseSubmissionBookmark.name(), ""+respM.getTestProcPk(), ResponseSubmissionBookmark.SubmissionTypeEnum.Final.name(), null, null);
 				if(currentMainSeq == null)
 				{
 					currentMainSeq = 1; //current main seq starts with 1.
@@ -1173,7 +1214,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 				{
 					currentMainSeq++;
 				}
-				int subSeq = SequenceIdGenerator.getNextSequence(EntityTypeEnum.ResponseSubmissionBookmark.name(), ""+respM.getTestProcPk(), ResponseSubmissionBookmark.SubmissionTypeEnum.Interim.name(), currentMainSeq+"", null);
+				int subSeq = sequenceIdGenerator.getNextSequence(ResponseSubmissionBookmark.name(), ""+respM.getTestProcPk(), ResponseSubmissionBookmark.SubmissionTypeEnum.Interim.name(), currentMainSeq+"", null);
 				String subSeqStr = null;
 				if(subSeq < 10)
 					subSeqStr = "0"+subSeq;
@@ -1241,13 +1282,13 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 	}
 
 
-    public static List<ResponseSubmissionBookmark> getResponseSubmissionBookmarks(TestProcOID testprocOID)
+    public  List<ResponseSubmissionBookmark> getResponseSubmissionBookmarks(TestProcOID testprocOID)
     {
     	return persistWrapper.readList(ResponseSubmissionBookmark.class,
     			"select * from RESPONSE_SUBMISSION_BOOKMARK where testProcFk = ? order by createdDate", testprocOID.getPk());
     }
 
-    public static ResponseSubmissionBookmark getLastResponseSubmissionBookmark(TestProcOID testprocOID)
+    public  ResponseSubmissionBookmark getLastResponseSubmissionBookmark(TestProcOID testprocOID)
     {
     	return persistWrapper.read(ResponseSubmissionBookmark.class,
     			"select * from RESPONSE_SUBMISSION_BOOKMARK where testProcFk = ? order by createdDate desc limit 0, 1", testprocOID.getPk());
@@ -1479,7 +1520,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 	public  SurveyResponse getSurveyResponse(int responseId) throws Exception
 	{
 		ResponseMasterNew respM = getResponseMaster(responseId);
-		SurveyDefinition sd = SurveyDefFactory.getSurveyDefinition(new FormOID(respM.getFormPk(), null));
+		SurveyDefinition sd = surveyDefFactory.getSurveyDefinition(new FormOID(respM.getFormPk(), null));
 		SurveyResponse resp = getSurveyResponse(sd, responseId);
 		return resp;
 	}
@@ -2047,7 +2088,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 	@Override
 	public  ResponseMaster getResponseMaster(int surveyPk, String responseId) throws Exception
 	{
-		Survey survey = SurveyMaster.getSurveyByPk(surveyPk);
+		Survey survey = surveyMaster.getSurveyByPk(surveyPk);
 
 		String surveyTable = survey.getDbTable();
 		String sql = Sqls.getResponseMaster;
@@ -2219,7 +2260,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 	}
 
 
-	public static ResponseMasterNew[] getLatestResponseMastersForUnitInWorkstation(UnitOID unitOID, ProjectOID projectOID, WorkstationOID workstationOID) throws Exception
+	public  ResponseMasterNew[] getLatestResponseMastersForUnitInWorkstation(UnitOID unitOID, ProjectOID projectOID, WorkstationOID workstationOID) throws Exception
 	{
 		String sql	= "select res.responseId, res.responseRefNo, "
 				+ " res.surveyPk as formPk, res.testProcPk as testProcPk, "
@@ -2339,7 +2380,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 
 			//create a copy of the response and mark it as incomplete so that the tester can
 			//carry on editing the form and resubmitting it
-			SurveyResponse newResponse = SurveyResponseServiceImpl.copyResponse(userContext, sResponse.getResponseId());
+			SurveyResponse newResponse = surveyResponseService.copyResponse(userContext, sResponse.getResponseId());
 
 			//create the FormResponseClientSubmissionRevision entry if its there for the unit.
 			updateFormResponseClientSubmissionRevisionOnNewResponse(userContext, sResponse.getResponseId(), newResponse.getResponseId());
@@ -2414,7 +2455,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 			conn = ServiceLocator.locate().getConnection();
 
 			stmt = conn.prepareStatement(sql);
-			stmt.setInt(1, userContext.getUser().getPk());
+			stmt.setInt(1, (int) userContext.getUser().getPk());
 			stmt.setString(2, comments);
 			stmt.setLong(3, resp.getResponseId());
 
@@ -2467,7 +2508,7 @@ public  void approveResponseWithComments(UserContext userContext, ResponseMaster
 			conn = ServiceLocator.locate().getConnection();
 
 			stmt = conn.prepareStatement(sql);
-			stmt.setInt(1, userContext.getUser().getPk());
+			stmt.setInt(1, (int) userContext.getUser().getPk());
 			stmt.setString(2, comments);
 			stmt.setLong(3, resp.getResponseId());
 
@@ -3076,7 +3117,7 @@ public  void rejectApproval(UserContext userContext, SurveyResponse sResponse, S
 
 			HashMap secParamsMap = new HashMap();
 			secParamsMap.put("surveyPk", testProc.getFormPk());
-			SurveyDefinition surveyDefinition = SurveyDefFactory
+			SurveyDefinition surveyDefinition = surveyDefFactory
 					.getSurveyDefinition(new FormOID(testProc.getFormPk(), null));
 			Survey survey = surveyDefinition.getSurveyConfig();
 			SurveyResponse surveyResponse = getSurveyResponse(surveyDefinition, responseId);
@@ -3085,7 +3126,7 @@ public  void rejectApproval(UserContext userContext, SurveyResponse sResponse, S
 			formResponseBean.setVersionKey(respMaster.getLastUpdated().getTime());
 			if (surveyResponse != null)
 			{
-				FormResponseStats stats = SurveyResponseServiceImpl
+				FormResponseStats stats = surveyResponseService
 						.getCommentCountAndPercentComplete(surveyDefinition.getQuestions(), surveyResponse);
 				formResponseBean.setResponseId(surveyResponse.getResponseId());
 				formResponseBean.setFormPk(survey.getPk());
@@ -3109,7 +3150,7 @@ public  void rejectApproval(UserContext userContext, SurveyResponse sResponse, S
 
 					List<SurveyItem> sec = new ArrayList<SurveyItem>();
 					sec.add((SurveyItem) surveyDefinition.getQuestion(sectionResponseQuery.getSectionId()));
-					FormResponseStats sstats = SurveyResponseServiceImpl.getCommentCountAndPercentComplete(sec,
+					FormResponseStats sstats = surveyResponseService.getCommentCountAndPercentComplete(sec,
 							surveyResponse);
 
 					sectionResponseBean.setTotalQCount(sstats.getTotalQCount());

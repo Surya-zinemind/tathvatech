@@ -1,139 +1,59 @@
 package com.tathvatech.forms.controller;
 
+import com.tathvatech.common.entity.EntityReference;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.forms.common.FormQuery;
 import com.tathvatech.forms.common.ObjectScheduleRequestBean;
 import com.tathvatech.forms.service.FormService;
-import com.tathvatech.user.OID.TestProcOID;
+import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.service.CommonServicesDelegate;
 import lombok.RequiredArgsConstructor;
+import com.tathvatech.unit.common.UnitFormQuery;
+
+import java.util.Iterator;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class FormController {
 
    private final FormService formService;
+   private final CommonServicesDelegate commonServicesDelegate;
     public  void saveTestProcSchedule(UserContext context, TestProcOID testProcOID,
                                       ObjectScheduleRequestBean objectScheduleRequestBean) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-            formService.saveTestProcSchedule(context, testProcOID, objectScheduleRequestBean);
-
-            con.commit();
-        }
-        catch (Exception ex)
-        {
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                logger.error("Count not rollback transaction", ex);
-            }
-            throw ex;
-        }
-        finally
-        {
-        }
+        formService.saveTestProcSchedule(context, testProcOID, objectScheduleRequestBean);
     }
 
     public  void saveTestProcSchedules(UserContext context, ProjectOID projectOID, UnitOID rootUnit,
-                                             List<ObjectScheduleRequestBean> scheduleList) throws Exception
+                                       List<ObjectScheduleRequestBean> scheduleList) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-            formService.saveTestProcSchedules(context, projectOID, rootUnit, scheduleList);
+        formService.saveTestProcSchedules(context, projectOID, rootUnit, scheduleList);
 
-            con.commit();
-        }
-        catch (Exception ex)
-        {
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                logger.error("Count not rollback transaction", ex);
-            }
-            throw ex;
-        }
-        finally
-        {
-        }
     }
 
     public  void moveTestProcsToUnit(UserContext userContext, List<TestProcOID> testProcsToMove,
                                            UnitOID unitOIDToMoveTo, ProjectOID projectOIDToMoveTo) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-            formService.moveTestProcsToUnit(userContext, testProcsToMove, unitOIDToMoveTo, projectOIDToMoveTo);
-
-            con.commit();
-        }
-        catch (Exception ex)
-        {
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                logger.error("Count not rollback transaction", ex);
-            }
-            throw ex;
-        }
-        finally
-        {
-        }
+        formService.moveTestProcsToUnit(userContext, testProcsToMove, unitOIDToMoveTo, projectOIDToMoveTo);
     }
 
     public  void renameTestForms(UserContext userContext, List<TestProcOID> selectedTestProcs,
-                                       List<OID> referencesToAdd, String name, String renameOption) throws Exception
+                                 List<OID> referencesToAdd, String name, String renameOption) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-            formService.renameTestForms(userContext, selectedTestProcs, referencesToAdd, name, renameOption);
+        formService.renameTestForms(userContext, selectedTestProcs, referencesToAdd, name, renameOption);
 
-            con.commit();
-        }
-        catch (Exception ex)
-        {
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                logger.error("Count not rollback transaction", ex);
-            }
-            throw ex;
-        }
-        finally
-        {
-        }
     }
 
     public  List<EntityReferenceBean> getReferencesForTestProc(UserContext context, TestProcOID oid)
     {
         List<EntityReferenceBean> returnList = new ArrayList<EntityReferenceBean>();
-        List<EntityReference> refList = CommonServicesDelegate.getEntityReferences(oid);
+        List<EntityReference> refList = commonServicesDelegate.getEntityReferences(oid);
         for (Iterator iterator = refList.iterator(); iterator.hasNext();)
         {
             EntityReference aRef = (EntityReference) iterator.next();
@@ -166,31 +86,7 @@ public class FormController {
     public  void revertFormUpgradeOnTestProc(TestProcOID testprocOID, FormOID currentFormOID,
                                                    FormOID revertToFormOID) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-            new FormUpgradeRevertProcessor().process(testprocOID, currentFormOID, revertToFormOID);
-
-            con.commit();
-        }
-        catch (Exception ex)
-        {
-            try
-            {
-                con.rollback();
-            }
-            catch (SQLException e)
-            {
-                logger.error("Count not rollback transaction", ex);
-            }
-            throw ex;
-        }
-        finally
-        {
-        }
+        new FormUpgradeRevertProcessor().process(testprocOID, currentFormOID, revertToFormOID);
     }
     public  List<UnitFormQuery> getTestProcsByForm(FormQuery formQuery) throws Exception
     {

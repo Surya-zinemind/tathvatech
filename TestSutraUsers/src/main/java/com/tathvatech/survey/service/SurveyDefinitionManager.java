@@ -6,6 +6,7 @@
  */
 package com.tathvatech.survey.service;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -26,6 +27,11 @@ import com.tathvatech.survey.inf.SurveyItemBase;
 import com.tathvatech.user.OID.FormOID;
 import com.tathvatech.user.service.AccountServiceImpl;
 
+import lombok.RequiredArgsConstructor;
+import org.jdom2.Element;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +43,7 @@ import javax.swing.text.Document;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
+@RequiredArgsConstructor
 public class SurveyDefinitionManager extends Object
 {
     private static final Logger logger = LoggerFactory.getLogger(SurveyDefinitionManager.class);
@@ -44,20 +51,24 @@ public class SurveyDefinitionManager extends Object
     private Survey survey;
     private SurveyDefinition surveyDefinition;
     private SequenceIdGenerator sequenceIdGenerator;
+    private  SurveyDefFactory surveyDefFactory;
+    private  SurveyMaster surveyMaster;
 
     /**
      * @param survey
      */
-    public SurveyDefinitionManager(Survey survey)throws Exception
+    public SurveyDefinitionManager(Survey survey, SurveyDefFactory surveyDefFactory)throws Exception
     {
         this.survey = survey;
-        this.surveyDefinition = SurveyDefFactory.getSurveyDefinition(new FormOID((int) survey.getPk(), survey.getIdentityNumber()));
+        this.surveyDefinition = surveyDefFactory.getSurveyDefinition(new FormOID((int) survey.getPk(), survey.getIdentityNumber()));
+        this.surveyDefFactory = surveyDefFactory;
     }
     
-    public SurveyDefinitionManager(FormOID formOID)throws Exception
+    public SurveyDefinitionManager(FormOID formOID, SurveyDefFactory surveyDefFactory)throws Exception
     {
-        this.survey = SurveyMaster.getSurveyByPk((int) formOID.getPk());
-        this.surveyDefinition = SurveyDefFactory.getSurveyDefinition(formOID);
+        this.survey = surveyMaster.getSurveyByPk((int) formOID.getPk());
+        this.surveyDefinition = surveyDefFactory.getSurveyDefinition(formOID);
+        this.surveyDefFactory = surveyDefFactory;
     }
 
     public Survey getSurvey()
@@ -306,8 +317,8 @@ public class SurveyDefinitionManager extends Object
 
 		FileInputStream inStream = new FileInputStream(new File(surveyFileName));
 		InputStreamReader reader = new InputStreamReader(inStream, "UTF-8");
-        SAXBuilder   builder = new SAXBuilder();
-		Document surveyDoc = builder.build(reader);
+        SAXBuilder builder = new SAXBuilder();
+		Document surveyDoc = (Document) builder.build(reader);
 		reader.close();
 		inStream.close();
 
@@ -337,7 +348,7 @@ public class SurveyDefinitionManager extends Object
         XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
         FileOutputStream outStream = new FileOutputStream(surveyFileName, false);
         OutputStreamWriter writer = new OutputStreamWriter(outStream, "UTF-8");
-        outputter.output(surveyDoc, writer);
+        outputter.output((org.jdom2.Document) surveyDoc, writer);
         writer.close();
         outStream.close();
     }
@@ -368,7 +379,7 @@ public class SurveyDefinitionManager extends Object
         String filePath = ApplicationProperties.getFormDefRoot();
         surveyFileName = filePath + surveyFileName;
 
-        SurveyDefinition sd = SurveyDefFactory.getSurveyDefinition(new FormOID(survey.getPk(), survey.getIdentityNumber()));
+        SurveyDefinition sd = surveyDefFactory.getSurveyDefinition(new FormOID((int) survey.getPk(), survey.getIdentityNumber()));
         List questions = sd.getQuestions();
 
         SurveyItemBase questionToMove = sd.getQuestion(questionId);
@@ -388,7 +399,7 @@ public class SurveyDefinitionManager extends Object
 		FileInputStream inStream = new FileInputStream(new File(surveyFileName));
 		InputStreamReader reader = new InputStreamReader(inStream, "UTF-8");
         SAXBuilder   builder = new SAXBuilder();
-		Document     surveyDoc = builder.build(reader);
+		Document     surveyDoc = (Document) builder.build(reader);
 		reader.close();
 		inStream.close();
 
@@ -436,7 +447,7 @@ public class SurveyDefinitionManager extends Object
         XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
         FileOutputStream outStream = new FileOutputStream(surveyFileName, false);
         OutputStreamWriter writer = new OutputStreamWriter(outStream, "UTF-8");
-        outputter.output(surveyDoc, writer);
+        outputter.output((org.jdom2.Document) surveyDoc, writer);
         writer.close();
         outStream.close();
 
@@ -521,7 +532,7 @@ public class SurveyDefinitionManager extends Object
         }
 
         
-        SurveyDefinition sourceSd = SurveyDefFactory.getSurveyDefinition(new FormOID(sourceForm.getPk(), sourceForm.getIdentityNumber()));
+        SurveyDefinition sourceSd = surveyDefFactory.getSurveyDefinition(new FormOID(sourceForm.getPk(), sourceForm.getIdentityNumber()));
         if(sourceItem == null)
         {
             return null;
@@ -711,7 +722,7 @@ public class SurveyDefinitionManager extends Object
         	throw new SurveyNotEditableException();
         }
 
-        int surveyPk = survey.getPk();
+        int surveyPk = (int) survey.getPk();
   		String surveyFileName = survey.getDefFileName();
         String filePath = ApplicationProperties.getFormDefRoot();
         surveyFileName = filePath + surveyFileName;
@@ -719,7 +730,7 @@ public class SurveyDefinitionManager extends Object
 		FileInputStream inStream = new FileInputStream(new File(surveyFileName));
 		InputStreamReader reader = new InputStreamReader(inStream, "UTF-8");
         SAXBuilder   builder = new SAXBuilder();
-		Document     surveyDoc = builder.build(reader);
+		Document     surveyDoc = (Document) builder.build(reader);
 		reader.close();
 		inStream.close();
 
@@ -743,7 +754,7 @@ public class SurveyDefinitionManager extends Object
         XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
         FileOutputStream outStream = new FileOutputStream(surveyFileName, false);
         OutputStreamWriter writer = new OutputStreamWriter(outStream, "UTF-8");
-        outputter.output(surveyDoc, writer);
+        outputter.output((org.jdom2.Document) surveyDoc, writer);
         writer.close();
         outStream.close();
     }
@@ -769,7 +780,7 @@ public class SurveyDefinitionManager extends Object
 		FileInputStream inStream = new FileInputStream(new File(surveyFileName));
 		InputStreamReader reader = new InputStreamReader(inStream, "UTF-8");
         SAXBuilder   builder = new SAXBuilder();
-		Document     surveyDoc = builder.build(reader);
+		Document     surveyDoc = (Document) builder.build(reader);
 		reader.close();
 		inStream.close();
 
@@ -818,7 +829,7 @@ public class SurveyDefinitionManager extends Object
         XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
         FileOutputStream outStream = new FileOutputStream(surveyFileName, false);
         OutputStreamWriter writer = new OutputStreamWriter(outStream, "UTF-8");
-        outputter.output(surveyDoc, writer);
+        outputter.output((org.jdom2.Document) surveyDoc, writer);
         writer.close();
         outStream.close();
 
@@ -865,7 +876,7 @@ public class SurveyDefinitionManager extends Object
 		FileInputStream inStream = new FileInputStream(new File(surveyFileName));
 		InputStreamReader reader = new InputStreamReader(inStream, "UTF-8");
         SAXBuilder   builder = new SAXBuilder();
-		Document     surveyDoc = builder.build(reader);
+		Document     surveyDoc = (Document) builder.build(reader);
 		reader.close();
 		inStream.close();
 
@@ -912,7 +923,7 @@ public class SurveyDefinitionManager extends Object
         XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
         FileOutputStream outStream = new FileOutputStream(surveyFileName, false);
         OutputStreamWriter writer = new OutputStreamWriter(outStream, "UTF-8");
-        outputter.output(surveyDoc, writer);
+        outputter.output((org.jdom2.Document) surveyDoc, writer);
         writer.close();
         outStream.close();
     }
@@ -950,7 +961,7 @@ public class SurveyDefinitionManager extends Object
 		FileInputStream inStream = new FileInputStream(new File(surveyFileName));
 		InputStreamReader reader = new InputStreamReader(inStream, "UTF-8");
         SAXBuilder   builder = new SAXBuilder();
-		Document     surveyDoc = builder.build(reader);
+		Document     surveyDoc = (Document) builder.build(reader);
 		reader.close();
 		inStream.close();
 
@@ -1005,7 +1016,7 @@ public class SurveyDefinitionManager extends Object
         XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
         FileOutputStream outStream = new FileOutputStream(surveyFileName, false);
         OutputStreamWriter writer = new OutputStreamWriter(outStream, "UTF-8");
-        outputter.output(surveyDoc, writer);
+        outputter.output((org.jdom2.Document) surveyDoc, writer);
         writer.close();
         outStream.close();
 
@@ -1112,12 +1123,12 @@ public class SurveyDefinitionManager extends Object
 
         String filePath = ApplicationProperties.getFormDefRoot();
         surveyFileName = filePath + surveyFileName;
-        SurveyDefinition sd = SurveyDefFactory.getSurveyDefinition(new FormOID(survey.getPk(), survey.getIdentityNumber()));
+        SurveyDefinition sd = surveyDefFactory.getSurveyDefinition(new FormOID((int) survey.getPk(), survey.getIdentityNumber()));
 
 		FileInputStream inStream = new FileInputStream(new File(surveyFileName));
 		InputStreamReader reader = new InputStreamReader(inStream, "UTF-8");
         SAXBuilder   builder = new SAXBuilder();
-		Document     surveyDoc = builder.build(reader);
+		Document     surveyDoc = (Document) builder.build(reader);
 		reader.close();
 		inStream.close();
 
@@ -1141,14 +1152,14 @@ public class SurveyDefinitionManager extends Object
         XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
         FileOutputStream outStream = new FileOutputStream(surveyFileName, false);
         OutputStreamWriter writer = new OutputStreamWriter(outStream, "UTF-8");
-        outputter.output(surveyDoc, writer);
+        outputter.output((org.jdom2.Document) surveyDoc, writer);
         writer.close();
         outStream.close();
     }
 
 	public void setFormInstruction(File file, String fileDisplayName)throws Exception
 	{
-        int surveyPk = survey.getPk();
+        int surveyPk = (int) survey.getPk();
   		String surveyFileName = survey.getDefFileName();
         String filePath = ApplicationProperties.getFormDefRoot();
         surveyFileName = filePath + surveyFileName;
@@ -1156,7 +1167,7 @@ public class SurveyDefinitionManager extends Object
 		FileInputStream inStream = new FileInputStream(new File(surveyFileName));
 		InputStreamReader reader = new InputStreamReader(inStream, "UTF-8");
         SAXBuilder   builder = new SAXBuilder();
-		Document     surveyDoc = builder.build(reader);
+		Document     surveyDoc = (Document) builder.build(reader);
 		reader.close();
 		inStream.close();
 
@@ -1176,7 +1187,7 @@ public class SurveyDefinitionManager extends Object
         XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
         FileOutputStream outStream = new FileOutputStream(surveyFileName, false);
         OutputStreamWriter writer = new OutputStreamWriter(outStream, "UTF-8");
-        outputter.output(surveyDoc, writer);
+        outputter.output((org.jdom2.Document) surveyDoc, writer);
         writer.close();
         outStream.close();
         
@@ -1434,7 +1445,7 @@ public class SurveyDefinitionManager extends Object
         XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
         FileOutputStream outStream = new FileOutputStream(surveyFileName, false);
         OutputStreamWriter writer = new OutputStreamWriter(outStream, "UTF-8");
-        outputter.output(surveyDoc, writer);
+        outputter.output((org.jdom2.Document) surveyDoc, writer);
         writer.close();
         outStream.close();
 	}

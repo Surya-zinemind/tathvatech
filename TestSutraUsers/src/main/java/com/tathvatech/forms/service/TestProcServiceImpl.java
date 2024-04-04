@@ -9,6 +9,7 @@ package com.tathvatech.forms.service;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.common.TestProcFilter;
 import com.tathvatech.forms.dao.TestProcDAO;
+import com.tathvatech.forms.oid.TestProcSectionOID;
 import com.tathvatech.forms.report.TestProcListReport;
 import com.tathvatech.forms.response.ResponseMasterNew;
 import com.tathvatech.survey.common.SurveyDefinition;
@@ -18,7 +19,9 @@ import com.tathvatech.survey.service.SurveyDefFactory;
 import com.tathvatech.survey.service.SurveyResponseService;
 import com.tathvatech.unit.common.UnitFormQuery;
 import com.tathvatech.unit.entity.UnitLocation;
+import com.tathvatech.forms.common.TestProcFormAssignBean;
 import com.tathvatech.unit.service.UnitManager;
+import com.tathvatech.forms.entity.TestProcFormAssign;
 import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
@@ -50,10 +53,12 @@ public class TestProcServiceImpl implements TestProcService
     private final PersistWrapper persistWrapper;
     private final UnitManager unitManager;
 	private final DummyWorkstation dummyWorkstation;
+	private final SurveyDefFactory surveyDefFactory;
 	@Autowired
 	@Lazy
 	private  WorkstationService workstationService;
 	private final SurveyResponseService surveyResponseService;
+	private UnitFormQuery unitFormQuery;
 
 	@Override
 	public  void activateTestProcs(UserContext userContext,
@@ -71,7 +76,7 @@ public class TestProcServiceImpl implements TestProcService
 			ResponseMasterNew response = surveyResponseService.getLatestResponseMasterForTest(unitFormQuery.getOID());
 			if(response == null)
 			{
-				SurveyDefinition sd = SurveyDefFactory.getSurveyDefinition(new FormOID(unitFormQuery.getFormPk(), unitFormQuery.getFormName()));
+				SurveyDefinition sd = surveyDefFactory.getSurveyDefinition(new FormOID(unitFormQuery.getFormPk(), unitFormQuery.getFormName()));
 				SurveyResponse sResponse = new SurveyResponse(sd);
 				sResponse.setSurveyPk(unitFormQuery.getFormPk());
 				sResponse.setTestProcPk(unitFormQuery.getPk());
@@ -150,7 +155,7 @@ public class TestProcServiceImpl implements TestProcService
 	{
 		try 
 		{
-			return persistWrapper.read(UnitFormQuery.class, UnitFormQuery.sql + " and ut.pk=?", testProcPk);
+			return persistWrapper.read(UnitFormQuery.class, unitFormQuery.sql + " and ut.pk=?", testProcPk);
 		} 
 		catch (Exception e) 
 		{
