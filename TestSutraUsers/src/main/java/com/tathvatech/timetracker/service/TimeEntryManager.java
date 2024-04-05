@@ -1,59 +1,50 @@
 package com.tathvatech.timetracker.service;
 
+import com.tathvatech.common.enums.EStatusEnum;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.common.enums.WorkItem;
+import com.tathvatech.forms.dao.TestProcDAO;
+import com.tathvatech.forms.entity.TestProcFormAssign;
+import com.tathvatech.forms.entity.TestProcFormSection;
+import com.tathvatech.report.request.ReportRequest;
+import com.tathvatech.common.exception.AppException;
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.project.service.ProjectService;
+import com.tathvatech.survey.controller.SurveyDelegate;
+import com.tathvatech.survey.service.SurveyMaster;
+import com.tathvatech.user.OID.*;
+import com.tathvatech.user.common.TestProcObj;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.entity.UserQuery;
+import com.tathvatech.user.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 
-import com.tathvatech.testsutra.timetrack.api.ShiftInstanceBean;
-import com.tathvatech.testsutra.timetrack.api.ShiftInstanceForUserResponseBean;
-import com.tathvatech.testsutra.timetrack.api.WorkOrderItemResponseBean;
-import com.tathvatech.testsutra.timetrack.common.TimeTypeEnum;
-import com.tathvatech.testsutra.timetrack.reports.opencheckinlistreport.OpenCheckinListReport;
-import com.tathvatech.testsutra.timetrack.reports.opencheckinlistreport.OpenCheckinListReportRequest;
-import com.tathvatech.testsutra.timetrack.reports.opencheckinlistreport.OpenCheckinListReportResultRow;
-import com.tathvatech.testsutra.timetrack.reports.timelogsummary.TimeLogSummaryReportResultRow;
-import com.tathvatech.testsutra.timetrack.reports.workorderlistreport.WorkorderListReportFilter;
-import com.tathvatech.testsutra.timetrack.reports.workorderlistreport.WorkorderListReportResultRow;
-import com.tathvatech.testsutra.workstationReport.service.ShiftInstance;
-import com.tathvatech.testsutra.workstationReport.service.ShiftInstanceOID;
-import com.tathvatech.testsutra.workstationReport.service.ShiftManager;
-import com.tathvatech.testsutra.workstationReport.service.ShiftOID;
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.accounts.UserOID;
-import com.tathvatech.ts.core.accounts.UserQuery;
-import com.tathvatech.ts.core.accounts.UserRepository;
-import com.tathvatech.ts.core.common.EStatusEnum;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.OID;
-import com.tathvatech.ts.core.common.ReworkOrderOID;
-import com.tathvatech.ts.core.common.WorkItem;
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.project.TestProcObj;
-import com.tathvatech.ts.core.project.WorkstationOID;
-import com.tathvatech.ts.report.ReportTypes;
-import com.thirdi.surveyside.project.ProjectManager;
-import com.thirdi.surveyside.project.TestProcDAO;
-import com.thirdi.surveyside.project.TestProcFormAssign;
-import com.thirdi.surveyside.project.TestProcFormSection;
-import com.thirdi.surveyside.reportv2.ReportRequest;
-import com.thirdi.surveyside.reportv2.ReportsDelegate;
-import com.thirdi.surveyside.survey.SurveyMaster;
-import com.thirdi.surveyside.survey.delegate.SurveyDelegate;
 
 public class TimeEntryManager
 {
-	private static Logger logger = Logger.getLogger(TimeEntryManager.class);
-	
-	public static Date checkIn(UserContext context, ReworkOrderOID workorderOID, UserOID timeForUserOID, 
-			ShiftInstanceForUserResponseBean shiftInstanceUserBean,
-			Date date, boolean forceCloseIfActiveOnOther, boolean setAsAttributionUser) throws Exception
+	private static final Logger logger = LoggerFactory.getLogger(TimeEntryManager.class);
+	private final PersistWrapper persistWrapper;
+	private final ProjectService projectService;
+	private final SurveyMaster surveyMaster;
+
+    public TimeEntryManager(PersistWrapper persistWrapper, ProjectService projectService, SurveyMaster surveyMaster) {
+        this.persistWrapper = persistWrapper;
+        this.projectService = projectService;
+        this.surveyMaster = surveyMaster;
+    }
+
+    public  Date checkIn(UserContext context, ReworkOrderOID workorderOID, UserOID timeForUserOID,
+							   ShiftInstanceForUserResponseBean shiftInstanceUserBean,
+							   Date date, boolean forceCloseIfActiveOnOther, boolean setAsAttributionUser) throws Exception
 	{
 		if(date == null)
 			date = new Date();  // default to current time.
@@ -71,7 +62,7 @@ public class TimeEntryManager
 		{
 			ongoingTimeSlot.setEndTime(date);
 			ongoingTimeSlot.setCommitted(1);
-			PersistWrapper.update(ongoingTimeSlot);
+			persistWrapper.update(ongoingTimeSlot);
 		}
 		
 		// check if there is any open checkin for the user. if its there it has to be closed or an error thrown based on forceclose flag
@@ -104,7 +95,7 @@ public class TimeEntryManager
 		}
 		else
 		{
-			ShiftInstance si = PersistWrapper.readByPrimaryKey(ShiftInstance.class, shiftInstanceUserBean.getShiftInstanceFk());
+			ShiftInstance si = persistWrapper.readByPrimaryKey(ShiftInstance.class, shiftInstanceUserBean.getShiftInstanceFk());
 			shiftInstanceOID = si.getOID();
 		}
 		
@@ -116,13 +107,13 @@ public class TimeEntryManager
 		{
 	        Workorder wo = WorkorderManager.getWorkorder(workorderOID);
 	        WorkItem workItem = WorkorderManager.getWorkItem(wo.getEntityPk(), (EntityTypeEnum) EntityTypeEnum.fromValue(wo.getEntityType()));
-			SurveyMaster.setAttribution(context, workItem, timeForUserOID);
+			surveyMaster.setAttribution(context, workItem, timeForUserOID);
 		}
 		
 		return date;
 	}
 	
-	public static Date pause(UserContext context, ReworkOrderOID workorderOID, UserOID timeForUserOID, int timeQualifierPk, Date date) throws Exception
+	public  Date pause(UserContext context, ReworkOrderOID workorderOID, UserOID timeForUserOID, int timeQualifierPk, Date date) throws Exception
 	{
 		if(date == null)
 			date = new Date();  // default to current time.
@@ -146,7 +137,7 @@ public class TimeEntryManager
 		else
 		{
 			timeEntry.setEndTime(date);
-			PersistWrapper.update(timeEntry);
+			persistWrapper.update(timeEntry);
 			
 			//now start time slot with wait as the time type.
 			Workorder workorder = WorkorderManager.getWorkorder(workorderOID);
@@ -157,7 +148,7 @@ public class TimeEntryManager
 		
 	}
 
-	public static Date restart(UserContext context, ReworkOrderOID workorderOID, UserOID timeForUserOID, 
+	public Date restart(UserContext context, ReworkOrderOID workorderOID, UserOID timeForUserOID,
 			ShiftInstanceForUserResponseBean shiftInstanceUserBean,
 			Date date) throws Exception
 	{
@@ -183,7 +174,7 @@ public class TimeEntryManager
 		else
 		{
 			timeEntry.setEndTime(date);
-			PersistWrapper.update(timeEntry);
+			persistWrapper.update(timeEntry);
 			
 			//create the shift instance if it is not already there.
 			ShiftInstanceOID shiftInstanceOID = null;
@@ -194,7 +185,7 @@ public class TimeEntryManager
 			}
 			else
 			{
-				ShiftInstance si = PersistWrapper.readByPrimaryKey(ShiftInstance.class, shiftInstanceUserBean.getShiftInstanceFk());
+				ShiftInstance si = persistWrapper.readByPrimaryKey(ShiftInstance.class, shiftInstanceUserBean.getShiftInstanceFk());
 				shiftInstanceOID = si.getOID();
 			}
 			
@@ -207,7 +198,7 @@ public class TimeEntryManager
 		}
 	}
 
-	public static Date checkOut(UserContext context, ReworkOrderOID workorderOID, UserOID timeForUserOID, Date date) throws Exception
+	public  Date checkOut(UserContext context, ReworkOrderOID workorderOID, UserOID timeForUserOID, Date date) throws Exception
 	{
 		if(date == null)
 			date = new Date();  // default to current time.
@@ -231,7 +222,7 @@ public class TimeEntryManager
 			}
 			aTimeEntry.setCommitted(1);
 			
-			PersistWrapper.update(aTimeEntry);
+			persistWrapper.update(aTimeEntry);
 		}
 		
 		// remove attribution if set
@@ -298,18 +289,18 @@ public class TimeEntryManager
 		}
 	}
 	
-	public static Date checkOutAll(UserContext context, ProjectOID projectOID, WorkstationOID workstationOID,
-			ShiftInstanceOID shiftInstanceOID,
-			UserOID userOID, Date date)throws Exception
+	public  Date checkOutAll(UserContext context, ProjectOID projectOID, WorkstationOID workstationOID,
+								   ShiftInstanceOID shiftInstanceOID,
+								   UserOID userOID, Date date)throws Exception
 	{
 		boolean allowCheckoutall = false;
-		if(User.USER_PRIMARY.equals(UserRepository.getInstance().getUser(userOID.getPk()).getUserType()))
+		if(User.USER_PRIMARY.equals(UserRepository.getInstance().getUser((int) userOID.getPk()).getUserType()))
 		{
 			allowCheckoutall = true;
 		}
 		else
 		{
-			List<User> verifiersForWorkstation = ProjectManager.getUsersForProjectInRole(projectOID.getPk(), workstationOID, User.ROLE_VERIFY);
+			List<User> verifiersForWorkstation = projectService.getUsersForProjectInRole(projectOID.getPk(), workstationOID, User.ROLE_VERIFY);
 			User tempU = new User();
 			tempU.setPk(userOID.getPk());
 			if((verifiersForWorkstation.contains(tempU)))
@@ -359,7 +350,7 @@ public class TimeEntryManager
 		return now;
 	}
 	
-	private static void createTimeEntry(UserOID createdByOID, Workorder workOrder, ShiftInstanceOID shiftInstanceOID, Date date, TimeTypeEnum timeType, UserOID timeForUserOID, Integer timeQualifierPk) throws Exception
+	private  void createTimeEntry(UserOID createdByOID, Workorder workOrder, ShiftInstanceOID shiftInstanceOID, Date date, TimeTypeEnum timeType, UserOID timeForUserOID, Integer timeQualifierPk) throws Exception
 	{
 		WorkorderTimeEntry timeEntry = new WorkorderTimeEntry();
 		timeEntry.setWorkorderFk(workOrder.getPk());
@@ -374,10 +365,10 @@ public class TimeEntryManager
 		timeEntry.setUserFk(timeForUserOID.getPk());
 		timeEntry.setTimeQualifierFk(timeQualifierPk);
 		
-		PersistWrapper.createEntity(timeEntry);
+		persistWrapper.createEntity(timeEntry);
 	}
 	
-	private static void fillTimeEntryDetailsForWorkorder(WorkorderTimeEntry timeEntry, Workorder workorder) throws Exception
+	private  void fillTimeEntryDetailsForWorkorder(WorkorderTimeEntry timeEntry, Workorder workorder) throws Exception
 	{
 		if(EntityTypeEnum.TestProc.getValue() == workorder.getEntityType())
 		{
@@ -390,8 +381,8 @@ public class TimeEntryManager
 		}
 		else if(EntityTypeEnum.TestProcSection.getValue() == workorder.getEntityType())
 		{
-			TestProcFormSection uts = PersistWrapper.readByPrimaryKey(TestProcFormSection.class, workorder.getEntityPk());
-			TestProcFormAssign utf = PersistWrapper.readByPrimaryKey(TestProcFormAssign.class, 
+			TestProcFormSection uts = persistWrapper.readByPrimaryKey(TestProcFormSection.class, workorder.getEntityPk());
+			TestProcFormAssign utf = persistWrapper.readByPrimaryKey(TestProcFormAssign.class,
 					uts.getTestProcFormAssignFk());
 			TestProcObj obj = new TestProcDAO().getTestProc(utf.getTestProcFk());
 			
@@ -408,7 +399,7 @@ public class TimeEntryManager
 	}
 
 
-	private static WorkOrderTimeEntryListObj getUnCommittedAndRunningTimeSlotsForUser(UserOID userOID) throws Exception
+	private  WorkOrderTimeEntryListObj getUnCommittedAndRunningTimeSlotsForUser(UserOID userOID) throws Exception
 	{
 		List<WorkorderTimeEntry> list = PersistWrapper.readList(WorkorderTimeEntry.class, 
 				"select * from workorder_timeentry where committed  = 0 and userFk = ? ", userOID.getPk()); 
@@ -423,7 +414,7 @@ public class TimeEntryManager
 			WorkorderTimeEntry workorderTimeEntry = (WorkorderTimeEntry) iterator.next();
 			if(returnObj.getWorkorder() == null)
 			{
-				Workorder wo = PersistWrapper.readByPrimaryKey(Workorder.class, workorderTimeEntry.getWorkorderFk());
+				Workorder wo = persistWrapper.readByPrimaryKey(Workorder.class, workorderTimeEntry.getWorkorderFk());
 				returnObj.setWorkorder(wo);
 			}
 			else
@@ -440,15 +431,15 @@ public class TimeEntryManager
 		return returnObj;
 	}
 
-	public static WorkorderTimeEntry getOngoingTimeSlotForUser(UserOID userOID)
+	public  WorkorderTimeEntry getOngoingTimeSlotForUser(UserOID userOID)
 	{
-		return PersistWrapper.read(WorkorderTimeEntry.class, 
+		return persistWrapper.read(WorkorderTimeEntry.class,
 				"select * from workorder_timeentry where endTime is null and userFk = ?", userOID.getPk()); 
 	}
 
 
-	public static double getLoggedTime(ReworkOrderOID oid)
+	public  double getLoggedTime(ReworkOrderOID oid)
 	{
-		return PersistWrapper.read(Double.class, "select sum(TIMESTAMPDIFF(MINUTE, IFNULL(checkinTime, NOW()), checkoutTime)) from workorder_timeentry where workorderFk = ?", null);
+		return persistWrapper.read(Double.class, "select sum(TIMESTAMPDIFF(MINUTE, IFNULL(checkinTime, NOW()), checkoutTime)) from workorder_timeentry where workorderFk = ?", null);
 	}
 }

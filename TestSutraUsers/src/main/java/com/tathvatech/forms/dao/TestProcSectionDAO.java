@@ -1,21 +1,25 @@
 package com.tathvatech.forms.dao;
 
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.forms.common.TestProcSectionObj;
+import com.tathvatech.forms.oid.TestProcSectionOID;
+import com.tathvatech.user.OID.FormSectionOID;
+import com.tathvatech.user.OID.TestProcOID;
+import com.tathvatech.user.utils.DateUtils;
+import lombok.RequiredArgsConstructor;
+
 import java.util.Date;
 import java.util.List;
 
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.project.FormSectionOID;
-import com.tathvatech.ts.core.project.TestProcOID;
-import com.tathvatech.ts.core.project.TestProcSectionOID;
-import com.tathvatech.ts.core.project.TestProcSectionObj;
-import com.thirdi.surveyside.utils.DateUtils;
 
 public class TestProcSectionDAO
 {
+	private final PersistWrapper persistWrapper;
 	Date now;
-	public TestProcSectionDAO()
+	public TestProcSectionDAO(PersistWrapper persistWrapper)
 	{
-		now = DateUtils.getNowDateForEffectiveDateFrom();
+        this.persistWrapper = persistWrapper;
+        now = DateUtils.getNowDateForEffectiveDateFrom();
 	}
 
 	/**
@@ -28,12 +32,12 @@ public class TestProcSectionDAO
 		StringBuilder sb = new StringBuilder(fetchSql);
 		sb.append(" join testproc_form_assign tfa on tfs.testprocFormAssignFk = tfa.pk and tfa.current = 1 ");
 		sb.append(" and tfa.testProcFk = ?");
-		return PersistWrapper.readList(TestProcSectionObj.class, sb.toString(), testProcOID.getPk());
+		return persistWrapper.readList(TestProcSectionObj.class, sb.toString(), testProcOID.getPk());
 	}
 
 	public TestProcSectionObj getTestProcSection(TestProcSectionOID testProcSectionOID)
 	{
-		return PersistWrapper.read(TestProcSectionObj.class, fetchSql + " where 1 = 1 and tfs.pk = ? ", 
+		return persistWrapper.read(TestProcSectionObj.class, fetchSql + " where 1 = 1 and tfs.pk = ? ",
 				testProcSectionOID.getPk());
 	}
 
@@ -42,7 +46,7 @@ public class TestProcSectionDAO
 		StringBuilder sb = new StringBuilder(fetchSql);
 		sb.append(" join testproc_form_assign tfa on tfs.testprocFormAssignFk = tfa.pk and tfa.current = 1 ");
 		sb.append(" and tfa.testProcFk = ? and tfs.formSectionFk = ? ");
-		return PersistWrapper.read(TestProcSectionObj.class, sb.toString(), 
+		return persistWrapper.read(TestProcSectionObj.class, sb.toString(),
 				testProcOID.getPk(), formSectionOID.getPk());
 	}
 

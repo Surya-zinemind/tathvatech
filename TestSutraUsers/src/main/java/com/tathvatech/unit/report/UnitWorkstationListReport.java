@@ -3,29 +3,40 @@ package com.tathvatech.unit.report;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.tathvatech.testsutra.ncr.common.QueryObject;
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.common.DummyWorkstation;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.project.UnitLocation;
-import com.thirdi.surveyside.project.UnitInProjectObj;
-import com.thirdi.surveyside.project.UnitManager;
+
+import com.tathvatech.common.common.QueryObject;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.common.exception.AppException;
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.unit.common.UnitWorkstationListReportFilter;
+import com.tathvatech.unit.common.UnitWorkstationListReportResultRow;
+import com.tathvatech.unit.entity.UnitLocation;
+import com.tathvatech.unit.service.UnitManager;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.workstation.common.DummyWorkstation;
+import com.tathvatech.workstation.common.UnitInProjectObj;
+import lombok.RequiredArgsConstructor;
+
+
 
 public class UnitWorkstationListReport
 {
 	private UnitWorkstationListReportFilter filter;
-
-	public UnitWorkstationListReport(UserContext context, UnitWorkstationListReportFilter filter)
+	private final PersistWrapper persistWrapper;
+	private final DummyWorkstation dummyWorkstation;
+	private final UnitManager unitManager;
+	public UnitWorkstationListReport(UserContext context, UnitWorkstationListReportFilter filter, PersistWrapper persistWrapper, DummyWorkstation dummyWorkstation, UnitManager unitManager)
 	{
 		this.filter = filter;
-	}
+        this.persistWrapper = persistWrapper;
+        this.dummyWorkstation = dummyWorkstation;
+        this.unitManager = unitManager;
+    }
 
 	public List<UnitWorkstationListReportResultRow> runReport()
 	{
 		QueryObject q = getSql();
-		return PersistWrapper.readList(UnitWorkstationListReportResultRow.class, q.getQuery(),
+		return persistWrapper.readList(UnitWorkstationListReportResultRow.class, q.getQuery(),
 				(q.getParams().size() > 0) ? q.getParams().toArray(new Object[q.getParams().size()]) : null);
 	}
 
@@ -49,7 +60,7 @@ public class UnitWorkstationListReport
 				+ " join TAB_UNIT u on uw.unitPk = u.pk "
 				+ " join TAB_UNIT_H uh on uh.unitPk = u.pk and now() between uh.effectiveDateFrom and uh.effectiveDateTo"
 				+ " join TAB_PROJECT p on uw.projectPk = p.pk "
-				+ " join TAB_WORKSTATION w on uw.workstationPk = w.pk and w.pk != " + DummyWorkstation.getPk() + ""
+				+ " join TAB_WORKSTATION w on uw.workstationPk = w.pk and w.pk != " + dummyWorkstation.getPk() + ""
 				+ " join site on w.sitePk = site.pk"
 				+ " join unit_project_ref upr on upr.unitPk = uw.unitPk and upr.projectPk = uw.projectPk"
 				+ " join unit_project_ref_h uprh on uprh.unitInProjectPk = upr.pk and now() between uprh.effectiveDateFrom and uprh.effectiveDateTo and uprh.status != 'Removed' "
@@ -70,7 +81,7 @@ public class UnitWorkstationListReport
 				{
 					throw new AppException("Project should be specified to include chileren of the selected unit");
 				}
-				UnitInProjectObj unit = UnitManager.getUnitInProject(filter.getUnitOID(), filter.getProjectOID());
+				UnitInProjectObj unit = unitManager.getUnitInProject(filter.getUnitOID(), filter.getProjectOID());
 				sb.append(
 						" and ( (upr.unitPk = ? and upr.projectPk = ?) or (uprh.rootParentPk = ? and uprh.heiCode like ?) ) ");
 				params.add(filter.getUnitOID().getPk());

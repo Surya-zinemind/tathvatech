@@ -9,14 +9,14 @@ package com.tathvatech.forms.common;
 import java.io.Serializable;
 import java.util.Date;
 
-import net.sf.persist.annotations.NoTable;
+
 
 /**
  * @author Hari
  * 
  */
 
-@NoTable
+
 public class EntityVersionReviewProxy implements Serializable
 {
 	private int pk;

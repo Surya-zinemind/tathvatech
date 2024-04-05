@@ -6,9 +6,8 @@
  */
 package com.tathvatech.survey.common;
 
-import com.tathvatech.ts.core.survey.response.SimpleSurveyItemResponse;
-import com.tathvatech.ts.core.survey.response.SurveyItemResponse;
-import com.thirdi.surveyside.survey.surveyitem.SurveySaveItem;
+import com.tathvatech.survey.response.SimpleSurveyItemResponse;
+import com.tathvatech.survey.response.SurveyItemResponse;
 
 /**
  * @author Hari

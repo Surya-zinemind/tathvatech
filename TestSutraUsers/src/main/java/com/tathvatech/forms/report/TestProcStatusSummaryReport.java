@@ -1,39 +1,47 @@
 package com.tathvatech.forms.report;
 
+import com.tathvatech.common.common.ApplicationProperties;
+import com.tathvatech.common.common.QueryObject;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.common.exception.AppException;
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.forms.enums.FormStatusEnum;
+import com.tathvatech.forms.request.TestProcStatusSummaryReportRequest;
+import com.tathvatech.unit.service.UnitManager;
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.SiteOID;
+import com.tathvatech.user.OID.UnitOID;
+import com.tathvatech.user.OID.WorkstationOID;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.forms.response.ResponseMasterNew;
+import com.tathvatech.workstation.common.DummyWorkstation;
+import com.tathvatech.workstation.common.UnitInProjectObj;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import com.tathvatech.testsutra.ncr.common.QueryObject;
-import com.tathvatech.ts.caf.ApplicationProperties;
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.common.DummyWorkstation;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.project.UnitOID;
-import com.tathvatech.ts.core.project.WorkstationOID;
-import com.tathvatech.ts.core.sites.SiteOID;
-import com.tathvatech.ts.core.survey.response.FormStatusEnum;
-import com.tathvatech.ts.core.survey.response.ResponseMasterNew;
-import com.thirdi.surveyside.project.UnitInProjectObj;
-import com.thirdi.surveyside.project.UnitManager;
-import com.thirdi.surveyside.project.testprocstatussummaryreport.TestProcStatusSummaryReportRequest.GroupingCol;
+
 
 public class TestProcStatusSummaryReport
 {
+	private final PersistWrapper persistWrapper;
+	private final DummyWorkstation dummyWorkstation;
+	private final UnitManager unitManager;
 	private static String dbtimezone = ApplicationProperties.getDBTimezone();
 
 	UserContext context;
 	private TestProcStatusSummaryReportRequest request;
 	List<TestProcStatusSummaryReportRequest.GroupingCol> groupingColList = new ArrayList<>();
 
-	public TestProcStatusSummaryReport(UserContext context, TestProcStatusSummaryReportRequest request)
+	public TestProcStatusSummaryReport(PersistWrapper persistWrapper, DummyWorkstation dummyWorkstation, UnitManager unitManager, UserContext context, TestProcStatusSummaryReportRequest request)
 	{
-		this.context = context;
+        this.persistWrapper = persistWrapper;
+        this.dummyWorkstation = dummyWorkstation;
+        this.unitManager = unitManager;
+        this.context = context;
 		this.request = request;
 		if (request.getGroupingSet() != null && request.getGroupingSet().size() > 0)
 			groupingColList.addAll(request.getGroupingSet());
@@ -71,7 +79,7 @@ public class TestProcStatusSummaryReport
 
 	public TestProcStatusSummaryReportResult runReport()
 	{
-		if(groupingColList.contains(GroupingCol.forecastTestStartDate) && groupingColList.contains(GroupingCol.forecastTestEndDate))
+		if(groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestStartDate) && groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestEndDate))
 			throw new AppException("You cannot group by the forecast start and end dates at the same time.");
 		
 		StringBuffer sb = new StringBuffer();
@@ -79,39 +87,39 @@ public class TestProcStatusSummaryReport
 		
 		sb.append("select ");
 		
-		if(groupingColList.contains(GroupingCol.project))
+		if(groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.project))
 			sb.append("projectPk, projectName, projectDescription ");
 		else
 			sb.append("null as projectPk, null as projectName, null as projectDescription ");
 
-		if(groupingColList.contains(GroupingCol.ProjectPart))
+		if(groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.ProjectPart))
 			sb.append(", projectPartPk, projectPartName ");
 		else
 			sb.append(", null as projectPartPk, null as projectPartName ");
 
-		if(groupingColList.contains(GroupingCol.unit))
+		if(groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.unit))
 			sb.append(" , unitPk, unitName, unitDescription ");
 		else
 			sb.append(" , null as unitPk, null as unitName, null as unitDescription ");
 			
-		if(groupingColList.contains(GroupingCol.workstation))
+		if(groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.workstation))
 			sb.append(" , workstationPk, workstationName, workstationDescription, sitePk, siteName ");
 		else
 			sb.append(" , null as workstationPk, null as workstationName, null as workstationDescription, null as sitePk, null as siteName ");
 
-		if(groupingColList.contains(GroupingCol.unit) && groupingColList.contains(GroupingCol.project) && groupingColList.contains(GroupingCol.workstation))
+		if(groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.unit) && groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.project) && groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.workstation))
 			sb.append(" , workstationMoveInDate, workstationStartDate, workstationCompleteDate,  workstationForecastStartDate, workstationForecastEndDate, workstationEstimateHours, workstationStatus ");
 		else
 			sb.append(" , null as workstationMoveInDate, null as workstationStartDate, null as workstationCompleteDate, null as workstationForecastStartDate, null as workstationForecastEndDate, null as workstationEstimateHours, null as workstationStatus ");
 		// please note.. in this report, we are treating workstationEstimateHours only as a regular workstation attribute and not as a stats data which can be summed up. 
 		// we get multiple rows with the same value for the workstation estimate hours as we get test level rows, so summing them will have a wrong value for the workstationEstimateHours
 		
-		if(groupingColList.contains(GroupingCol.form))
+		if(groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.form))
 			sb.append(" , testPk, testName, formPk, formName, formDescription ");
 		else
 			sb.append(" , null as testPk, null as testName, null as formPk, null as formName, null as formDescription ");
 
-		if (request.getGroupingSet().contains(GroupingCol.forecastTestStartDate))
+		if (request.getGroupingSet().contains(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestStartDate))
 		{
 			sb.append(" , DATE(convert_tz(forecastStartDate, ?, siteTimeZone)) as forecastStartDate ");
 			sb.append(" , concat(DAY(convert_tz(forecastStartDate, ?, siteTimeZone)), '/', MONTH(convert_tz(forecastStartDate, ?, siteTimeZone)), '/', YEAR(convert_tz(forecastStartDate, ?, siteTimeZone))) as forecastStartDateString ");
@@ -125,7 +133,7 @@ public class TestProcStatusSummaryReport
 			sb.append(" , null as forecastStartDate, null as  forecastStartDateString");
 		}
 
-		if (request.getGroupingSet().contains(GroupingCol.forecastTestEndDate))
+		if (request.getGroupingSet().contains(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestEndDate))
 		{
 			sb.append(" , DATE(convert_tz(forecastEndDate, ?, siteTimeZone)) as forecastEndDate ");
 			sb.append(" , concat(DAY(convert_tz(forecastEndDate, ?, siteTimeZone)), '/', MONTH(convert_tz(forecastEndDate, ?, siteTimeZone)), '/', YEAR(convert_tz(forecastEndDate, ?, siteTimeZone))) as forecastEndDateString ");
@@ -163,38 +171,38 @@ public class TestProcStatusSummaryReport
 			String groupSep = "";
 			for (Iterator iterator = groupingColList.iterator(); iterator.hasNext();)
 			{
-				GroupingCol aCol = (GroupingCol) iterator.next();
-				if(GroupingCol.project == aCol)
+				TestProcStatusSummaryReportRequest.GroupingCol aCol = (TestProcStatusSummaryReportRequest.GroupingCol) iterator.next();
+				if(TestProcStatusSummaryReportRequest.GroupingCol.project == aCol)
 				{
 					sb.append(groupSep).append("projectPk");
 					groupSep = ",";
 				}
-				if(GroupingCol.ProjectPart == aCol)
+				if(TestProcStatusSummaryReportRequest.GroupingCol.ProjectPart == aCol)
 				{
 					sb.append(groupSep).append("projectPartPk");
 					groupSep = ",";
 				}
-				else if(GroupingCol.unit == aCol)
+				else if(TestProcStatusSummaryReportRequest.GroupingCol.unit == aCol)
 				{
 					sb.append(groupSep).append("unitPk");
 					groupSep = ",";
 				}
-				else if(GroupingCol.workstation == aCol)
+				else if(TestProcStatusSummaryReportRequest.GroupingCol.workstation == aCol)
 				{
 					sb.append(groupSep).append("workstationPk");
 					groupSep = ",";
 				}
-				else if(GroupingCol.form == aCol)
+				else if(TestProcStatusSummaryReportRequest.GroupingCol.form == aCol)
 				{
 					sb.append(groupSep).append("testPk");
 					groupSep = ",";
 				}
-				if(groupingColList.contains(GroupingCol.forecastTestStartDate))
+				if(groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestStartDate))
 				{
 					sb.append(groupSep).append("forecastStartDate");
 					groupSep = ",";
 				}
-				if(groupingColList.contains(GroupingCol.forecastTestEndDate))
+				if(groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestEndDate))
 				{
 					sb.append(groupSep).append("forecastEndDate");
 					groupSep = ",";
@@ -208,40 +216,40 @@ public class TestProcStatusSummaryReport
 			sb.append(" order by ");
 			String orderSep = "";
 			
-			if(groupingColList.contains(GroupingCol.project))
+			if(groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.project))
 			{
 				sb.append(orderSep).append(" projectCreatedDate ");
 				orderSep = ", ";
 			}
-			if(groupingColList.contains(GroupingCol.ProjectPart))
+			if(groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.ProjectPart))
 			{
 				sb.append(orderSep).append(" projectPartName ");
 				orderSep = ", ";
 			}
-			if(groupingColList.contains(GroupingCol.unit) && groupingColList.contains(GroupingCol.project))
+			if(groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.unit) && groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.project))
 			{
 				sb.append(orderSep).append(" unitLevel, unitOrderNo ");
 				orderSep = ", ";
 			}
-			if(groupingColList.contains(GroupingCol.workstation))
+			if(groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.workstation))
 			{
 				sb.append(orderSep).append(" workstationOrderNo ");
 				orderSep = ", ";
 			}
-			if(groupingColList.contains(GroupingCol.form))
+			if(groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.form))
 			{
 				sb.append(orderSep).append(" testPk ");
 			}
-			if(groupingColList.contains(GroupingCol.forecastTestStartDate))
+			if(groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestStartDate))
 			{
 				sb.append(orderSep).append(" forecastStartDate ");
 			}
-			if(groupingColList.contains(GroupingCol.forecastTestEndDate))
+			if(groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestEndDate))
 			{
 				sb.append(orderSep).append(" forecastEndDate ");
 			}
 		}
-		List<TestProcStatusSummaryReportResultRow> rows = PersistWrapper.readList(TestProcStatusSummaryReportResultRow.class, sb.toString(), params.toArray());
+		List<TestProcStatusSummaryReportResultRow> rows = persistWrapper.readList(TestProcStatusSummaryReportResultRow.class, sb.toString(), params.toArray());
 		TestProcStatusSummaryReportResult result = new TestProcStatusSummaryReportResult();
 		result.setReportResult(rows);
 		
@@ -284,7 +292,7 @@ public class TestProcStatusSummaryReport
 				+ " join TAB_UNIT u on uth.unitPk = u.pk "
 				+ " join TAB_UNIT_H uh on uh.unitPk = u.pk and now() between uh.effectiveDateFrom and uh.effectiveDateTo"
 				+ " join TAB_PROJECT p on uth.projectPk = p.pk "
-				+ " join TAB_WORKSTATION w on uth.workstationPk = w.pk and w.pk != " + DummyWorkstation.getPk()
+				+ " join TAB_WORKSTATION w on uth.workstationPk = w.pk and w.pk != " + dummyWorkstation.getPk()
 				+ " join TAB_SURVEY f on tfa.formFk = f.pk "
 				+ " join unit_project_ref upr on upr.unitPk = uth.unitPk and upr.projectPk = uth.projectPk "
 				+ " join unit_project_ref_h uprh on uprh.unitInProjectPk = upr.pk and now() between uprh.effectiveDateFrom and uprh.effectiveDateTo and uprh.status != 'Removed' "
@@ -315,7 +323,7 @@ public class TestProcStatusSummaryReport
 					throw new AppException(
 							"Project for unit heirarchy should be specified to include chileren of the selected unit");
 				}
-				UnitInProjectObj upr = UnitManager.getUnitInProject(request.getUnitOID(),
+				UnitInProjectObj upr = unitManager.getUnitInProject(request.getUnitOID(),
 						request.getProjectOIDForUnitHeirarchy());
 				sb.append(" join (select upr.unitPk from unit_project_ref upr "
 						+ " join unit_project_ref_h uprh on uprh.unitInProjectPk = upr.pk and now() between uprh.effectiveDateFrom and uprh.effectiveDateTo and uprh.status != 'Removed' "
@@ -334,7 +342,7 @@ public class TestProcStatusSummaryReport
 		}
 		
 		
-		sb.append(" where  uth.workstationPk != " + DummyWorkstation.getPk() + "");
+		sb.append(" where  uth.workstationPk != " + dummyWorkstation.getPk() + "");
 		
 		
 		if (request.getProjectOIDList() != null && request.getProjectOIDList().size() > 0)
@@ -478,11 +486,11 @@ public class TestProcStatusSummaryReport
 
 		sb.append(" having 1 = 1  ");
 
-		if (groupingColList.contains(GroupingCol.forecastTestStartDate))
+		if (groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestStartDate))
 		{
 			sb.append(" and forecastStartDate is not null ");
 		}
-		if (groupingColList.contains(GroupingCol.forecastTestEndDate))
+		if (groupingColList.contains(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestEndDate))
 		{
 			sb.append(" and forecastEndDate is not null ");
 		}

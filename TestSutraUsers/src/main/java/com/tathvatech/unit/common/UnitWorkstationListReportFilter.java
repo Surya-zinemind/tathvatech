@@ -1,11 +1,13 @@
 package com.tathvatech.unit.common;
 
+import com.tathvatech.report.request.ReportFilter;
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.UnitOID;
+import com.tathvatech.user.OID.WorkstationOID;
+
 import java.util.List;
 
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.project.UnitOID;
-import com.tathvatech.ts.core.project.WorkstationOID;
-import com.thirdi.surveyside.reportv2.ReportFilter;
+
 
 public class UnitWorkstationListReportFilter extends ReportFilter
 {

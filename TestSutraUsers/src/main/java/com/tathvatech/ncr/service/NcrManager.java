@@ -1,5 +1,21 @@
 package com.tathvatech.ncr.service;
 
+import com.tathvatech.common.common.QueryObject;
+import com.tathvatech.common.enums.EStatusEnum;
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.ncr.common.NcrItemQuery;
+import com.tathvatech.ncr.common.NcrItemQueryBuilder;
+import com.tathvatech.ncr.common.NcrItemQueryFilter;
+import com.tathvatech.ncr.oid.NcrItemOID;
+import com.tathvatech.project.common.ProjectQuery;
+import com.tathvatech.project.controller.ProjectController;
+import com.tathvatech.project.service.ProjectService;
+import com.tathvatech.user.OID.PartOID;
+import com.tathvatech.user.OID.PartRevisionOID;
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.WhereFoundOID;
+import com.tathvatech.user.common.UserContext;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -9,101 +25,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.sarvasutra.etest.EtestApplication;
-import com.sarvasutra.etest.mod.Mode;
-import com.tathvatech.testsutra.additionalparts.common.AdditionalPartsBean;
-import com.tathvatech.testsutra.additionalparts.service.AdditionalPartsManager;
-import com.tathvatech.testsutra.mrf.service.MRFManager;
-import com.tathvatech.testsutra.ncr.common.NcrAreaOfResponsibilityBean;
-import com.tathvatech.testsutra.ncr.common.NcrCorrectiveActionBean;
-import com.tathvatech.testsutra.ncr.common.NcrDispositionBean;
-import com.tathvatech.testsutra.ncr.common.NcrDispositionTypes;
-import com.tathvatech.testsutra.ncr.common.NcrEnum;
-import com.tathvatech.testsutra.ncr.common.NcrEnum.NcrItemStatus;
-import com.tathvatech.testsutra.ncr.common.NcrFailureCodeMasterBean;
-import com.tathvatech.testsutra.ncr.common.NcrFunctionBean;
-import com.tathvatech.testsutra.ncr.common.NcrFunctionQuery;
-import com.tathvatech.testsutra.ncr.common.NcrGroupBean;
-import com.tathvatech.testsutra.ncr.common.NcrGroupBeanSimple;
-import com.tathvatech.testsutra.ncr.common.NcrGroupOID;
-import com.tathvatech.testsutra.ncr.common.NcrGroupQuery;
-import com.tathvatech.testsutra.ncr.common.NcrGroupQueryBuilder;
-import com.tathvatech.testsutra.ncr.common.NcrGroupQueryFilter;
-import com.tathvatech.testsutra.ncr.common.NcrItemActivityMasterBean;
-import com.tathvatech.testsutra.ncr.common.NcrItemActivityRefBean;
-import com.tathvatech.testsutra.ncr.common.NcrItemBean;
-import com.tathvatech.testsutra.ncr.common.NcrItemBeanTransfer;
-import com.tathvatech.testsutra.ncr.common.NcrItemNcgExportQuery;
-import com.tathvatech.testsutra.ncr.common.NcrItemNcgExportQueryBuilder;
-import com.tathvatech.testsutra.ncr.common.NcrItemOID;
-import com.tathvatech.testsutra.ncr.common.NcrItemQuery;
-import com.tathvatech.testsutra.ncr.common.NcrItemQueryBuilder;
-import com.tathvatech.testsutra.ncr.common.NcrItemQueryFilter;
-import com.tathvatech.testsutra.ncr.common.NcrMileStoneQueryBuilder;
-import com.tathvatech.testsutra.ncr.common.NcrMilestoneQuery;
-import com.tathvatech.testsutra.ncr.common.NcrUnitAllocBean;
-import com.tathvatech.testsutra.ncr.common.NcrUnitAssignBean;
-import com.tathvatech.testsutra.ncr.common.NcrUnitAssignOID;
-import com.tathvatech.testsutra.ncr.common.NcrWhereFoundBean;
-import com.tathvatech.testsutra.ncr.common.NcrWhereFoundList;
-import com.tathvatech.testsutra.ncr.common.QueryObject;
-import com.tathvatech.testsutra.ncr.common.ResourceRequirementBean;
-import com.tathvatech.testsutra.ncr.reports.ncritemlistreport.NcrCorrectiveActionQuery;
-import com.tathvatech.testsutra.ncr.reports.ncritemlistreport.NcrCorrectiveActionReportFilter;
-import com.tathvatech.testsutra.ncr.reports.ncritemlistreport.NcrItemListReportFilter;
-import com.tathvatech.testsutra.ncr.reports.ncritemlistreport.NcrItemListReportFilter.DispositionIsSet;
-import com.tathvatech.testsutra.ncr.reports.ncritemlistreport.NcrItemListReportResultRow;
-import com.tathvatech.testsutra.openitemv2.service.OpenItemV2;
-import com.tathvatech.testsutra.parts.common.ReworkOrderBean;
-import com.tathvatech.testsutra.parts.common.ShipmentReceiveEntryBean;
-import com.tathvatech.testsutra.parts.service.PartsNewManager;
-import com.tathvatech.testsutra.purchaseOrders.common.PurchaseOrderBean;
-import com.tathvatech.testsutra.purchaseOrders.common.PurchaseOrderLineItemBean;
-import com.tathvatech.testsutra.purchaseOrders.common.PurchaseOrderLineItemOID;
-import com.tathvatech.testsutra.purchaseOrders.common.PurchaseOrderOID;
-import com.tathvatech.testsutra.purchaseOrders.service.PONManager;
-import com.tathvatech.ts.caf.DBEnum;
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.AccountManager;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.accounts.UserOID;
-import com.tathvatech.ts.core.common.Attachment;
-import com.tathvatech.ts.core.common.Comment;
-import com.tathvatech.ts.core.common.EStatusEnum;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.MRFPartAssignOID;
-import com.tathvatech.ts.core.common.service.CommonServiceManager;
-import com.tathvatech.ts.core.common.utils.AttachmentIntf;
-import com.tathvatech.ts.core.part.PartOID;
-import com.tathvatech.ts.core.part.PartRevisionOID;
-import com.tathvatech.ts.core.part.SupplierOID;
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.project.Unit;
-import com.tathvatech.ts.core.project.UnitBean;
-import com.tathvatech.ts.core.project.UnitOID;
-import com.tathvatech.ts.core.project.UnitOriginType;
-import com.tathvatech.ts.core.project.WhereFoundOID;
-import com.tathvatech.ts.core.sites.Site;
-import com.tathvatech.ts.core.sites.SiteGroup;
-import com.tathvatech.ts.core.sites.SiteOID;
-import com.tathvatech.ts.core.survey.response.FormItemResponse;
-import com.tathvatech.ts.milestonetrack.EntityMilestoneDelegate;
-import com.tathvatech.ts.report.ReportTypes;
-import com.thirdi.surveyside.project.ProjectDelegate;
-import com.thirdi.surveyside.project.ProjectManager;
-import com.thirdi.surveyside.project.ProjectQuery;
-import com.thirdi.surveyside.project.SiteDelegate;
-import com.thirdi.surveyside.project.UnitDelegate;
-import com.thirdi.surveyside.reportv2.ReportRequest;
-import com.thirdi.surveyside.reportv2.ReportResponse;
-import com.thirdi.surveyside.reportv2.ReportsDelegate;
-import com.thirdi.surveyside.utils.DateUtils;
+
 
 public class NcrManager
 {
-
+    private final PersistWrapper persistWrapper;
+	private ProjectController projectController;
 	public static String PUBLISHED_MILESTONE = "Published";
 	public static String PUBLISHED_MILESTONE_SELECTEDVALUE = "Complete";
 	public static String CLOSED_MILESTONE = "Closed";
@@ -111,13 +38,18 @@ public class NcrManager
 	public static int SCRAP_DISPOSITIONFK = 3;
 	public static int RETURN_TO_SUPPLIER_DISPOSITIONFK = 5;
 
-	// Ncr Group
-	public static NcrGroupBean saveNcrGroup(UserContext context, NcrGroupBean nesnItemBean) throws Exception
+    public NcrManager(PersistWrapper persistWrapper) {
+        this.persistWrapper = persistWrapper;
+
+    }
+
+    // Ncr Group
+	public  NcrGroupBean saveNcrGroup(UserContext context, NcrGroupBean nesnItemBean) throws Exception
 	{
 		NcrGroup nesnItem = null;
 		if (nesnItemBean.getPk() != 0)
 		{
-			nesnItem = PersistWrapper.readByPrimaryKey(NcrGroup.class, nesnItemBean.getPk());
+			nesnItem = persistWrapper.readByPrimaryKey(NcrGroup.class, nesnItemBean.getPk());
 		} else
 		{
 			nesnItem = new NcrGroup();
@@ -184,12 +116,12 @@ public class NcrManager
 		int itemPk;
 		if (nesnItemBean.getPk() != 0)
 		{
-			PersistWrapper.update(nesnItem);
+			persistWrapper.update(nesnItem);
 			itemPk = nesnItem.getPk();
 		} else
 		{
-			itemPk = PersistWrapper.createEntity(nesnItem);
-			nesnItem = PersistWrapper.readByPrimaryKey(NcrGroup.class, itemPk);
+			itemPk = persistWrapper.createEntity(nesnItem);
+			nesnItem = persistWrapper.readByPrimaryKey(NcrGroup.class, itemPk);
 			nesnItem.setPk(itemPk);
 			nesnItem.setNcrGroupNo("TNCRGROUP-" + itemPk);
 			PersistWrapper.update(nesnItem);
@@ -229,7 +161,7 @@ public class NcrManager
 		return nesnItemBean;
 	}
 
-	public static NcrGroupBean copyNcrGroup(UserContext context, NcrGroupBean nesnItemBean) throws Exception
+	public  NcrGroupBean copyNcrGroup(UserContext context, NcrGroupBean nesnItemBean) throws Exception
 	{
 		NcrGroup nesnItem = null;
 		nesnItem = new NcrGroup();
@@ -293,10 +225,10 @@ public class NcrManager
 			}
 		}
 		int itemPk;
-		itemPk = PersistWrapper.createEntity(nesnItem);
+		itemPk = persistWrapper.createEntity(nesnItem);
 		nesnItem.setPk(itemPk);
 		nesnItem.setNcrGroupNo("TNCRGROUP-" + itemPk);
-		PersistWrapper.update(nesnItem);
+		persistWrapper.update(nesnItem);
 
 		List<NcrItemBean> storeList = new ArrayList<NcrItemBean>();
 		if (nesnItemBean.getNcrItemBeanList() != null)
@@ -319,18 +251,18 @@ public class NcrManager
 		return nesnItemBean;
 	}
 
-	public static NcrGroupBean publishNcrGroup(UserContext context, NcrGroupBean nesnItemBean, String message)
+	public  NcrGroupBean publishNcrGroup(UserContext context, NcrGroupBean nesnItemBean, String message)
 			throws Exception
 	{
 		NcrGroup nesnItem = null;
 		if (nesnItemBean.getPk() != 0)
 		{
-			nesnItem = PersistWrapper.readByPrimaryKey(NcrGroup.class, nesnItemBean.getPk());
+			nesnItem = persistWrapper.readByPrimaryKey(NcrGroup.class, nesnItemBean.getPk());
 			nesnItem.setStatus(NcrEnum.NcrGroupStatus.PUBLISHED.toString());
 			Integer seqCount = getPublishedSequenceNumber(new NcrGroupOID(nesnItemBean.getPk(), ""));
 			if (seqCount == null || seqCount == 0)
 			{
-				ProjectQuery projectQuery = ProjectDelegate.getProjectQueryByPk(nesnItemBean.getProjectOID().getPk());
+				ProjectQuery projectQuery = projectController.getProjectQueryByPk(nesnItemBean.getProjectOID().getPk());
 				String projectName = "";
 				if (projectQuery != null)
 				{
@@ -368,11 +300,11 @@ public class NcrManager
 			int itemPk;
 			if (nesnItemBean.getPk() != 0)
 			{
-				PersistWrapper.update(nesnItem);
+				persistWrapper.update(nesnItem);
 				itemPk = nesnItem.getPk();
 			} else
 			{
-				itemPk = PersistWrapper.createEntity(nesnItem);
+				itemPk = persistWrapper.createEntity(nesnItem);
 			}
 
 			List<NcrItemBean> prevNcrItemBeans = getNcrItemBeans(new NcrGroupOID(itemPk, ""));
@@ -397,12 +329,12 @@ public class NcrManager
 		return nesnItemBean;
 	}
 
-	public static NcrGroupBean verifyNcrGroup(UserContext context, NcrGroupBean nesnItemBean) throws Exception
+	public  NcrGroupBean verifyNcrGroup(UserContext context, NcrGroupBean nesnItemBean) throws Exception
 	{
 		NcrGroup nesnItem = null;
 		if (nesnItemBean.getPk() != 0)
 		{
-			nesnItem = PersistWrapper.readByPrimaryKey(NcrGroup.class, nesnItemBean.getPk());
+			nesnItem = persistWrapper.readByPrimaryKey(NcrGroup.class, nesnItemBean.getPk());
 
 			nesnItem.setStatus(NcrEnum.NcrGroupStatus.COMPLETED.toString());
 
@@ -413,7 +345,7 @@ public class NcrManager
 				itemPk = nesnItem.getPk();
 			} else
 			{
-				itemPk = PersistWrapper.createEntity(nesnItem);
+				itemPk = persistWrapper.createEntity(nesnItem);
 			}
 			List<NcrItemBean> storeList = new ArrayList<NcrItemBean>();
 			if (nesnItemBean.getNcrItemBeanList() != null)
@@ -433,13 +365,13 @@ public class NcrManager
 		return nesnItemBean;
 	}
 
-	public static NcrGroupBean cancelNcrGroup(UserContext context, NcrGroupBean nesnItemBean, String message)
+	public  NcrGroupBean cancelNcrGroup(UserContext context, NcrGroupBean nesnItemBean, String message)
 			throws Exception
 	{
 		NcrGroup nesnItem = null;
 		if (nesnItemBean.getPk() != 0)
 		{
-			nesnItem = PersistWrapper.readByPrimaryKey(NcrGroup.class, nesnItemBean.getPk());
+			nesnItem = persistWrapper.readByPrimaryKey(NcrGroup.class, nesnItemBean.getPk());
 
 			nesnItem.setStatus(NcrEnum.NcrGroupStatus.CANCELLED.toString());
 
@@ -450,7 +382,7 @@ public class NcrManager
 				itemPk = nesnItem.getPk();
 			} else
 			{
-				itemPk = PersistWrapper.createEntity(nesnItem);
+				itemPk = persistWrapper.createEntity(nesnItem);
 			}
 			List<NcrItemBean> storeList = new ArrayList<NcrItemBean>();
 			if (nesnItemBean.getNcrItemBeanList() != null)
@@ -471,22 +403,22 @@ public class NcrManager
 		return nesnItemBean;
 	}
 
-	public static NcrGroupBean closeNcrGroup(UserContext context, NcrGroupBean nesnItemBean) throws Exception
+	public  NcrGroupBean closeNcrGroup(UserContext context, NcrGroupBean nesnItemBean) throws Exception
 	{
 		NcrGroup nesnItem = null;
 		if (nesnItemBean.getPk() != 0)
 		{
-			nesnItem = PersistWrapper.readByPrimaryKey(NcrGroup.class, nesnItemBean.getPk());
+			nesnItem = persistWrapper.readByPrimaryKey(NcrGroup.class, nesnItemBean.getPk());
 			nesnItem.setStatus(NcrEnum.NcrGroupStatus.CLOSED.toString());
 
 			int itemPk;
 			if (nesnItemBean.getPk() != 0)
 			{
-				PersistWrapper.update(nesnItem);
+				persistWrapper.update(nesnItem);
 				itemPk = nesnItem.getPk();
 			} else
 			{
-				itemPk = PersistWrapper.createEntity(nesnItem);
+				itemPk = persistWrapper.createEntity(nesnItem);
 			}
 			List<NcrItemBean> storeList = new ArrayList<NcrItemBean>();
 			if (nesnItemBean.getNcrItemBeanList() != null)
@@ -508,14 +440,14 @@ public class NcrManager
 
 	}
 
-	public static NcrItemQuery getNcrItemQuery(UserContext context, NcrItemOID ncrItemOID)
+	public  NcrItemQuery getNcrItemQuery(UserContext context, NcrItemOID ncrItemOID)
 	{
 		NcrItemQueryFilter nfilter = new NcrItemQueryFilter();
 		nfilter.setPk(ncrItemOID.getPk());
 		NcrItemQueryBuilder ncrItemQueryBuilder = new NcrItemQueryBuilder(context, nfilter);
 		QueryObject queryObject = ncrItemQueryBuilder.getQuery();
 		if (queryObject != null)
-			return PersistWrapper.read(NcrItemQuery.class, queryObject.getQuery(),
+			return persistWrapper.read(NcrItemQuery.class, queryObject.getQuery(),
 					(queryObject.getParams().size() > 0)
 							? queryObject.getParams().toArray(new Object[queryObject.getParams().size()])
 							: null);
@@ -529,15 +461,15 @@ public class NcrManager
 		return PersistWrapper.read(NcrAreaOfResponsibilityBean.class, queryString + "where pk = ?", pk);
 	}
 
-	public static List<NcrAreaOfResponsibilityBean> getNcrAreaOfResponsibility()
+	public  List<NcrAreaOfResponsibilityBean> getNcrAreaOfResponsibility()
 	{
 		String queryString = " select * from ncr_area_of_responsibility_master where estatus=1";
-		return PersistWrapper.readList(NcrAreaOfResponsibilityBean.class, queryString);
+		return persistWrapper.readList(NcrAreaOfResponsibilityBean.class, queryString);
 	}
 
-	public static List<NcrAreaOfResponsibilityBean> getNcrDefectCodes()
+	public  List<NcrAreaOfResponsibilityBean> getNcrDefectCodes()
 	{
-		List<NcrAreaOfResponsibilityBean> allList = PersistWrapper.readList(NcrAreaOfResponsibilityBean.class,
+		List<NcrAreaOfResponsibilityBean> allList = persistWrapper.readList(NcrAreaOfResponsibilityBean.class,
 				"select * from ncr_area_of_responsibility_master where estatus=1");
 		HashMap<Integer, NcrAreaOfResponsibilityBean> codeMap = new HashMap<>();
 		for (Iterator iterator = allList.iterator(); iterator.hasNext();)
@@ -611,9 +543,9 @@ public class NcrManager
 		return PersistWrapper.read(NcrFailureCodeMasterBean.class, queryString + "where pk = ?", pk);
 	}
 
-	public static List<NcrFailureCodeMasterBean> getNcrFailureCodes()
+	public  List<NcrFailureCodeMasterBean> getNcrFailureCodes()
 	{
-		List<NcrFailureCodeMasterBean> allList = PersistWrapper.readList(NcrFailureCodeMasterBean.class,
+		List<NcrFailureCodeMasterBean> allList = persistWrapper.readList(NcrFailureCodeMasterBean.class,
 				"select * from ncr_failure_code_master");
 		HashMap<Integer, NcrFailureCodeMasterBean> codeMap = new HashMap<>();
 		for (Iterator iterator = allList.iterator(); iterator.hasNext();)
@@ -641,15 +573,15 @@ public class NcrManager
 		return returnList;
 	}
 
-	public static List<NcrItemActivityMasterBean> getNcrItemActivityList()
+	public  List<NcrItemActivityMasterBean> getNcrItemActivityList()
 	{
-		return PersistWrapper.readList(NcrItemActivityMasterBean.class, "select * from ncr_item_activity_master");
+		return persistWrapper.readList(NcrItemActivityMasterBean.class, "select * from ncr_item_activity_master");
 	}
 
-	public static List<NcrItemActivityRefBean> getNcrItemActivityRefList()
+	public  List<NcrItemActivityRefBean> getNcrItemActivityRefList()
 	{
 		List<NcrItemActivityRefBean> ncrItemActivityRefBeanList = new ArrayList<NcrItemActivityRefBean>();
-		List<NcrItemActivityRef> ncrItemActivityRefList = PersistWrapper.readList(NcrItemActivityRef.class,
+		List<NcrItemActivityRef> ncrItemActivityRefList = persistWrapper.readList(NcrItemActivityRef.class,
 				"select * from ncr_item_activity_ref");
 		if (ncrItemActivityRefList != null)
 		{
@@ -662,9 +594,9 @@ public class NcrManager
 
 	}
 
-	public static List<NcrItemActivityMasterBean> getNcrItemActivityList(NcrItemOID ncrItemOID)
+	public  List<NcrItemActivityMasterBean> getNcrItemActivityList(NcrItemOID ncrItemOID)
 	{
-		return PersistWrapper.readList(NcrItemActivityMasterBean.class,
+		return persistWrapper.readList(NcrItemActivityMasterBean.class,
 				"select ncr_item_activity_master.* from ncr_item_activity_master inner join ncr_item_activity_ref on ncr_item_activity_master.pk=ncr_item_activity_ref.ncrItemActivityMasterFk where ncr_item_activity_ref.ncrFk = ?",
 				ncrItemOID.getPk());
 	}
@@ -691,21 +623,21 @@ public class NcrManager
 	// return ncrItemActivityRefBeanList;
 	// }
 
-	public static NcrGroupBean getNcrGroupBean(NcrGroupOID ncrGroupOID)
+	public NcrGroupBean getNcrGroupBean(NcrGroupOID ncrGroupOID)
 	{
-		NcrGroup ncrGroupItem = PersistWrapper.readByPrimaryKey(NcrGroup.class, ncrGroupOID.getPk());
+		NcrGroup ncrGroupItem = persistWrapper.readByPrimaryKey(NcrGroup.class, ncrGroupOID.getPk());
 		return NcrBeanHelper.getBean(ncrGroupItem);
 	}
 
-	public static NcrGroupBeanSimple getNcrGroupBeanSimple(NcrGroupOID ncrGroupOID)
+	public  NcrGroupBeanSimple getNcrGroupBeanSimple(NcrGroupOID ncrGroupOID)
 	{
-		NcrGroup ncrGroupItem = PersistWrapper.readByPrimaryKey(NcrGroup.class, ncrGroupOID.getPk());
+		NcrGroup ncrGroupItem = persistWrapper.readByPrimaryKey(NcrGroup.class, ncrGroupOID.getPk());
 		return NcrBeanHelper.getNcrGroupSimple(ncrGroupItem);
 	}
 
-	public static NcrGroupBean getPublishedNcrGroup(NcrGroupOID ncrGroupOID) throws Exception
+	public  NcrGroupBean getPublishedNcrGroup(NcrGroupOID ncrGroupOID) throws Exception
 	{
-		NcrGroup ncrGroupItem = PersistWrapper.readByPrimaryKey(NcrGroup.class, ncrGroupOID.getPk());
+		NcrGroup ncrGroupItem = persistWrapper.readByPrimaryKey(NcrGroup.class, ncrGroupOID.getPk());
 		NcrGroupBean ncrGroupBean = NcrBeanHelper.getBean(ncrGroupItem);
 		if (ncrGroupBean != null && ncrGroupBean.getPk() != 0)
 		{
@@ -715,21 +647,21 @@ public class NcrManager
 		return ncrGroupBean;
 	}
 
-	public static List<String> getDescriptionHistory(PartOID partOID) throws Exception
+	public  List<String> getDescriptionHistory(PartOID partOID) throws Exception
 	{
-		return PersistWrapper.readList(String.class,
+		return persistWrapper.readList(String.class,
 				"SELECT distinct(groupDescription) FROM ncr_group where eStatus=? and partFk=? and groupDescription is  not null order by createdBy desc limit 0,20 ",
 				EStatusEnum.Active.getValue(), partOID.getPk());
 	}
 
-	public static void deleteNcrGroupByPk(NcrGroupOID ncrGroupOID) throws Exception
+	public  void deleteNcrGroupByPk(NcrGroupOID ncrGroupOID) throws Exception
 	{
 		deleteNcrItem(ncrGroupOID);
-		PersistWrapper.executeUpdate("update ncr_group set eStatus=? where pk=?", EStatusEnum.Deleted.getValue(),
+		persistWrapper.executeUpdate("update ncr_group set eStatus=? where pk=?", EStatusEnum.Deleted.getValue(),
 				ncrGroupOID.getPk());
 	}
 
-	public static List<NcrGroupQuery> getSimilarNcrGroupList(UserContext context, String searchString,
+	public  List<NcrGroupQuery> getSimilarNcrGroupList(UserContext context, String searchString,
 			ProjectOID projectOID)
 	{
 		List<NcrGroupQuery> ncrGroupQuerys = null;
@@ -743,13 +675,13 @@ public class NcrManager
 			if (projectOID != null && projectOID.getPk() != 0)
 			{
 				List<Integer> projectPks = new ArrayList<Integer>();
-				projectPks.add(projectOID.getPk());
+				projectPks.add((int) projectOID.getPk());
 				ncrQueryFilter.setProjectPks(projectPks);
 			}
 			NcrGroupQueryBuilder nqBuilder = new NcrGroupQueryBuilder(context, ncrQueryFilter);
 			QueryObject result = nqBuilder.getQuery();
-			PersistWrapper p = new PersistWrapper();
-			ncrGroupQuerys = PersistWrapper.readList(NcrGroupQuery.class, result.getQuery(),
+
+			ncrGroupQuerys = persistWrapper.readList(NcrGroupQuery.class, result.getQuery(),
 					(result.getParams().size() > 0) ? result.getParams().toArray(new Object[result.getParams().size()])
 							: null);
 		}
@@ -760,7 +692,7 @@ public class NcrManager
 		return ncrGroupQuerys;
 	}
 
-	public static List<NcrGroupQuery> getNcrGroupList(UserContext context, PartOID partOID)
+	public  List<NcrGroupQuery> getNcrGroupList(UserContext context, PartOID partOID)
 	{
 		List<NcrGroupQuery> ncrGroupQuerys = null;
 		try
@@ -770,7 +702,7 @@ public class NcrManager
 			ncrQueryFilter.setStatusCountRequired(true);
 			NcrGroupQueryBuilder nqBuilder = new NcrGroupQueryBuilder(context, ncrQueryFilter);
 			QueryObject result = nqBuilder.getQuery();
-			ncrGroupQuerys = PersistWrapper.readList(NcrGroupQuery.class, result.getQuery(),
+			ncrGroupQuerys = persistWrapper.readList(NcrGroupQuery.class, result.getQuery(),
 					(result.getParams().size() > 0) ? result.getParams().toArray(new Object[result.getParams().size()])
 							: null);
 		}
@@ -781,7 +713,7 @@ public class NcrManager
 		return ncrGroupQuerys;
 	}
 
-	public static List<NcrGroupQuery> getNcrGroupList(UserContext context, PartOID partOID,
+	public  List<NcrGroupQuery> getNcrGroupList(UserContext context, PartOID partOID,
 			PartRevisionOID partRevisionOID)
 	{
 		List<NcrGroupQuery> ncrGroupQuerys = null;
@@ -793,7 +725,7 @@ public class NcrManager
 			ncrQueryFilter.setStatusCountRequired(true);
 			NcrGroupQueryBuilder nqBuilder = new NcrGroupQueryBuilder(context, ncrQueryFilter);
 			QueryObject result = nqBuilder.getQuery();
-			ncrGroupQuerys = PersistWrapper.readList(NcrGroupQuery.class, result.getQuery(),
+			ncrGroupQuerys = persistWrapper.readList(NcrGroupQuery.class, result.getQuery(),
 					(result.getParams().size() > 0) ? result.getParams().toArray(new Object[result.getParams().size()])
 							: null);
 		}
@@ -804,7 +736,7 @@ public class NcrManager
 		return ncrGroupQuerys;
 	}
 
-	public static List<NcrGroupQuery> getLastNcrGroupList(UserContext context, PartOID partOID)
+	public  List<NcrGroupQuery> getLastNcrGroupList(UserContext context, PartOID partOID)
 	{
 		List<NcrGroupQuery> ncrGroupQuerys = null;
 		try
@@ -826,7 +758,7 @@ public class NcrManager
 			NcrGroupQueryBuilder nqBuilder = new NcrGroupQueryBuilder(context, ncrQueryFilter);
 			QueryObject result = nqBuilder.getQuery();
 
-			ncrGroupQuerys = PersistWrapper.readList(NcrGroupQuery.class, result.getQuery(),
+			ncrGroupQuerys = persistWrapper.readList(NcrGroupQuery.class, result.getQuery(),
 					(result.getParams().size() > 0) ? result.getParams().toArray(new Object[result.getParams().size()])
 							: null);
 		}
@@ -837,7 +769,7 @@ public class NcrManager
 		return ncrGroupQuerys;
 	}
 
-	public static List<NcrGroupQuery> getNcrGroupListView(UserContext context, NcrGroupQueryFilter ncrQueryFilter)
+	public  List<NcrGroupQuery> getNcrGroupListView(UserContext context, NcrGroupQueryFilter ncrQueryFilter)
 	{
 		List<NcrGroupQuery> ncrGroupQuerys = null;
 		try

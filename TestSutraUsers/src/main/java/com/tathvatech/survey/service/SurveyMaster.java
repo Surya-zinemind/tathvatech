@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import com.tathvatech.common.enums.WorkItem;
+import com.tathvatech.forms.common.TestProcSectionObj;
+import com.tathvatech.forms.dao.TestProcSectionDAO;
+import com.tathvatech.forms.entity.FormMain;
 import com.tathvatech.forms.oid.FormResponseOID;
 import com.tathvatech.forms.oid.TestProcSectionOID;
 import com.tathvatech.forms.service.TestProcServiceImpl;
@@ -33,6 +36,8 @@ import com.tathvatech.project.entity.Project;
 import com.tathvatech.project.entity.ProjectForm;
 import com.tathvatech.project.service.ProjectService;
 import com.tathvatech.survey.entity.Survey;
+import com.tathvatech.timetracker.request.WorkorderRequestBean;
+import com.tathvatech.timetracker.service.WorkorderManager;
 import com.tathvatech.unit.entity.UnitBookmark;
 import com.tathvatech.unit.service.UnitManager;
 import com.tathvatech.user.Asynch.AsyncProcessor;
@@ -43,6 +48,7 @@ import com.tathvatech.user.entity.Account;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.user.entity.UserQuery;
 import com.tathvatech.user.repository.UserRepository;
+import com.tathvatech.user.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.binary.Base64;
 
@@ -74,6 +80,7 @@ public class SurveyMaster
 	private final SurveyMaster surveyMaster;
 	private final SurveyDefFactory surveyDefFactory;
    private final TestProcService testProcService;
+   private final AccountService accountService;
 
 
 
@@ -335,7 +342,7 @@ public class SurveyMaster
 				"select count(*) from tab_survey where formMainPk = ? and status != ? ", surveyConfig.getFormMainPk(), Survey.STATUS_DELETED);
 		if(formCountInSet == 0)
 		{
-			FormMain formMain = persistWrapper.readByPrimaryKey(FormMain.class, surveyConfig.getFormMainPk());
+			FormMain formMain = (FormMain) persistWrapper.readByPrimaryKey(FormMain.class, surveyConfig.getFormMainPk());
 			formMain.setIdentityNumber(surveyConfig.getIdentityNumber() + "-del-" + formMain.getPk());
 			persistWrapper.update(formMain);
 		}
@@ -696,7 +703,7 @@ public class SurveyMaster
 				ol.setAttributionUserFk(attributeToUserOID.getPk());
 			else
 				ol.setAttributionUserFk(ol.getUserPk());
-			PersistWrapper.update(ol);
+			persistWrapper.update(ol);
 		}
 	}
 
@@ -810,7 +817,7 @@ public class SurveyMaster
 		return returnList;
 	}
 
-	public static List<ObjectLock> getLockedSectionIds(FormResponseOID responseOID)throws Exception
+	public  List<ObjectLock> getLockedSectionIds(FormResponseOID responseOID)throws Exception
 	{
 		List<ObjectLock> l = PersistWrapper.readList(ObjectLock.class, "select * from tab_sectionlock where responseFk=? ", 
 				responseOID.getPk());
@@ -818,7 +825,7 @@ public class SurveyMaster
 		for (Iterator iterator = l.iterator(); iterator.hasNext();)
 		{
 			ObjectLock objectLock = (ObjectLock) iterator.next();
-			User lockedBy = AccountManager.getUser(objectLock.getUserPk());
+			User lockedBy = accountService.getUser(objectLock.getUserPk());
 			objectLock.setLockedByUser(lockedBy);
 		}
 		

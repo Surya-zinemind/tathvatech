@@ -11,37 +11,24 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.tathvatech.site.service.SiteServiceImpl;
+import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.common.SurveyItem;
+import com.tathvatech.survey.common.SurveySaveItem;
+import com.tathvatech.survey.response.SurveyItemResponse;
+import com.tathvatech.unit.response.ResponseUnit;
+import com.tathvatech.user.common.UserContext;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sarvasutra.etest.api.model.AdvancedBomInspectionItemResponseBean;
-import com.sarvasutra.etest.api.model.BomCellTypeEnum;
-import com.sarvasutra.etest.api.model.FormItemResponseBase;
-import com.sarvasutra.etest.api.model.OptionGroupItemResponseBean;
-import com.sarvasutra.etest.api.model.ResultEnum;
-import com.sarvasutra.etest.api.model.SignatureCaptureItemResponseBean;
-import com.sarvasutra.etest.api.model.TCell;
-import com.sarvasutra.etest.api.model.TextAreaItemResponseBean;
-import com.sarvasutra.etest.api.model.TextBoxItemResponseBean;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.common.FileStoreManager;
-import com.tathvatech.ts.core.survey.BomTypesEnum;
-import com.tathvatech.ts.core.survey.OneDOptionType;
-import com.tathvatech.ts.core.survey.Option;
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.response.ResponseUnit;
-import com.tathvatech.ts.core.survey.response.SurveyItemResponse;
-import com.thirdi.surveyside.survey.DataTypes;
-import com.thirdi.surveyside.survey.SurveyItem;
-import com.thirdi.surveyside.survey.response.SignatureCaptureItemResponse;
-import com.thirdi.surveyside.survey.surveyitem.AdvancedBomInspectItemAnswerType;
-import com.thirdi.surveyside.survey.surveyitem.BomInspectItemAnswerType;
-import com.thirdi.surveyside.survey.surveyitem.RadioButtonAnswerType;
-import com.thirdi.surveyside.survey.surveyitem.SignatureCaptureAnswerType;
-import com.thirdi.surveyside.survey.surveyitem.SurveySaveItem;
-import com.thirdi.surveyside.survey.surveyitem.TextAreaAnswerType;
-import com.thirdi.surveyside.survey.surveyitem.TextBoxAnswerType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.text.html.Option;
+
+import static com.tathvatech.survey.service.SurveyItemManager.AdvancedBomInspectItemAnswerType;
 
 /**
  * @author Hari
@@ -51,7 +38,7 @@ import com.thirdi.surveyside.survey.surveyitem.TextBoxAnswerType;
  */
 public class DeviceResponseExportProcessor
 {
-    private static final Logger logger = Logger.getLogger(DeviceResponseExportProcessor.class);
+	private static final Logger logger = LoggerFactory.getLogger(DeviceResponseExportProcessor.class);
 
     private SurveyDefinition sd;
     UserContext context;

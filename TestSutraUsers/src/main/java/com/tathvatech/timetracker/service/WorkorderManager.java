@@ -5,48 +5,29 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+
+import com.tathvatech.common.common.ApplicationProperties;
+import com.tathvatech.forms.oid.TestProcSectionOID;
 import java.util.List;
 
+import com.tathvatech.ncr.oid.NcrItemOID;
+import com.tathvatech.report.enums.ReportTypes;
+import com.tathvatech.report.request.ReportRequest;
+import com.tathvatech.user.OID.OID;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.common.exception.AppException;
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.site.service.SiteServiceImpl;
+import com.tathvatech.timetracker.request.WorkorderRequestBean;
+import com.tathvatech.user.OID.ReworkOrderOID;
+import com.tathvatech.user.OID.TestProcOID;
+import com.tathvatech.user.OID.UserOID;
+import com.tathvatech.user.common.DateRangeFilter;
+import com.tathvatech.user.common.UserContext;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.sarvasutra.etest.components.bocomponents.DateRangeFilter;
-import com.sarvasutra.etest.util.ListStringUtil;
-import com.tathvatech.testsutra.ncr.common.NcrItemOID;
-import com.tathvatech.testsutra.ncr.common.NcrUnitAssignOID;
-import com.tathvatech.testsutra.openitemv2.common.OpenItemOID;
-import com.tathvatech.testsutra.timetrack.api.WorkOrderItemResponseBean;
-import com.tathvatech.testsutra.timetrack.api.WorkOrderUserBean;
-import com.tathvatech.testsutra.timetrack.common.TimeQualifierMaster;
-import com.tathvatech.testsutra.timetrack.common.TimeTypeEnum;
-import com.tathvatech.testsutra.timetrack.common.WorkorderRequestBean;
-import com.tathvatech.testsutra.timetrack.reports.opencheckinlistreport.OpenCheckinListReport;
-import com.tathvatech.testsutra.timetrack.reports.opencheckinlistreport.OpenCheckinListReportRequest;
-import com.tathvatech.testsutra.timetrack.reports.opencheckinlistreport.OpenCheckinListReportResultRow;
-import com.tathvatech.testsutra.timetrack.reports.timelogsummary.TimeLogSummaryReport;
-import com.tathvatech.testsutra.timetrack.reports.timelogsummary.TimeLogSummaryReportRequest;
-import com.tathvatech.testsutra.timetrack.reports.timelogsummary.TimeLogSummaryReportRequest.GroupingCol;
-import com.tathvatech.testsutra.timetrack.reports.timelogsummary.TimeLogSummaryReportResultRow;
-import com.tathvatech.testsutra.timetrack.reports.timelogsummary.TimeSlotTypeEnum;
-import com.tathvatech.testsutra.timetrack.reports.workorderlistreport.WorkorderListReportFilter;
-import com.tathvatech.testsutra.timetrack.reports.workorderlistreport.WorkorderListReportResultRow;
-import com.tathvatech.testsutra.vcr.common.VcrOID;
-import com.tathvatech.ts.caf.ApplicationProperties;
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.UserOID;
-import com.tathvatech.ts.core.common.EStatusEnum;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.OID;
-import com.tathvatech.ts.core.common.ReworkOrderOID;
-import com.tathvatech.ts.core.common.WorkItem;
-import com.tathvatech.ts.core.project.ModeOID;
-import com.tathvatech.ts.core.project.TestProcOID;
-import com.tathvatech.ts.core.project.TestProcSectionOID;
-import com.tathvatech.ts.report.ReportTypes;
-import com.thirdi.surveyside.reportv2.ReportRequest;
-import com.thirdi.surveyside.reportv2.ReportsDelegate;
 
 /**
  * @author Hari
@@ -55,11 +36,16 @@ import com.thirdi.surveyside.reportv2.ReportsDelegate;
  */
 public class WorkorderManager
 {
-	public static Logger logger = Logger.getLogger(WorkorderManager.class);
-	
-	public static void createWorkorder(UserContext context, WorkorderRequestBean requestBean) throws Exception
+	private static final Logger logger = LoggerFactory.getLogger(WorkorderManager.class);
+	private final PersistWrapper persistWrapper;
+
+    public WorkorderManager(PersistWrapper persistWrapper) {
+        this.persistWrapper = persistWrapper;
+    }
+
+    public static void createWorkorder(UserContext context, WorkorderRequestBean requestBean) throws Exception
 	{
-		if(!(EntityTypeEnum.TestProc == requestBean.getEntityOID().getEntityType() 
+		if(!(EntityTypeEnum.TestProc == requestBean.getEntityOID().getEntityType()
 				|| EntityTypeEnum.TestProcSection == requestBean.getEntityOID().getEntityType()
 				|| EntityTypeEnum.NCR == requestBean.getEntityOID().getEntityType()
 				|| EntityTypeEnum.NcrUnitAssign == requestBean.getEntityOID().getEntityType()
@@ -93,9 +79,9 @@ public class WorkorderManager
 		}
 	}
 	
-	public static List<TimeQualifierMaster> getTimeQualifierList(TimeTypeEnum timeType)
+	public  List<TimeQualifierMaster> getTimeQualifierList(TimeTypeEnum timeType)
 	{
-		return PersistWrapper.readList(TimeQualifierMaster.class, 
+		return persistWrapper.readList(TimeQualifierMaster.class,
 				"select * from wo_time_qualifier_master where timeType = ? and estatus = 1", timeType.name());
 	}
 
@@ -106,17 +92,17 @@ public class WorkorderManager
 		return PersistWrapper.read(Workorder.class, sql.toString(), workorderOID.getPk());
 	}
 	
-	private static Workorder getWorkOrderByWorkOrderNo(String workorderNo)
+	private  Workorder getWorkOrderByWorkOrderNo(String workorderNo)
 	{
-		return PersistWrapper.read(Workorder.class, "select * from workorder where (extWorkorderNumber = ?) or (extWorkorderNumber is null and workorderNumber = ? ) ", 
+		return persistWrapper.read(Workorder.class, "select * from workorder where (extWorkorderNumber = ?) or (extWorkorderNumber is null and workorderNumber = ? ) ",
 				workorderNo, workorderNo);
 	}
 
-	protected static Workorder getWorkorderForEntity(OID entityOID)
+	protected  Workorder getWorkorderForEntity(OID entityOID)
 	{
 		StringBuffer sql = new StringBuffer("select wo.* from workorder wo where wo.entityPk = ? and wo.entityType = ? and wo.estatus = 1 ");
 		
-		return PersistWrapper.read(Workorder.class, sql.toString(), entityOID.getPk(), entityOID.getEntityType().getValue());
+		return persistWrapper.read(Workorder.class, sql.toString(), entityOID.getPk(), entityOID.getEntityType().getValue());
 	}
 
 	protected static WorkItem getWorkItem(int entityPk, EntityTypeEnum entityType)
@@ -130,7 +116,7 @@ public class WorkorderManager
 
 	protected OID getEntityOIDForWorkorder(ReworkOrderOID workorderOID)
 	{
-		Workorder wo = PersistWrapper.readByPrimaryKey(Workorder.class, workorderOID.getPk());
+		Workorder wo = persistWrapper.readByPrimaryKey(Workorder.class, workorderOID.getPk());
 		if(wo == null)
 		{
 			logger.error(String.format("Workorder for pk:%d not found", workorderOID.getPk()));
@@ -138,7 +124,7 @@ public class WorkorderManager
 		}
 		if(EntityTypeEnum.TestProc.getValue() == wo.getEntityType())
 		{
-			return new TestProcOID(wo.getEntityPk()); 
+			return new TestProcOID(wo.getEntityPk());
 		}
 		else if(EntityTypeEnum.TestProcSection.getValue() == wo.getEntityType())
 		{
@@ -146,7 +132,7 @@ public class WorkorderManager
 		}
 		else if(EntityTypeEnum.NCR.getValue() == wo.getEntityType())
 		{
-			return new NcrItemOID(wo.getEntityPk()); 
+			return new NcrItemOID(wo.getEntityPk());
 		}
 		else if(EntityTypeEnum.NcrUnitAssign.getValue() == wo.getEntityType())
 		{
@@ -167,7 +153,7 @@ public class WorkorderManager
 		throw new AppException("Unsupported Entity Type for Workorder.");
 	}
 
-	private static Workorder createWorkorderEntity(UserContext context, WorkorderRequestBean requestBean) throws Exception
+	private Workorder createWorkorderEntity(UserContext context, WorkorderRequestBean requestBean) throws Exception
 	{
 		Workorder workorder = new Workorder();
 		workorder.setCreatedBy(context.getUser().getPk());
@@ -177,11 +163,11 @@ public class WorkorderManager
 		workorder.setEntityType(requestBean.getEntityOID().getEntityType().getValue());
 		workorder.setEstatus(EStatusEnum.Active.getValue());
 		
-		int pk = PersistWrapper.createEntity(workorder);
+		int pk = persistWrapper.createEntity(workorder);
 		workorder = PersistWrapper.readByPrimaryKey(Workorder.class, pk);
 		workorder.setWorkorderNumber(pk+"");
-		PersistWrapper.update(workorder);
-		return PersistWrapper.readByPrimaryKey(Workorder.class, pk);
+		persistWrapper.update(workorder);
+		return persistWrapper.readByPrimaryKey(Workorder.class, pk);
 	}
 	
 	/**

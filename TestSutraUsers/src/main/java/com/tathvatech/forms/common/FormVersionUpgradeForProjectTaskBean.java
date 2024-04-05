@@ -4,10 +4,9 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tathvatech.ts.core.project.ProjectFormQuery;
-import com.tathvatech.ts.core.project.UnitFormQuery;
-import com.tathvatech.ts.tasks.TaskDefBean;
-import com.tathvatech.ts.tasks.TaskTypes;
+import com.tathvatech.user.entity.TaskDefBean;
+import com.tathvatech.user.entity.TaskTypes;
+
 
 public class FormVersionUpgradeForProjectTaskBean extends TaskDefBean
 {

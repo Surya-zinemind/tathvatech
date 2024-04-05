@@ -1,10 +1,12 @@
 package com.tathvatech.ncr.common;
 
+import com.tathvatech.user.OID.OID;
+import com.tathvatech.user.OID.ReworkOrderOID;
+
 import java.util.Date;
 import java.util.List;
 
-import com.tathvatech.ts.core.common.OID;
-import com.tathvatech.ts.core.common.ReworkOrderOID;
+
 
 public class NcrItemQueryFilter
 {

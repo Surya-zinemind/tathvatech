@@ -1,5 +1,5 @@
 package com.tathvatech.ncr.common;
-
+import com.tathvatech.user.OID.LocationTypeOID;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -7,18 +7,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.tathvatech.user.OID.WhereFoundOID;
+import com.tathvatech.user.OID.WorkstationOID;
+import com.tathvatech.common.common.QueryObject;
+import com.tathvatech.common.enums.EStatusEnum;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.workstation.common.WorkstationQuery;
 import org.apache.commons.lang3.time.DateUtils;
 
-import com.tathvatech.testsutra.injury.common.InjuryLocationMasterQuery;
-import com.tathvatech.testsutra.openitemv2.service.OpenItemV2;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.common.EStatusEnum;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.part.ProjectSiteConfigRolesEnum;
-import com.tathvatech.ts.core.project.LocationTypeOID;
-import com.tathvatech.ts.core.project.WhereFoundOID;
-import com.tathvatech.ts.core.project.WorkstationOID;
-import com.tathvatech.ts.core.project.WorkstationQuery;
 
 public class NcrItemQueryBuilder
 {

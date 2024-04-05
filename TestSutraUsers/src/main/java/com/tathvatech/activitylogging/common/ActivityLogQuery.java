@@ -6,9 +6,11 @@
  */
 package com.tathvatech.activitylogging.common;
 
+import com.tathvatech.common.enums.BaseActions;
+
 import java.util.Date;
 
-import net.sf.persist.annotations.NoTable;
+
 
 /**
  * @author Hari
@@ -16,7 +18,7 @@ import net.sf.persist.annotations.NoTable;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-@NoTable
+
 public class ActivityLogQuery
 {
 
@@ -49,7 +51,7 @@ public class ActivityLogQuery
 	int commentsCount = 0;
 
 	public ActivityLogQuery(Integer userPk, BaseActions action, String actionDescription, Date actionStartDate, Date actionEndDate,
-			Integer projectPk, Integer testProcPk, Integer unitPk, Integer workstationPk, Integer formPk, String sectionId, Integer responseId)
+							Integer projectPk, Integer testProcPk, Integer unitPk, Integer workstationPk, Integer formPk, String sectionId, Integer responseId)
 	{
 		this.userPk = userPk;
 		this.action = action.value();

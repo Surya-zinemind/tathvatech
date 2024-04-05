@@ -1,23 +1,29 @@
 package com.tathvatech.forms.service;
 
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.forms.entity.FormSection;
+import com.tathvatech.forms.oid.FormMainOID;
+import com.tathvatech.survey.common.Section;
+import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.entity.Survey;
+import com.tathvatech.survey.inf.SurveyItemBase;
+import com.tathvatech.survey.service.SurveyDefinitionManager;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.OID.FormOID;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.project.FormMainOID;
-import com.tathvatech.ts.core.project.FormOID;
-import com.tathvatech.ts.core.survey.Survey;
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.surveyitem.SurveyItemBase;
-import com.thirdi.surveyside.survey.surveyitem.Section;
-import com.thirdi.surveyside.wizard.xml.SurveyDefinitionManager;
 
 public class FormDBManager
 {
+	private final PersistWrapper persistWrapper;
 
-	public void addSurveyToDB(UserContext context, Survey survey) throws Exception
+    public FormDBManager(PersistWrapper persistWrapper) {
+        this.persistWrapper = persistWrapper;
+    }
+
+    public void addSurveyToDB(UserContext context, Survey survey) throws Exception
 	{
 		SurveyDefinition sd = new SurveyDefinitionManager(survey).getSurveyDefinition();
 		List<SurveyItemBase> sections = sd.getFormSections();
@@ -36,14 +42,14 @@ public class FormDBManager
 			
 			FormSection sec = new FormSection();
 			sec.setCreatedDate(new Date());
-			sec.setFormPk(survey.getPk());
+			sec.setFormPk((int) survey.getPk());
 			sec.setFormSectionMainPk(sectionMain.getPk());
 			sec.setOrderNo(aSec.getOrderNum());
 			sec.setSectionId(aSec.getSurveyItemId());
 			sec.setInstructionFileName(aSec.getInstructionFileName());
 			sec.setInstructionFileDisplayName(aSec.getInstructionFileDisplayName());
 
-			PersistWrapper.createEntity(sec);
+			persistWrapper.createEntity(sec);
 		}
 	}
 
@@ -54,23 +60,23 @@ public class FormDBManager
 		sm.setFormMainPk(formMainOID.getPk());
 		sm.setItemNo(itemNo);
 		sm.setDescription(description);
-		int pk = PersistWrapper.createEntity(sm);
-		return PersistWrapper.readByPrimaryKey(FormSectionMain.class, pk);
+		int pk = persistWrapper.createEntity(sm);
+		return persistWrapper.readByPrimaryKey(FormSectionMain.class, pk);
 	}
 
 	private FormSectionMain getFormSectionMain(FormMainOID formMainOID, String itemNo, String description)
 	{
-		return PersistWrapper.read(FormSectionMain.class, "select * from form_section_main where formMainPk = ? and itemNo = ? and description = ?", 
+		return persistWrapper.read(FormSectionMain.class, "select * from form_section_main where formMainPk = ? and itemNo = ? and description = ?",
 				formMainOID.getPk(), itemNo, description);
 	}
 
 	public FormSection getFormSection(String surveyItemId, int formPk)
 	{
-		return PersistWrapper.read(FormSection.class, "select * from form_section where formPk = ? and sectionId = ?",  formPk, surveyItemId);
+		return persistWrapper.read(FormSection.class, "select * from form_section where formPk = ? and sectionId = ?",  formPk, surveyItemId);
 	}
 
 	public List<FormSection> getFormSections(FormOID formOID)
 	{
-		return PersistWrapper.readList(FormSection.class, "select * from form_section where formPk = ?",  formOID.getPk());
+		return persistWrapper.readList(FormSection.class, "select * from form_section where formPk = ?",  formOID.getPk());
 	}
 }

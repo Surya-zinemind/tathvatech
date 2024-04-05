@@ -6,25 +6,23 @@
  */
 package com.tathvatech.survey.common;
 
+import com.tathvatech.site.service.SiteServiceImpl;
+import com.tathvatech.survey.inf.LogicBase;
+import com.tathvatech.survey.inf.LogicIntf;
+import com.tathvatech.survey.response.SurveyResponse;
+import com.tathvatech.unit.common.UnitFormQuery;
+import com.tathvatech.user.common.UserContext;
+import org.jdom2.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Condition;
 
-import org.apache.log4j.Logger;
-import org.jdom.Element;
-
-import com.sarvasutra.etest.FormDesignListener;
-import com.sarvasutra.etest.FormEventListner;
-import com.sarvasutra.etest.TestProcController;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.project.UnitFormQuery;
-import com.tathvatech.ts.core.survey.LogicBase;
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.response.SurveyResponse;
-import com.tathvatech.ts.core.survey.surveyitem.LogicIntf;
-import com.thirdi.surveyside.survey.SurveyItem;
-import com.vaadin.ui.Component;
 
 /**
  * @author Hari
@@ -34,7 +32,7 @@ import com.vaadin.ui.Component;
  */
 public class Logic extends SurveyItem implements LogicIntf, LogicBase
 {
-    private static final Logger logger = Logger.getLogger(Logic.class);
+    private static final Logger logger = LoggerFactory.getLogger(Logic.class);
     
     private List conditionList = new ArrayList();
     private LogicAction action;
@@ -296,7 +294,7 @@ public class Logic extends SurveyItem implements LogicIntf, LogicBase
 
 	@Override
 	public Component drawResponseField(UnitFormQuery testProc, SurveyResponse sResponse,
-		Component parent, String[] flags,  FormEventListner formEventListner)
+                                       Component parent, String[] flags, FormEventListner formEventListner)
 	{
 	    // TODO Auto-generated method stub
 	    return null;
@@ -305,7 +303,7 @@ public class Logic extends SurveyItem implements LogicIntf, LogicBase
 
 	@Override
 	public Component drawResponseDetail(UserContext userContext, UnitFormQuery testProc, SurveyResponse sResponse,
-		Component parent, boolean expandedView, boolean isLatestResponse, String[] flags, final TestProcController testProcController)
+                                        Component parent, boolean expandedView, boolean isLatestResponse, String[] flags, final TestProcController testProcController)
 	{
 	    // TODO Auto-generated method stub
 	    return null;

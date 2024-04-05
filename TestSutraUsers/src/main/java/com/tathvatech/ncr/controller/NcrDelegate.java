@@ -1,69 +1,28 @@
 package com.tathvatech.ncr.controller;
 
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import com.tathvatech.ncr.common.NcrItemQuery;
+import com.tathvatech.ncr.oid.NcrItemOID;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.ncr.service.NcrManager;
 
-import com.sarvasutra.etest.EtestApplication;
-import com.tathvatech.testsutra.ncr.common.FunctionPermissionMapping;
-import com.tathvatech.testsutra.ncr.common.NcrCorrectiveActionBean;
-import com.tathvatech.testsutra.ncr.common.NcrDispositionBean;
-import com.tathvatech.testsutra.ncr.common.NcrEnum;
-import com.tathvatech.testsutra.ncr.common.NcrFunctionBean;
-import com.tathvatech.testsutra.ncr.common.NcrFunctionQuery;
-import com.tathvatech.testsutra.ncr.common.NcrGroupBean;
-import com.tathvatech.testsutra.ncr.common.NcrGroupBeanSimple;
-import com.tathvatech.testsutra.ncr.common.NcrGroupOID;
-import com.tathvatech.testsutra.ncr.common.NcrGroupQuery;
-import com.tathvatech.testsutra.ncr.common.NcrGroupQueryFilter;
-import com.tathvatech.testsutra.ncr.common.NcrItemActivityRefBean;
-import com.tathvatech.testsutra.ncr.common.NcrItemBean;
-import com.tathvatech.testsutra.ncr.common.NcrItemNcgExportQuery;
-import com.tathvatech.testsutra.ncr.common.NcrItemOID;
-import com.tathvatech.testsutra.ncr.common.NcrItemQuery;
-import com.tathvatech.testsutra.ncr.common.NcrItemQueryFilter;
-import com.tathvatech.testsutra.ncr.common.NcrMilestoneQuery;
-import com.tathvatech.testsutra.ncr.common.NcrUnitAllocBean;
-import com.tathvatech.testsutra.ncr.common.NcrUnitAssignBean;
-import com.tathvatech.testsutra.ncr.common.NcrUnitAssignOID;
-import com.tathvatech.testsutra.ncr.common.NcrWhereFoundBean;
-import com.tathvatech.testsutra.ncr.common.ResourceRequirementBean;
-import com.tathvatech.testsutra.ncr.reports.ncritemlistreport.NcrCorrectiveActionQuery;
-import com.tathvatech.testsutra.ncr.reports.ncritemlistreport.NcrCorrectiveActionReportFilter;
-import com.tathvatech.testsutra.ncr.reports.ncritemlistreport.NcrItemListReportResultRow;
-import com.tathvatech.testsutra.purchaseOrders.common.PurchaseOrderOID;
-import com.tathvatech.testsutra.vcr.service.VcrEmailSender;
-import com.tathvatech.ts.caf.ApplicationProperties;
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.caf.util.ServiceLocator;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.accounts.UserOID;
-import com.tathvatech.ts.core.authorization.AuthorizationManager;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.utils.AsyncProcessor;
-import com.tathvatech.ts.core.common.utils.EmailMessageInfo;
-import com.tathvatech.ts.core.part.PartOID;
-import com.tathvatech.ts.core.part.PartRevisionOID;
-import com.tathvatech.ts.core.part.ProjectSiteConfigRolesEnum;
-import com.tathvatech.ts.core.part.SupplierOID;
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.project.ProjectSiteConfigOID;
-import com.tathvatech.ts.core.sites.SiteOID;
-import com.tathvatech.ts.milestonetrack.EntityMilestoneDelegate;
-import com.thirdi.surveyside.project.ProjectManager;
-import com.thirdi.surveyside.project.ProjectSiteConfig;
 
-public class NcrDelegate
-{
 
+
+
+
+
+
+public class NcrDelegate {
+	private final NcrManager ncrManager;
 	public static String APPROVED_MILESTONE = "Approved";
 	public static String APPROVED_MILESTONE_SELECTEDVALUE = "Complete";
 
+	public NcrDelegate(NcrManager ncrManager) {
+		this.ncrManager = ncrManager;
+	}
+
 	// ncr group
-	public static NcrGroupBean saveNcrGroup(UserContext context, NcrGroupBean nesnItemBean) throws Exception
+	/*public static NcrGroupBean saveNcrGroup(UserContext context, NcrGroupBean nesnItemBean) throws Exception
 	{
 		Connection conn = null;
 		try
@@ -569,13 +528,13 @@ public class NcrDelegate
 			throw e;
 		}
 	}
-
-	public static NcrItemQuery getNcrItemQuery(UserContext context, NcrItemOID ncrItemOID)
-	{
-		return NcrManager.getNcrItemQuery(context, ncrItemOID);
+*/
+	public NcrItemQuery getNcrItemQuery(UserContext context, NcrItemOID ncrItemOID) {
+		return ncrManager.getNcrItemQuery(context, ncrItemOID);
 	}
+}
 
-	public static List<NcrUnitAllocBean> getNcrUnitAloc(Integer orginPk, String originType, int unitFk) throws Exception
+	/*public static List<NcrUnitAllocBean> getNcrUnitAloc(Integer orginPk, String originType, int unitFk) throws Exception
 	{
 		return NcrManager.getNcrUnitAloc(orginPk, originType, unitFk);
 	}
@@ -2001,4 +1960,4 @@ public class NcrDelegate
 			conn.commit();
 		}
 	}
-}
+}*/

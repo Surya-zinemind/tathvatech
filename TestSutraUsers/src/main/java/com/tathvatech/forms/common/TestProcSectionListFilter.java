@@ -1,13 +1,10 @@
 package com.tathvatech.forms.common;
 
-import com.sarvasutra.etest.components.bocomponents.DateRangeFilter;
-import com.tathvatech.ts.core.project.FormOID;
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.project.TestProcOID;
-import com.tathvatech.ts.core.project.UnitOID;
-import com.tathvatech.ts.core.project.WorkstationOID;
-import com.tathvatech.ts.core.survey.response.FormStatusEnum;
-import com.thirdi.surveyside.reportv2.ReportFilter;
+
+import com.tathvatech.forms.enums.FormStatusEnum;
+import com.tathvatech.report.request.ReportFilter;
+import com.tathvatech.user.OID.*;
+import com.tathvatech.user.common.DateRangeFilter;
 
 public class TestProcSectionListFilter extends ReportFilter
 {

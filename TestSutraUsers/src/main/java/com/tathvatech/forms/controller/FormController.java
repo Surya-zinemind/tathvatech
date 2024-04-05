@@ -8,6 +8,7 @@ import com.tathvatech.forms.service.FormService;
 import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.User;
+import com.tathvatech.user.service.AccountService;
 import com.tathvatech.user.service.CommonServicesDelegate;
 import lombok.RequiredArgsConstructor;
 import com.tathvatech.unit.common.UnitFormQuery;
@@ -20,6 +21,7 @@ public class FormController {
 
    private final FormService formService;
    private final CommonServicesDelegate commonServicesDelegate;
+   private final AccountService accountService;
     public  void saveTestProcSchedule(UserContext context, TestProcOID testProcOID,
                                       ObjectScheduleRequestBean objectScheduleRequestBean) throws Exception
     {
@@ -73,7 +75,7 @@ public class FormController {
                             new NcrItemOID(aRef.getReferenceToPk(), ncr.getNcrGroupNo() + "." + ncr.getNcrNo()));
                     bean.setReferencedObject(ncr);
 
-                    User user = AccountDelegate.getUser(aRef.getCreatedBy());
+                    User user = accountService.getUser(aRef.getCreatedBy());
                     bean.setCreatedBy(user);
 
                     returnList.add(bean);

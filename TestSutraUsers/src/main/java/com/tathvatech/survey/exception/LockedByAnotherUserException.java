@@ -1,7 +1,7 @@
 package com.tathvatech.survey.exception;
 
-import com.tathvatech.ts.core.survey.ObjectLock;
 
+import com.tathvatech.forms.entity.ObjectLock;
 
 public class LockedByAnotherUserException extends Exception
 {

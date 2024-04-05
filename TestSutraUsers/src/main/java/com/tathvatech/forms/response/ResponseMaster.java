@@ -6,9 +6,12 @@
  */
 package com.tathvatech.forms.response;
 
+import com.tathvatech.survey.entity.ResponseFlags;
+import com.tathvatech.user.entity.UserBase;
+
 import java.util.Date;
 
-import com.tathvatech.ts.core.UserBase;
+
 
 /**
  * @author Hari

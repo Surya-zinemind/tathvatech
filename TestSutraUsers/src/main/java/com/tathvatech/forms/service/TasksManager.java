@@ -1,18 +1,24 @@
 package com.tathvatech.forms.service;
 
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.user.OID.OID;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.TaskDefBean;
+import com.tathvatech.user.entity.User;
+import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.config.Task;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.common.OID;
 
+@RequiredArgsConstructor
 public class TasksManager {
+	private final PersistWrapper persistWrapper;
 
-	public static void saveTask(UserContext userContext,
-			OID associatedObjectOid,  OID assignedTo, TaskDefBean taskDef) throws Exception 
+	public  void saveTask(UserContext userContext,
+								OID associatedObjectOid, OID assignedTo, TaskDefBean taskDef) throws Exception
 	{
         Task task = new Task();
         if(assignedTo != null)
@@ -31,20 +37,20 @@ public class TasksManager {
 		{
 	        task.setCreatedBy(userContext.getUser().getPk());
 	        task.setCreatedDate(new Date());
-			PersistWrapper.createEntity(task);
+			persistWrapper.createEntity(task);
 		}
 		else
 		{
-			PersistWrapper.update(task);
+			persistWrapper.update(task);
 		}
 	}
 
-	public static Task getTask(int taskPk)throws Exception
+	public  Task getTask(int taskPk)throws Exception
 	{
-		return PersistWrapper.readByPrimaryKey(Task.class, taskPk);
+		return persistWrapper.readByPrimaryKey(Task.class, taskPk);
 	}
 	
-	public static List<Task> getTasks(UserContext userContext, TaskFilter taskFilter) throws Exception 
+	public  List<Task> getTasks(UserContext userContext, TaskFilter taskFilter) throws Exception
 	{
     	if(taskFilter == null)
     		taskFilter = new TaskFilter();
@@ -102,18 +108,18 @@ public class TasksManager {
 		
 		sb.append(" order by createdDate desc");
 		
-		return PersistWrapper.readList(Task.class, 
+		return persistWrapper.readList(Task.class,
 				sb.toString(), params.toArray(new Object[params.size()]));
 	}
 
-	public static void markTaskPerformed(UserContext context, Task task,
+	public  void markTaskPerformed(UserContext context, Task task,
 			TaskStatus resultStatus) 
 	{
 		task.setStatus(resultStatus.getValue());
 		task.setPerformedBy(context.getUser().getPk());
 		task.setPerformedDate(new Date());
 
-		PersistWrapper.update(task);
+		persistWrapper.update(task);
 	}
 
 }

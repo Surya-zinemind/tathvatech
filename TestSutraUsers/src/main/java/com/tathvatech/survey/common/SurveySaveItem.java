@@ -6,19 +6,17 @@
  */
 package com.tathvatech.survey.common;
 
+import com.tathvatech.survey.enums.AnswerPersistor;
+import com.tathvatech.survey.inf.LogicAnchor;
+import com.tathvatech.survey.inf.SurveySaveItemBase;
+import com.tathvatech.survey.response.SurveyItemResponse;
+import org.jdom2.Element;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.jdom.Element;
 
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.response.AnswerPersistor;
-import com.tathvatech.ts.core.survey.response.InvalidResponseException;
-import com.tathvatech.ts.core.survey.response.SurveyItemResponse;
-import com.tathvatech.ts.core.survey.surveyitem.LogicAnchor;
-import com.tathvatech.ts.core.survey.surveyitem.SurveySaveItemBase;
-import com.thirdi.surveyside.survey.SurveyItem;
 
 /**
  * @author Hari

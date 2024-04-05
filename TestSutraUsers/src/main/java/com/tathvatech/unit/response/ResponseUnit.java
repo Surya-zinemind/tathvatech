@@ -20,9 +20,9 @@ public class ResponseUnit
 	public static final int DEFAULT_VAL = -99;
     
 	int key1 = DEFAULT_VAL;
-    int key2 = DEFAULT_VAL;
-    int key3 = DEFAULT_VAL;
-    String key4;
+    public int key2 = DEFAULT_VAL;
+    public int key3 = DEFAULT_VAL;
+    public String key4;
     /**
      * @return Returns the key1.
      */

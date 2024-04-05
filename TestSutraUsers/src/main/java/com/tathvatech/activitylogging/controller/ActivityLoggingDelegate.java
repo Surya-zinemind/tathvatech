@@ -5,16 +5,18 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import com.tathvatech.user.OID.UserOID;
+import com.tathvatech.activitylogging.common.ActivityLogQuery;
+import com.tathvatech.common.enums.BaseActions;
+import com.tathvatech.common.exception.AppException;
+import com.tathvatech.common.wrapper.PersistWrapper;
+import lombok.RequiredArgsConstructor;
 
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.caf.util.ServiceLocator;
-import com.tathvatech.ts.core.accounts.UserOID;
-
+@RequiredArgsConstructor
 public class ActivityLoggingDelegate {
+          private final PersistWrapper persistWrapper;
 
-
-	public static List<ActivityLogQuery> getActivityLogs(Integer userPk, Date startDate, Date endDate, BaseActions[] actions) throws Exception
+	public  List<ActivityLogQuery> getActivityLogs(Integer userPk, Date startDate, Date endDate, BaseActions[] actions) throws Exception
 	{
 		Calendar cal = Calendar.getInstance();
 		if(endDate == null)
@@ -72,20 +74,20 @@ public class ActivityLoggingDelegate {
 			sql.append(")");
 		}
 		
-		return PersistWrapper.readList(ActivityLogQuery.class, 
+		return persistWrapper.readList(ActivityLogQuery.class,
 				sql.toString(), 
 				objs.toArray(new Object[objs.size()]));
 	}
 
-	public static ActivityLogQuery getLastActivityForResponse(int responseId) throws Exception
+	public  ActivityLogQuery getLastActivityForResponse(int responseId) throws Exception
 	{
 		String sql = ActivityLogQuery.fetchQuery + " and a.responseId = ? order by pk desc limit 0, 1";
-		return PersistWrapper.read(ActivityLogQuery.class, 
+		return persistWrapper.read(ActivityLogQuery.class,
 				sql.toString(), 
 				responseId);
 	}
 	
-	public static ActivityLogQuery getLastActivityForResponse(int responseId, BaseActions[] actions) throws Exception
+	public  ActivityLogQuery getLastActivityForResponse(int responseId, BaseActions[] actions) throws Exception
 	{
 		StringBuffer sql = new StringBuffer(ActivityLogQuery.fetchQuery);
 				
@@ -106,12 +108,12 @@ public class ActivityLoggingDelegate {
 		
 		params[params.length-1] = responseId;
 		
-		return PersistWrapper.read(ActivityLogQuery.class, 
+		return persistWrapper.read(ActivityLogQuery.class,
 				sql.toString(), 
 				params);
 	}
 	
-	public static void logActivity(ActivityLogQuery act) throws Exception
+	public  void logActivity(ActivityLogQuery act) throws Exception
     {
     	ActivityLog aLog = new ActivityLog();
     	aLog.setAction(act.getAction());
@@ -135,7 +137,7 @@ public class ActivityLoggingDelegate {
     	aLog.setNaCount(act.getNaCount());
     	aLog.setCommentsCount(act.getCommentsCount());
     	
-    	PersistWrapper.createEntity(aLog);
+    	persistWrapper.createEntity(aLog);
     }
 
 	
@@ -144,32 +146,19 @@ public class ActivityLoggingDelegate {
 	 * @param activityLogBean
 	 * @throws Exception
 	 */
-	public static void logActivity(ActivityLogRequestBeanBase activityLogBean)throws Exception
+	public  void logActivity(ActivityLogRequestBeanBase activityLogBean)throws Exception
 	{
 
-		Connection conn = null;
-		try
-		{
-		    conn = ServiceLocator.locate().getConnection();
-		    conn.setAutoCommit(false);
+
 
 			ActivityLogCommon act = new ActivityLogCommon();
 			act.setAction(activityLogBean.getAction().value());
 			act.setActionTime(new Date());
 			act.setComment(activityLogBean.getComment());
 			act.setExecutedByPk(activityLogBean.getExecutedBy().getPk());
-			PersistWrapper.createEntity(act);
+			persistWrapper.createEntity(act);
 		    
-			conn.commit();
-		}
-		catch (Exception ex)
-		{
-		    conn.rollback();
-		    throw ex;
-		}
-		finally
-		{
-		}
+
 	}
 	
 	

@@ -6,9 +6,11 @@
  */
 package com.tathvatech.forms.common;
 
+import com.tathvatech.forms.oid.TestProcSectionOID;
+
 import java.util.Date;
 
-import net.sf.persist.annotations.NoTable;
+
 
 /**
  * @author Hari
@@ -16,7 +18,7 @@ import net.sf.persist.annotations.NoTable;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-@NoTable
+
 public class TestProcSectionObj
 {
 	private int pk;

@@ -1,13 +1,14 @@
 package com.tathvatech.forms.common;
 
+import com.tathvatech.user.OID.OID;
+import com.tathvatech.user.entity.User;
+
 import java.io.Serializable;
 import java.util.Date;
 
-import com.tathvatech.ts.core.accounts.User;
 
-import net.sf.persist.annotations.NoTable;
 
-@NoTable
+
 public class EntityReferenceBean implements Serializable
 {
 	private int pk;

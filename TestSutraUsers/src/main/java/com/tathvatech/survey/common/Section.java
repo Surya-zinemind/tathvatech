@@ -6,82 +6,46 @@
  */
 package com.tathvatech.survey.common;
 
+import com.tathvatech.common.common.FileStoreManager;
+import com.tathvatech.common.entity.AttachmentIntf;
+import com.tathvatech.forms.common.ObjectLockQuery;
+import com.tathvatech.forms.common.TestProcSectionObj;
+import com.tathvatech.forms.entity.FormSection;
+import com.tathvatech.forms.entity.ObjectLock;
+import com.tathvatech.forms.intf.SectionBase;
+import com.tathvatech.forms.service.FormDBManager;
+import com.tathvatech.forms.service.TestProcService;
+import com.tathvatech.survey.controller.SurveyDelegate;
+import com.tathvatech.survey.response.SurveyResponse;
+import com.tathvatech.survey.service.SurveyResponseService;
+import com.tathvatech.unit.common.UnitFormQuery;
+import com.tathvatech.unit.service.UnitService;
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.ReworkOrderOID;
+import com.tathvatech.user.OID.WorkstationOID;
+import com.tathvatech.user.common.SecurityContext;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.Attachment;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.service.AccountService;
+import com.tathvatech.user.service.PlanSecurityManager;
+import org.apache.catalina.Container;
+import org.jdom2.Element;
+
+import java.awt.*;
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.jdom.Element;
 
-import com.sarvasutra.etest.EtestApplication;
-import com.sarvasutra.etest.FormDesignListener;
-import com.sarvasutra.etest.FormEventListner;
-import com.sarvasutra.etest.TestProcController;
-import com.sarvasutra.etest.components.ExpandPanel;
-import com.sarvasutra.etest.components.FileUploadFormMulti;
-import com.sarvasutra.etest.components.FileUploadFormMulti.FileUploadListener;
-import com.sarvasutra.etest.components.LockUnlockExpandPanel;
-import com.sarvasutra.etest.components.SectionDetailViewExpandPanel;
-import com.sarvasutra.etest.pdfprint.PdfPrinter;
-import com.tathvatech.testsutra.timetrack.reports.workorderlistreport.WorkorderListReportFilter;
-import com.tathvatech.testsutra.timetrack.service.Workorder;
-import com.tathvatech.testsutra.timetrack.service.WorkorderDelegate;
-import com.tathvatech.testsutra.timetrack.web.WorkOrderListView;
-import com.tathvatech.ts.core.SecurityContext;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.accounts.delegate.AccountDelegate;
-import com.tathvatech.ts.core.common.Attachment;
-import com.tathvatech.ts.core.common.FileStoreManager;
-import com.tathvatech.ts.core.common.ReworkOrderOID;
-import com.tathvatech.ts.core.common.utils.AttachmentIntf;
-import com.tathvatech.ts.core.common.utils.LineSeperatorUtil;
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.project.TestProcSectionObj;
-import com.tathvatech.ts.core.project.UnitFormQuery;
-import com.tathvatech.ts.core.project.WorkstationOID;
-import com.tathvatech.ts.core.survey.ObjectLock;
-import com.tathvatech.ts.core.survey.ObjectLockQuery;
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.response.SurveyResponse;
-import com.tathvatech.ts.core.survey.surveyitem.SectionBase;
-import com.thirdi.surveyside.project.ProjectDelegate;
-import com.thirdi.surveyside.project.TestProcManager;
-import com.thirdi.surveyside.security.PlanSecurityManager;
-import com.thirdi.surveyside.survey.Container;
-import com.thirdi.surveyside.survey.FormDBManager;
-import com.thirdi.surveyside.survey.FormSection;
-import com.thirdi.surveyside.survey.SurveyDisplayItem;
-import com.thirdi.surveyside.survey.SurveyItem;
-import com.thirdi.surveyside.survey.delegate.SurveyDelegate;
-import com.thirdi.surveyside.survey.logic.Logic;
-import com.thirdi.surveyside.survey.response.SectionResponseQuery;
-import com.thirdi.surveyside.survey.response.delegate.SurveyResponseDelegate;
-import com.vaadin.data.Validator;
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.server.FileResource;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Page;
-import com.vaadin.server.StreamResource;
-import com.vaadin.server.ThemeResource;
-import com.vaadin.ui.AbstractOrderedLayout;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.DefaultFieldFactory;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.BaseTheme;
-import com.vaadin.ui.themes.ValoTheme;
+
+
+
 
 /**
  * @author Hari
@@ -91,6 +55,10 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class Section extends SurveyItem implements SectionBase, SurveyDisplayItem, Container
 {
+	private final SurveyResponseService surveyResponseService;
+	private final TestProcService testProcService;
+	private final UnitService unitService;
+	private final AccountService accountService;
 	private String				pageTitle;
 	private String 				description;
     String instructionFileName;
@@ -104,19 +72,27 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 	VerticalLayout childLayoutContainer;
 	HorizontalLayout manageChildrenControlLayoutArea;
 	
-	public Section()
+	public Section(SurveyResponseService surveyResponseService, TestProcService testProcService, UnitService unitService, AccountService accountService)
 	{
 		super();
-	}
+        this.surveyResponseService = surveyResponseService;
+        this.testProcService = testProcService;
+        this.unitService = unitService;
+        this.accountService = accountService;
+    }
 
 	/**
 	 * @param _survey
 	 */
-	public Section(SurveyDefinition _survey)
+	public Section(SurveyDefinition _survey, SurveyResponseService surveyResponseService, TestProcService testProcService, UnitService unitService, AccountService accountService)
 	{
 		super(_survey);
 		// TODO Auto-generated constructor stub
-	}
+        this.surveyResponseService = surveyResponseService;
+        this.testProcService = testProcService;
+        this.unitService = unitService;
+        this.accountService = accountService;
+    }
 
 	public String getQuestionText()
 	{
@@ -400,13 +376,13 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 
 	@Override
 	public Component drawResponseField(UnitFormQuery testProc, final SurveyResponse sResponse, Component parent, String[] flags,
-			FormEventListner formEventListner)
+									   FormEventListner formEventListner)
 	{
 		SectionResponseQuery srq = null;
 		try
 		{
 			if(sResponse != null)
-				srq = SurveyResponseDelegate.getSectionResponseSummary(sResponse.getSurveyDefinition(), sResponse.getResponseId(), getSurveyItemId());
+				srq =surveyResponseService.getSectionResponseSummary(sResponse.getSurveyDefinition(), sResponse.getResponseId(), getSurveyItemId());
 		}
 		catch(Exception e)
 		{
@@ -471,7 +447,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 				{
 					UnitFormQuery testProcQ = null;
 					if(getFormResponseContext().getTestProc() != null)
-						testProcQ = TestProcManager.getTestProcQuery(getFormResponseContext().getTestProc().getPk());
+						testProcQ = testProcService.getTestProcQuery(getFormResponseContext().getTestProc().getPk());
 					
 					final InputStream pdfStream =  new PdfPrinter(EtestApplication.getInstance().getUserContext(), PdfPrinter.OPTION_PRINT_RESPONSE)
 							.printSection(EtestApplication.getInstance().getUserContext(), getFormResponseContext().getProjectQuery(), 
@@ -519,12 +495,12 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 		
 		try
 		{
-			boolean isUserInRole = ProjectDelegate.isUsersForUnitInRole(new ProjectOID(getFormResponseContext().getUnitQuery().getProjectPk(), null), 
+			boolean isUserInRole = unitService.isUsersForUnitInRole(new ProjectOID(getFormResponseContext().getUnitQuery().getProjectPk(), null),
 					getFormResponseContext().getUser().getPk(), getFormResponseContext().getUnitQuery().getUnitPk(),
 					getFormResponseContext().getWorkstationQuery().getOID(), User.ROLE_TESTER);
 			if(isUserInRole || User.USER_PRIMARY.equals(EtestApplication.getInstance().getUserContext().getUser().getUserType()))
 			{
-				ObjectLockQuery lock = SurveyDelegate.getCurrentLock(getFormResponseContext().getResponseMaster().getOID(), 
+				ObjectLockQuery lock = SurveyDelegate.getCurrentLock(getFormResponseContext().getResponseMaster().getOID(),
 						Section.this.getSurveyItemId());
 			
 				if(lock == null)
@@ -594,15 +570,15 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 	}
 	
 	@Override
-	public Component drawResponseDetail(UserContext userContext, final UnitFormQuery testProc, SurveyResponse sResponse, Component parent, 
-			boolean expandedView, boolean isLatestResponse, String[] flags, final TestProcController testProcController)
+	public Component drawResponseDetail(UserContext userContext, final UnitFormQuery testProc, SurveyResponse sResponse, Component parent,
+										boolean expandedView, boolean isLatestResponse, String[] flags, final TestProcController testProcController)
 	{
 		SectionResponseQuery srq = null;
 		try
 		{
 			if(sResponse != null)
 			{
-				srq = SurveyResponseDelegate.getSectionResponseSummary(sResponse.getSurveyDefinition(), sResponse.getResponseId(), getSurveyItemId());
+				srq = surveyResponseService.getSectionResponseSummary(sResponse.getSurveyDefinition(), sResponse.getResponseId(), getSurveyItemId());
 			}
 		}
 		catch(Exception e)
@@ -650,7 +626,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 				{
 					UnitFormQuery testProcQ = null;
 					if(getFormResponseContext().getTestProc() != null)
-						testProcQ = TestProcManager.getTestProcQuery(getFormResponseContext().getTestProc().getPk());
+						testProcQ = testProcService.getTestProcQuery(getFormResponseContext().getTestProc().getPk());
 					
 					PdfPrinter pdfPrinter = new PdfPrinter(EtestApplication.getInstance().getUserContext(), PdfPrinter.OPTION_PRINT_RESPONSE);
 					final InputStream pdfStream =  pdfPrinter.printSection(EtestApplication.getInstance().getUserContext(), getFormResponseContext().getProjectQuery(), 
@@ -688,7 +664,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 				public void buttonClick(ClickEvent event)
 				{
 					FormSection formSection = new FormDBManager().getFormSection(getSurveyItemId(), testProc.getFormPk());
-					TestProcSectionObj testprocSection = TestProcManager.getTestProcSection(testProc.getOID(), formSection.getOID());
+					TestProcSectionObj testprocSection = testProcService.getTestProcSection(testProc.getOID(), formSection.getOID());
 					Workorder wo = WorkorderDelegate.getWorkorderForEntity(testprocSection.getOID());
 					if(wo != null)
 					{
@@ -719,7 +695,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 			expp.collapseView();
 		}
     	
-		if(isLatestResponse && userContext.getSecurityManager().checkAccess(PlanSecurityManager.FORM_MANAGE_SECTION_LOCKS, 
+		if(isLatestResponse && userContext.getSecurityManager().checkAccess(PlanSecurityManager.FORM_MANAGE_SECTION_LOCKS,
 				new SecurityContext(getFormResponseContext().getProjectQuery().getOID(), null, null, null, null)))
     	{
 			expp.setShowUnlockButton(true);

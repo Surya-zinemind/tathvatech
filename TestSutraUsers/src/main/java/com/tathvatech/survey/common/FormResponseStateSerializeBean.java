@@ -6,19 +6,19 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.response.FormResponseStats;
-import com.tathvatech.ts.core.survey.response.ResponseFlags;
-import com.tathvatech.ts.core.survey.response.ResponseMasterNew;
-import com.tathvatech.ts.core.survey.response.SimpleSurveyItemResponse;
-import com.tathvatech.ts.core.survey.response.SurveyResponse;
-import com.tathvatech.ts.core.survey.surveyitem.SurveySaveItemBase;
+import com.tathvatech.forms.response.FormResponseStats;
+import com.tathvatech.forms.response.ResponseMasterNew;
+import com.tathvatech.survey.entity.ResponseFlags;
+import com.tathvatech.survey.inf.SurveySaveItemBase;
+import com.tathvatech.survey.response.SimpleSurveyItemResponse;
+import com.tathvatech.survey.response.SurveyResponse;
+import com.tathvatech.user.entity.User;
+
 
 public class FormResponseStateSerializeBean
 {
 	private ResponseMasterNew responseMaster;
-    private HashMap<String,SimpleSurveyItemResponse> answerMap = new HashMap();
+    private HashMap<String, SimpleSurveyItemResponse> answerMap = new HashMap();
 	private List<SectionResponseQuery> sectionResponseList;
 
 	

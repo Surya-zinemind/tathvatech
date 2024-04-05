@@ -1,44 +1,30 @@
 package com.tathvatech.forms.controller;
 
+import com.tathvatech.forms.service.TasksManager;
+import com.tathvatech.user.OID.OID;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.TaskDefBean;
+import org.springframework.scheduling.config.Task;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import com.tathvatech.ts.caf.util.ServiceLocator;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.common.OID;
+
 
 public class TasksDelegate {
 
 	public static void saveTask(UserContext userContext,
-			OID associatedObjectOid,  OID assignedTo, TaskDefBean taskDef) throws Exception 
+                                OID associatedObjectOid, OID assignedTo, TaskDefBean taskDef) throws Exception
 	{
 
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
             TasksManager.saveTask(userContext, associatedObjectOid,  assignedTo, taskDef);
-        }
-        catch(Exception ex)
-        {
-            try {
-				con.rollback();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
 	}
 
-	public static List<Task> getTasks(UserContext userContext, TaskFilter taskFilter) throws Exception 
+	public static List<Task> getTasks(UserContext userContext, TaskFilter taskFilter) throws Exception
 	{
 		return TasksManager.getTasks(userContext, taskFilter);
 	}
@@ -52,28 +38,12 @@ public class TasksDelegate {
 			TaskStatus resultStatus) throws Exception
 	{
 
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
     		TasksManager.markTaskPerformed(context, task, resultStatus);
-        }
-        catch(Exception ex)
-        {
-            try {
-				con.rollback();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
+
+
 	}
 	
 	

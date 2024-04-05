@@ -6,16 +6,22 @@
  */
 package com.tathvatech.survey.service;
 
+import com.tathvatech.site.service.SiteServiceImpl;
+import com.tathvatech.survey.common.SurveyItemType;
+import com.tathvatech.survey.inf.SurveyItemBase;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.input.SAXBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
+
 
 
 /**
@@ -26,7 +32,7 @@ import org.jdom.input.SAXBuilder;
  */
 public class SurveyItemManager
 {
-    private static final Logger logger = Logger.getLogger(SurveyItemManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(SurveyItemManager.class);
 
     private static SurveyItemManager instance = null;
     private HashMap itemTypesMap = new HashMap();
@@ -202,8 +208,8 @@ public class SurveyItemManager
     {
 		try
 		{
-		    SAXBuilder   builder = new SAXBuilder();
-			Document     doc = builder.build(new File("answertypes.xml"));
+		    SAXBuilder builder = new SAXBuilder();
+			Document doc = builder.build(new File("answertypes.xml"));
 			
 			List aList = doc.getRootElement().getChildren("surveyItemType");
 			for (Iterator aListItr = aList.iterator(); aListItr.hasNext();)

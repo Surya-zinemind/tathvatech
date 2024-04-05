@@ -126,7 +126,7 @@ public class SurveyResponseController
 		    }
 	
 		    ArrayList sectionsToSave = new ArrayList();
-			List<String> lockedSectionIds = SurveyDelegate.getLockedSectionIds((User) context.getUser(), surveyResponse.getOID());
+			List<String> lockedSectionIds = surveyMaster.getLockedSectionIds((User) context.getUser(), surveyResponse.getOID());
 			
 			SurveyDefinition sd = surveyResponse.getSurveyDefinition();
 			for (Iterator iterator = sd.getQuestions().iterator(); iterator.hasNext();)
@@ -280,7 +280,7 @@ public class SurveyResponseController
 		    }
 
 		    ArrayList sectionsToSave = new ArrayList();
-			List<String> lockedSectionIds = SurveyDelegate.getLockedSectionIds((User) userContext.getUser(), 
+			List<String> lockedSectionIds = surveyMaster.getLockedSectionIds((User) userContext.getUser(),
 					surveyResponse.getOID());
 			
 			SurveyDefinition sd = surveyResponse.getSurveyDefinition();

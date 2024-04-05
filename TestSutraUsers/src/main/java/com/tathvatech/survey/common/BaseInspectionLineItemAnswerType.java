@@ -6,14 +6,10 @@
  */
 package com.tathvatech.survey.common;
 
-import com.sarvasutra.etest.FormDesignListener;
-import com.tathvatech.ts.core.survey.Option;
-import com.tathvatech.ts.core.survey.response.SurveyItemResponse;
-import com.tathvatech.ts.core.utils.OptionList;
-import com.thirdi.surveyside.survey.ExpectedNumericValue;
-import com.thirdi.surveyside.survey.response.InspectionLineItemAnswerStatus;
-import com.vaadin.ui.Table;
 
+import jakarta.persistence.Table;
+import com.tathvatech.survey.response.SurveyItemResponse;
+import javax.swing.text.html.Option;
 
 /**
  * @author Hari

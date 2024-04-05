@@ -1,11 +1,12 @@
 package com.tathvatech.timetracker.request;
 
-import com.tathvatech.ts.core.common.OID;
+
+import com.tathvatech.user.OID.OID;
 
 public class WorkorderRequestBean
 {
 	protected String extWorkorderNo; 
-	protected OID entityOID; 
+	protected OID entityOID;
 	
 	public WorkorderRequestBean(OID entityOID)
 	{

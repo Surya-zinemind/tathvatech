@@ -1,6 +1,7 @@
 package com.tathvatech.survey.inf;
 
-import com.tathvatech.ts.core.survey.SurveyDefinitionBase;
+
+import com.tathvatech.survey.common.SurveyDefinitionBase;
 
 public interface SurveyParamBase {
 

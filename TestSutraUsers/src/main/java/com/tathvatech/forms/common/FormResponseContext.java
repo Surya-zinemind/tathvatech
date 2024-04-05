@@ -2,14 +2,13 @@ package com.tathvatech.forms.common;
 
 import java.util.List;
 
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.project.TestProcObj;
-import com.tathvatech.ts.core.project.UnitQuery;
-import com.tathvatech.ts.core.project.WorkstationQuery;
-import com.tathvatech.ts.core.survey.response.ResponseMasterNew;
-import com.tathvatech.ts.core.survey.response.SurveyResponse;
-import com.thirdi.surveyside.project.ProjectQuery;
-import com.thirdi.surveyside.survey.FormQuery;
+import com.tathvatech.forms.response.ResponseMasterNew;
+import com.tathvatech.project.common.ProjectQuery;
+import com.tathvatech.survey.response.SurveyResponse;
+import com.tathvatech.unit.common.UnitQuery;
+import com.tathvatech.user.common.TestProcObj;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.workstation.common.WorkstationQuery;
 
 public class FormResponseContext
 {

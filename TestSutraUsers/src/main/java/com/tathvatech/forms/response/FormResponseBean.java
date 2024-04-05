@@ -1,11 +1,9 @@
 package com.tathvatech.forms.response;
 
-import java.util.Date;
-import java.util.List;
+import com.tathvatech.common.utils.ListStringUtil;
 
-import com.sarvasutra.etest.api.BaseResponseBean;
-import com.sarvasutra.etest.util.ListStringUtil;
-import com.tathvatech.ts.core.survey.response.FormResponseStats;
+import java.util.Date;
+
 
 public class FormResponseBean extends BaseResponseBean{
 	public static enum ResponseSubmitMode{saveItems, saveSections, saveAndSubmit;};

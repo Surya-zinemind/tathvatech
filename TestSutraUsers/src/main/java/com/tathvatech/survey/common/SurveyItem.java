@@ -6,27 +6,22 @@
  */
 package com.tathvatech.survey.common;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.apache.log4j.Logger;
-import org.jdom.Element;
-
-import com.sarvasutra.etest.FormDesignListener;
-import com.sarvasutra.etest.FormEventListner;
-import com.sarvasutra.etest.TestProcController;
-import com.sarvasutra.etest.server.FormResponseContext;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.project.UnitFormQuery;
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.response.SurveyResponse;
-import com.tathvatech.ts.core.survey.surveyitem.SurveyItemBase;
-import com.tathvatech.ts.core.survey.surveyitem.SurveyItemOrderComparator;
-import com.thirdi.surveyside.survey.logic.Logic;
-import com.vaadin.ui.Component;
+import com.tathvatech.forms.common.FormResponseContext;
+import com.tathvatech.survey.inf.SurveyItemBase;
+import com.tathvatech.survey.response.SurveyResponse;
+import com.tathvatech.unit.common.UnitFormQuery;
+import com.tathvatech.user.common.UserContext;
+import org.apache.catalina.Container;
+import org.jdom2.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Hari
@@ -36,7 +31,7 @@ import com.vaadin.ui.Component;
  */
 public abstract class SurveyItem extends SurveyItemBase
 {
-    private static final Logger logger = Logger.getLogger(SurveyItem.class);
+	private static final Logger logger = LoggerFactory.getLogger(SurveyItem.class);
 
     protected SurveyResponse surveyResponse;
 
@@ -157,9 +152,9 @@ public abstract class SurveyItem extends SurveyItemBase
 
     public abstract Component drawDesignView(boolean isPreviewMode, FormDesignListener formDesignListener);
 
-    public abstract Component drawResponseField(UnitFormQuery testProc, SurveyResponse response, Component parent, String[] flags,  FormEventListner formEventListner);
-    public abstract Component drawResponseDetail(UserContext userContext, UnitFormQuery testProc, SurveyResponse response, Component parent, 
-    		boolean expandedView, boolean isLatestResponse, String[] flags, final TestProcController testProcController);
+    public abstract Component drawResponseField(UnitFormQuery testProc, SurveyResponse response, Component parent, String[] flags, FormEventListner formEventListner);
+    public abstract Component drawResponseDetail(UserContext userContext, UnitFormQuery testProc, SurveyResponse response, Component parent,
+												 boolean expandedView, boolean isLatestResponse, String[] flags, final TestProcController testProcController);
 
     /**
      * This text identifies the item uniquely, For a question, it could be the

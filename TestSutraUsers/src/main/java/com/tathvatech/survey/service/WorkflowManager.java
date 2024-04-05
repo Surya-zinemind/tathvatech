@@ -7,16 +7,13 @@
 package com.tathvatech.survey.service;
 
 import java.util.Date;
-import java.util.List;
 
-import org.apache.log4j.Logger;
-
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.project.TestProcOID;
-import com.tathvatech.ts.core.survey.response.ResponseMasterNew;
-import com.tathvatech.ts.core.workflow.FormWorkflow;
-import com.tathvatech.ts.core.workflow.FormWorkflowQuery;
-
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.forms.entity.FormWorkflow;
+import com.tathvatech.forms.response.ResponseMasterNew;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.tathvatech.user.OID.TestProcOID;
 
 /**
  * @author Hari
@@ -26,17 +23,22 @@ import com.tathvatech.ts.core.workflow.FormWorkflowQuery;
  */
 public class WorkflowManager
 {
-    private static final Logger logger = Logger.getLogger(WorkflowManager.class);
+	private final PersistWrapper persistWrapper;
+	private static final Logger logger = LoggerFactory.getLogger(WorkflowManager.class);
 
-    public static FormWorkflow getLastEntry(TestProcOID testProcOID)throws Exception
+    public WorkflowManager(PersistWrapper persistWrapper) {
+        this.persistWrapper = persistWrapper;
+    }
+
+    public  FormWorkflow getLastEntry(TestProcOID testProcOID)throws Exception
     {
-		return PersistWrapper.read(FormWorkflow.class, "select * from TAB_FORM_WORKFLOW where testProcPk=? order by pk desc limit 0,1",
+		return persistWrapper.read(FormWorkflow.class, "select * from TAB_FORM_WORKFLOW where testProcPk=? order by pk desc limit 0,1",
 				testProcOID.getPk());
     }
     
-	public static void addWorkflowEntry(String action, int performedByUserPk, int responseId, int testProcPk, String resultStatus, String comments) throws Exception
+	public  void addWorkflowEntry(String action, int performedByUserPk, int responseId, int testProcPk, String resultStatus, String comments) throws Exception
 	{
-		FormWorkflow lastEntry = PersistWrapper.read(FormWorkflow.class, "select * from TAB_FORM_WORKFLOW where testProcPk = ? and current = 1", testProcPk);
+		FormWorkflow lastEntry = persistWrapper.read(FormWorkflow.class, "select * from TAB_FORM_WORKFLOW where testProcPk = ? and current = 1", testProcPk);
 		
 		if(ResponseMasterNew.STATUS_INPROGRESS.equals(resultStatus))
 		{
@@ -54,7 +56,7 @@ public class WorkflowManager
 		if(lastEntry != null)
 		{
 			lastEntry.setCurrent(0);
-			PersistWrapper.update(lastEntry);
+			persistWrapper.update(lastEntry);
 		}
 		
 		FormWorkflow nwf = new FormWorkflow();
@@ -69,12 +71,12 @@ public class WorkflowManager
 		
 		nwf.setDate(new Date());
 		
-		PersistWrapper.createEntity(nwf);
+		persistWrapper.createEntity(nwf);
 	}
 
-	public static List<FormWorkflowQuery> getWorkflowsForTestProc(TestProcOID testProcOid) throws Exception 
+	public  List<FormWorkflowQuery> getWorkflowsForTestProc(TestProcOID testProcOid) throws Exception
 	{
-		return PersistWrapper.readList(FormWorkflowQuery.class, 
+		return persistWrapper.readList(FormWorkflowQuery.class,
 			    FormWorkflowQuery.sql + " and fwf.testProcPk=? and fwf.action != ?", 
 			    testProcOid.getPk(), FormWorkflow.ACTION_START);
 	}

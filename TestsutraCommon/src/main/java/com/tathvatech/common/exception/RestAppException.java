@@ -1,11 +1,8 @@
 package com.tathvatech.common.exception;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
 
-@Provider
+import org.hibernate.resource.transaction.backend.jta.internal.synchronization.ExceptionMapper;
+
 public class RestAppException extends Exception implements ExceptionMapper<RestAppException>
 {
 

@@ -4,11 +4,11 @@
  */
 package com.tathvatech.unit.common;
 
+import com.tathvatech.workstation.oid.UnitWorkstationOID;
+
 import java.util.Date;
 
-import com.tathvatech.ts.core.project.UnitWorkstationOID;
 
-import net.sf.persist.annotations.NoTable;
 
 /**
  * @author Hari
@@ -16,7 +16,7 @@ import net.sf.persist.annotations.NoTable;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-@NoTable
+
 public class UnitWorkstationListReportResultRow
 {
 	private int pk;
