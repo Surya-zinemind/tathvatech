@@ -6,7 +6,7 @@
  */
 package com.tathvatech.survey.service;
 import com.tathvatech.forms.common.*;
-import com.tathvatech.forms.controller.TasksDelegate;
+import com.tathvatech.tasks.controller.TasksDelegate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,10 +20,8 @@ import com.tathvatech.forms.entity.*;
 import com.tathvatech.forms.oid.FormResponseOID;
 import com.tathvatech.forms.oid.TestProcSectionOID;
 import com.tathvatech.forms.service.FormDBManager;
-import com.tathvatech.forms.service.TestProcServiceImpl;
 import com.tathvatech.pdf.common.ItemPrintAreaDef;
 import com.tathvatech.pdf.config.PdfTemplatePrintLocationConfig;
-import com.tathvatech.report.enums.ReportTypes;
 import com.tathvatech.report.request.ReportRequest;
 import com.tathvatech.report.response.ReportResponse;
 import com.tathvatech.common.common.ApplicationProperties;

@@ -69,7 +69,7 @@ public abstract class SurveySaveItem extends SurveyItem implements SurveySaveIte
     /**
      * @param paramMap
      * @return
-     * @throws InvalidResponseException
+     * @throws
      */
     public abstract SurveyItemResponse getResponse(Map paramMap, Properties props) throws InvalidResponseException;
 	

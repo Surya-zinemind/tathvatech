@@ -8,6 +8,7 @@ import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.site.service.SiteServiceImpl;
 import com.tathvatech.timetracker.common.OpenCheckinListReportResultRow;
 import com.tathvatech.timetracker.request.OpenCheckinListReportRequest;
+import com.tathvatech.timetracker.request.OpenCheckinListReportResult;
 import com.tathvatech.user.entity.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -7,14 +7,14 @@
 package com.tathvatech.survey.common;
 
 
-import net.sf.jsqlparser.statement.ExplainStatement;
+
 
 /**
  * @author Hari
  *
  * This interface denotes that the question type has an Add other option which adds Other as an option and a textfield to enter the value.
  */
-public interface HasOtherType extends ExplainStatement.OptionType
+public interface HasOtherType extends OptionType
 {
 	public static final String EXPORT_OTHER_VAL = "0"; //user is Format2 Exportor. (need to show 0 as the value if other option is selected)
     public static final int OTHER_KEY = -1;
