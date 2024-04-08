@@ -41,8 +41,8 @@ public class TimeEntryManager
         this.projectService = projectService;
         this.surveyMaster = surveyMaster;
     }
-
-    public  Date checkIn(UserContext context, ReworkOrderOID workorderOID, UserOID timeForUserOID,
+//uncomment while doing timetracker
+ /*   public  Date checkIn(UserContext context, ReworkOrderOID workorderOID, UserOID timeForUserOID,
 							   ShiftInstanceForUserResponseBean shiftInstanceUserBean,
 							   Date date, boolean forceCloseIfActiveOnOther, boolean setAsAttributionUser) throws Exception
 	{
@@ -196,7 +196,7 @@ public class TimeEntryManager
 			
 			return date;
 		}
-	}
+	}*/
 
 	public  Date checkOut(UserContext context, ReworkOrderOID workorderOID, UserOID timeForUserOID, Date date) throws Exception
 	{
@@ -239,7 +239,7 @@ public class TimeEntryManager
 	}
 
 	
-	public static Date checkOutAndTransfer(UserContext context, ReworkOrderOID workorderOID, UserOID timeForUserOID, int timeQualifierPk, Date date) throws Exception
+	/*public static Date checkOutAndTransfer(UserContext context, ReworkOrderOID workorderOID, UserOID timeForUserOID, int timeQualifierPk, Date date) throws Exception
 	{
 		if(date == null)
 			date = new Date();  // default to current time.
@@ -266,7 +266,7 @@ public class TimeEntryManager
 
         return date;
 	}
-
+*/
 	public static void checkOutAllFromWorkOrder(UserContext context, WorkItem workItem)throws Exception
 	{
 		Date now = new Date();
@@ -276,7 +276,7 @@ public class TimeEntryManager
 		{
 			OpenCheckinListReportRequest openCheckinReq = new OpenCheckinListReportRequest();
 			openCheckinReq.setWorkorders(new ReworkOrderOID[] {wo.getOID()});
-			List<OpenCheckinListReportResultRow> openCheckInList = new OpenCheckinListReport(openCheckinReq).runReport().getReportResult();
+			List<OpenCheckinListReportResultRow> openCheckInList = new OpenCheckinListReport.java(openCheckinReq).runReport().getReportResult();
 			
 			for (Iterator iterator = openCheckInList.iterator(); iterator.hasNext();)
 			{
@@ -289,7 +289,7 @@ public class TimeEntryManager
 		}
 	}
 	
-	public  Date checkOutAll(UserContext context, ProjectOID projectOID, WorkstationOID workstationOID,
+	/*public  Date checkOutAll(UserContext context, ProjectOID projectOID, WorkstationOID workstationOID,
 								   ShiftInstanceOID shiftInstanceOID,
 								   UserOID userOID, Date date)throws Exception
 	{
@@ -398,7 +398,7 @@ public class TimeEntryManager
 			throw new UnsupportedOperationException();
 	}
 
-
+*/
 	private  WorkOrderTimeEntryListObj getUnCommittedAndRunningTimeSlotsForUser(UserOID userOID) throws Exception
 	{
 		List<WorkorderTimeEntry> list = PersistWrapper.readList(WorkorderTimeEntry.class, 
@@ -430,7 +430,7 @@ public class TimeEntryManager
 		
 		return returnObj;
 	}
-
+/*
 	public  WorkorderTimeEntry getOngoingTimeSlotForUser(UserOID userOID)
 	{
 		return persistWrapper.read(WorkorderTimeEntry.class,
@@ -441,5 +441,5 @@ public class TimeEntryManager
 	public  double getLoggedTime(ReworkOrderOID oid)
 	{
 		return persistWrapper.read(Double.class, "select sum(TIMESTAMPDIFF(MINUTE, IFNULL(checkinTime, NOW()), checkoutTime)) from workorder_timeentry where workorderFk = ?", null);
-	}
+	}*/
 }

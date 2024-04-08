@@ -7,12 +7,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import com.tathvatech.common.common.ApplicationProperties;
+import com.tathvatech.common.enums.EStatusEnum;
+import com.tathvatech.common.enums.WorkItem;
 import com.tathvatech.forms.oid.TestProcSectionOID;
 import java.util.List;
 
 import com.tathvatech.ncr.oid.NcrItemOID;
 import com.tathvatech.report.enums.ReportTypes;
 import com.tathvatech.report.request.ReportRequest;
+import com.tathvatech.timetracker.entity.Workorder;
 import com.tathvatech.user.OID.OID;
 import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.common.exception.AppException;
@@ -79,11 +82,11 @@ public class WorkorderManager
 		}
 	}
 	
-	public  List<TimeQualifierMaster> getTimeQualifierList(TimeTypeEnum timeType)
+	/*public  List<TimeQualifierMaster> getTimeQualifierList(TimeTypeEnum timeType)
 	{
 		return persistWrapper.readList(TimeQualifierMaster.class,
 				"select * from wo_time_qualifier_master where timeType = ? and estatus = 1", timeType.name());
-	}
+	}*/
 
 	protected static Workorder getWorkorder(ReworkOrderOID workorderOID)
 	{
@@ -114,7 +117,7 @@ public class WorkorderManager
 		throw new AppException("Unsupported Entity Type for Workorder.");
 	}
 
-	protected OID getEntityOIDForWorkorder(ReworkOrderOID workorderOID)
+	/*protected OID getEntityOIDForWorkorder(ReworkOrderOID workorderOID)
 	{
 		Workorder wo = persistWrapper.readByPrimaryKey(Workorder.class, workorderOID.getPk());
 		if(wo == null)
@@ -152,7 +155,7 @@ public class WorkorderManager
 		}
 		throw new AppException("Unsupported Entity Type for Workorder.");
 	}
-
+*/
 	private Workorder createWorkorderEntity(UserContext context, WorkorderRequestBean requestBean) throws Exception
 	{
 		Workorder workorder = new Workorder();
@@ -169,15 +172,15 @@ public class WorkorderManager
 		persistWrapper.update(workorder);
 		return persistWrapper.readByPrimaryKey(Workorder.class, pk);
 	}
-	
-	/**
+	/*
+	*//**
 	 * returns the workorder list and the user time logs against each of these workorders within the daterange matching the workorder filter. 
 	 * @param timeZone
 	 * @param filter find workorders matching this filter.
 	 * @param timeComputeDateRange compute the user time logs within this date range.
 	 * @return
 	 * @throws Exception
-	 */
+	 *//*
 	public static List<WorkOrderItemResponseBean> getWorkOrdersAndTimeLogs(WorkorderListReportFilter filter, DateRangeFilter timeComputeDateRange)throws Exception
 	{
 		String applicationURL = ApplicationProperties.getProperty("config/server/url");
@@ -458,6 +461,6 @@ public class WorkorderManager
 		
 		
 		return returnList;
-	}
+	}*/
 	
 }
