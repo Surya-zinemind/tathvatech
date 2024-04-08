@@ -4,9 +4,10 @@
  * TODO To change the template for this generated file go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-package com.tathvatech.survey.common;
+package com.tathvatech.logic.common;
 
-import com.tathvatech.site.service.SiteServiceImpl;
+import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.common.SurveyItem;
 import com.tathvatech.survey.inf.LogicBase;
 import com.tathvatech.survey.inf.LogicIntf;
 import com.tathvatech.survey.response.SurveyResponse;

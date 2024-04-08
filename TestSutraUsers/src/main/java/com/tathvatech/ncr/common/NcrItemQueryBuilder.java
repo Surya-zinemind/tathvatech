@@ -1,4 +1,5 @@
 package com.tathvatech.ncr.common;
+import com.tathvatech.ncr.enums.NcrEnum;
 import com.tathvatech.user.OID.LocationTypeOID;
 import java.util.ArrayList;
 import java.util.Arrays;

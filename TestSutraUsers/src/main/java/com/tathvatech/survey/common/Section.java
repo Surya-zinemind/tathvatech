@@ -15,6 +15,7 @@ import com.tathvatech.forms.entity.ObjectLock;
 import com.tathvatech.forms.intf.SectionBase;
 import com.tathvatech.forms.service.FormDBManager;
 import com.tathvatech.forms.service.TestProcService;
+import com.tathvatech.logic.common.Logic;
 import com.tathvatech.survey.controller.SurveyDelegate;
 import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.survey.service.SurveyResponseService;

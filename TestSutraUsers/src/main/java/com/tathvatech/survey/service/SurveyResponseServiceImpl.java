@@ -12,6 +12,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 
+import com.tathvatech.activitylogging.common.ActivityLogQuery;
+import com.tathvatech.activitylogging.controller.ActivityLoggingDelegate;
 import com.tathvatech.common.common.ApplicationProperties;
 import com.tathvatech.forms.oid.FormResponseOID;
 import com.tathvatech.survey.entity.ResponseFlags;

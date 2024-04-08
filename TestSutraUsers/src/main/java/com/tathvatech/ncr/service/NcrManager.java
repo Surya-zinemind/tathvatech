@@ -42,8 +42,9 @@ public class NcrManager
         this.persistWrapper = persistWrapper;
 
     }
+	//uncomment while working on NCR
 
-    // Ncr Group
+   /* // Ncr Group
 	public  NcrGroupBean saveNcrGroup(UserContext context, NcrGroupBean nesnItemBean) throws Exception
 	{
 		NcrGroup nesnItem = null;
@@ -438,12 +439,12 @@ public class NcrManager
 		}
 		return nesnItemBean;
 
-	}
+	}*/
 
 	public  NcrItemQuery getNcrItemQuery(UserContext context, NcrItemOID ncrItemOID)
 	{
 		NcrItemQueryFilter nfilter = new NcrItemQueryFilter();
-		nfilter.setPk(ncrItemOID.getPk());
+		nfilter.setPk((int) ncrItemOID.getPk());
 		NcrItemQueryBuilder ncrItemQueryBuilder = new NcrItemQueryBuilder(context, nfilter);
 		QueryObject queryObject = ncrItemQueryBuilder.getQuery();
 		if (queryObject != null)
@@ -455,7 +456,9 @@ public class NcrManager
 			return null;
 	}
 
-	public static NcrAreaOfResponsibilityBean getNcrAreaOfResponsibility(int pk)
+	//uncomment while working on it
+
+	/*public static NcrAreaOfResponsibilityBean getNcrAreaOfResponsibility(int pk)
 	{
 		String queryString = " select * from ncr_area_of_responsibility_master ";
 		return PersistWrapper.read(NcrAreaOfResponsibilityBean.class, queryString + "where pk = ?", pk);
@@ -1512,9 +1515,9 @@ public class NcrManager
 			}
 		}
 		AdditionalPartsManager.delete(previousPartRequiredBean);
-		/*
+		*//*
 		 * Corrective Action start
-		 */
+		 *//*
 
 		List<NcrCorrectiveActionBean> prevNcrCorrctive = getNcrCorrectiveAction(new NcrItemOID(ncrItemPk));
 
@@ -1549,9 +1552,9 @@ public class NcrManager
 				deleteNcrCorrectiveAction(context, bean.getPk());
 			}
 		}
-		/*
+		*//*
 		 * Corrective action end
-		 */
+		 *//*
 
 		// for (int i = 0; i < ncrItemBean.getNcrPartsRequiredBeanList().size();
 		if (ncrItemBean.getNcrStatus() != null
@@ -1563,26 +1566,26 @@ public class NcrManager
 
 		if (isUnitUpdatedAftercompletNCR)
 		{
-			/*
+			*//*
 			 * If we add effected unit after complete or close NCR
-			 */
+			 *//*
 			updateNCRItemStatus(context, prevNcrItemBean, new NcrItemOID(ncrItemPk));
 
 		}
 		ncrItemBean = getNcrItemBean(new NcrItemOID(ncrItemPk, ""));
 
-		/*
+		*//*
 		 * Sent a mail to quality users if the D8 values updated. - start 8D
 		 * update information checked in the notifyD8Updated method.
 		 * prevNcrItemBean is null only if we create a new NCR item
-		 */
+		 *//*
 		if (prevNcrItemBean != null && prevNcrItemBean.getPk() > 0)
 		{
 			NcrEmailSender.notifyD8Updated(context, prevNcrItemBean, ncrItemBean);
 		}
-		/*
+		*//*
 		 * Sent a mail to quality users if the D8 values updated - end
-		 */
+		 *//*
 		setNcrGroupStatus(new NcrGroupOID(ncrItemBean.getNcrGroupFk(), ""));
 
 		if (isDispositionChange && ncrItemBean.getNcrStatus() != null
@@ -4870,6 +4873,6 @@ public class NcrManager
 	public static NcrFunctionMaster getNcrFunctionMaster(int pk) throws Exception
 	{
 		return PersistWrapper.readByPrimaryKey(NcrFunctionMaster.class, pk);
-	}
+	}*/
 
 }

@@ -1,5 +1,6 @@
 package com.tathvatech.ncr.common;
 
+import com.tathvatech.ncr.enums.NcrEnum;
 import com.tathvatech.user.OID.OID;
 import com.tathvatech.user.OID.ReworkOrderOID;
 
