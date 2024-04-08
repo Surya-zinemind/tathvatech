@@ -10,8 +10,13 @@ import com.tathvatech.report.request.ReportRequest;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.project.service.ProjectService;
-import com.tathvatech.survey.controller.SurveyDelegate;
+import com.tathvatech.timetracker.report.OpenCheckinListReport;
 import com.tathvatech.survey.service.SurveyMaster;
+import com.tathvatech.timetracker.common.OpenCheckinListReportResultRow;
+import com.tathvatech.timetracker.common.WorkOrderTimeEntryListObj;
+import com.tathvatech.timetracker.entity.Workorder;
+import com.tathvatech.timetracker.entity.WorkorderTimeEntry;
+import com.tathvatech.timetracker.request.OpenCheckinListReportRequest;
 import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
@@ -35,11 +40,14 @@ public class TimeEntryManager
 	private final PersistWrapper persistWrapper;
 	private final ProjectService projectService;
 	private final SurveyMaster surveyMaster;
+	private final WorkorderManager workorderManager;
+	private  OpenCheckinListReport openCheckinListReport;
 
-    public TimeEntryManager(PersistWrapper persistWrapper, ProjectService projectService, SurveyMaster surveyMaster) {
+    public TimeEntryManager(PersistWrapper persistWrapper, ProjectService projectService, SurveyMaster surveyMaster, WorkorderManager workorderManager) {
         this.persistWrapper = persistWrapper;
         this.projectService = projectService;
         this.surveyMaster = surveyMaster;
+        this.workorderManager = workorderManager;
     }
 //uncomment while doing timetracker
  /*   public  Date checkIn(UserContext context, ReworkOrderOID workorderOID, UserOID timeForUserOID,
@@ -226,13 +234,13 @@ public class TimeEntryManager
 		}
 		
 		// remove attribution if set
-        Workorder wo = WorkorderManager.getWorkorder(workorderOID);
+        Workorder wo = workorderManager.getWorkorder(workorderOID);
         WorkItem workItem = WorkorderManager.getWorkItem(wo.getEntityPk(), (EntityTypeEnum) EntityTypeEnum.fromValue(wo.getEntityType()));
         
-        UserQuery currentAttributedUser = SurveyDelegate.getAttributionUser(workItem);
+        UserQuery currentAttributedUser =surveyMaster.getAttributionUser(workItem);
         if(currentAttributedUser != null && currentAttributedUser.getPk() == timeForUserOID.getPk())
         {
-            SurveyDelegate.setAttribution(context, workItem, null);
+            surveyMaster.setAttribution(context, workItem, null);
         }
 		
 		return date;
@@ -267,16 +275,16 @@ public class TimeEntryManager
         return date;
 	}
 */
-	public static void checkOutAllFromWorkOrder(UserContext context, WorkItem workItem)throws Exception
+	public void checkOutAllFromWorkOrder(UserContext context, WorkItem workItem)throws Exception
 	{
 		Date now = new Date();
 		
-		Workorder wo = WorkorderManager.getWorkorderForEntity((OID) workItem);
+		Workorder wo = workorderManager.getWorkorderForEntity((OID) workItem);
 		if(wo != null)
 		{
 			OpenCheckinListReportRequest openCheckinReq = new OpenCheckinListReportRequest();
 			openCheckinReq.setWorkorders(new ReworkOrderOID[] {wo.getOID()});
-			List<OpenCheckinListReportResultRow> openCheckInList = new OpenCheckinListReport.java(openCheckinReq).runReport().getReportResult();
+			List<OpenCheckinListReportResultRow> openCheckInList = openCheckinListReport.java(openCheckinReq).runReport().getReportResult();
 			
 			for (Iterator iterator = openCheckInList.iterator(); iterator.hasNext();)
 			{
@@ -401,7 +409,7 @@ public class TimeEntryManager
 */
 	private  WorkOrderTimeEntryListObj getUnCommittedAndRunningTimeSlotsForUser(UserOID userOID) throws Exception
 	{
-		List<WorkorderTimeEntry> list = PersistWrapper.readList(WorkorderTimeEntry.class, 
+		List<WorkorderTimeEntry> list = persistWrapper.readList(WorkorderTimeEntry.class,
 				"select * from workorder_timeentry where committed  = 0 and userFk = ? ", userOID.getPk()); 
 
 		if(list == null || list.size() == 0)
@@ -414,7 +422,7 @@ public class TimeEntryManager
 			WorkorderTimeEntry workorderTimeEntry = (WorkorderTimeEntry) iterator.next();
 			if(returnObj.getWorkorder() == null)
 			{
-				Workorder wo = persistWrapper.readByPrimaryKey(Workorder.class, workorderTimeEntry.getWorkorderFk());
+				Workorder wo = (Workorder) persistWrapper.readByPrimaryKey(Workorder.class, workorderTimeEntry.getWorkorderFk());
 				returnObj.setWorkorder(wo);
 			}
 			else

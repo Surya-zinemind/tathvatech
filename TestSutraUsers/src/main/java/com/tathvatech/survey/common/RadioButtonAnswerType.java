@@ -6,6 +6,7 @@
  */
 package com.tathvatech.survey.common;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,56 +15,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import com.tathvatech.forms.common.FormDesignListener;
+import com.tathvatech.forms.controller.TestProcController;
 import com.tathvatech.logic.common.Logic;
-import org.apache.log4j.Logger;
-import org.jdom.Element;
+import com.tathvatech.survey.enums.AnswerPersistor;
+import com.tathvatech.survey.response.SimpleSurveyItemResponse;
+import com.tathvatech.survey.response.SurveyItemResponse;
+import com.tathvatech.survey.response.SurveyResponse;
+import com.tathvatech.unit.common.UnitFormQuery;
+import com.tathvatech.unit.response.ResponseUnit;
+import com.tathvatech.user.common.UserContext;
+import org.jdom2.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.sarvasutra.etest.FormDesignListener;
-import com.sarvasutra.etest.FormEventListner;
-import com.sarvasutra.etest.TestProcController;
-import com.sarvasutra.etest.components.HSpacer;
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.common.utils.LineSeperatorUtil;
-import com.tathvatech.ts.core.project.UnitFormQuery;
-import com.tathvatech.ts.core.survey.MultipleChoiceType;
-import com.tathvatech.ts.core.survey.OneDOptionType;
-import com.tathvatech.ts.core.survey.Option;
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.response.AnswerPersistor;
-import com.tathvatech.ts.core.survey.response.InvalidResponseException;
-import com.tathvatech.ts.core.survey.response.ResponseUnit;
-import com.tathvatech.ts.core.survey.response.SimpleSurveyItemResponse;
-import com.tathvatech.ts.core.survey.response.SurveyItemResponse;
-import com.tathvatech.ts.core.survey.response.SurveyResponse;
-import com.tathvatech.ts.core.survey.surveyitem.LogicSubject;
-import com.tathvatech.ts.core.survey.surveyitem.SimpleAnswerPersistor;
-import com.tathvatech.ts.core.utils.OptionList;
-import com.thirdi.surveyside.survey.CommentFieldType;
-import com.thirdi.surveyside.survey.DataTypes;
-import com.thirdi.surveyside.survey.HasOtherType;
-import com.thirdi.surveyside.survey.SurveyDisplayItem;
-import com.thirdi.surveyside.survey.logic.Logic;
-import com.vaadin.data.Validator;
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.server.ThemeResource;
-import com.vaadin.server.UserError;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.DefaultFieldFactory;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.OptionGroup;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.BaseTheme;
+import javax.swing.text.html.Option;
 
 
 /**
@@ -74,7 +40,7 @@ import com.vaadin.ui.themes.BaseTheme;
  */
 public class RadioButtonAnswerType extends SurveySaveItem implements SurveyDisplayItem, MultipleChoiceType, OneDOptionType, HasOtherType, LogicSubject
 {
-    private static final Logger logger = Logger.getLogger(RadioButtonAnswerType.class);
+    private static final Logger logger = LoggerFactory.getLogger(RadioButtonAnswerType.class);
 
     //if no maxlength is defined, set it to 1
     private static final int DEFAULT_MAXLENGTH = 1;
@@ -597,7 +563,7 @@ public class RadioButtonAnswerType extends SurveySaveItem implements SurveyDispl
         {
             Option choice = (Option) options.getOptionByIndex(i);
             String choiceString = choice.getText();
-            int choiceValue = choice.getValue();
+            int choiceValue = Integer.parseInt(choice.getValue());
             boolean answer = false;
             if(itemResponse != null)
             {
@@ -670,7 +636,7 @@ public class RadioButtonAnswerType extends SurveySaveItem implements SurveyDispl
 		return elem;
 	 }
 
-	@Override
+
 	public Component drawDesignView(boolean isPreviewMode, FormDesignListener formDesignListener)
 	{
 		Panel p = new Panel();
@@ -711,14 +677,14 @@ public class RadioButtonAnswerType extends SurveySaveItem implements SurveyDispl
 	}
 
 	@Override
-	public Component drawConfigurationView(FormDesignListener formDesignListener)
+	public ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		return new ConfigForm(this, formDesignListener);
 	}
 
 	@Override
 	public Component drawResponseField(UnitFormQuery testProc, SurveyResponse sResponse,
-		Component parent, String[] flags,  FormEventListner formEventListner)
+                                       Component parent, String[] flags, FormEventListner formEventListner)
 	{
 		List<Integer> answers = new ArrayList<Integer>();
 		if (sResponse != null)
@@ -852,7 +818,7 @@ public class RadioButtonAnswerType extends SurveySaveItem implements SurveyDispl
 
 	@Override
 	public Component drawResponseDetail(UserContext userContext, UnitFormQuery testProc, SurveyResponse sResponse,
-		Component parent, boolean expandedView, boolean isLatestResponse, String[] flags, final TestProcController testProcController)
+                                        Component parent, boolean expandedView, boolean isLatestResponse, String[] flags, final TestProcController testProcController)
 	{
 		List thisItemFlagList = this.getFlagsAsList();
 		boolean matchFlagsToDisplay = false;

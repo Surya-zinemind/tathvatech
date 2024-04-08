@@ -17,7 +17,7 @@ public class RestAppException extends Exception implements ExceptionMapper<RestA
 		super(errorMessage);
 	}
 
-	@Override
+
 	public Response toResponse(RestAppException e)
 	{
 		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).type("text/Json").build();

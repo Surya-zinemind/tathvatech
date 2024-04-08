@@ -2,6 +2,7 @@ package com.tathvatech.forms.service;
 
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.entity.FormSection;
+import com.tathvatech.forms.entity.FormSectionMain;
 import com.tathvatech.forms.oid.FormMainOID;
 import com.tathvatech.survey.common.Section;
 import com.tathvatech.survey.common.SurveyDefinition;
@@ -43,7 +44,7 @@ public class FormDBManager
 			FormSection sec = new FormSection();
 			sec.setCreatedDate(new Date());
 			sec.setFormPk((int) survey.getPk());
-			sec.setFormSectionMainPk(sectionMain.getPk());
+			sec.setFormSectionMainPk((int) sectionMain.getPk());
 			sec.setOrderNo(aSec.getOrderNum());
 			sec.setSectionId(aSec.getSurveyItemId());
 			sec.setInstructionFileName(aSec.getInstructionFileName());
@@ -57,11 +58,11 @@ public class FormDBManager
 	{
 		FormSectionMain sm = new FormSectionMain();
 		sm.setCreatedDate(new Date());
-		sm.setFormMainPk(formMainOID.getPk());
+		sm.setFormMainPk((int) formMainOID.getPk());
 		sm.setItemNo(itemNo);
 		sm.setDescription(description);
-		int pk = persistWrapper.createEntity(sm);
-		return persistWrapper.readByPrimaryKey(FormSectionMain.class, pk);
+		int pk = (int) persistWrapper.createEntity(sm);
+		return (FormSectionMain) persistWrapper.readByPrimaryKey(FormSectionMain.class, pk);
 	}
 
 	private FormSectionMain getFormSectionMain(FormMainOID formMainOID, String itemNo, String description)

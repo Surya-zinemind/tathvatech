@@ -1,8 +1,10 @@
 package com.tathvatech.forms.response;
 
 import com.tathvatech.common.utils.ListStringUtil;
+import com.tathvatech.user.common.AttachmentInfoBean;
 
 import java.util.Date;
+import java.util.List;
 
 
 public class FormResponseBean extends BaseResponseBean{

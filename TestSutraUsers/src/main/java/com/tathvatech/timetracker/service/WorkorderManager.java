@@ -41,12 +41,14 @@ public class WorkorderManager
 {
 	private static final Logger logger = LoggerFactory.getLogger(WorkorderManager.class);
 	private final PersistWrapper persistWrapper;
+	private final WorkorderManager workorderManager;
 
-    public WorkorderManager(PersistWrapper persistWrapper) {
+    public WorkorderManager(PersistWrapper persistWrapper, WorkorderManager workorderManager) {
         this.persistWrapper = persistWrapper;
+        this.workorderManager = workorderManager;
     }
 
-    public static void createWorkorder(UserContext context, WorkorderRequestBean requestBean) throws Exception
+    public  void createWorkorder(UserContext context, WorkorderRequestBean requestBean) throws Exception
 	{
 		if(!(EntityTypeEnum.TestProc == requestBean.getEntityOID().getEntityType()
 				|| EntityTypeEnum.TestProcSection == requestBean.getEntityOID().getEntityType()
@@ -59,7 +61,7 @@ public class WorkorderManager
 			throw new AppException("Workorders not supported for type " + requestBean.getEntityOID().getEntityType());
 		}
 
-		Workorder workorder = getWorkorderForEntity(requestBean.getEntityOID());
+		Workorder workorder =worgetWorkorderForEntity(requestBean.getEntityOID());
 		if(workorder != null)
 			return; // workorder already exists. so just return;
 		
@@ -88,11 +90,11 @@ public class WorkorderManager
 				"select * from wo_time_qualifier_master where timeType = ? and estatus = 1", timeType.name());
 	}*/
 
-	protected static Workorder getWorkorder(ReworkOrderOID workorderOID)
+	protected  Workorder getWorkorder(ReworkOrderOID workorderOID)
 	{
 		StringBuffer sql = new StringBuffer("select wo.* from workorder wo where wo.pk = ? ");
 		
-		return PersistWrapper.read(Workorder.class, sql.toString(), workorderOID.getPk());
+		return persistWrapper.read(Workorder.class, sql.toString(), workorderOID.getPk());
 	}
 	
 	private  Workorder getWorkOrderByWorkOrderNo(String workorderNo)
@@ -156,21 +158,21 @@ public class WorkorderManager
 		throw new AppException("Unsupported Entity Type for Workorder.");
 	}
 */
-	private Workorder createWorkorderEntity(UserContext context, WorkorderRequestBean requestBean) throws Exception
+	private  Workorder createWorkorderEntity(UserContext context, WorkorderRequestBean requestBean) throws Exception
 	{
 		Workorder workorder = new Workorder();
-		workorder.setCreatedBy(context.getUser().getPk());
+		workorder.setCreatedBy((int) context.getUser().getPk());
 		workorder.setCreatedDate(new Date());
 		workorder.setWorkorderNumber(requestBean.getExtWorkorderNo());
-		workorder.setEntityPk(requestBean.getEntityOID().getPk());
+		workorder.setEntityPk((int) requestBean.getEntityOID().getPk());
 		workorder.setEntityType(requestBean.getEntityOID().getEntityType().getValue());
 		workorder.setEstatus(EStatusEnum.Active.getValue());
 		
-		int pk = persistWrapper.createEntity(workorder);
-		workorder = PersistWrapper.readByPrimaryKey(Workorder.class, pk);
+		int pk = (int) persistWrapper.createEntity(workorder);
+		workorder = (Workorder) persistWrapper.readByPrimaryKey(Workorder.class, pk);
 		workorder.setWorkorderNumber(pk+"");
 		persistWrapper.update(workorder);
-		return persistWrapper.readByPrimaryKey(Workorder.class, pk);
+		return (Workorder) persistWrapper.readByPrimaryKey(Workorder.class, pk);
 	}
 	/*
 	*//**

@@ -9,9 +9,9 @@ package com.tathvatech.logic.common;
 import java.util.Map;
 import java.util.Properties;
 
-import org.jdom.Element;
 
-import com.tathvatech.ts.core.survey.SurveyDefinition;
+import com.tathvatech.survey.common.SurveyDefinition;
+import org.jdom2.Element;
 
 /**
  * @author Hari

@@ -6,6 +6,9 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tathvatech.pdf.common.ItemPrintAreaDef;
+import com.tathvatech.pdf.common.PdfPrintArea;
+
+
 
 
 public class PdfTemplatePrintLocationConfig

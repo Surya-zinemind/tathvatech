@@ -12,12 +12,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
 
-import com.tathvatech.ts.core.survey.SurveyDefinition;
+import com.tathvatech.logic.common.LogicAction;
+import com.tathvatech.survey.common.SurveyDefinition;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.input.SAXBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -28,7 +30,7 @@ import com.tathvatech.ts.core.survey.SurveyDefinition;
  */
 public class RuleActionManager
 {
-    private static final Logger logger = Logger.getLogger(RuleActionManager.class);
+    private static final Logger logger = LoggerFactory.getLogger( RuleActionManager.class);
     
     private HashMap actionTypesMap = new HashMap();
     private List actionTypesList = new ArrayList();
@@ -82,8 +84,8 @@ public class RuleActionManager
     {
 		try
 		{
-		    SAXBuilder   builder = new SAXBuilder();
-			Document     doc = builder.build(new File("ruleactions.xml"));
+		    SAXBuilder builder = new SAXBuilder();
+			Document doc = builder.build(new File("ruleactions.xml"));
 			
 			List aList = doc.getRootElement().getChildren("action");
 			for (Iterator aListItr = aList.iterator(); aListItr.hasNext();)

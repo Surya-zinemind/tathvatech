@@ -1,11 +1,11 @@
 package com.tathvatech.timetracker.request;
 
-import com.tathvatech.testsutra.workstationReport.service.ShiftInstanceOID;
-import com.tathvatech.ts.core.accounts.UserOID;
-import com.tathvatech.ts.core.common.ReworkOrderOID;
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.project.WorkstationOID;
+
+import com.tathvatech.timetracker.oid.ShiftInstanceOID;
+import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.ReworkOrderOID;
+import com.tathvatech.user.OID.UserOID;
+import com.tathvatech.user.OID.WorkstationOID;
 
 public class OpenCheckinListReportRequest
 {

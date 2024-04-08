@@ -13,34 +13,39 @@ import java.util.List;
 
 
 public class TasksDelegate {
+	private final TasksManager tasksManager;
 
-	public static void saveTask(UserContext userContext,
+    public TasksDelegate(TasksManager tasksManager) {
+        this.tasksManager = tasksManager;
+    }
+
+    public  void saveTask(UserContext userContext,
                                 OID associatedObjectOid, OID assignedTo, TaskDefBean taskDef) throws Exception
 	{
 
 
 
-            TasksManager.saveTask(userContext, associatedObjectOid,  assignedTo, taskDef);
+            tasksManager.saveTask(userContext, associatedObjectOid,  assignedTo, taskDef);
 
 	}
 
-	public static List<Task> getTasks(UserContext userContext, TaskFilter taskFilter) throws Exception
+	public  List<Task> getTasks(UserContext userContext, TaskFilter taskFilter) throws Exception
 	{
-		return TasksManager.getTasks(userContext, taskFilter);
+		return tasksManager.getTasks(userContext, taskFilter);
 	}
 
-	public static Task getTask(int taskPk)throws Exception
+	public  Task getTask(int taskPk)throws Exception
 	{
-		return TasksManager.getTask(taskPk);
+		return tasksManager.getTask(taskPk);
 	}
 
-	public static void markTaskPerformed(UserContext context, Task task,
+	public  void markTaskPerformed(UserContext context, Task task,
 			TaskStatus resultStatus) throws Exception
 	{
 
 
 
-    		TasksManager.markTaskPerformed(context, task, resultStatus);
+    		tasksManager.markTaskPerformed(context, task, resultStatus);
 
 
 

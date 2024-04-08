@@ -26,7 +26,7 @@ import jakarta.persistence.Table;
 @Entity
 
 @Table(name="TAB_RESPONSE")
-public class FormResponseMaster extends AbstractEntity implements Serializable, Authorizable
+public class FormResponseMaster extends AbstractEntity implements Serializable
 {
 	private int		responseId;
 

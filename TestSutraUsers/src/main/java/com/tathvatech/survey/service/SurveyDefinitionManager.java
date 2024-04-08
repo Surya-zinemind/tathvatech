@@ -21,9 +21,18 @@ import java.util.List;
 import com.tathvatech.common.common.ApplicationProperties;
 import com.tathvatech.common.utils.SequenceIdGenerator;
 import com.tathvatech.forms.common.FormQuery;
+import com.tathvatech.forms.enums.FormTypeEnum;
+import com.tathvatech.forms.intf.SectionBase;
+import com.tathvatech.logic.common.Logic;
 import com.tathvatech.survey.common.SurveyDefinition;
+
+import com.tathvatech.survey.common.SurveyItem;
+import com.tathvatech.survey.common.SurveyItemOrderComparator;
+import com.tathvatech.survey.common.SurveySaveItem;
 import com.tathvatech.survey.entity.Survey;
+import com.tathvatech.survey.exception.SurveyNotEditableException;
 import com.tathvatech.survey.inf.SurveyItemBase;
+import com.tathvatech.survey.inf.SurveyParamBase;
 import com.tathvatech.user.OID.FormOID;
 import com.tathvatech.user.service.AccountServiceImpl;
 
@@ -70,6 +79,10 @@ public class SurveyDefinitionManager extends Object
         this.surveyDefinition = surveyDefFactory.getSurveyDefinition(formOID);
         this.surveyDefFactory = surveyDefFactory;
     }
+
+    public SurveyDefinitionManager(Survey survey) {
+    }
+
 
     public Survey getSurvey()
 	{

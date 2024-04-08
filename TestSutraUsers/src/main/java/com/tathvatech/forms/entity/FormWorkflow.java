@@ -12,7 +12,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name="TAB_FORM_WORKFLOW")
-public class FormWorkflow extends AbstractEntity implements Serializable, Authorizable
+public class FormWorkflow extends AbstractEntity implements Serializable
 {
 
     @Id

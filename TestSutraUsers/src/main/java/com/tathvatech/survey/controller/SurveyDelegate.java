@@ -7,34 +7,34 @@
 package com.tathvatech.survey.controller;
 
 import java.sql.Connection;
+
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 
-import com.sarvasutra.etest.pdfprint.templatelocationconfig.PdfTemplatePrintLocationConfig;
-import com.tathvatech.ts.caf.util.ServiceLocator;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.accounts.UserOID;
-import com.tathvatech.ts.core.accounts.UserQuery;
-import com.tathvatech.ts.core.common.WorkItem;
-import com.tathvatech.ts.core.project.FormOID;
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.project.TestProcOID;
-import com.tathvatech.ts.core.survey.FormPrintFormat;
-import com.tathvatech.ts.core.survey.ObjectLock;
-import com.tathvatech.ts.core.survey.ObjectLockQuery;
-import com.tathvatech.ts.core.survey.Survey;
-import com.tathvatech.ts.core.survey.response.FormResponseOID;
-import com.tathvatech.ts.core.survey.response.ResponseMasterNew;
-import com.thirdi.surveyside.project.FormFilter;
-import com.thirdi.surveyside.project.ProjectManager;
-import com.thirdi.surveyside.survey.FormMain;
-import com.thirdi.surveyside.survey.FormQuery;
-import com.thirdi.surveyside.survey.LockedByAnotherUserException;
-import com.thirdi.surveyside.survey.SurveyMaster;
-import com.thirdi.surveyside.survey.response.SurveyResponseManager;
+import com.tathvatech.common.enums.WorkItem;
+import com.tathvatech.forms.common.FormFilter;
+import com.tathvatech.forms.common.FormQuery;
+import com.tathvatech.forms.common.ObjectLockQuery;
+import com.tathvatech.forms.entity.FormMain;
+import com.tathvatech.forms.entity.FormPrintFormat;
+import com.tathvatech.forms.entity.ObjectLock;
+import com.tathvatech.forms.oid.FormResponseOID;
+import com.tathvatech.forms.response.ResponseMasterNew;
+import com.tathvatech.pdf.config.PdfTemplatePrintLocationConfig;
+import com.tathvatech.survey.entity.Survey;
+import com.tathvatech.survey.service.SurveyMaster;
+import com.tathvatech.survey.service.SurveyResponseService;
+import com.tathvatech.user.OID.FormOID;
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.TestProcOID;
+import com.tathvatech.user.OID.UserOID;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.entity.UserQuery;
+import com.tathvatech.workstation.service.WorkstationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -45,8 +45,17 @@ import com.thirdi.surveyside.survey.response.SurveyResponseManager;
  */
 public class SurveyDelegate
 {
-    private static final Logger logger = Logger.getLogger(SurveyDelegate.class);
-    
+	private static final Logger logger = LoggerFactory.getLogger(SurveyDelegate.class);
+	private final SurveyMaster surveyMaster;
+	private final SurveyResponseService surveyResponseService;
+	private final WorkstationService workstationService;
+
+    public SurveyDelegate(SurveyMaster surveyMaster, SurveyResponseService surveyResponseService, WorkstationService workstationService) {
+        this.surveyMaster = surveyMaster;
+        this.surveyResponseService = surveyResponseService;
+        this.workstationService = workstationService;
+    }
+
     //TODO:: implement a cache with this hashmap
     //private static HashMap surveyMap = new HashMap();
     
@@ -54,85 +63,53 @@ public class SurveyDelegate
      * @param surveyPk
      * @return
      */
-    public static String getSurveyDefFileName(int _surveyPk)throws Exception
+    public  String getSurveyDefFileName(int _surveyPk)throws Exception
     {
-        return SurveyMaster.getSurveyDefFileName(_surveyPk);
+        return surveyMaster.getSurveyDefFileName(_surveyPk);
     }
 
     /**
      * @param surveyPk
      * @return
      */
-    public static Survey getSurveyByPk(int surveyPk)throws Exception
+    public  Survey getSurveyByPk(int surveyPk)throws Exception
     {
-        return SurveyMaster.getSurveyByPk(surveyPk);
+        return surveyMaster.getSurveyByPk(surveyPk);
     }
 
 
-    public static Survey createSurvey(UserContext context, Survey survey) throws Exception
+    public  Survey createSurvey(UserContext context, Survey survey) throws Exception
     {
-    	Connection conn = null;
-    	try
-    	{
-    	    conn = ServiceLocator.locate().getConnection();
-    	    conn.setAutoCommit(false);
 
-        	Survey sur = SurveyMaster.createSurvey(context, survey);
 
-    	    conn.commit();
+        	Survey sur = surveyMaster.createSurvey(context, survey);
+
+
     	    
     	    return sur;
-    	}
-    	catch (Exception ex)
-    	{
-    	    conn.rollback();
-    	    throw ex;
-    	}
+
     }
 
-    public static Survey createSurveyNewVersion(UserContext context, Survey newVersion, FormQuery baseRevision) throws Exception
+    public Survey createSurveyNewVersion(UserContext context, Survey newVersion, FormQuery baseRevision) throws Exception
     {
-    	Connection conn = null;
-    	try
-    	{
-    	    conn = ServiceLocator.locate().getConnection();
-    	    conn.setAutoCommit(false);
 
-        	Survey sur = SurveyMaster.createSurveyNewVersion(context, newVersion, baseRevision);
 
-    	    conn.commit();
-    	    
-    	    return sur;
-    	}
-    	catch (Exception ex)
-    	{
-    	    conn.rollback();
-    	    throw ex;
-    	}
+        	Survey sur = surveyMaster.createSurveyNewVersion(context, newVersion, baseRevision);
+
+			return sur;
+
     }
 
-    public static Survey createSurveyByCopy(UserContext context, Survey survey, int sourceSurveyPk) throws Exception
+    public  Survey createSurveyByCopy(UserContext context, Survey survey, int sourceSurveyPk) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-        	survey = SurveyMaster.createSurveyByCopy(context, survey, sourceSurveyPk);
 
-            con.commit();
+        	survey = surveyMaster.createSurveyByCopy(context, survey, sourceSurveyPk);
+
+
             
             return survey;
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-	    finally
-	    {
-	    }
+
     }
 
     /**
@@ -140,49 +117,24 @@ public class SurveyDelegate
      * a complete removal should be done manually.
      * @param surveyDef
      */
-    public static void deleteSurvey(int surveyPk)throws Exception
+    public  void deleteSurvey(int surveyPk)throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-            SurveyMaster.deleteSurvey(surveyPk);
 
-            con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-	    finally
-	    {
-	    }
+            surveyMaster.deleteSurvey(surveyPk);
+
     }
 
-    public static Survey updateSurvey(Survey survey)throws Exception
+    public  Survey updateSurvey(Survey survey)throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-            survey = SurveyMaster.updateSurvey(survey);
 
-            con.commit();
+            survey = surveyMaster.updateSurvey(survey);
+
+
             
             return survey;
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-	    finally
-	    {
+
 	    }
     }
 
@@ -191,9 +143,9 @@ public class SurveyDelegate
 		return SurveyMaster.getFormByPk(formPk);
 	}
 
-	public static List<FormQuery> getSurveyList() throws Exception
+	public List<FormQuery> getSurveyList() throws Exception
 	{
-		return SurveyMaster.getSurveyList();
+		return surveyMaster.getSurveyList();
 	}
 
 	public static List<FormQuery> getOpenSurveyList() throws Exception
@@ -226,76 +178,39 @@ public class SurveyDelegate
 		return SurveyMaster.getLatestPublishedVersionOfForm(formPk);
 	}
 
-	public static void deleteSurveyVersion(UserContext context, int surveyVersionPk) throws Exception 
+	public  void deleteSurveyVersion(UserContext context, int surveyVersionPk) throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-    		SurveyMaster.deleteSurveyVersion(context, surveyVersionPk);
 
-            con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-	    finally
-	    {
-	    }
+    		surveyMaster.deleteSurveyVersion(context, surveyVersionPk);
+
+
 	}
 
-	public static FormMain getFormMain(FormQuery formQuery) throws Exception 
+	public  FormMain getFormMain(FormQuery formQuery) throws Exception
 	{
-		return SurveyMaster.getFormMain(formQuery);
+		return surveyMaster.getFormMain(formQuery);
 	}
 
-	public static void publishSurvey(UserContext context, int surveyPk, 
-			List<ProjectOID> projectUpgradeList, HashMap<ProjectOID, User> projectNotificationMap, HashMap<ProjectOID, List<Integer>> formsUpgradeMap) throws Exception
+	public static void publishSurvey(UserContext context, int surveyPk,
+									 List<ProjectOID> projectUpgradeList, HashMap<ProjectOID, User> projectNotificationMap, HashMap<ProjectOID, List<Integer>> formsUpgradeMap) throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
     		SurveyMaster.publishSurvey(context, surveyPk, projectUpgradeList, projectNotificationMap, formsUpgradeMap);
 
-            con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-	    finally
-	    {
-	    }
+
+
 	}
 
 	public static void applyFormUpgradePublish(UserContext context, int surveyPk, List projectListToUpgrade, List unitFormsListToUpgrade) throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
     		SurveyMaster.applyFormUpgradePublish(context, surveyPk, projectListToUpgrade, unitFormsListToUpgrade);
 
-            con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-	    finally
-	    {
-	    }
+
+
 	}
 
 	public static UserQuery getAttributionUser(WorkItem workItem)throws Exception
@@ -305,73 +220,31 @@ public class SurveyDelegate
 	
 	public static void setAttribution(UserContext context, WorkItem workItem, UserOID attributeToUserOID)throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
     		SurveyMaster.setAttribution(context, workItem, attributeToUserOID);
-            
-            con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
+
+
 	}
 	
-	public static void resetAttribution(UserContext context, WorkItem workItem)throws Exception
+	public  void resetAttribution(UserContext context, WorkItem workItem)throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-    		SurveyMaster.resetAttribution(context, workItem);
+    		surveyMaster.resetAttribution(context, workItem);
             
-            con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
+
 	}
 	
-	public static synchronized ObjectLock lockSectionToEdit(UserContext context, User lockForUser, FormResponseOID responseOID, String sectionId)throws LockedByAnotherUserException, Exception
+	public  synchronized ObjectLock lockSectionToEdit(UserContext context, User lockForUser, FormResponseOID responseOID, String sectionId)throws LockedByAnotherUserException, Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-    		ObjectLock l = SurveyMaster.lockSectionToEdit(context, lockForUser, responseOID, sectionId);
+    		ObjectLock l = surveyMaster.lockSectionToEdit(context, lockForUser, responseOID, sectionId);
             
     		//record in workstation
-			ResponseMasterNew respMaster = SurveyResponseManager.getResponseMaster(responseOID.getPk());
-    		ProjectManager.recordWorkstationFormLock(new TestProcOID(respMaster.getTestProcPk()));
+			ResponseMasterNew respMaster = surveyResponseService.getResponseMaster(responseOID.getPk());
+    		workstationService.recordWorkstationFormLock(new TestProcOID(respMaster.getTestProcPk()));
     		
-    		con.commit();
-            return l;
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-	    finally
-	    {
-	    }
+
 	}
 
 	public static ObjectLockQuery getCurrentLock(FormResponseOID responseOID, String sectionId)throws Exception
@@ -429,11 +302,6 @@ public class SurveyDelegate
 	 */
 	public static void releaseSectionEditLock(UserContext context, FormResponseOID responseOID, String sectionId)throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
     		SurveyMaster.releaseSectionEditLock(context, responseOID, sectionId);
     		
@@ -441,16 +309,7 @@ public class SurveyDelegate
     		
     		ProjectManager.recordWorkstationFormUnlock(new TestProcOID(respMaster.getTestProcPk()));
     		
-            con.commit();
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-	    finally
-	    {
-	    }
+
 	}
 
 	public static FormPrintFormat getFormPrintFormat(FormOID formOID)
@@ -465,25 +324,12 @@ public class SurveyDelegate
 	
 	public static PdfTemplatePrintLocationConfig saveFormPrintTemplateLocationConfig(UserContext context, FormOID formOID, PdfTemplatePrintLocationConfig config) throws Exception
 	{
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
 
             PdfTemplatePrintLocationConfig c = SurveyMaster.saveFormPrintTemplateLocationConfig(context, formOID, config);
     		
-            con.commit();
-            return c;
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-	    finally
-	    {
-	    }
-	}
+
+
 	
 }
+

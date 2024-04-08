@@ -6,6 +6,8 @@
  */
 package com.tathvatech.survey.common;
 
+import java.awt.*;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -15,52 +17,23 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
 
+import com.tathvatech.forms.common.FormDesignListener;
+import com.tathvatech.forms.controller.TestProcController;
 import com.tathvatech.logic.common.Logic;
-import org.apache.log4j.Logger;
-import org.jdom.Element;
+import com.tathvatech.site.service.SiteServiceImpl;
+import com.tathvatech.survey.enums.AnswerPersistor;
+import com.tathvatech.survey.response.SimpleSurveyItemResponse;
+import com.tathvatech.survey.response.SurveyItemResponse;
+import com.tathvatech.survey.response.SurveyResponse;
+import com.tathvatech.unit.common.UnitFormQuery;
+import com.tathvatech.unit.response.ResponseUnit;
+import com.tathvatech.user.common.UserContext;
+import org.jdom2.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.sarvasutra.etest.EtestApplication;
-import com.sarvasutra.etest.FormDesignListener;
-import com.sarvasutra.etest.FormEventListner;
-import com.sarvasutra.etest.TestProcController;
-import com.tathvatech.ts.caf.util.DataConversionUtil;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.project.UnitFormQuery;
-import com.tathvatech.ts.core.survey.MultiDataTypeQuestionType;
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.response.AnswerPersistor;
-import com.tathvatech.ts.core.survey.response.InvalidResponseException;
-import com.tathvatech.ts.core.survey.response.ResponseUnit;
-import com.tathvatech.ts.core.survey.response.SimpleSurveyItemResponse;
-import com.tathvatech.ts.core.survey.response.SurveyItemResponse;
-import com.tathvatech.ts.core.survey.response.SurveyResponse;
-import com.tathvatech.ts.core.survey.surveyitem.LogicSubject;
-import com.tathvatech.ts.core.survey.surveyitem.SimpleAnswerPersistor;
-import com.tathvatech.ts.core.utils.EmailValidator;
-import com.thirdi.surveyside.survey.DataTypes;
-import com.thirdi.surveyside.survey.SurveyDisplayItem;
-import com.thirdi.surveyside.survey.logic.Logic;
-import com.vaadin.data.Validator;
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.event.FieldEvents.BlurEvent;
-import com.vaadin.event.FieldEvents.BlurListener;
-import com.vaadin.server.ThemeResource;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.DefaultFieldFactory;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.BaseTheme;
+import static com.tathvatech.survey.service.SurveyItemManager.BomInspectItemGroupAnswerType;
+
 
 /**
  * @author Hari
@@ -71,7 +44,7 @@ import com.vaadin.ui.themes.BaseTheme;
 public class TextAreaAnswerType extends SurveySaveItem implements SurveyDisplayItem, LogicSubject,
 		MultiDataTypeQuestionType
 {
-	private static final Logger	logger					= Logger.getLogger(TextAreaAnswerType.class);
+	private static final Logger logger = LoggerFactory.getLogger(TextAreaAnswerType.class);
 
 	// if no maxlength is defined, set it to 255
 	public static final int		DEFAULT_MAXLENGTH		= 5000;
@@ -81,7 +54,7 @@ public class TextAreaAnswerType extends SurveySaveItem implements SurveyDisplayI
 	private String				questionTextDescription	= "";
 	private boolean				required;
 
-	private TextArea			textField;
+	private TextArea textField;
 
 	/**
      *
@@ -576,7 +549,7 @@ public class TextAreaAnswerType extends SurveySaveItem implements SurveyDisplayI
 
 	@Override
 	public Component drawResponseField(UnitFormQuery testProc, SurveyResponse sResponse, Component parent, String[] flags,
-			final FormEventListner formEventListner)
+									   final FormEventListner formEventListner)
 	{
 		String answer = "";
 		if (sResponse != null)
@@ -737,7 +710,7 @@ public class TextAreaAnswerType extends SurveySaveItem implements SurveyDisplayI
 
 	@Override
 	public Component drawResponseDetail(UserContext userContext, UnitFormQuery testProc, SurveyResponse sResponse, Component parent,
-			boolean expandedView, boolean isLatestResponse, String[] flags, final TestProcController testProcController)
+										boolean expandedView, boolean isLatestResponse, String[] flags, final TestProcController testProcController)
 	{
 		List thisItemFlagList = this.getFlagsAsList();
 		boolean matchFlagsToDisplay = false;

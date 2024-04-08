@@ -1,6 +1,7 @@
 package com.tathvatech.pdf.common;
 
-import com.itextpdf.text.Element;
+
+import static org.jdom2.Content.CType.Element;
 
 public class PdfPrintArea
 {

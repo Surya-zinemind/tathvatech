@@ -1,5 +1,8 @@
 package com.tathvatech.timetracker.common;
 
+import com.tathvatech.timetracker.entity.Workorder;
+import com.tathvatech.timetracker.entity.WorkorderTimeEntry;
+
 import java.util.List;
 
 public class WorkOrderTimeEntryListObj

@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import net.sf.persist.annotations.NoTable;
+
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.tathvatech.ts.core.common.TSBeanBase;
+import com.tathvatech.user.OID.TSBeanBase;
 
-@NoTable
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NcrFailureCodeMasterBean extends TSBeanBase implements Serializable
 {
@@ -34,7 +34,7 @@ public class NcrFailureCodeMasterBean extends TSBeanBase implements Serializable
 		this.children = children;
 	}
 
-	public int getPk()
+	public long getPk()
 	{
 		return pk;
 	}

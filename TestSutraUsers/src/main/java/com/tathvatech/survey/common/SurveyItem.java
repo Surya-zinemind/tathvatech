@@ -13,7 +13,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import com.tathvatech.forms.common.FormDesignListener;
 import com.tathvatech.forms.common.FormResponseContext;
+import com.tathvatech.forms.controller.TestProcController;
 import com.tathvatech.logic.common.Logic;
 import com.tathvatech.survey.inf.SurveyItemBase;
 import com.tathvatech.survey.response.SurveyResponse;
@@ -148,7 +150,7 @@ public abstract class SurveyItem extends SurveyItemBase
 		this.loadLogicItems(element);
     }
 
-    public abstract Component drawConfigurationView(
+    public abstract RadioButtonAnswerType.ConfigForm drawConfigurationView(
 	    FormDesignListener formDesignListener);
 
     public abstract Component drawDesignView(boolean isPreviewMode, FormDesignListener formDesignListener);

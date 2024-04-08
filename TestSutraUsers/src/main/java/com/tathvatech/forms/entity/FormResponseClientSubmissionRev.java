@@ -23,7 +23,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name="RESPONSE_CLIENT_SUBMISSION_REV")
-public class FormResponseClientSubmissionRev extends AbstractEntity implements Serializable, Authorizable
+public class FormResponseClientSubmissionRev extends AbstractEntity implements Serializable
 {
 	@Id
 	private long pk;

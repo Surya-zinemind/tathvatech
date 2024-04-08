@@ -1,5 +1,7 @@
 package com.tathvatech.ncr.common;
+import com.tathvatech.injury.common.InjuryLocationMasterQuery;
 import com.tathvatech.ncr.enums.NcrEnum;
+import com.tathvatech.openitem.andon.entity.OpenItemV2;
 import com.tathvatech.user.OID.LocationTypeOID;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -428,15 +430,15 @@ public class NcrItemQueryBuilder
 			}
 			if (ncrItemQueryFilter.getSources() != null && ncrItemQueryFilter.getSources().size() > 0)
 			{
-				List<Integer> ncrWhereFoundPks = ncrItemQueryFilter.getSources().stream()
+				List<Long> ncrWhereFoundPks = ncrItemQueryFilter.getSources().stream()
 						.filter(location -> (location instanceof WhereFoundOID))
-						.map(location -> ((WhereFoundOID) location).getPk()).collect(Collectors.toList());
-				List<Integer> workstationPks = ncrItemQueryFilter.getSources().stream()
+						.map(location -> ((WhereFoundOID) location).getPk()).collect(Collectors.toList()).reversed();
+				List<Long> workstationPks = ncrItemQueryFilter.getSources().stream()
 						.filter(location -> (location instanceof WorkstationOID))
-						.map(location -> ((WorkstationOID) location).getPk()).collect(Collectors.toList());
+						.map(location -> ((WorkstationOID) location).getPk()).collect(Collectors.toList()).reversed();
 				List<Integer> LocationPks = ncrItemQueryFilter.getSources().stream()
 						.filter(location -> (location instanceof LocationTypeOID))
-						.map(location -> ((LocationTypeOID) location).getPk()).collect(Collectors.toList());
+						.map(location -> ((LocationTypeOID) location).getPk()).collect(Collectors.toList()).reversed();
 				if (ncrWhereFoundPks != null && ncrWhereFoundPks.size() > 0)
 				{
 					sqlQuery.append(" and ncr.sourceType = ? and ncr.sourcePk in ");
@@ -471,7 +473,7 @@ public class NcrItemQueryBuilder
 			{
 				List<Integer> ncrWhereFoundPks = ncrItemQueryFilter.getLocations().stream()
 						.filter(location -> (location instanceof WhereFoundOID))
-						.map(location -> ((WhereFoundOID) location).getPk()).collect(Collectors.toList());
+						.map(location -> ((WhereFoundOID) location).getPk()).collect(Collectors.toList()).reversed();
 				List<Integer> workstationPks = ncrItemQueryFilter.getLocations().stream()
 						.filter(location -> (location instanceof WorkstationOID))
 						.map(location -> ((WorkstationOID) location).getPk()).collect(Collectors.toList());

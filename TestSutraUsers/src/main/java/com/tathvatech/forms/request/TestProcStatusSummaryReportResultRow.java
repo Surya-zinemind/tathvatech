@@ -2,9 +2,9 @@ package com.tathvatech.forms.request;
 
 import java.util.Date;
 
-import net.sf.persist.annotations.NoTable;
 
-@NoTable
+
+
 public class TestProcStatusSummaryReportResultRow
 {
 	Integer projectPk;

@@ -6,6 +6,11 @@
  */
 package com.tathvatech.logic.common;
 
+import com.tathvatech.forms.common.FormDesignListener;
+import com.tathvatech.forms.controller.TestProcController;
+import com.tathvatech.logic.service.LogicConfigurationManager;
+import com.tathvatech.logic.service.RuleActionManager;
+import com.tathvatech.survey.common.RadioButtonAnswerType;
 import com.tathvatech.survey.common.SurveyDefinition;
 import com.tathvatech.survey.common.SurveyItem;
 import com.tathvatech.survey.inf.LogicBase;
@@ -255,7 +260,7 @@ public class Logic extends SurveyItem implements LogicIntf, LogicBase
                 logger.debug("ActionName - " + actionName);
             }
             LogicAction lAction = RuleActionManager.getInstance((SurveyDefinition) this.surveyDef).getAction(actionName);
-            lAction.setConfiguration(actionElement);
+            lAction.setConfiguration((Map) actionElement);
 
             if (logger.isDebugEnabled())
             {
@@ -278,14 +283,14 @@ public class Logic extends SurveyItem implements LogicIntf, LogicBase
 
 
 	@Override
-	public Component drawConfigurationView(FormDesignListener formDesignListener)
+	public RadioButtonAnswerType.ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 
-	@Override
+
 	public Component drawDesignView(boolean isPreviewMode, FormDesignListener formDesignListener)
 	{
 		// TODO Auto-generated method stub
@@ -302,7 +307,7 @@ public class Logic extends SurveyItem implements LogicIntf, LogicBase
 	}
 
 
-	@Override
+
 	public Component drawResponseDetail(UserContext userContext, UnitFormQuery testProc, SurveyResponse sResponse,
                                         Component parent, boolean expandedView, boolean isLatestResponse, String[] flags, final TestProcController testProcController)
 	{

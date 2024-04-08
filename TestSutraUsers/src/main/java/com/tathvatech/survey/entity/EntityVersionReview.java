@@ -23,7 +23,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name="entity_review_version")
-public class EntityVersionReview extends AbstractEntity implements Serializable, Authorizable
+public class EntityVersionReview extends AbstractEntity implements Serializable
 {
 	public static enum ReviewStatus{Pending, Complete, Rejected};
 	

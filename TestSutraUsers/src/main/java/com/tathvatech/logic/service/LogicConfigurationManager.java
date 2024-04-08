@@ -6,9 +6,13 @@
  */
 package com.tathvatech.logic.service;
 
-import org.apache.log4j.Logger;
 
-import com.tathvatech.ts.core.survey.SurveyDefinition;
+import com.tathvatech.site.service.SiteServiceImpl;
+import com.tathvatech.survey.common.SurveyDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.locks.Condition;
 
 /**
  * @author Hari
@@ -18,7 +22,7 @@ import com.tathvatech.ts.core.survey.SurveyDefinition;
  */
 public class LogicConfigurationManager extends Object
 {
-    private static final Logger logger = Logger.getLogger(LogicConfigurationManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(LogicConfigurationManager.class);
     
     private SurveyDefinition surveyDefinition;
 

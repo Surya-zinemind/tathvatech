@@ -39,7 +39,7 @@ public class FormUpgradeRevertProcessor
     }
 
     // we should remove the new records created as part of the upgrade. As this is a mistake by the user. we dont have to keep it in history.
-	void process(TestProcOID testProcOID, FormOID currentFormOID, FormOID revertToFormOID) throws Exception
+	public void process(TestProcOID testProcOID, FormOID currentFormOID, FormOID revertToFormOID) throws Exception
 	{
 		//make sure that the workstation is in Waiting status when reverting the form
 		TestProcObj testProc = new TestProcDAO().getTestProc((int) testProcOID.getPk());

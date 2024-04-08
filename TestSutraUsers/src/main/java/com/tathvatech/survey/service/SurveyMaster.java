@@ -5,19 +5,24 @@
  * Window - Preferences - Java - Code Style - Code Templates
  */
 package com.tathvatech.survey.service;
-
+import com.tathvatech.forms.common.*;
+import com.tathvatech.forms.controller.TasksDelegate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import com.tathvatech.survey.exception.LockedByAnotherUserException;
 import java.util.Iterator;
 import java.util.List;
+import  com.tathvatech.timetracker.service.TimeEntryManager;
 import com.tathvatech.common.enums.WorkItem;
-import com.tathvatech.forms.common.TestProcSectionObj;
 import com.tathvatech.forms.dao.TestProcSectionDAO;
-import com.tathvatech.forms.entity.FormMain;
+import com.tathvatech.forms.entity.*;
 import com.tathvatech.forms.oid.FormResponseOID;
 import com.tathvatech.forms.oid.TestProcSectionOID;
+import com.tathvatech.forms.service.FormDBManager;
 import com.tathvatech.forms.service.TestProcServiceImpl;
+import com.tathvatech.pdf.common.ItemPrintAreaDef;
+import com.tathvatech.pdf.config.PdfTemplatePrintLocationConfig;
 import com.tathvatech.report.enums.ReportTypes;
 import com.tathvatech.report.request.ReportRequest;
 import com.tathvatech.report.response.ReportResponse;
@@ -27,8 +32,6 @@ import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.utils.SequenceIdGenerator;
 import com.tathvatech.common.wrapper.PersistWrapper;
-import com.tathvatech.forms.common.FormQuery;
-import com.tathvatech.forms.entity.FormSection;
 import com.tathvatech.forms.oid.FormMainOID;
 import com.tathvatech.forms.response.ResponseMasterNew;
 import com.tathvatech.forms.service.TestProcService;
@@ -59,6 +62,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import static com.tathvatech.report.enums.ReportTypes.FormListReport;
 
 
 /**
@@ -81,7 +85,11 @@ public class SurveyMaster
 	private final SurveyDefFactory surveyDefFactory;
    private final TestProcService testProcService;
    private final AccountService accountService;
-
+   private final FormDBManager formDBManager;
+   private final TasksDelegate tasksDelegate;
+private final WorkorderManager workorderManager;
+private final TestProcSectionDAO testProcSectionDAO;
+private final TimeEntryManager timeEntryManager;
 
 
 
@@ -368,7 +376,7 @@ public class SurveyMaster
 		filter.setFormPk(formPk);
 		filter.setShowAllFormRevisions(true);
 		filter.setStatus(new String[]{Survey.STATUS_CLOSED, Survey.STATUS_DELETED, Survey.STATUS_OPEN});
-		ReportRequest req = new ReportRequest(ReportTypes.FormListReport);
+		ReportRequest req = new ReportRequest(FormListReport);
 		req.setFetchRowCount(false);
 		req.setFilter(filter);
 		req.setFetchAllRows(true);
@@ -383,7 +391,7 @@ public class SurveyMaster
 	public static List<FormQuery> getSurveyList() throws Exception
 	{
 		FormFilter filter = new FormFilter();
-		ReportRequest req = new ReportRequest(ReportTypes.FormListReport);
+		ReportRequest req = new ReportRequest(FormListReport);
 		req.setFetchRowCount(false);
 		req.setFilter(filter);
 		req.setFetchAllRows(true);
@@ -397,7 +405,7 @@ public class SurveyMaster
 
 	public static List<FormQuery> getSurveyList(FormFilter filter)
 	{
-		ReportRequest req = new ReportRequest(ReportTypes.FormListReport);
+		ReportRequest req = new ReportRequest(FormListReport);
 		req.setFetchRowCount(false);
 		req.setFilter(filter);
 		req.setFetchAllRows(true);
@@ -413,7 +421,7 @@ public class SurveyMaster
 	{
 		FormFilter filter = new FormFilter();
 		filter.setStatus(new String[]{Survey.STATUS_OPEN});
-		ReportRequest req = new ReportRequest(ReportTypes.FormListReport);
+		ReportRequest req = new ReportRequest(FormListReport);
 		req.setFetchRowCount(false);
 		req.setFilter(filter);
 		req.setFetchAllRows(true);
@@ -431,7 +439,7 @@ public class SurveyMaster
 		filter.setFormMainPk(formMainPk);
 		filter.setShowAllFormRevisions(true);
 		filter.setStatus(new String[]{Survey.STATUS_OPEN, Survey.STATUS_CLOSED, Survey.STATUS_DELETED});
-		ReportRequest req = new ReportRequest(ReportTypes.FormListReport);
+		ReportRequest req = new ReportRequest(FormListReport);
 		req.setFilter(filter);
 		req.setFetchRowCount(false);
 		req.setFetchAllRows(true);
@@ -449,7 +457,7 @@ public class SurveyMaster
 		filter.setFormMainPk(formMainPk);
 		filter.setShowAllFormRevisions(false); // this will fetch the max version
 		filter.setStatus(new String[]{Survey.STATUS_OPEN, Survey.STATUS_CLOSED, Survey.STATUS_DELETED});
-		ReportRequest req = new ReportRequest(ReportTypes.FormListReport);
+		ReportRequest req = new ReportRequest(FormListReport);
 		req.setFilter(filter);
 		req.setFetchRowCount(false);
 		req.setFetchAllRows(true);
@@ -473,7 +481,7 @@ public class SurveyMaster
 		filter.setFormMainPk(formMainPk);
 		filter.setShowAllFormRevisions(false); // this will fetch the max version
 		filter.setStatus(new String[]{Survey.STATUS_OPEN});
-		ReportRequest req = new ReportRequest(ReportTypes.FormListReport);
+		ReportRequest req = new ReportRequest(FormListReport);
 		req.setFilter(filter);
 		req.setFetchRowCount(false);
 		req.setFetchAllRows(true);
@@ -503,7 +511,7 @@ public class SurveyMaster
 				"select count(*) from tab_survey where formMainPk = ? and status != ? ", surveyConfig.getFormMainPk(), Survey.STATUS_DELETED);
 		if(formCountInSet == 0)
 		{
-			FormMain formMain = persistWrapper.readByPrimaryKey(FormMain.class, surveyConfig.getFormMainPk());
+			FormMain formMain = (FormMain) persistWrapper.readByPrimaryKey(FormMain.class, surveyConfig.getFormMainPk());
 			formMain.setIdentityNumber(surveyConfig.getIdentityNumber() + "-del-" + formMain.getPk());
 			formMain.setStatus(FormMain.STATUS_DELETED);
 			persistWrapper.update(formMain);
@@ -543,7 +551,7 @@ public class SurveyMaster
 		
 		supersedPreviousFormVersions(survey);
 		
-		new FormDBManager().addSurveyToDB(context, survey);
+		formDBManager.addSurveyToDB(context, survey);
 		
 		notifyFormPublish(context, surveyPk, projectUpgradeList, projectNotificationMap, formsUpgradeMap);
 	}
@@ -584,7 +592,7 @@ public class SurveyMaster
 			User manager = projectNotificationMap.get(projectOID);
 			
 			FormVersionUpgradeForProjectTaskBean taskBean = new FormVersionUpgradeForProjectTaskBean();
-			taskBean.setProjectPk(projectOID.getPk());
+			taskBean.setProjectPk((int) projectOID.getPk());
 			taskBean.setProjectName(project.getProjectName());
 			taskBean.setFormPk(surveyPk);
 			taskBean.setFormName(formQuery.getIdentityNumber());
@@ -597,7 +605,7 @@ public class SurveyMaster
 			taskBean.setUnitForms(formsUpgradeMap.get(projectOID));
 			
 			
-			TasksDelegate.saveTask(context, projectOID, manager.getOID(), taskBean);
+			tasksDelegate.saveTask(context, projectOID, manager.getOID(), taskBean);
 			
 			String text = sbText.toString();
 			String html = sbHtml.toString();
@@ -700,7 +708,7 @@ public class SurveyMaster
 
 			ObjectLock ol = getObjectLock(resp.getResponseId(), (int) testProcSectionObj.getFormSectionFk());
 			if(attributeToUserOID != null)
-				ol.setAttributionUserFk(attributeToUserOID.getPk());
+				ol.setAttributionUserFk((int) attributeToUserOID.getPk());
 			else
 				ol.setAttributionUserFk(ol.getUserPk());
 			persistWrapper.update(ol);
@@ -730,7 +738,7 @@ public class SurveyMaster
 	public synchronized  ObjectLock lockSectionToEdit(UserContext context, User lockForUser, FormResponseOID responseOID, String sectionId)throws LockedByAnotherUserException, Exception
 	{
 		FormResponseMaster respMaster = persistWrapper.readByResponseId(FormResponseMaster.class, responseOID.getPk());
-		FormSection formSection = new FormDBManager().getFormSection(sectionId, respMaster.getSurveyPk());
+		FormSection formSection = formDBManager.getFormSection(sectionId, respMaster.getSurveyPk());
 		
 		ObjectLock objectLock = persistWrapper.read(ObjectLock.class, "select * from tab_sectionlock where " +
 				"responseFk=? and sectionId=?", 
@@ -738,7 +746,7 @@ public class SurveyMaster
 		
 		if(objectLock != null)
 		{
-			User lockedBy = persistWrapper.readByPrimaryKey(User.class, objectLock.getUserPk());
+			User lockedBy = (User) persistWrapper.readByPrimaryKey(User.class, objectLock.getUserPk());
 			
 			objectLock.setLockedByUser(lockedBy);
 			
@@ -754,15 +762,15 @@ public class SurveyMaster
 		else
 		{
 			ObjectLock lock = new ObjectLock();
-			lock.setResponseFk(responseOID.getPk());
-			lock.setFormSectionFk(formSection.getPk());
+			lock.setResponseFk((int) responseOID.getPk());
+			lock.setFormSectionFk((int) formSection.getPk());
 			lock.setSectionId(sectionId);
-			lock.setUserPk(lockForUser.getPk());
-			lock.setAttributionUserFk(lockForUser.getPk());
+			lock.setUserPk((int) lockForUser.getPk());
+			lock.setAttributionUserFk((int) lockForUser.getPk());
 			lock.setLockDate(new Date());
 			int newPk = Math.toIntExact(persistWrapper.createEntity(lock));
 
-			ObjectLock newLock = persistWrapper.readByPrimaryKey(ObjectLock.class, newPk);
+			ObjectLock newLock = (ObjectLock) persistWrapper.readByPrimaryKey(ObjectLock.class, newPk);
 			newLock.setLockedByUser(lockForUser);
 			
 			
@@ -770,7 +778,7 @@ public class SurveyMaster
 			ResponseMasterNew resp = surveyResponseService.getResponseMaster((int) responseOID.getPk());
 			TestProcSectionObj tsObj = new TestProcSectionDAO().getTestProcSection(new TestProcOID(resp.getTestProcPk()), new FormSectionOID(newLock.getFormSectionFk()));
 			WorkorderRequestBean woBean = new WorkorderRequestBean(tsObj.getOID());
-			WorkorderManager.createWorkorder(context, woBean);
+			workorderManager.createWorkorder(context, woBean);
 			
 			
 			
@@ -784,7 +792,7 @@ public class SurveyMaster
 	}
 	
 	
-	public  ObjectLockQuery getCurrentLock(FormResponseOID responseOID, String sectionId)throws Exception
+	public ObjectLockQuery getCurrentLock(FormResponseOID responseOID, String sectionId)throws Exception
 	{
 		List<ObjectLockQuery> oList = persistWrapper.readList(ObjectLockQuery.class,  ObjectLockQuery.sql +
 				" and responseFk=? and sectionId=? order by pk desc", 
@@ -819,7 +827,7 @@ public class SurveyMaster
 
 	public  List<ObjectLock> getLockedSectionIds(FormResponseOID responseOID)throws Exception
 	{
-		List<ObjectLock> l = PersistWrapper.readList(ObjectLock.class, "select * from tab_sectionlock where responseFk=? ", 
+		List<ObjectLock> l = persistWrapper.readList(ObjectLock.class, "select * from tab_sectionlock where responseFk=? ",
 				responseOID.getPk());
 		
 		for (Iterator iterator = l.iterator(); iterator.hasNext();)
@@ -855,14 +863,14 @@ public class SurveyMaster
 		else if(objectLock.getUserPk() == user.getPk())
 		{
 			ResponseMasterNew resp = surveyResponseService.getResponseMaster(objectLock.getResponseFk());
-			TestProcSectionObj tsObj = new TestProcSectionDAO().getTestProcSection(new TestProcOID(resp.getTestProcPk()), new FormSectionOID(objectLock.getFormSectionFk()));
-			TimeEntryManager.checkOutAllFromWorkOrder(context, tsObj.getOID());
+			TestProcSectionObj tsObj = testProcSectionDAO.getTestProcSection(new TestProcOID(resp.getTestProcPk()), new FormSectionOID(objectLock.getFormSectionFk()));
+			timeEntryManager.checkOutAllFromWorkOrder(context, tsObj.getOID());
 
 			persistWrapper.deleteEntity(ObjectLock.class, objectLock.getPk());
 		}
 		else
 		{
-			User lockedBy = persistWrapper.readByPrimaryKey(User.class, objectLock.getUserPk());
+			User lockedBy = (User) persistWrapper.readByPrimaryKey(User.class, objectLock.getUserPk());
 			objectLock.setLockedByUser(lockedBy);
 			throw new LockedByAnotherUserException(objectLock);
 		}
@@ -876,20 +884,20 @@ public class SurveyMaster
 		if(objectLock !=null)
 		{
 			ResponseMasterNew resp = surveyResponseService.getResponseMaster(objectLock.getResponseFk());
-			TestProcSectionObj tsObj = new TestProcSectionDAO().getTestProcSection(new TestProcOID(resp.getTestProcPk()), new FormSectionOID(objectLock.getFormSectionFk()));
-			TimeEntryManager.checkOutAllFromWorkOrder(context, tsObj.getOID());
+			TestProcSectionObj tsObj =testProcSectionDAO.getTestProcSection(new TestProcOID(resp.getTestProcPk()), new FormSectionOID(objectLock.getFormSectionFk()));
+			timeEntryManager.checkOutAllFromWorkOrder(context, tsObj.getOID());
 
 			persistWrapper.deleteEntity(ObjectLock.class, objectLock.getPk());
 		}
 	}
 
-	public static FormPrintFormat getFormPrintFormat(FormOID formOID)
+	public  FormPrintFormat getFormPrintFormat(FormOID formOID)
 	{
-		return PersistWrapper.read(FormPrintFormat.class, 
+		return persistWrapper.read(FormPrintFormat.class,
 				"select * from form_print_format where formFk = ? ", formOID.getPk());
 	}
 
-	public static PdfTemplatePrintLocationConfig getFormPrintTemplateLocationConfig(FormOID formOID) throws Exception
+	public  PdfTemplatePrintLocationConfig getFormPrintTemplateLocationConfig(FormOID formOID) throws Exception
 	{
 		FormPrintFormat pf = getFormPrintFormat(formOID);
 		if(pf != null && pf.getPrintAreaDef() != null)

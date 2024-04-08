@@ -8,7 +8,9 @@ package com.tathvatech.forms.service;
 
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.common.TestProcFilter;
+import com.tathvatech.forms.common.TestProcSectionObj;
 import com.tathvatech.forms.dao.TestProcDAO;
+import com.tathvatech.forms.dao.TestProcSectionDAO;
 import com.tathvatech.forms.oid.TestProcSectionOID;
 import com.tathvatech.forms.report.TestProcListReport;
 import com.tathvatech.forms.response.ResponseMasterNew;
@@ -54,6 +56,7 @@ public class TestProcServiceImpl implements TestProcService
     private final UnitManager unitManager;
 	private final DummyWorkstation dummyWorkstation;
 	private final SurveyDefFactory surveyDefFactory;
+	private final TestProcSectionDAO testProcSectionDAO;
 	@Autowired
 	@Lazy
 	private  WorkstationService workstationService;
@@ -202,14 +205,14 @@ public class TestProcServiceImpl implements TestProcService
 		return new TestProcDAO().getTestProcFormUpgradeHistory(testProcOID);
 	}
 	@Override
-	public  TestProcSectionObj getTestProcSection(TestProcOID testProcOID, FormSectionOID formSectionOID)
+	public TestProcSectionObj getTestProcSection(TestProcOID testProcOID, FormSectionOID formSectionOID)
 	{
-		return new TestProcSectionDAO().getTestProcSection(testProcOID, formSectionOID);
+		return testProcSectionDAO.getTestProcSection(testProcOID, formSectionOID);
 	}
 	@Override
 	public  TestProcSectionObj getTestProcSection(TestProcSectionOID testProcSectionOID)
 	{
-		return new TestProcSectionDAO().getTestProcSection(testProcSectionOID);
+		return testProcSectionDAO.getTestProcSection(testProcSectionOID);
 	}
 
 	@Override
@@ -222,7 +225,7 @@ public class TestProcServiceImpl implements TestProcService
 	public TestProcObj getTestProc(TestProcSectionOID testProcSectionOID) throws Exception
 	{
 		TestProcSectionObj sectionObj = getTestProcSection(testProcSectionOID);
-		TestProcFormAssign tpFormAssign = persistWrapper.readByPrimaryKey(TestProcFormAssign.class, sectionObj.getTestProcFormAssignFk());
+		TestProcFormAssign tpFormAssign = (TestProcFormAssign) persistWrapper.readByPrimaryKey(TestProcFormAssign.class, sectionObj.getTestProcFormAssignFk());
 		return getTestProc(tpFormAssign.getTestProcFk());
 	}
 	

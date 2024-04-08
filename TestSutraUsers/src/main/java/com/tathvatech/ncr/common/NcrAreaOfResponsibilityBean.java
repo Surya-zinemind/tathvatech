@@ -1,15 +1,15 @@
 package com.tathvatech.ncr.common;
 
+import com.tathvatech.user.OID.TSBeanBase;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.tathvatech.ts.core.common.TSBeanBase;
 
-import net.sf.persist.annotations.NoTable;
 
-@NoTable
+
 public class NcrAreaOfResponsibilityBean extends TSBeanBase implements Serializable
 {
 	private int pk;
@@ -22,7 +22,7 @@ public class NcrAreaOfResponsibilityBean extends TSBeanBase implements Serializa
 	private Date lastUpdated;
 	List<NcrAreaOfResponsibilityBean> children = new ArrayList<NcrAreaOfResponsibilityBean>();
 
-	public int getPk()
+	public long getPk()
 	{
 		return pk;
 	}

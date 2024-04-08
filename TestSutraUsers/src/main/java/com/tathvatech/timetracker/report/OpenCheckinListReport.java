@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.site.service.SiteServiceImpl;
+import com.tathvatech.timetracker.common.OpenCheckinListReportResultRow;
 import com.tathvatech.timetracker.request.OpenCheckinListReportRequest;
-import org.apache.log4j.Logger;
+import com.tathvatech.user.entity.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.tathvatech.common.enums.EntityTypeEnum;
 
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
 
 /**
  * returns a list of tasks where users are currently checked in based on the filter.
@@ -18,14 +21,16 @@ import com.tathvatech.ts.core.common.EntityTypeEnum;
  */
 public class OpenCheckinListReport
 {
-	private static Logger logger = Logger.getLogger(OpenCheckinListReport.class);
+	private static final Logger logger = LoggerFactory.getLogger(OpenCheckinListReport.class);
 
 	private OpenCheckinListReportRequest request;
+	private final PersistWrapper persistWrapper;
 
-	public OpenCheckinListReport(OpenCheckinListReportRequest request)
+	public OpenCheckinListReport(OpenCheckinListReportRequest request, PersistWrapper persistWrapper)
 	{
 		this.request = request;
-	}
+        this.persistWrapper = persistWrapper;
+    }
 
 	public OpenCheckinListReportResult runReport()
 	{
@@ -93,7 +98,7 @@ public class OpenCheckinListReport
 		
 		logger.info(sb.toString() + " " + Arrays.deepToString(params.toArray()));
 
-		List<OpenCheckinListReportResultRow> rows = PersistWrapper
+		List<OpenCheckinListReportResultRow> rows = persistWrapper
 				.readList(OpenCheckinListReportResultRow.class, sb.toString(), params.toArray());
 		OpenCheckinListReportResult result = new OpenCheckinListReportResult();
 		result.setReportResult(rows);

@@ -6,7 +6,9 @@
  */
 package com.tathvatech.forms.response;
 
+import com.tathvatech.forms.enums.FormItemTypeEnum;
 import com.tathvatech.forms.response.FormItemResponseBase;
+import com.tathvatech.survey.enums.SectionLockStatusEnum;
 
 import java.util.Date;
 

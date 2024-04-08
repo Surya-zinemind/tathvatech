@@ -7,6 +7,8 @@ import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.enums.FormStatusEnum;
 import com.tathvatech.forms.request.TestProcStatusSummaryReportRequest;
+import com.tathvatech.forms.request.TestProcStatusSummaryReportResult;
+import com.tathvatech.forms.request.TestProcStatusSummaryReportResultRow;
 import com.tathvatech.unit.service.UnitManager;
 import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.SiteOID;

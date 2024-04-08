@@ -25,7 +25,7 @@ import jakarta.persistence.Table;
 @Entity
 
 @Table(name = "form_print_format")
-public class FormPrintFormat extends AbstractEntity implements Serializable, Authorizable
+public class FormPrintFormat extends AbstractEntity implements Serializable
 {
 	@Id
 	private long pk;

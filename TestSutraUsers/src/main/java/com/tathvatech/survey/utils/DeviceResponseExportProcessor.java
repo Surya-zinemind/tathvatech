@@ -11,10 +11,11 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.tathvatech.site.service.SiteServiceImpl;
-import com.tathvatech.survey.common.SurveyDefinition;
-import com.tathvatech.survey.common.SurveyItem;
-import com.tathvatech.survey.common.SurveySaveItem;
+import com.tathvatech.common.common.FileStoreManager;
+import com.tathvatech.common.enums.ResultEnum;
+import com.tathvatech.forms.response.*;
+import com.tathvatech.survey.common.*;
+import com.tathvatech.survey.enums.BomCellTypeEnum;
 import com.tathvatech.survey.response.SurveyItemResponse;
 import com.tathvatech.unit.response.ResponseUnit;
 import com.tathvatech.user.common.UserContext;
@@ -49,13 +50,13 @@ public class DeviceResponseExportProcessor
     	this.context = context;
     }
     /**
-     * @param sd
-     * @param response
-     * @param rVal
-     * @return
-     * @throws Exception 
-     */
-    public FormItemResponseBase getFormItemResponsesBean(SurveyItem sItem, SurveyItemResponse aItemResponse) throws Exception
+	 * @param sd
+	 * @param response
+	 * @param rVal
+	 * @return
+	 * @throws Exception
+	 */
+    public TextBoxItemResponseBean getFormItemResponsesBean(SurveyItem sItem, SurveyItemResponse aItemResponse) throws Exception
     {
         if(sItem instanceof RadioButtonAnswerType)
         {
@@ -147,7 +148,7 @@ public class DeviceResponseExportProcessor
 				if(aOption.getType() != null && aOption.getType().getValue() == BomTypesEnum.RadioGroup.getValue())
 				{
 					TCell aCell = new TCell();
-					aCell.setCellIndex(aOption.getValue());
+					aCell.setCellIndex(Integer.parseInt(aOption.getValue()));
 					aCell.setLabel(aOption.getText());
 					aCell.setCellType(BomCellTypeEnum.Option);
 					aCell.setValue(aUnit.getKey3());
@@ -156,7 +157,7 @@ public class DeviceResponseExportProcessor
 				if(aOption.getType() != null && aOption.getType().getValue() == BomTypesEnum.RadioGroupMandatory.getValue())
 				{
 					TCell aCell = new TCell();
-					aCell.setCellIndex(aOption.getValue());
+					aCell.setCellIndex(Integer.parseInt(aOption.getValue()));
 					aCell.setLabel(aOption.getText());
 					aCell.setCellType(BomCellTypeEnum.OptionMandatory);
 					aCell.setValue(aUnit.getKey3());
@@ -165,7 +166,7 @@ public class DeviceResponseExportProcessor
 				if(aOption.getType() != null && aOption.getType().getValue() == BomTypesEnum.CheckboxGroup.getValue())
 				{
 					TCell aCell = new TCell();
-					aCell.setCellIndex(aOption.getValue());
+					aCell.setCellIndex(Integer.parseInt(aOption.getValue()));
 					aCell.setLabel(aOption.getText());
 					aCell.setCellType(BomCellTypeEnum.OptionMultiSelect);
 					aCell.setValue(aUnit.getKey4());
@@ -174,7 +175,7 @@ public class DeviceResponseExportProcessor
 				if(aOption.getType() != null && aOption.getType().getValue() == BomTypesEnum.CheckboxGroupMandatory.getValue())
 				{
 					TCell aCell = new TCell();
-					aCell.setCellIndex(aOption.getValue());
+					aCell.setCellIndex(Integer.parseInt(aOption.getValue()));
 					aCell.setLabel(aOption.getText());
 					aCell.setCellType(BomCellTypeEnum.OptionMultiSelectMandatory);
 					aCell.setValue(aUnit.getKey4());
@@ -183,7 +184,7 @@ public class DeviceResponseExportProcessor
 				if(aOption.getType() != null && aOption.getType().getValue() == BomTypesEnum.Date.getValue())
 				{
 					TCell aCell = new TCell();
-					aCell.setCellIndex(aOption.getValue());
+					aCell.setCellIndex(Integer.parseInt(aOption.getValue()));
 					aCell.setLabel(aOption.getText());
 					aCell.setCellType(BomCellTypeEnum.Date);
 					aCell.setValue(aUnit.getKey4());
@@ -192,7 +193,7 @@ public class DeviceResponseExportProcessor
 				if(aOption.getType() != null && aOption.getType().getValue() == BomTypesEnum.DateMandatory.getValue())
 				{
 					TCell aCell = new TCell();
-					aCell.setCellIndex(aOption.getValue());
+					aCell.setCellIndex(Integer.parseInt(aOption.getValue()));
 					aCell.setLabel(aOption.getText());
 					aCell.setCellType(BomCellTypeEnum.DateMandatory);
 					aCell.setValue(aUnit.getKey4());
@@ -201,7 +202,7 @@ public class DeviceResponseExportProcessor
 				if(aOption.getType() != null && aOption.getType().getValue() == BomTypesEnum.DateTime.getValue())
 				{
 					TCell aCell = new TCell();
-					aCell.setCellIndex(aOption.getValue());
+					aCell.setCellIndex(Integer.parseInt(aOption.getValue()));
 					aCell.setLabel(aOption.getText());
 					aCell.setCellType(BomCellTypeEnum.DateTime);
 					aCell.setValue(aUnit.getKey4());
@@ -210,7 +211,7 @@ public class DeviceResponseExportProcessor
 				if(aOption.getType() != null && aOption.getType().getValue() == BomTypesEnum.DateTimeMandatory.getValue())
 				{
 					TCell aCell = new TCell();
-					aCell.setCellIndex(aOption.getValue());
+					aCell.setCellIndex(Integer.parseInt(aOption.getValue()));
 					aCell.setLabel(aOption.getText());
 					aCell.setCellType(BomCellTypeEnum.DateTimeMandatory);
 					aCell.setValue(aUnit.getKey4());
@@ -224,7 +225,7 @@ public class DeviceResponseExportProcessor
 						)
 				{
 					TCell aCell = new TCell();
-					aCell.setCellIndex(aOption.getValue());
+					aCell.setCellIndex(Integer.parseInt(aOption.getValue()));
 					aCell.setLabel(aOption.getText());
 					aCell.setValue(aUnit.getKey4());
 					if(aOption.getType() != null && aOption.getType().getValue() == BomTypesEnum.CommentBox.getValue())
@@ -352,7 +353,7 @@ public class DeviceResponseExportProcessor
 		ResponseUnit aUnit = (ResponseUnit) itemResponse.getResponseUnits().get(0);
 		if(aUnit.getKey4() != null && aUnit.getKey4().trim().length() > 0)
 		{
-			SignatureCaptureItemResponse val = new ObjectMapper().readValue(aUnit.getKey4(), SignatureCaptureItemResponse.class); 
+			SignatureCaptureItemResponse val = new ObjectMapper().readValue(aUnit.getKey4(), SignatureCaptureItemResponse.class);
 
 			bean.setImageFileName(val.getImageFileName());
 			bean.setSignatureTimestamp(val.getSignatureTimestamp());

@@ -25,7 +25,7 @@ import jakarta.persistence.Table;
  */
 @Entity
 @Table(name="tab_sectionlock")
-public class ObjectLock extends AbstractEntity implements Serializable, Authorizable
+public class ObjectLock extends AbstractEntity implements Serializable
 {
 	@Id
 	private long pk;

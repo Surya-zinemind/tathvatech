@@ -1,10 +1,14 @@
 package com.tathvatech.forms.controller;
-
+import com.tathvatech.ncr.controller.NcrDelegate;
 import com.tathvatech.common.entity.EntityReference;
 import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.forms.common.EntityReferenceBean;
 import com.tathvatech.forms.common.FormQuery;
 import com.tathvatech.forms.common.ObjectScheduleRequestBean;
 import com.tathvatech.forms.service.FormService;
+import com.tathvatech.ncr.common.NcrItemQuery;
+import com.tathvatech.forms.processor.FormUpgradeRevertProcessor;
+import com.tathvatech.ncr.oid.NcrItemOID;
 import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.User;
@@ -13,6 +17,7 @@ import com.tathvatech.user.service.CommonServicesDelegate;
 import lombok.RequiredArgsConstructor;
 import com.tathvatech.unit.common.UnitFormQuery;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -22,6 +27,8 @@ public class FormController {
    private final FormService formService;
    private final CommonServicesDelegate commonServicesDelegate;
    private final AccountService accountService;
+   private final FormUpgradeRevertProcessor formUpgradeRevertProcessor;
+   private final NcrDelegate ncrDelegate;
     public  void saveTestProcSchedule(UserContext context, TestProcOID testProcOID,
                                       ObjectScheduleRequestBean objectScheduleRequestBean) throws Exception
     {
@@ -67,12 +74,12 @@ public class FormController {
 
             if (aRef.getReferenceToType() == EntityTypeEnum.NCR.getValue())
             {
-                NcrItemQuery ncr = NcrDelegate.getNcrItemQuery(context, new NcrItemOID(aRef.getReferenceToPk()));
+                NcrItemQuery ncr =ncrDelegate.getNcrItemQuery(context, new NcrItemOID((int) aRef.getReferenceToPk()));
                 if (ncr != null) // load user and add to list only if the
                 // referenced object is there.
                 {
                     bean.setReferenceToOID(
-                            new NcrItemOID(aRef.getReferenceToPk(), ncr.getNcrGroupNo() + "." + ncr.getNcrNo()));
+                            new NcrItemOID((int) aRef.getReferenceToPk(), ncr.getNcrGroupNo() + "." + ncr.getNcrNo()));
                     bean.setReferencedObject(ncr);
 
                     User user = accountService.getUser(aRef.getCreatedBy());
@@ -88,7 +95,7 @@ public class FormController {
     public  void revertFormUpgradeOnTestProc(TestProcOID testprocOID, FormOID currentFormOID,
                                                    FormOID revertToFormOID) throws Exception
     {
-        new FormUpgradeRevertProcessor().process(testprocOID, currentFormOID, revertToFormOID);
+       formUpgradeRevertProcessor.process(testprocOID, currentFormOID, revertToFormOID);
     }
     public  List<UnitFormQuery> getTestProcsByForm(FormQuery formQuery) throws Exception
     {

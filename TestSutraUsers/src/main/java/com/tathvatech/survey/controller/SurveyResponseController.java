@@ -15,11 +15,22 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import com.tathvatech.activitylogging.common.ActivityLogQuery;
 import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.forms.common.EntityVersionReviewProxy;
+import com.tathvatech.forms.entity.FormResponseClientSubmissionRev;
+import com.tathvatech.forms.entity.FormResponseMaster;
+import com.tathvatech.forms.entity.FormWorkflow;
+import com.tathvatech.forms.entity.ObjectLock;
 import com.tathvatech.forms.oid.FormResponseOID;
+import com.tathvatech.forms.response.FormResponseBean;
 import com.tathvatech.project.service.ProjectService;
+import com.tathvatech.survey.common.Section;
 import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.common.SurveyItem;
+import com.tathvatech.survey.entity.ResponseSubmissionBookmark;
 import com.tathvatech.survey.entity.Survey;
+import com.tathvatech.survey.exception.LockedByAnotherUserException;
 import com.tathvatech.survey.response.SurveyItemResponse;
 import com.tathvatech.survey.service.SurveyMaster;
 import com.tathvatech.unit.common.UnitLocationQuery;
@@ -142,7 +153,7 @@ public class SurveyResponseController
 		    
 			//add a workflow entry with the new responseId and the same status.. that way the response will be pickedup when
 			// clicking through from the myassignments table.
-			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, context.getUser().getPk(), resp.getResponseId(), 
+			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, context.getUser().getPk(), resp.getResponseId(),
 					testProc.getPk(), ResponseMasterNew.STATUS_INPROGRESS, null);
 
 			//record workstation save
@@ -355,7 +366,7 @@ public class SurveyResponseController
 				else
 				{
 					surveyResponseService.finalizeSurveyResponse(userContext, surveyDef, surveyResponse.getResponseId());
-					ActivityLogQuery aLog1 = new ActivityLogQuery(userContext.getUser().getPk(), Actions.submitForm, 
+					ActivityLogQuery aLog1 = new ActivityLogQuery(userContext.getUser().getPk(), Actions.submitForm,
 							"Form Submitted", new Date(), new Date(), project.getPk(), testProc.getPk(), testProc.getUnitPk(), testProc.getWorkstationPk(), 
 							surveyResponse.getSurveyPk(), null, surveyResponse.getResponseId());
 					ActivityLoggingDelegate.logActivity(aLog1);
@@ -983,12 +994,12 @@ public class SurveyResponseController
 		return surveyResponseService.getFormResponseBean(context, responseId);
 	}
 	
-	public  EntityVersionReviewProxy getEntityRevisionReviewProxy(UserContext context, int responseId) throws Exception
+	public EntityVersionReviewProxy getEntityRevisionReviewProxy(UserContext context, int responseId) throws Exception
 	{
 		return surveyResponseService.getEntityRevisionForReview(context.getUser().getOID(), responseId);
 	}
 	
-	public  FormResponseBean getFormResponseBeanForSyncErrorReview(int entityVersionReviewPk) throws Exception
+	public FormResponseBean getFormResponseBeanForSyncErrorReview(int entityVersionReviewPk) throws Exception
 	{
 		return surveyResponseService.getFormResponseBeanForSyncErrorReview(entityVersionReviewPk);
 	}

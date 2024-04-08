@@ -6,6 +6,7 @@
  */
 package com.tathvatech.survey.common;
 
+import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,111 +15,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import com.tathvatech.common.utils.ListStringUtil;
+import com.tathvatech.forms.common.FormDesignListener;
+import com.tathvatech.survey.enums.AnswerPersistor;
+import com.tathvatech.forms.common.ExpectedNumericValue;
+import com.tathvatech.forms.entity.FormItemResponse;
 import com.tathvatech.logic.common.Logic;
-import org.apache.log4j.Logger;
-import org.jdom.Element;
+import com.tathvatech.survey.response.SimpleSurveyItemResponse;
+import com.tathvatech.survey.response.SurveyItemResponse;
+import com.tathvatech.unit.common.UnitFormQuery;
+import com.tathvatech.unit.response.ResponseUnit;
+import jakarta.persistence.Table;
+import org.jdom2.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.sarvasutra.etest.DesignSurveyFormNew.SurveyItemConfigHolder;
-import com.sarvasutra.etest.EtestApplication;
-import com.sarvasutra.etest.FormDesignListener;
-import com.sarvasutra.etest.FormEventListner;
-import com.sarvasutra.etest.ObjectEditListener;
-import com.sarvasutra.etest.QuestionSummaryViewer;
-import com.sarvasutra.etest.TestProcController;
-import com.sarvasutra.etest.api.model.AttachmentInfoBean;
-import com.sarvasutra.etest.components.CommentsThreadPopup;
-import com.sarvasutra.etest.components.ConfirmWindow;
-import com.sarvasutra.etest.components.ExpandableTextArea;
-import com.sarvasutra.etest.components.FileUploadForm;
-import com.sarvasutra.etest.components.InspectionItemImage;
-import com.sarvasutra.etest.components.SingleSelectCheckboxGroup;
-import com.sarvasutra.etest.components.TSTableContainer;
-import com.sarvasutra.etest.components.VSpacer;
-import com.sarvasutra.etest.components.WindowWithFooter;
-import com.sarvasutra.etest.components.bocomponents.AttachmentField;
-import com.sarvasutra.etest.components.bocomponents.AttachmentField.AttachmentFieldListener;
-import com.sarvasutra.etest.reports.InspectionItemAnswerViewerReport;
-import com.sarvasutra.etest.server.TestProcItemFailureTransferContext;
-import com.sarvasutra.etest.util.ListStringUtil;
-import com.tathvatech.testsutra.ncr.common.NcrGroupBean;
-import com.tathvatech.testsutra.ncr.common.NcrGroupOID;
-import com.tathvatech.testsutra.ncr.common.NcrItemOID;
-import com.tathvatech.testsutra.ncr.common.NcrItemQuery;
-import com.tathvatech.testsutra.ncr.service.NcrDelegate;
-import com.tathvatech.testsutra.ncr.web.NcrGroupForm;
-import com.tathvatech.testsutra.ncr.web.NcrGroupForm.NcrGroupViewMode;
-import com.tathvatech.testsutra.openitemv2.common.OpenItemInfoBean;
-import com.tathvatech.testsutra.openitemv2.common.OpenItemTypeEnum;
-import com.tathvatech.testsutra.openitemv2.service.OILDelegate;
-import com.tathvatech.testsutra.openitemv2.service.OpenItemV2;
-import com.tathvatech.testsutra.openitemv2.web.OpenItemEditForm;
-import com.tathvatech.testsutra.openitemv2.web.OpenItemFormListener;
-import com.tathvatech.testsutra.openitemv2.web.P8ListSelectorComponent;
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.core.SecurityContext;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.FileStoreManager;
-import com.tathvatech.ts.core.common.utils.LineSeperatorUtil;
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.project.UnitFormQuery;
-import com.tathvatech.ts.core.project.UnitOID;
-import com.tathvatech.ts.core.project.UnitObj;
-import com.tathvatech.ts.core.project.UnitQuery;
-import com.tathvatech.ts.core.survey.BomTypesEnum;
-import com.tathvatech.ts.core.survey.Option;
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.response.AnswerPersistor;
-import com.tathvatech.ts.core.survey.response.FormItemResponse;
-import com.tathvatech.ts.core.survey.response.InvalidResponseException;
-import com.tathvatech.ts.core.survey.response.ResponseMasterNew;
-import com.tathvatech.ts.core.survey.response.ResponseUnit;
-import com.tathvatech.ts.core.survey.response.SimpleSurveyItemResponse;
-import com.tathvatech.ts.core.survey.response.SurveyItemResponse;
-import com.tathvatech.ts.core.survey.response.SurveyResponse;
-import com.tathvatech.ts.core.survey.response.TestItemOILTransferQuery;
-import com.tathvatech.ts.core.survey.surveyitem.LogicSubject;
-import com.tathvatech.ts.core.survey.surveyitem.SimpleAnswerPersistor;
-import com.tathvatech.ts.core.survey.surveyitem.SurveyItemManager;
-import com.tathvatech.ts.core.utils.OptionList;
-import com.thirdi.surveyside.project.ProjectManager;
-import com.thirdi.surveyside.security.PlanSecurityManager;
-import com.thirdi.surveyside.survey.DataTypes;
-import com.thirdi.surveyside.survey.ExpectedNumericValue;
-import com.thirdi.surveyside.survey.SurveyDisplayItem;
-import com.thirdi.surveyside.survey.logic.Logic;
-import com.thirdi.surveyside.survey.response.InspectionLineItemAnswerStatus;
-import com.thirdi.surveyside.survey.response.delegate.SurveyResponseDelegate;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.Validator;
-import com.vaadin.event.FieldEvents.BlurEvent;
-import com.vaadin.event.FieldEvents.BlurListener;
-import com.vaadin.server.ThemeResource;
-import com.vaadin.server.UserError;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.ComponentContainer;
-import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.Form;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.Select;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.BaseTheme;
-import com.vaadin.ui.themes.ValoTheme;
+import javax.swing.text.html.Option;
+
+import static com.tathvatech.survey.service.SurveyItemManager.BomInspectItemGroupAnswerType;
 
 /**
  * @author Hari
@@ -128,8 +42,8 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInspectionLineItemAnswerType, SurveyDisplayItem, LogicSubject
 {
-	private static final Logger logger = Logger.getLogger(BomInspectItemAnswerType.class);
 
+	private static final Logger logger = LoggerFactory.getLogger(BomInspectItemAnswerType.class);
 	private enum DisplayModeEnum {ViewMode, DataEntryMode}; // this is currently used only for the P8Transfer Menu.
 
 	// if no maxlength is defined, set it to 1
@@ -165,7 +79,7 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 	ExpandableTextArea commentsTxt;
 	SingleSelectCheckboxGroup result;
 
-	Table table; // Table to which it is added as a row to. 
+	Table table; // Table to which it is added as a row to.
 	
 	String imageAttachCol = null; //column where image should be attached.
 	String answer = "";
@@ -467,7 +381,7 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 				}
 
 				ResponseUnit aUnit = new ResponseUnit();
-				aUnit.setKey1(aOption.getValue());
+				aUnit.setKey1(Integer.parseInt(aOption.getValue()));
 				aUnit.setKey4(answerText.trim());
 				itemResponse.addResponseUnit(aUnit);
 			}
@@ -1251,7 +1165,7 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 	}
 
 	@Override
-	public Component drawConfigurationView(FormDesignListener formDesignListener)
+	public RadioButtonAnswerType.ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		return new ConfigForm(this, formDesignListener);
 	}

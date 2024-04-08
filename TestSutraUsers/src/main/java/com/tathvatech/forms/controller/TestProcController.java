@@ -1,5 +1,24 @@
 package com.tathvatech.forms.controller;
 
+import com.tathvatech.common.common.FileStoreManager;
+import com.tathvatech.common.entity.AttachmentIntf;
+import com.tathvatech.forms.entity.FormItemResponse;
+import com.tathvatech.ncr.enums.NcrEnum;
+import com.tathvatech.project.entity.Project;
+import com.tathvatech.project.service.ProjectService;
+import com.tathvatech.survey.common.BomInspectItemAnswerType;
+import com.tathvatech.survey.common.SurveyItem;
+import com.tathvatech.survey.response.SurveyItemResponse;
+import com.tathvatech.survey.service.SurveyResponseService;
+import com.tathvatech.unit.common.UnitObj;
+import com.tathvatech.unit.common.UnitQuery;
+import com.tathvatech.unit.response.ResponseUnit;
+import com.tathvatech.unit.service.UnitService;
+import com.tathvatech.user.OID.UnitOID;
+import com.tathvatech.user.common.TestProcObj;
+import com.tathvatech.user.entity.Attachment;
+import jakarta.servlet.http.Part;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,37 +26,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import com.tathvatech.testsutra.ncr.common.NcrEnum;
-import com.tathvatech.testsutra.ncr.common.NcrGroupBean;
-import com.tathvatech.testsutra.ncr.common.NcrItemBean;
-import com.tathvatech.testsutra.ncr.common.NcrItemBeanTransfer;
-import com.tathvatech.testsutra.ncr.common.NcrUnitAssignBean;
-import com.tathvatech.testsutra.ncr.web.NcrGroupForm;
-import com.tathvatech.testsutra.ncr.web.NcrGroupForm.NcrGroupViewMode;
-import com.tathvatech.testsutra.openitemv2.service.OILDelegate;
-import com.tathvatech.testsutra.parts.service.PartsDelegate;
-import com.tathvatech.ts.core.common.Attachment;
-import com.tathvatech.ts.core.common.FileStoreManager;
-import com.tathvatech.ts.core.common.utils.AttachmentIntf;
-import com.tathvatech.ts.core.part.Part;
-import com.tathvatech.ts.core.project.TestProcObj;
-import com.tathvatech.ts.core.project.UnitOID;
-import com.tathvatech.ts.core.project.UnitObj;
-import com.tathvatech.ts.core.project.UnitQuery;
-import com.tathvatech.ts.core.survey.response.FormItemResponse;
-import com.tathvatech.ts.core.survey.response.ResponseUnit;
-import com.tathvatech.ts.core.survey.response.SurveyItemResponse;
-import com.tathvatech.ts.core.survey.response.TestItemOILTransferQuery;
-import com.thirdi.surveyside.project.Project;
-import com.thirdi.surveyside.project.ProjectManager;
-import com.thirdi.surveyside.survey.SurveyItem;
-import com.thirdi.surveyside.survey.response.SurveyResponseManager;
-import com.thirdi.surveyside.survey.surveyitem.AdvancedBomInspectItemAnswerType;
-import com.thirdi.surveyside.survey.surveyitem.BomInspectItemAnswerType;
+
 
 public class TestProcController {
 	
 	TestProcObj testProc;
+	private final UnitService unitService;
+	private final ProjectService projectService;
+	private final SurveyResponseService surveyResponseService;
 	HashMap<String, FormItemResponse> formItemResponseMap;
 	HashMap<String, List<TestItemOILTransferQuery>> oilTransferMap = new HashMap<String, List<TestItemOILTransferQuery>>();
 	
@@ -46,11 +42,14 @@ public class TestProcController {
 	HashMap<SurveyItem, FormItemResponse> selectedItems = new HashMap<SurveyItem, FormItemResponse>();
 	
 	
-	public TestProcController(ResponseDetailForm responseDetailForm, TestProcObj testProc) 
+	public TestProcController(ResponseDetailForm responseDetailForm, TestProcObj testProc, UnitService unitService, ProjectService projectService, SurveyResponseService surveyResponseService)
 	{
 		this.responseDetailForm = responseDetailForm;
 		this.testProc = testProc;
-	}
+        this.unitService = unitService;
+        this.projectService = projectService;
+        this.surveyResponseService = surveyResponseService;
+    }
 
 	public ResponseDetailForm getResponseDetailForm()
 	{
@@ -74,9 +73,9 @@ public class TestProcController {
 
 	public void createNCROnSelected() 
 	{
-		UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(testProc.getUnitPk()));
-		Project project = ProjectManager.getProject(testProc.getProjectPk());
-		UnitQuery unitQuery = ProjectManager.getUnitQueryByPk(unit.getPk(), project.getOID());
+		UnitObj unit =unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
+		Project project =projectService.getProject(testProc.getProjectPk());
+		UnitQuery unitQuery = unitService.getUnitQueryByPk((int) unit.getPk(), project.getOID());
 
 		NcrGroupBean ncrGroupBean = new NcrGroupBean();
 		Part part = PartsDelegate.getPart(unit.getPartPk());
@@ -121,7 +120,7 @@ public class TestProcController {
 					attachments.add(attachment);
 				}
 
-				SurveyItemResponse itemResponse = SurveyResponseManager.getSurveyItemResponse(aItem, aItem.getSurveyItemId(), responseDetailForm.responseMaster.getResponseId());
+				SurveyItemResponse itemResponse = surveyResponseService.getSurveyItemResponse(aItem, aItem.getSurveyItemId(), responseDetailForm.responseMaster.getResponseId());
 				if(itemResponse != null)
 				{
 					List<String> responseImageFileNames = new ArrayList<String>();
@@ -161,13 +160,13 @@ public class TestProcController {
 		
 		NcrGroupForm ncrGroupForm = new NcrGroupForm(ncrGroupBean, responseDetailForm, new ObjectEditListener() {
 			
-			@Override
+
 			public void commited(Object object) {
 				// TODO Auto-generated method stub
 				
 			}
 			
-			@Override
+
 			public void cancelled() {
 				// TODO Auto-generated method stub
 				

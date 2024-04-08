@@ -6,11 +6,12 @@
  */
 package com.tathvatech.survey.common;
 
-import java.awt.Image;
+import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -21,58 +22,33 @@ import java.util.Properties;
 import java.util.TimeZone;
 
 import javax.imageio.ImageIO;
+import javax.xml.transform.stream.StreamSource;
 
+import com.tathvatech.common.common.FileStoreManager;
+import com.tathvatech.common.entity.AttachmentIntf;
+import com.tathvatech.forms.common.FormDesignListener;
+import com.tathvatech.forms.controller.TestProcController;
+import com.tathvatech.forms.response.SignatureCaptureItemResponse;
 import com.tathvatech.logic.common.Logic;
-import org.apache.log4j.Logger;
-import org.jdom.Element;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sarvasutra.etest.EtestApplication;
-import com.sarvasutra.etest.FormDesignListener;
-import com.sarvasutra.etest.FormEventListner;
-import com.sarvasutra.etest.TestProcController;
-import com.sarvasutra.etest.components.FileUploadFormMulti;
-import com.sarvasutra.etest.components.FileUploadFormMulti.FileUploadListener;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.common.Attachment;
-import com.tathvatech.ts.core.common.FileStoreManager;
-import com.tathvatech.ts.core.common.utils.AttachmentIntf;
-import com.tathvatech.ts.core.project.UnitFormQuery;
-import com.tathvatech.ts.core.survey.MultiDataTypeQuestionType;
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.response.AnswerPersistor;
-import com.tathvatech.ts.core.survey.response.InvalidResponseException;
-import com.tathvatech.ts.core.survey.response.ResponseUnit;
-import com.tathvatech.ts.core.survey.response.SimpleSurveyItemResponse;
-import com.tathvatech.ts.core.survey.response.SurveyItemResponse;
-import com.tathvatech.ts.core.survey.response.SurveyResponse;
-import com.tathvatech.ts.core.survey.surveyitem.LogicSubject;
-import com.tathvatech.ts.core.survey.surveyitem.SimpleAnswerPersistor;
-import com.thirdi.surveyside.survey.DataTypes;
-import com.thirdi.surveyside.survey.SurveyDisplayItem;
-import com.thirdi.surveyside.survey.logic.Logic;
-import com.thirdi.surveyside.survey.response.SignatureCaptureItemResponse;
-import com.thirdi.surveyside.utils.DateFormatter;
-import com.vaadin.data.Validator;
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.server.StreamResource;
-import com.vaadin.server.StreamResource.StreamSource;
-import com.vaadin.server.ThemeResource;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.DefaultFieldFactory;
-import com.vaadin.ui.Embedded;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.BaseTheme;
+import com.tathvatech.site.service.SiteServiceImpl;
+import com.tathvatech.survey.enums.AnswerPersistor;
+import com.tathvatech.survey.response.SimpleSurveyItemResponse;
+import com.tathvatech.survey.response.SurveyItemResponse;
+import com.tathvatech.survey.response.SurveyResponse;
+import com.tathvatech.unit.common.UnitFormQuery;
+import com.tathvatech.unit.response.ResponseUnit;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.Attachment;
+import jakarta.persistence.Embedded;
+import org.jdom2.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static com.tathvatech.survey.service.SurveyItemManager.BomInspectItemGroupAnswerType;
+
 
 /**
  * @author Hari
@@ -83,7 +59,7 @@ import com.vaadin.ui.themes.BaseTheme;
 public class SignatureCaptureAnswerType extends SurveySaveItem implements SurveyDisplayItem, LogicSubject,
 		MultiDataTypeQuestionType
 {
-	private static final Logger logger = Logger.getLogger(SignatureCaptureAnswerType.class);
+	private static final Logger logger = LoggerFactory.getLogger(SignatureCaptureAnswerType.class);
 
 	public static int MAX_IMAGE_WIDTH = 900;
 	
@@ -512,7 +488,7 @@ public class SignatureCaptureAnswerType extends SurveySaveItem implements Survey
 
 	@Override
 	public Component drawResponseField(UnitFormQuery testProc, SurveyResponse sResponse, Component parent, String[] flags,
-			final FormEventListner formEventListner)
+									   final FormEventListner formEventListner)
 	{
 		if (sResponse != null)
 		{
@@ -524,7 +500,7 @@ public class SignatureCaptureAnswerType extends SurveySaveItem implements Survey
 					ResponseUnit aUnit = (ResponseUnit) itemResponse.getResponseUnits().get(0);
 					String data = aUnit.getKey4();
 					
-					SignatureCaptureItemResponse val = new ObjectMapper().readValue(data, SignatureCaptureItemResponse.class); 
+					SignatureCaptureItemResponse val = new ObjectMapper().readValue(data, SignatureCaptureItemResponse.class);
 					signatureFileName = val.getImageFileName(); 
 					signatureTimeStamp = val.getSignatureTimestamp();
 					signedBy = val.getSignedBy();
@@ -728,8 +704,8 @@ public class SignatureCaptureAnswerType extends SurveySaveItem implements Survey
 	}
 
 	@Override
-	public Component drawResponseDetail(UserContext userContext, UnitFormQuery testProc, SurveyResponse sResponse, Component parent, 
-			boolean expandedView, boolean isLatestResponse, String[] flags, final TestProcController testProcController)
+	public Component drawResponseDetail(UserContext userContext, UnitFormQuery testProc, SurveyResponse sResponse, Component parent,
+										boolean expandedView, boolean isLatestResponse, String[] flags, final TestProcController testProcController)
 	{
 		List thisItemFlagList = this.getFlagsAsList();
 		boolean matchFlagsToDisplay = false;
@@ -882,15 +858,14 @@ public class SignatureCaptureAnswerType extends SurveySaveItem implements Survey
 
 	}
 	
-	public class PictureRenderer implements StreamSource
-	{
+	public class PictureRenderer extends StreamSource {
 		String fileName;
 		public PictureRenderer(String fileName)
 		{
 			this.fileName = fileName;
 		}
 
-		@Override
+
 		public InputStream getStream()
 		{
 			try

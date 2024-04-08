@@ -2,9 +2,9 @@ package com.tathvatech.timetracker.common;
 
 import java.util.Date;
 
-import net.sf.persist.annotations.NoTable;
 
-@NoTable
+
+
 public class OpenCheckinListReportResultRow
 {
 	private Integer workorderPk;

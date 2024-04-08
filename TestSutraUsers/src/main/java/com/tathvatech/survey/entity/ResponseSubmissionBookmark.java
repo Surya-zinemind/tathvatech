@@ -7,6 +7,7 @@
 package com.tathvatech.survey.entity;
 
 import com.tathvatech.common.entity.AbstractEntity;
+import com.tathvatech.survey.oid.ResponseSubmissionBookmarkOID;
 import com.tathvatech.user.OID.Authorizable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -29,7 +30,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "RESPONSE_SUBMISSION_BOOKMARK")
-public class ResponseSubmissionBookmark extends AbstractEntity implements Serializable, Authorizable
+public class ResponseSubmissionBookmark extends AbstractEntity implements Serializable
 {
 	@Id
 	private long pk;
@@ -162,9 +163,9 @@ public class ResponseSubmissionBookmark extends AbstractEntity implements Serial
 		this.lastUpdated = lastUpdated;
 	}
 	
-	public ResponseSubmissionBookmarkOID getOID() 
+	public ResponseSubmissionBookmarkOID getOID()
 	{
-		return new ResponseSubmissionBookmarkOID(pk, revisionNo);
+		return new ResponseSubmissionBookmarkOID((int) pk, revisionNo);
 	}
     
 	public enum SubmissionTypeEnum{Interim, Final};

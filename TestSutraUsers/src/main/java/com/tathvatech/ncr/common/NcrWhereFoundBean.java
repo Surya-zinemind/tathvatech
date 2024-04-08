@@ -6,12 +6,10 @@ import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.tathvatech.ts.core.common.TSBeanBase;
-import com.tathvatech.ts.core.project.WhereFoundOID;
+import com.tathvatech.user.OID.TSBeanBase;
+import com.tathvatech.user.OID.WhereFoundOID;
 
-import net.sf.persist.annotations.NoTable;
 
-@NoTable
 @JsonTypeName("NcrWhereFoundBean")
 public class NcrWhereFoundBean extends TSBeanBase implements Serializable
 {
@@ -25,7 +23,7 @@ public class NcrWhereFoundBean extends TSBeanBase implements Serializable
 	private Date lastUpdated;
 	List<NcrWhereFoundBean> children = new ArrayList<NcrWhereFoundBean>();
 
-	public int getPk()
+	public long getPk()
 	{
 		return pk;
 	}
