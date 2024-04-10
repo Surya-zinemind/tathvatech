@@ -1,7 +1,6 @@
 package com.tathvatech.user.common;
 
 import com.tathvatech.user.OID.TestProcOID;
-import com.tathvatech.user.OID.UnitOID;
 
 import java.util.Date;
 
@@ -36,7 +35,7 @@ public class TestProcObj
 	{
 		this.projectPk = projectPk;
 	}
-	public UnitOID getUnitPk()
+	public int getUnitPk()
 	{
 		return unitPk;
 	}

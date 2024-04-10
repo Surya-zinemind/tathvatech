@@ -23,6 +23,7 @@ import com.tathvatech.forms.entity.FormItemResponse;
 import com.tathvatech.logic.common.Logic;
 import com.tathvatech.survey.response.SimpleSurveyItemResponse;
 import com.tathvatech.survey.response.SurveyItemResponse;
+import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.unit.common.UnitFormQuery;
 import com.tathvatech.unit.response.ResponseUnit;
 import jakarta.persistence.Table;
@@ -32,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.text.html.Option;
 
-import static com.tathvatech.survey.service.SurveyItemManager.BomInspectItemGroupAnswerType;
+
 
 /**
  * @author Hari
@@ -1165,13 +1166,13 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 	}
 
 	@Override
-	public RadioButtonAnswerType.ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
+	public TextAreaAnswerType.ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		return new ConfigForm(this, formDesignListener);
 	}
 
 	@Override
-	public Component drawResponseField(UnitFormQuery testProc, SurveyResponse sResponse, Component parent, String[] flags,  FormEventListner formEventListner)
+	public Component drawResponseField(UnitFormQuery testProc, SurveyResponse sResponse, Component parent, String[] flags, FormEventListner formEventListner)
 	{
 		return null;
 	}

@@ -284,7 +284,7 @@ public class TimeEntryManager
 		{
 			OpenCheckinListReportRequest openCheckinReq = new OpenCheckinListReportRequest();
 			openCheckinReq.setWorkorders(new ReworkOrderOID[] {wo.getOID()});
-			List<OpenCheckinListReportResultRow> openCheckInList = openCheckinListReport.java(openCheckinReq).runReport().getReportResult();
+			List<OpenCheckinListReportResultRow> openCheckInList = new OpenCheckinListReport(openCheckinReq,persistWrapper).runReport().getReportResult();
 			
 			for (Iterator iterator = openCheckInList.iterator(); iterator.hasNext();)
 			{

@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.tathvatech.user.OID.OID;
 import com.tathvatech.user.OID.WhereFoundOID;
 import com.tathvatech.user.OID.WorkstationOID;
 import com.tathvatech.common.common.QueryObject;
@@ -436,7 +437,7 @@ public class NcrItemQueryBuilder
 				List<Long> workstationPks = ncrItemQueryFilter.getSources().stream()
 						.filter(location -> (location instanceof WorkstationOID))
 						.map(location -> ((WorkstationOID) location).getPk()).collect(Collectors.toList()).reversed();
-				List<Integer> LocationPks = ncrItemQueryFilter.getSources().stream()
+				List<Long> LocationPks = ncrItemQueryFilter.getSources().stream()
 						.filter(location -> (location instanceof LocationTypeOID))
 						.map(location -> ((LocationTypeOID) location).getPk()).collect(Collectors.toList()).reversed();
 				if (ncrWhereFoundPks != null && ncrWhereFoundPks.size() > 0)
@@ -471,16 +472,24 @@ public class NcrItemQueryBuilder
 			
 			if (ncrItemQueryFilter.getLocations() != null && ncrItemQueryFilter.getLocations().size() > 0)
 			{
-				List<Integer> ncrWhereFoundPks = ncrItemQueryFilter.getLocations().stream()
+				List<Long> ncrWhereFoundPks = ncrItemQueryFilter.getLocations().stream()
 						.filter(location -> (location instanceof WhereFoundOID))
 						.map(location -> ((WhereFoundOID) location).getPk()).collect(Collectors.toList()).reversed();
-				List<Integer> workstationPks = ncrItemQueryFilter.getLocations().stream()
-						.filter(location -> (location instanceof WorkstationOID))
-						.map(location -> ((WorkstationOID) location).getPk()).collect(Collectors.toList());
-				List<Integer> LocationPks = ncrItemQueryFilter.getLocations().stream()
-						.filter(location -> (location instanceof LocationTypeOID))
-						.map(location -> ((LocationTypeOID) location).getPk()).collect(Collectors.toList());
-				if (ncrWhereFoundPks != null && ncrWhereFoundPks.size() > 0)
+                List<Integer> workstationPks = new ArrayList<>();
+                for (OID oid : ncrItemQueryFilter.getLocations()) {
+                    if ((oid instanceof WorkstationOID)) {
+                        Long pk = oid.getPk();
+                        workstationPks.add(Math.toIntExact(pk));
+                    }
+                }
+                List<Integer> LocationPks = new ArrayList<>();
+                for (OID location : ncrItemQueryFilter.getLocations()) {
+                    if ((location instanceof LocationTypeOID)) {
+                        Long pk = location.getPk();
+                        LocationPks.add(Math.toIntExact(pk));
+                    }
+                }
+                if (ncrWhereFoundPks != null && ncrWhereFoundPks.size() > 0)
 				{
 					sqlQuery.append(" and ncr.locationType = ? and ncr.locationPk in ");
 					params.add(EntityTypeEnum.WhereFoundType.name());

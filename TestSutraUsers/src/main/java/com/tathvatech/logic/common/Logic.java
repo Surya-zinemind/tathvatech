@@ -11,9 +11,9 @@ import com.tathvatech.forms.common.FormEventListner;
 import com.tathvatech.forms.controller.TestProcController;
 import com.tathvatech.logic.service.LogicConfigurationManager;
 import com.tathvatech.logic.service.RuleActionManager;
-import com.tathvatech.survey.common.RadioButtonAnswerType;
 import com.tathvatech.survey.common.SurveyDefinition;
 import com.tathvatech.survey.common.SurveyItem;
+import com.tathvatech.survey.common.TextAreaAnswerType;
 import com.tathvatech.survey.inf.LogicBase;
 import com.tathvatech.survey.inf.LogicIntf;
 import com.tathvatech.survey.response.SurveyResponse;
@@ -23,12 +23,13 @@ import org.jdom2.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Condition;
+
 
 
 /**
@@ -236,7 +237,7 @@ public class Logic extends SurveyItem implements LogicIntf, LogicBase
                 }
                 LogicConfigurationManager lcm = new LogicConfigurationManager((SurveyDefinition) surveyDef);
                 
-                Condition item = lcm.getCondition(subjectType, subjectId);
+                Condition item = (Condition) lcm.getCondition(subjectType, subjectId);
                 if(item != null)
                 {
                     item.setConfiguration(qElement);
@@ -284,7 +285,7 @@ public class Logic extends SurveyItem implements LogicIntf, LogicBase
 
 
 	@Override
-	public RadioButtonAnswerType.ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
+	public TextAreaAnswerType.ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		// TODO Auto-generated method stub
 		return null;

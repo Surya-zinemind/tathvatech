@@ -60,7 +60,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import static com.tathvatech.report.enums.ReportTypes.FormListReport;
+
 
 
 /**
@@ -774,7 +774,7 @@ private final TimeEntryManager timeEntryManager;
 			
 			//create the workorder for this section if not already created
 			ResponseMasterNew resp = surveyResponseService.getResponseMaster((int) responseOID.getPk());
-			TestProcSectionObj tsObj = new TestProcSectionDAO().getTestProcSection(new TestProcOID(resp.getTestProcPk()), new FormSectionOID(newLock.getFormSectionFk()));
+			TestProcSectionObj tsObj = testProcSectionDAO.getTestProcSection(new TestProcOID(resp.getTestProcPk()), new FormSectionOID(newLock.getFormSectionFk()));
 			WorkorderRequestBean woBean = new WorkorderRequestBean(tsObj.getOID());
 			workorderManager.createWorkorder(context, woBean);
 			
@@ -876,7 +876,7 @@ private final TimeEntryManager timeEntryManager;
 
 	public  void releaseSectionEditLock(UserContext context, FormResponseOID responseOID, String sectionId)throws Exception
 	{
-		ObjectLock objectLock = PersistWrapper.read(ObjectLock.class, ObjectLockQuery.sql +
+		ObjectLock objectLock = persistWrapper.read(ObjectLock.class, ObjectLockQuery.sql +
 				" and responseFk=? and sectionId=?", 
 				responseOID.getPk(), sectionId);
 		if(objectLock !=null)

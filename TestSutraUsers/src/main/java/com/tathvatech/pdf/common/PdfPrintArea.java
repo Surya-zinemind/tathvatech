@@ -1,8 +1,5 @@
 package com.tathvatech.pdf.common;
 
-
-import static org.jdom2.Content.CType.Element;
-
 public class PdfPrintArea
 {
 	public int pageNo, left, width, top, height, leading, hAlign, vAlign;

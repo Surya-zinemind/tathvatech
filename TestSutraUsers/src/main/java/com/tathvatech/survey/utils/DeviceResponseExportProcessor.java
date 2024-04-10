@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.text.html.Option;
 
-import static com.tathvatech.survey.service.SurveyItemManager.AdvancedBomInspectItemAnswerType;
+
 
 /**
  * @author Hari
@@ -56,7 +56,7 @@ public class DeviceResponseExportProcessor
 	 * @return
 	 * @throws Exception
 	 */
-    public TextBoxItemResponseBean getFormItemResponsesBean(SurveyItem sItem, SurveyItemResponse aItemResponse) throws Exception
+    public AdvancedBomInspectionItemResponseBean getFormItemResponsesBean(SurveyItem sItem, SurveyItemResponse aItemResponse) throws Exception
     {
         if(sItem instanceof RadioButtonAnswerType)
         {

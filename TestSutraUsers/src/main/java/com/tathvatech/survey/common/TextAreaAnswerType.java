@@ -7,7 +7,7 @@
 package com.tathvatech.survey.common;
 
 import java.awt.*;
-import java.lang.reflect.Field;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -20,7 +20,6 @@ import java.util.TimeZone;
 import com.tathvatech.forms.common.FormDesignListener;
 import com.tathvatech.forms.controller.TestProcController;
 import com.tathvatech.logic.common.Logic;
-import com.tathvatech.site.service.SiteServiceImpl;
 import com.tathvatech.survey.enums.AnswerPersistor;
 import com.tathvatech.survey.response.SimpleSurveyItemResponse;
 import com.tathvatech.survey.response.SurveyItemResponse;
@@ -28,11 +27,12 @@ import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.unit.common.UnitFormQuery;
 import com.tathvatech.unit.response.ResponseUnit;
 import com.tathvatech.user.common.UserContext;
+import org.aspectj.apache.bcel.classfile.Field;
 import org.jdom2.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.tathvatech.survey.service.SurveyItemManager.BomInspectItemGroupAnswerType;
+
 
 
 /**
@@ -280,7 +280,7 @@ public class TextAreaAnswerType extends SurveySaveItem implements SurveyDisplayI
 	 * @see
 	 * com.thirdi.surveyside.survey.AnswerType#drawQuestionConfigurationForm()
 	 */
-	public Component drawConfigurationView(FormDesignListener formDesignListener)
+	public ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		return new ConfigForm(this, formDesignListener);
 	}

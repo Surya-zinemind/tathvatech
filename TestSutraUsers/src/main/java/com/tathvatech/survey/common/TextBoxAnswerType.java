@@ -7,6 +7,7 @@
 package com.tathvatech.survey.common;
 
 import java.awt.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -27,11 +28,12 @@ import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.unit.common.UnitFormQuery;
 import com.tathvatech.unit.response.ResponseUnit;
 import com.tathvatech.user.common.UserContext;
+import org.aspectj.apache.bcel.classfile.Field;
 import org.jdom2.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.tathvatech.survey.service.SurveyItemManager.BomInspectItemGroupAnswerType;
+
 
 /**
  * @author Hari
@@ -293,7 +295,7 @@ public class TextBoxAnswerType extends SurveySaveItem implements SurveyDisplayIt
 	 * @see
 	 * com.thirdi.surveyside.survey.AnswerType#drawQuestionConfigurationForm()
 	 */
-	public Component drawConfigurationView(FormDesignListener formDesignListener)
+	public TextAreaAnswerType.ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		return new ConfigForm(this, formDesignListener);
 	}

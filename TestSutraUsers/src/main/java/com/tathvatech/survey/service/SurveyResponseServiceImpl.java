@@ -42,6 +42,7 @@ import com.tathvatech.common.exception.AppException;
 import com.tathvatech.forms.entity.FormSection;
 import com.tathvatech.project.entity.Project;
 import com.tathvatech.project.enums.ProjectPropertyEnum;
+import com.tathvatech.survey.entity.ResponseSubmissionBookmark;
 import com.tathvatech.survey.entity.Survey;
 import com.tathvatech.survey.enums.AnswerPersistor;
 import com.tathvatech.survey.enums.SectionLockStatusEnum;
@@ -78,7 +79,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import static com.tathvatech.common.enums.EntityTypeEnum.ResponseSubmissionBookmark;
+
 
 /**
  * @author Hari
@@ -107,6 +108,7 @@ public class SurveyResponseServiceImpl implements SurveyResponseService
 	private final WorkstationService workstationService;
 	private final ActivityLoggingDelegate activityLoggingDelegate;
 	private final SiteService siteService;
+
     public SurveyResponseServiceImpl(PersistWrapper persistWrapper, DummyWorkstation dummyWorkstation, FormDBManager formDBManager, SurveyResponseService surveyResponseService, SurveyDefFactory surveyDefFactory, UnitManager unitManager, SurveyMaster surveyMaster, CommonServicesDelegate commonServicesDelegate, AccountService accountService, TestProcService testProcService, WorkflowManager workflowManager, WorkstationService workstationService, ActivityLoggingDelegate activityLoggingDelegate, SiteService siteService) {
         this.persistWrapper = persistWrapper;
         this.dummyWorkstation = dummyWorkstation;
@@ -1111,7 +1113,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 
 			stmt.execute();
 
-			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_SUBMIT, userContext.getUser().getPk(), sResponse.getResponseId(),
+			workflowManager.addWorkflowEntry(FormWorkflow.ACTION_SUBMIT, (int) userContext.getUser().getPk(), sResponse.getResponseId(),
 					sResponse.getTestProcPk(), ResponseMasterNew.STATUS_COMPLETE, null);
 
 		}
@@ -1221,7 +1223,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 		String revisionNo = null;
 
 	    //get the FormResponseBean and then save this as a backup to save the inetrim/final submitted response state.
-		Boolean createRevisionNoOnFormSubmit = (Boolean) new CommonServicesDelegate().getEntityPropertyValue(new ProjectOID(tp.getProjectPk()), ProjectPropertyEnum.CreateRevisionNoForFormSubmit.getId(), Boolean.class);
+		Boolean createRevisionNoOnFormSubmit = (Boolean) commonServicesDelegate.getEntityPropertyValue(new ProjectOID(tp.getProjectPk()), ProjectPropertyEnum.CreateRevisionNoForFormSubmit.getId(), Boolean.class);
 		if(createRevisionNoOnFormSubmit != null && true == createRevisionNoOnFormSubmit)
 		{
 			//The sequence order will be like below
@@ -1306,7 +1308,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 
         Date now = new Date();
 		ResponseSubmissionBookmark respSubmission = new ResponseSubmissionBookmark();
-		respSubmission.setCreatedBy(context.getUser().getPk());
+		respSubmission.setCreatedBy((int) context.getUser().getPk());
 		respSubmission.setCreatedDate(now);
 		respSubmission.setTestProcFk(respM.getTestProcPk());
 		respSubmission.setResponseId(respM.getResponseId());
@@ -1314,7 +1316,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 		respSubmission.setSubmissionType(submissionType.name());
 		respSubmission.setResponseJSON(objRep);
 		respSubmission.setEstatus(EStatusEnum.Active.getValue());
-		int respSubmissionPk = persistWrapper.createEntity(respSubmission);
+		int respSubmissionPk = (int) persistWrapper.createEntity(respSubmission);
 	}
 
 
@@ -1465,7 +1467,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 			}
 
 			//new reload the surveyResponse
-			surveyResponse = SurveyResponseServiceImpl.getSurveyResponse(surveyDef, responseId);
+			surveyResponse = surveyResponseService.getSurveyResponse(surveyDef, responseId);
 
 
 			//copy the SectionResponses to the new Response
@@ -2049,7 +2051,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 	@Override
 	public  List getResponseMastersForRespondent(int surveyPk, int respondentPk) throws Exception
 	{
-		Survey survey = SurveyMaster.getSurveyByPk(surveyPk);
+		Survey survey = surveyMaster.getSurveyByPk(surveyPk);
 
 		String surveyTable = survey.getDbTable();
 		String sql = Sqls.getResponseMastersForRespondentId;
@@ -2410,7 +2412,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 			ResponseMasterNew responseMaster = getResponseMaster(sResponse.getResponseId());
 			markResponseAsOld(userContext, responseMaster);
 
-			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_VERIFY_REJECTED, userContext.getUser().getPk(), sResponse.getResponseId(),
+			workflowManager.addWorkflowEntry(FormWorkflow.ACTION_VERIFY_REJECTED, (int) userContext.getUser().getPk(), sResponse.getResponseId(),
 					sResponse.getTestProcPk(), ResponseMasterNew.STATUS_REJECTED, comments);
 
 
@@ -2498,7 +2500,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 			stmt.execute();
 
 
-			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_APPROVED, userContext.getUser().getPk(), resp.getResponseId(),
+			workflowManager.addWorkflowEntry(FormWorkflow.ACTION_APPROVED, (int) userContext.getUser().getPk(), resp.getResponseId(),
 					resp.getTestProcPk(), ResponseMasterNew.STATUS_APPROVED, comments);
 
 		}
@@ -2551,7 +2553,7 @@ public  void approveResponseWithComments(UserContext userContext, ResponseMaster
 			stmt.execute();
 
 
-			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_APPROVED_WITH_COMMENTS, userContext.getUser().getPk(), resp.getResponseId(),
+			workflowManager.addWorkflowEntry(FormWorkflow.ACTION_APPROVED_WITH_COMMENTS, (int) userContext.getUser().getPk(), resp.getResponseId(),
 					resp.getTestProcPk(), ResponseMasterNew.STATUS_APPROVED_WITH_COMMENTS, comments);
 
 		}

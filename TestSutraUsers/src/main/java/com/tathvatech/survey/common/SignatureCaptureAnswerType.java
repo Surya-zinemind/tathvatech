@@ -11,7 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -33,7 +33,6 @@ import com.tathvatech.logic.common.Logic;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tathvatech.site.service.SiteServiceImpl;
 import com.tathvatech.survey.enums.AnswerPersistor;
 import com.tathvatech.survey.response.SimpleSurveyItemResponse;
 import com.tathvatech.survey.response.SurveyItemResponse;
@@ -43,11 +42,12 @@ import com.tathvatech.unit.response.ResponseUnit;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.Attachment;
 import jakarta.persistence.Embedded;
+import org.aspectj.apache.bcel.classfile.Field;
 import org.jdom2.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.tathvatech.survey.service.SurveyItemManager.BomInspectItemGroupAnswerType;
+
 
 
 /**
@@ -235,7 +235,7 @@ public class SignatureCaptureAnswerType extends SurveySaveItem implements Survey
 	 * @see
 	 * com.thirdi.surveyside.survey.AnswerType#drawQuestionConfigurationForm()
 	 */
-	public Component drawConfigurationView(FormDesignListener formDesignListener)
+	public TextAreaAnswerType.ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		return new ConfigForm(this, formDesignListener);
 	}

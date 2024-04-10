@@ -28,7 +28,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.tathvatech.common.enums.EntityTypeEnum.ResponseSubmissionBookmark;
+
 
 public interface SurveyResponseService {
     void changeResponseStatus(UserContext userContext, int responseId, String responseStatus)

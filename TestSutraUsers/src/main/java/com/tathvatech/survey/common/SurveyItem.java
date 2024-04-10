@@ -150,7 +150,7 @@ public abstract class SurveyItem extends SurveyItemBase
 		this.loadLogicItems(element);
     }
 
-    public abstract RadioButtonAnswerType.ConfigForm drawConfigurationView(
+    public abstract TextAreaAnswerType.ConfigForm drawConfigurationView(
 	    FormDesignListener formDesignListener);
 
     public abstract Component drawDesignView(boolean isPreviewMode, FormDesignListener formDesignListener);

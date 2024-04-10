@@ -677,7 +677,7 @@ public class RadioButtonAnswerType extends SurveySaveItem implements SurveyDispl
 	}
 
 	@Override
-	public ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
+	public TextAreaAnswerType.ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		return new ConfigForm(this, formDesignListener);
 	}

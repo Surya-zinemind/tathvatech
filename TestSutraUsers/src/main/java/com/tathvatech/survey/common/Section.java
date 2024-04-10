@@ -17,6 +17,7 @@ import com.tathvatech.forms.intf.SectionBase;
 import com.tathvatech.forms.service.FormDBManager;
 import com.tathvatech.forms.service.TestProcService;
 import com.tathvatech.logic.common.Logic;
+
 import com.tathvatech.survey.controller.SurveyDelegate;
 import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.survey.service.SurveyResponseService;
@@ -32,12 +33,13 @@ import com.tathvatech.user.entity.User;
 import com.tathvatech.user.service.AccountService;
 import com.tathvatech.user.service.PlanSecurityManager;
 import org.apache.catalina.Container;
+import org.aspectj.apache.bcel.classfile.Field;
 import org.jdom2.Element;
 
 import java.awt.*;
 import java.io.File;
 import java.io.InputStream;
-import java.lang.reflect.Field;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -194,7 +196,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 	 * @see
 	 * com.thirdi.surveyside.survey.AnswerType#drawQuestionConfigurationForm()
 	 */
-	public Component drawConfigurationView(FormDesignListener formDesignListener)
+	public TextAreaAnswerType.ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		return new ConfigForm(this, formDesignListener);
 	}
@@ -398,7 +400,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 			{
 				try
 				{
-					SurveyDelegate.releaseSectionEditLock(EtestApplication.getInstance().getUserContext(), getFormResponseContext().getResponseMaster().getOID(), 
+					SurveyDelegate.releaseSectionEditLock(EtestApplication.getInstance().getUserContext(), getFormResponseContext().getResponseMaster().getOID(),
 							Section.this.getSurveyItemId());
 
 					exp.setLockStatus(LockUnlockExpandPanel.LOCKSTATUS_UNLOCKED);

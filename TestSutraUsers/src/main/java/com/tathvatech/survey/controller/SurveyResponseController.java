@@ -16,23 +16,22 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.tathvatech.activitylogging.common.ActivityLogQuery;
+import com.tathvatech.activitylogging.controller.ActivityLoggingDelegate;
+import com.tathvatech.common.enums.BaseActions;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.common.EntityVersionReviewProxy;
-import com.tathvatech.forms.entity.FormResponseClientSubmissionRev;
-import com.tathvatech.forms.entity.FormResponseMaster;
-import com.tathvatech.forms.entity.FormWorkflow;
-import com.tathvatech.forms.entity.ObjectLock;
+import com.tathvatech.forms.common.ObjectLockQuery;
+import com.tathvatech.forms.entity.*;
 import com.tathvatech.forms.oid.FormResponseOID;
 import com.tathvatech.forms.response.FormResponseBean;
 import com.tathvatech.project.service.ProjectService;
-import com.tathvatech.survey.common.Section;
-import com.tathvatech.survey.common.SurveyDefinition;
-import com.tathvatech.survey.common.SurveyItem;
+import com.tathvatech.survey.common.*;
 import com.tathvatech.survey.entity.ResponseSubmissionBookmark;
 import com.tathvatech.survey.entity.Survey;
 import com.tathvatech.survey.exception.LockedByAnotherUserException;
 import com.tathvatech.survey.response.SurveyItemResponse;
 import com.tathvatech.survey.service.SurveyMaster;
+import com.tathvatech.survey.service.WorkflowManager;
 import com.tathvatech.unit.common.UnitLocationQuery;
 import com.tathvatech.unit.entity.UnitLocation;
 import com.tathvatech.unit.enums.Actions;
@@ -75,10 +74,12 @@ public class SurveyResponseController
 	private final SurveyResponseService surveyResponseService;
     private final UnitManager unitManager;
      private final UnitService unitService;
+	 private final ActivityLoggingDelegate activityLoggingDelegate;
     private final ProjectService projectService;
     private final SurveyMaster surveyMaster;
     private final WorkstationService workstationService;
 	private final PersistWrapper persistWrapper;
+	private  final WorkflowManager workflowManager;
     /**
      * Called when the workstation is changed to in progress
      */
@@ -153,7 +154,7 @@ public class SurveyResponseController
 		    
 			//add a workflow entry with the new responseId and the same status.. that way the response will be pickedup when
 			// clicking through from the myassignments table.
-			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, context.getUser().getPk(), resp.getResponseId(),
+			workflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, (int) context.getUser().getPk(), resp.getResponseId(),
 					testProc.getPk(), ResponseMasterNew.STATUS_INPROGRESS, null);
 
 			//record workstation save
@@ -241,7 +242,7 @@ public class SurveyResponseController
 		    
 			//add a workflow entry with the new responseId and the same status.. that way the response will be pickedup when
 			// clicking through from the myassignments table.
-			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, context.getUser().getPk(), resp.getResponseId(), 
+			workflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, (int) context.getUser().getPk(), resp.getResponseId(),
 					testProc.getPk(), ResponseMasterNew.STATUS_INPROGRESS, null);
 
 			//record workstation save
@@ -318,7 +319,7 @@ public class SurveyResponseController
 				
 				//add a workflow entry with the new responseId and the same status.. that way the response will be pickedup when
 				// clicking through from the myassignments table.
-				WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, userContext.getUser().getPk(), surveyResponse.getResponseId(), 
+				workflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, (int) userContext.getUser().getPk(), surveyResponse.getResponseId(),
 						testProc.getPk(), ResponseMasterNew.STATUS_INPROGRESS, null);
 
 				throw new AppException("Workstation associated with the test is in Waiting status, Form Saved but not Submitted");
@@ -334,11 +335,11 @@ public class SurveyResponseController
 			
 			//add a workflow entry with the new responseId and the same status.. that way the response will be pickedup when
 			// clicking through from the myassignments table.
-			WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, userContext.getUser().getPk(), surveyResponse.getResponseId(), 
-					testProc.getPk(), ResponseMasterNew.STATUS_INPROGRESS, null);
+			workflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, (int) userContext.getUser().getPk(), surveyResponse.getResponseId(),
+					testProc.getPk(), ResponseMasterNew.STATUS_INPROGRESS, (String) null);
 
 			boolean hasSectionsLockedByOtherUsers = false;
-			List<ObjectLock> lockedSections = SurveyMaster.getLockedSectionIds(surveyResponse.getOID());
+			List<ObjectLock> lockedSections = surveyMaster.getLockedSectionIds(surveyResponse.getOID());
 			for (Iterator iterator = lockedSections.iterator(); iterator.hasNext();)
 			{
 				ObjectLock aLock = (ObjectLock) iterator.next();
@@ -366,10 +367,10 @@ public class SurveyResponseController
 				else
 				{
 					surveyResponseService.finalizeSurveyResponse(userContext, surveyDef, surveyResponse.getResponseId());
-					ActivityLogQuery aLog1 = new ActivityLogQuery(userContext.getUser().getPk(), Actions.submitForm,
-							"Form Submitted", new Date(), new Date(), project.getPk(), testProc.getPk(), testProc.getUnitPk(), testProc.getWorkstationPk(), 
+					ActivityLogQuery aLog1 = new ActivityLogQuery((int) userContext.getUser().getPk(), (BaseActions) Actions.submitForm,
+							"Form Submitted", new Date(), new Date(), (int) project.getPk(), testProc.getPk(), testProc.getUnitPk(), testProc.getWorkstationPk(),
 							surveyResponse.getSurveyPk(), null, surveyResponse.getResponseId());
-					ActivityLoggingDelegate.logActivity(aLog1);
+					activityLoggingDelegate.logActivity(aLog1);
 				}
 			}
 
@@ -465,7 +466,7 @@ public class SurveyResponseController
 		
 	    //add a workflow entry with the new responseId and the same status.. that way the response will be pickedup when
 		// clicking through from the myassignments table.
-		WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, userContext.getUser().getPk(), resp.getResponseId(), 
+		workflowManager.addWorkflowEntry(FormWorkflow.ACTION_START, (int) userContext.getUser().getPk(), resp.getResponseId(),
 				testProc.getPk(), ResponseMasterNew.STATUS_INPROGRESS, null);
 
 
@@ -532,7 +533,7 @@ public class SurveyResponseController
 			//when editing a response, to maintain history of what the tester had submitted, the response should be copied to old.
 			// find the last workflow entry and if the action on that is editform, the response has been copied and edited, so continue edit on that. 
 			//else save the current response to a backup,
-			FormWorkflow lastEntry = WorkflowManager.getLastEntry(testProc.getOID());
+			FormWorkflow lastEntry = workflowManager.getLastEntry(testProc.getOID());
 
 			SurveyResponse responseToReturn;
 			if(FormWorkflow.ACTION_EDIT_RESPONSE.equals(lastEntry.getAction()))
@@ -550,12 +551,12 @@ public class SurveyResponseController
 				//create a copy of the response and mark it as incomplete so that the tester can
 				//carry on editing the form and resubmitting it
 				//create the new response, and set the current = true
-				FormResponseMaster respMaster = PersistWrapper.readByResponseId(FormResponseMaster.class, surveyResponse.getResponseId());
+				FormResponseMaster respMaster = persistWrapper.readByResponseId(FormResponseMaster.class, surveyResponse.getResponseId());
 				List<SectionResponse> sections = PersistWrapper.readList(SectionResponse.class, "select * from TAB_SECTION_RESPONSE where responseId = ?", surveyResponse.getResponseId());
 				List<FormResponseDesc> itemResponses = PersistWrapper.readList(FormResponseDesc.class, "select * from TAB_RESPONSE_desc where responseId = ?", surveyResponse.getResponseId());
 				respMaster.setResponseId(0);
 				respMaster.setCurrent(true);
-				int newResponseId = persistWrapper.createEntity(respMaster);
+				int newResponseId = (int) persistWrapper.createEntity(respMaster);
 				
 				for (Iterator iterator = sections.iterator(); iterator.hasNext();) 
 				{
@@ -581,7 +582,7 @@ public class SurveyResponseController
 	
 				
 				
-				WorkflowManager.addWorkflowEntry(FormWorkflow.ACTION_EDIT_RESPONSE, userContext.getUser().getPk(), newResponse.getResponseId(), 
+				workflowManager.addWorkflowEntry(FormWorkflow.ACTION_EDIT_RESPONSE, (int) userContext.getUser().getPk(), newResponse.getResponseId(),
 						testProc.getPk(), lastEntry.getResultStatus(), "Edit performed");
 
 
@@ -693,10 +694,10 @@ public class SurveyResponseController
 			TestProcObj testProc = testProcService.getTestProc(sResponse.getTestProcPk());
 		    UnitObj unit =unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 		    Project project = projectService.getProject(testProc.getProjectPk());
-		    ActivityLogQuery aLog = new ActivityLogQuery(userContext.getUser().getPk(), Actions.verifyForm,
-					"Form Verified", new Date(), new Date(), project.getPk(), testProc.getPk(), unit.getPk(), testProc.getWorkstationPk(),
+		    ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), (BaseActions) Actions.verifyForm,
+					"Form Verified", new Date(), new Date(), (int) project.getPk(), testProc.getPk(), (int) unit.getPk(), testProc.getWorkstationPk(),
 					sResponse.getSurveyPk(), null, sResponse.getResponseId());
-			ActivityLoggingDelegate.logActivity(aLog);
+			activityLoggingDelegate.logActivity(aLog);
 
 
 
@@ -713,11 +714,11 @@ public class SurveyResponseController
 			TestProcObj testProc = testProcService.getTestProc(sResponse.getTestProcPk());
 		    UnitObj unit = unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 		    Project project = projectService.getProject(testProc.getProjectPk());
-			ActivityLogQuery aLog = new ActivityLogQuery(userContext.getUser().getPk(), Actions.rejectVerifyForm, 
-					"Form Verification Rejected", new Date(), new Date(), project.getPk(), testProc.getPk(), 
-					unit.getPk(), testProc.getWorkstationPk(), 
+			ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), (BaseActions) Actions.rejectVerifyForm,
+					"Form Verification Rejected", new Date(), new Date(), (int) project.getPk(), testProc.getPk(),
+                    (int) unit.getPk(), testProc.getWorkstationPk(),
 					sResponse.getSurveyPk(), null, sResponse.getResponseId());
-			ActivityLoggingDelegate.logActivity(aLog);
+			activityLoggingDelegate.logActivity(aLog);
 	
 
 
@@ -732,11 +733,11 @@ public class SurveyResponseController
 	    	TestProcObj testProc = testProcService.getTestProc(resp.getTestProcPk());
 //		    UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 //		    Project project = ProjectManager.getProject(testProc.getProjectPk());
-	    	ActivityLogQuery aLog = new ActivityLogQuery(userContext.getUser().getPk(), Actions.approveForm, 
+	    	ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), Actions.approveForm,
 	    				"Form Approved", new Date(), new Date(), testProc.getProjectPk(), testProc.getPk(), 
 	    				testProc.getUnitPk(), testProc.getWorkstationPk(), 
 	    				testProc.getFormPk(), null, resp.getResponseId());
-	    	ActivityLoggingDelegate.logActivity(aLog);
+	    	activityLoggingDelegate.logActivity(aLog);
 	
 
     }
@@ -750,11 +751,11 @@ public class SurveyResponseController
 	    	TestProcObj testProc = testProcService.getTestProc(resp.getTestProcPk());
 //		    UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 //		    Project project = ProjectManager.getProject(testProc.getProjectPk());
-	    	ActivityLogQuery aLog = new ActivityLogQuery(userContext.getUser().getPk(), Actions.approveForm, 
+	    	ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), Actions.approveForm,
 	    				"Form approved with comments", new Date(), new Date(), testProc.getProjectPk(), testProc.getPk(), 
 	    				testProc.getUnitPk(), testProc.getWorkstationPk(), 
 	    				testProc.getFormPk(), null, resp.getResponseId());
-	    	ActivityLoggingDelegate.logActivity(aLog);
+	    	activityLoggingDelegate.logActivity(aLog);
 	
 
     }
@@ -773,11 +774,11 @@ public class SurveyResponseController
 
 				TestProcObj testProc = testProcService.getTestProc(resp.getTestProcPk());
 
-				ActivityLogQuery aLog = new ActivityLogQuery(userContext.getUser().getPk(), Actions.approveForm,
+				ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), Actions.approveForm,
 						"Form Approved", new Date(), new Date(), testProc.getProjectPk(), testProc.getPk(),
 						testProc.getUnitPk(), testProc.getWorkstationPk(),
 						resp.getFormPk(), null, resp.getResponseId());
-				ActivityLoggingDelegate.logActivity(aLog);
+				activityLoggingDelegate.logActivity(aLog);
 			}
 	}
 	
@@ -792,11 +793,11 @@ public class SurveyResponseController
 			TestProcObj testProc = testProcService.getTestProc(sResponse.getTestProcPk());
 		    UnitObj unit =unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 		    Project project = projectService.getProject(testProc.getProjectPk());
-			ActivityLogQuery aLog = new ActivityLogQuery(userContext.getUser().getPk(), Actions.rejectApproveForm, 
-					"Form Approval Rejected", new Date(), new Date(), project.getPk(), testProc.getPk(), 
+			ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), (BaseActions) Actions.rejectApproveForm,
+					"Form Approval Rejected", new Date(), new Date(), (int) project.getPk(), testProc.getPk(),
 					testProc.getUnitPk(), testProc.getWorkstationPk(), 
 					sResponse.getSurveyPk(), null, sResponse.getResponseId());
-			ActivityLoggingDelegate.logActivity(aLog);
+		activityLoggingDelegate.logActivity(aLog);
 	
 
     }
@@ -811,11 +812,11 @@ public class SurveyResponseController
 	    	TestProcObj testProc = testProcService.getTestProc(sResponse.getTestProcPk());
 		    UnitObj unit = unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 		    Project project = projectService.getProject(testProc.getProjectPk());
-	    	ActivityLogQuery aLog = new ActivityLogQuery(userContext.getUser().getPk(), Actions.rejectApproveForm, 
-	    			"Approved form reopened", new Date(), new Date(), project.getPk(), testProc.getPk(), 
+	    	ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), (BaseActions) Actions.rejectApproveForm,
+	    			"Approved form reopened", new Date(), new Date(), (int) project.getPk(), testProc.getPk(),
 	    			testProc.getUnitPk(), testProc.getWorkstationPk(), 
 	    			sResponse.getSurveyPk(), null, sResponse.getResponseId());
-	    	ActivityLoggingDelegate.logActivity(aLog);
+	    	activityLoggingDelegate.logActivity(aLog);
 	
 
     }
@@ -839,7 +840,7 @@ public class SurveyResponseController
 			SurveyItem aItem = (SurveyItem) iter.next();
 			if(aItem instanceof Section)
 			{
-				ObjectLockQuery lock = SurveyDelegate.getCurrentLock(responseOID, 
+				ObjectLockQuery lock = surveyMaster.getCurrentLock(responseOID,
 						aItem.getSurveyItemId());
 			
 				if(lock == null)
@@ -933,7 +934,7 @@ public class SurveyResponseController
 //	}
 
 	
-	public  FormItemResponse getFormItemResponse(FormItemResponseOID formItemResponseOID)
+	public FormItemResponse getFormItemResponse(FormItemResponseOID formItemResponseOID)
 	{
 		return	surveyResponseService.getFormItemResponse(formItemResponseOID);
 	}

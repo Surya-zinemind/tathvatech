@@ -30,6 +30,7 @@ import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.utils.DateUtils;
+import com.tathvatech.workstation.common.DummyWorkstation;
 import com.tathvatech.workstation.common.UnitInProjectObj;
 import com.tathvatech.workstation.entity.UnitWorkstation;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class FormServiceImpl implements  FormService{
     private final TestProcService testProcService;
+    private final DummyWorkstation dummyWorkstation;
     private final PersistWrapper persistWrapper;
     private final SurveyMaster surveyMaster;
     private final UnitManager unitManager;
@@ -134,7 +136,7 @@ public class FormServiceImpl implements  FormService{
         req.setUnitOID(rootUnitOID);
         req.setIncludeChildren(true);
         List<UnitWorkstationListReportResultRow> wsSummaryRows = new UnitWorkstationListReport(
-                context, req).runReport();
+                context, req, persistWrapper,  dummyWorkstation, unitManager).runReport();
 
         // create a hashmap of UnitWorkstationOID and the wsStatusSummary
         HashMap<UnitWorkstationOID, UnitWorkstationListReportResultRow> unitWorkstationMap = new HashMap<UnitWorkstationOID, UnitWorkstationListReportResultRow>();
@@ -151,7 +153,7 @@ public class FormServiceImpl implements  FormService{
         filter.setUnitOID(rootUnitOID);
         filter.setIncludeChildren(true);
         filter.setFetchWorkstationForecastAsTestForecast(false);
-        List<UnitFormQuery> list = new TestProcListReport(context, filter).getTestProcs();
+        List<UnitFormQuery> list = new TestProcListReport(context, filter, persistWrapper,  unitManager, dummyWorkstation).getTestProcs();
         HashMap<TestProcOID, UnitFormQuery> testProcMap = new HashMap<TestProcOID, UnitFormQuery>();
         for (Iterator iterator = list.iterator(); iterator.hasNext();)
         {
@@ -244,7 +246,7 @@ public class FormServiceImpl implements  FormService{
         TestProcFilter listFilter = new TestProcFilter(projectOIDToMoveTo);
         listFilter.setUnitOID(unitOIDToMoveTo);
         listFilter.setIncludeChildren(false);
-        List<UnitFormQuery> testList = new TestProcListReport(userContext, listFilter).getTestProcs();
+        List<UnitFormQuery> testList = new TestProcListReport(userContext, listFilter,persistWrapper,  unitManager, dummyWorkstation).getTestProcs();
         HashMap<String, UnitFormQuery> targetUnitTestMap = new HashMap<String, UnitFormQuery>();
         for (Iterator iterator = testList.iterator(); iterator.hasNext();)
         {
@@ -315,9 +317,8 @@ public class FormServiceImpl implements  FormService{
         request.setUnitOID(unitOIDToMoveTo);
         request.setIncludeChildrenUnits(false);
         request.setProjectOIDForUnitHeirarchy(projectOIDToMoveTo);
-        request.setGroupingSet(Arrays.asList(new TestProcStatusSummaryReportRequest.GroupingCol[] { GroupingCol.workstation }));
-        TestProcStatusSummaryReport report = new TestProcStatusSummaryReport(
-                userContext, request);
+        request.setGroupingSet(Arrays.asList(new TestProcStatusSummaryReportRequest.GroupingCol[] { TestProcStatusSummaryReportRequest.GroupingCol.workstation }));
+        TestProcStatusSummaryReport report = new TestProcStatusSummaryReport( persistWrapper, dummyWorkstation, unitManager, userContext, request);
         TestProcStatusSummaryReportResult result = report.runReport();
         List<TestProcStatusSummaryReportResultRow> resultRows = result.getReportResult();
         HashMap<WorkstationOID, TestProcStatusSummaryReportResultRow> unitWsLookupMap = new HashMap<>();
@@ -374,7 +375,7 @@ public class FormServiceImpl implements  FormService{
             TestProcFilter listFilter = new TestProcFilter(new ProjectOID(aTest.getProjectPk()));
             listFilter.setUnitOID(new UnitOID(rootUnitPk));
             listFilter.setIncludeChildren(true);
-            List<UnitFormQuery> testList = new TestProcListReport(userContext, listFilter).getTestProcs();
+            List<UnitFormQuery> testList = new TestProcListReport(userContext, listFilter,persistWrapper, unitManager, dummyWorkstation).getTestProcs();
             for (Iterator iterator = testList.iterator(); iterator.hasNext();)
             {
                 UnitFormQuery test = (UnitFormQuery) iterator.next();
