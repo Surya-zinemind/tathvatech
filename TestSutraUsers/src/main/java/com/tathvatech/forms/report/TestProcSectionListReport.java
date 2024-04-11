@@ -4,37 +4,41 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
+import com.tathvatech.unit.service.UnitManager;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.common.exception.AppException;
+import com.tathvatech.forms.enums.FormStatusEnum;
+import com.tathvatech.unit.entity.UnitLocation;
 import com.tathvatech.common.common.QueryObject;
+import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.common.TestProcSectionListFilter;
 import com.tathvatech.forms.common.TestProcSectionListReportResultRow;
-import com.tathvatech.testsutra.ncr.common.QueryObject;
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.common.DummyWorkstation;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.project.UnitLocation;
-import com.tathvatech.ts.core.survey.response.FormStatusEnum;
+
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.utils.DateUtils;
-import com.thirdi.surveyside.project.UnitInProjectObj;
-import com.thirdi.surveyside.project.UnitManager;
-import com.thirdi.surveyside.utils.DateUtils;
+import com.tathvatech.workstation.common.DummyWorkstation;
+import com.tathvatech.workstation.common.UnitInProjectObj;
+
 
 public class TestProcSectionListReport
 {
 	private TestProcSectionListFilter filter;
+	private final PersistWrapper persistWrapper;
+	private final DummyWorkstation dummyWorkstation;
+	private final UnitManager unitManager;
 	private Date forecastTestStartDateFrom = null;
 	private Date forecastTestStartDateTo = null;
 	private Date forecastTestCompletionDateFrom = null;
 	private Date forecastTestCompletionDateTo = null;
 
-	public TestProcSectionListReport(UserContext context, TestProcSectionListFilter filter)
+	public TestProcSectionListReport(UserContext context, TestProcSectionListFilter filter, PersistWrapper persistWrapper, DummyWorkstation dummyWorkstation, UnitManager unitManager)
 	{
 		this.filter = filter;
-		
-		if (filter.getForecastTestStartDateFilter() != null)
+        this.persistWrapper = persistWrapper;
+        this.dummyWorkstation = dummyWorkstation;
+        this.unitManager = unitManager;
+
+        if (filter.getForecastTestStartDateFilter() != null)
 		{
 			Date[] forecastStartDateRange = filter.getForecastTestStartDateFilter().getResolvedDateRangeValues();
 			if(forecastStartDateRange != null)
@@ -68,7 +72,7 @@ public class TestProcSectionListReport
 	public  List<TestProcSectionListReportResultRow> getTestProcs()
 	{
 		QueryObject q = getSql();
-    	return PersistWrapper.readList(TestProcSectionListReportResultRow.class, q.getQuery(), (q.getParams().size() > 0)?q.getParams().toArray(new Object[q.getParams().size()]):null);
+    	return persistWrapper.readList(TestProcSectionListReportResultRow.class, q.getQuery(), (q.getParams().size() > 0)?q.getParams().toArray(new Object[q.getParams().size()]):null);
 	}
 	
 	public QueryObject getSql()
@@ -164,7 +168,7 @@ public class TestProcSectionListReport
 		+ " join TAB_UNIT u on uth.unitPk = u.pk "
 		+ " join TAB_UNIT_H uh on uh.unitPk = u.pk and now() between uh.effectiveDateFrom and uh.effectiveDateTo"
 		+ " join TAB_PROJECT p on uth.projectPk = p.pk "
-		+ " join TAB_WORKSTATION w on uth.workstationPk = w.pk and w.pk != " + DummyWorkstation.getPk() + ""
+		+ " join TAB_WORKSTATION w on uth.workstationPk = w.pk and w.pk != " + dummyWorkstation.getPk() + ""
 		+ " join TAB_UNIT_WORKSTATIONS uw on uth.unitPk = uW.unitPk and uth.projectPk = uw.projectPk and uth.workstationPk = uw.workstationPk "
 		+ " join site on w.sitePk = site.pk"
 		+ " join TAB_SURVEY f on tfa.formFk = f.pk "
@@ -195,7 +199,7 @@ public class TestProcSectionListReport
 				{
 					throw new AppException("Project should be specified to include chileren of the selected unit");
 				}
-				UnitInProjectObj unit = UnitManager.getUnitInProject(filter.getUnitOID(), filter.getProjectOID());
+				UnitInProjectObj unit = unitManager.getUnitInProject(filter.getUnitOID(), filter.getProjectOID());
 				sb.append(" and ( (upr.unitPk = ? and upr.projectPk = ?) or (uprh.rootParentPk = ? and uprh.heiCode like ?) ) ");
 				params.add(filter.getUnitOID().getPk());
 				params.add(filter.getProjectOID().getPk());

@@ -31,6 +31,7 @@ import com.tathvatech.user.utils.DateUtils;
 import com.tathvatech.workstation.common.DummyWorkstation;
 import com.tathvatech.workstation.common.UnitInProjectObj;
 import com.tathvatech.workstation.entity.UnitWorkstation;
+import com.tathvatech.workstation.service.WorkstationService;
 import lombok.RequiredArgsConstructor;
 import com.tathvatech.workstation.oid.UnitWorkstationOID;
 import com.tathvatech.survey.service.SurveyMaster;
@@ -44,6 +45,7 @@ public class FormServiceImpl implements  FormService{
     private final DummyWorkstation dummyWorkstation;
     private final PersistWrapper persistWrapper;
     private final SurveyMaster surveyMaster;
+    private final WorkstationService workstationService;
     private final UnitManager unitManager;
     private final CommonServiceManager commonServiceManager;
     private final UnitInProjectDAO unitInProjectDAO;
@@ -166,7 +168,7 @@ public class FormServiceImpl implements  FormService{
         secFilter.setUnitOID(rootUnitOID);
         secFilter.setIncludeChildren(true);
         secFilter.setFetchWorkstationOrTestForecastAsSectionForecast(false);
-        List<TestProcSectionListReportResultRow> secList = new TestProcSectionListReport(context, secFilter)
+        List<TestProcSectionListReportResultRow> secList = new TestProcSectionListReport(context, secFilter, persistWrapper,  dummyWorkstation, unitManager)
                 .getTestProcs();
         HashMap<TestProcSectionOID, TestProcSectionListReportResultRow> testProcSectionMap = new HashMap<TestProcSectionOID, TestProcSectionListReportResultRow>();
         for (Iterator iterator = secList.iterator(); iterator.hasNext();)
@@ -335,7 +337,7 @@ public class FormServiceImpl implements  FormService{
             WorkstationOID workstationOID = (WorkstationOID) iterator.next();
 
             String currentStatus = UnitLocation.STATUS_WAITING;
-            UnitLocation currentWsStatus = getUnitWorkstation(unitOIDToMoveTo.getPk(), projectOIDToMoveTo,
+            UnitLocation currentWsStatus = workstationService.getUnitWorkstation((int) unitOIDToMoveTo.getPk(), projectOIDToMoveTo,
                     workstationOID);
             if (currentWsStatus != null)
                 currentStatus = currentWsStatus.getStatus();
@@ -347,7 +349,7 @@ public class FormServiceImpl implements  FormService{
                 {
                     if (!(UnitLocation.STATUS_IN_PROGRESS.equals(currentStatus)))
                     {
-                        setUnitWorkstationStatus(userContext, unitOIDToMoveTo.getPk(), projectOIDToMoveTo,
+                        workstationService.setUnitWorkstationStatus(userContext, (int) unitOIDToMoveTo.getPk(), projectOIDToMoveTo,
                                 workstationOID, UnitLocation.STATUS_IN_PROGRESS);
                     }
                 }
