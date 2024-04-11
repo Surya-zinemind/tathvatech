@@ -32,7 +32,7 @@ import com.tathvatech.user.entity.Attachment;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.user.service.AccountService;
 import com.tathvatech.user.service.PlanSecurityManager;
-import org.apache.catalina.Container;
+
 import org.aspectj.apache.bcel.classfile.Field;
 import org.jdom2.Element;
 

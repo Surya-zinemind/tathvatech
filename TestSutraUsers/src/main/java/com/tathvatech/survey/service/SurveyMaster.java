@@ -7,6 +7,7 @@
 package com.tathvatech.survey.service;
 import com.tathvatech.forms.common.*;
 import com.tathvatech.forms.report.FormListReport;
+import com.tathvatech.report.enums.ReportTypes;
 import com.tathvatech.tasks.controller.TasksDelegate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -409,7 +410,7 @@ private final TimeEntryManager timeEntryManager;
 	{
 		FormFilter filter = new FormFilter();
 		filter.setStatus(new String[]{Survey.STATUS_OPEN});
-		ReportRequest req = new ReportRequest(FormListReport);
+		ReportRequest req = new ReportRequest(ReportTypes.FormListReport);
 		req.setFetchRowCount(false);
 		req.setFilter(filter);
 		req.setFetchAllRows(true);
