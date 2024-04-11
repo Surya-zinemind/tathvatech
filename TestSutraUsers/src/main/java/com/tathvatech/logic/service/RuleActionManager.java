@@ -14,6 +14,7 @@ import java.util.List;
 
 
 import com.tathvatech.logic.common.LogicAction;
+import com.tathvatech.logic.common.LogicActionConfig;
 import com.tathvatech.survey.common.SurveyDefinition;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -48,7 +49,7 @@ public class RuleActionManager
     {
         try
         {
-            LogicActionConfig lConfig = (LogicActionConfig)actionTypesMap.get(_actionName); 
+            LogicActionConfig lConfig = (LogicActionConfig)actionTypesMap.get(_actionName);
             String className = lConfig.getTypeClass();
             if (logger.isDebugEnabled())
             {
