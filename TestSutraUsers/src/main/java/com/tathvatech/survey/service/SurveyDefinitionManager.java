@@ -6,7 +6,7 @@
  */
 package com.tathvatech.survey.service;
 
-import java.awt.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -24,11 +24,8 @@ import com.tathvatech.forms.common.FormQuery;
 import com.tathvatech.forms.enums.FormTypeEnum;
 import com.tathvatech.forms.intf.SectionBase;
 import com.tathvatech.logic.common.Logic;
-import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.common.*;
 
-import com.tathvatech.survey.common.SurveyItem;
-import com.tathvatech.survey.common.SurveyItemOrderComparator;
-import com.tathvatech.survey.common.SurveySaveItem;
 import com.tathvatech.survey.entity.Survey;
 import com.tathvatech.survey.exception.SurveyNotEditableException;
 import com.tathvatech.survey.inf.SurveyItemBase;
@@ -37,6 +34,7 @@ import com.tathvatech.user.OID.FormOID;
 import com.tathvatech.user.service.AccountServiceImpl;
 
 import lombok.RequiredArgsConstructor;
+import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
@@ -44,7 +42,7 @@ import org.jdom2.output.XMLOutputter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.text.Document;
+
 
 /**
  * @author Hari

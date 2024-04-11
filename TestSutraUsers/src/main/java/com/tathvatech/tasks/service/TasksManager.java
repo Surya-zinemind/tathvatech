@@ -16,11 +16,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TasksManager {
 	private final PersistWrapper persistWrapper;
+	private Task task;
 
 	public  void saveTask(UserContext userContext,
 								OID associatedObjectOid, OID assignedTo, TaskDefBean taskDef) throws Exception
 	{
-        Task task = new Task();
+
         if(assignedTo != null)
         {
         	task.setAssignedToPk(assignedTo.getPk());

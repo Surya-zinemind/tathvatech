@@ -15,8 +15,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import com.tathvatech.common.common.FileStoreManager;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.utils.ListStringUtil;
 import com.tathvatech.forms.common.FormDesignListener;
+import com.tathvatech.forms.common.FormEventListner;
+import com.tathvatech.forms.controller.TestProcController;
+import com.tathvatech.forms.response.ResponseMasterNew;
+import com.tathvatech.ncr.common.NcrItemQuery;
+import com.tathvatech.openitem.andon.entity.OpenItemV2;
 import com.tathvatech.survey.enums.AnswerPersistor;
 import com.tathvatech.forms.common.ExpectedNumericValue;
 import com.tathvatech.forms.entity.FormItemResponse;
@@ -24,8 +32,19 @@ import com.tathvatech.logic.common.Logic;
 import com.tathvatech.survey.response.SimpleSurveyItemResponse;
 import com.tathvatech.survey.response.SurveyItemResponse;
 import com.tathvatech.survey.response.SurveyResponse;
+import com.tathvatech.survey.service.SurveyResponseService;
 import com.tathvatech.unit.common.UnitFormQuery;
+import com.tathvatech.unit.common.UnitObj;
+import com.tathvatech.unit.common.UnitQuery;
 import com.tathvatech.unit.response.ResponseUnit;
+import com.tathvatech.unit.service.UnitService;
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.UnitOID;
+import com.tathvatech.user.common.AttachmentInfoBean;
+import com.tathvatech.user.common.SecurityContext;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.service.PlanSecurityManager;
 import jakarta.persistence.Table;
 import org.jdom2.Element;
 import org.slf4j.Logger;
@@ -45,6 +64,8 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 {
 
 	private static final Logger logger = LoggerFactory.getLogger(BomInspectItemAnswerType.class);
+	private final SurveyResponseService surveyResponseService;
+	private final UnitService unitService;
 	private enum DisplayModeEnum {ViewMode, DataEntryMode}; // this is currently used only for the P8Transfer Menu.
 
 	// if no maxlength is defined, set it to 1
@@ -95,19 +116,23 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 	/**
      *
      */
-	public BomInspectItemAnswerType()
+	public BomInspectItemAnswerType(SurveyResponseService surveyResponseService, UnitService unitService)
 	{
 		super();
 
-	}
+        this.surveyResponseService = surveyResponseService;
+        this.unitService = unitService;
+    }
 
 	/**
 	 * @param _survey
 	 */
-	public BomInspectItemAnswerType(SurveyDefinition _survey)
+	public BomInspectItemAnswerType(SurveyDefinition _survey, SurveyResponseService surveyResponseService, UnitService unitService)
 	{
 		super(_survey);
-	}
+        this.surveyResponseService = surveyResponseService;
+        this.unitService = unitService;
+    }
 
 	public String getTypeName()
 	{
@@ -1178,8 +1203,7 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 	}
 
 	public void drawResponseFieldInt(UnitFormQuery testProc, final SurveyResponse sResponse, 
-			TSTableContainer table, int index,  String[] flags, final FormEventListner formEventListner)
-	{
+			TSTableContainer table, int index,  String[] flags, final FormEventListner formEventListner) throws Exception {
 		this.testProc = testProc;
 		
 		final UserContext userContext = (EtestApplication.getInstance()).getUserContext();
@@ -1578,7 +1602,7 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 		
 		if (sResponse != null)
 		{
-			final FormItemResponse formItemResponse = SurveyResponseDelegate.getFormItemResponse(sResponse.getResponseId(), BomInspectItemAnswerType.this.getSurveyItemId(), true);
+			final FormItemResponse formItemResponse =surveyResponseService.getFormItemResponse(sResponse.getResponseId(), BomInspectItemAnswerType.this.getSurveyItemId(), true);
 			oilItemList = OILDelegate.getTestProcItemFailureQuery(formItemResponse.getOID());
 
 // no need for comments during dataentry			
@@ -1807,8 +1831,7 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 	
 	public boolean drawResponseDetailInt(final UserContext userContext, UnitFormQuery testProc,  
 			final SurveyResponse sResponse, TSTableContainer  table, int index, boolean isLatestResponse, String[] flags,
-			final TestProcController testProcController)
-	{
+			final TestProcController testProcController) throws Exception {
 		this.testProc = testProc;
 		List thisItemFlagList = this.getFlagsAsList();
 		boolean matchFlagsToDisplay = false;
@@ -1818,7 +1841,7 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 		{
 			formItemResponse = testProcController.getFormItemResponseMap().get(getSurveyItemId());
 			if(formItemResponse == null)
-				formItemResponse = SurveyResponseDelegate.createFormItemResponse(sResponse.getResponseId(), BomInspectItemAnswerType.this.getSurveyItemId());
+				formItemResponse = surveyResponseService.createFormItemResponse(sResponse.getResponseId(), BomInspectItemAnswerType.this.getSurveyItemId());
 		}		
 
 		List flagList = new ArrayList();
@@ -2151,7 +2174,7 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 				{
 					try
 					{
-						new QuestionSummaryViewer(BomInspectItemAnswerType.this.testProc.getPk(), sResponse.getSurveyDefinition(), 
+						new QuestionSummaryViewer(BomInspectItemAnswerType.this.testProc.getPk(), sResponse.getSurveyDefinition(),
 								sResponse.getSurveyPk(), BomInspectItemAnswerType.this).showQuestionResponseHistoryUnit();
 					}
 					catch (Exception e)
@@ -2425,7 +2448,7 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 			if(imageAttachCols.size() > 0)
 			{
 				fileUpload = new FileUploadForm("Attach Picture", "jpg,jpeg,png,gif,tiff,tif", imageFileDisplayName, 
-						(imageFileName != null)?FileStoreManager.getFile(imageFileName):null, false, new FileUploadForm.FileUploadListener() {
+						(imageFileName != null)? FileStoreManager.getFile(imageFileName):null, false, new FileUploadForm.FileUploadListener() {
 							
 							@Override
 							public void uploadComplete(File file, String fileDisplayName)
@@ -2871,8 +2894,8 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 					{
 						if(aOil.getOilItemType() == EntityTypeEnum.OpenItem.getValue())
 						{
-							UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(BomInspectItemAnswerType.this.testProc.getUnitPk()));
-							UnitQuery unitQuery = ProjectManager.getUnitQueryByPk(unit.getPk(), new ProjectOID(BomInspectItemAnswerType.this.testProc.getProjectPk()));
+							UnitObj unit = unitService.getUnitByPk(new UnitOID(BomInspectItemAnswerType.this.testProc.getUnitPk()));
+							UnitQuery unitQuery = unitService.getUnitQueryByPk((int) unit.getPk(), new ProjectOID(BomInspectItemAnswerType.this.testProc.getProjectPk()));
 
 							OpenItemInfoBean openItemInfoBean = OILDelegate.getOpenItem(aOil.getOilItemPk());
 							OpenItemEditForm openItemEditForm = new OpenItemEditForm(OpenItemEditForm.FormMode.DetailViewMode, unitQuery, new ProjectOID(unitQuery.getProjectPk(), null), null, openItemInfoBean, new OpenItemFormListener() {
@@ -2936,10 +2959,10 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 			
 			p8Root.addItem("Link to an existing open item", selectedItem -> 
 			{
-				formItemResponse = SurveyResponseDelegate.getFormItemResponse(sResponse.getResponseId(), BomInspectItemAnswerType.this.getSurveyItemId(), true);
+				formItemResponse = surveyResponseService.getFormItemResponse(sResponse.getResponseId(), BomInspectItemAnswerType.this.getSurveyItemId(), true);
 
-				UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(BomInspectItemAnswerType.this.testProc.getUnitPk()));
-				UnitQuery unitQuery = ProjectManager.getUnitQueryByPk(unit.getPk(), new ProjectOID(BomInspectItemAnswerType.this.testProc.getProjectPk()));
+				UnitObj unit =unitService.getUnitByPk(new UnitOID(BomInspectItemAnswerType.this.testProc.getUnitPk()));
+				UnitQuery unitQuery =unitService.getUnitQueryByPk((int) unit.getPk(), new ProjectOID(BomInspectItemAnswerType.this.testProc.getProjectPk()));
 				
 				OpenItemV2.StatusEnum[] openItemStatus = null;
 				List<User> projectManagers = ProjectManager.getProjectManagers(unitQuery.getProjectOID());
@@ -3006,10 +3029,10 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 
 			p8Root.addItem("Create new open item", selectedItem -> 
 			{
-				formItemResponse = SurveyResponseDelegate.getFormItemResponse(sResponse.getResponseId(), BomInspectItemAnswerType.this.getSurveyItemId(), true);
+				formItemResponse = surveyResponseService.getFormItemResponse(sResponse.getResponseId(), BomInspectItemAnswerType.this.getSurveyItemId(), true);
 
-				UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(BomInspectItemAnswerType.this.testProc.getUnitPk()));
-				UnitQuery unitQuery = ProjectManager.getUnitQueryByPk(unit.getPk(), new ProjectOID(BomInspectItemAnswerType.this.testProc.getProjectPk()));
+				UnitObj unit =unitService.getUnitByPk(new UnitOID(BomInspectItemAnswerType.this.testProc.getUnitPk()));
+				UnitQuery unitQuery = unitService.getUnitQueryByPk((int) unit.getPk(), new ProjectOID(BomInspectItemAnswerType.this.testProc.getProjectPk()));
 				OpenItemEditForm openItemEditForm = new OpenItemEditForm(OpenItemEditForm.FormMode.EditViewMode, unitQuery, new ProjectOID(unitQuery.getProjectPk(), null), null, new OpenItemInfoBean(), new OpenItemFormListener() {
 
 					@Override
