@@ -364,10 +364,7 @@ public class SurveyDefinitionManager extends Object
         outStream.close();
     }
 
-    *//**
-     * @param questionId
-     * @param newLocationId
-     *//*
+
     public void moveQuestionToLocation(String questionId, String newLocationId)throws Exception
     {
         String status = survey.getStatus();
@@ -525,11 +522,7 @@ public class SurveyDefinitionManager extends Object
         
         return newQuestion;
     }
-    
-    /**
-     * @param questionId
-     * @param newLocationId
-     */
+
     public SurveyItem copyQuestionToLocation(FormQuery sourceForm, SurveyItem sourceItem, String destinationParentItemId, String newLocationId)throws Exception
     {
         String status = survey.getStatus();
@@ -943,7 +936,7 @@ public class SurveyDefinitionManager extends Object
      * saves a logic to the surveydefinition file
      * @param item
      * @param logic
-     * @param paramMap
+     * @param
      * @return
      */
     public Logic updateLogic(SurveyItem item, Logic logic)throws Exception

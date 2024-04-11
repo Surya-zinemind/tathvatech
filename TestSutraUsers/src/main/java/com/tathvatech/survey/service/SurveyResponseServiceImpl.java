@@ -74,7 +74,6 @@ import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.workstation.common.DummyWorkstation;
 import com.tathvatech.workstation.service.WorkstationService;
-import org.apache.catalina.Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -1200,7 +1199,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 	/**
 	 * saves the current state of the response as a JSON adds it as an attachment to the testproc.
 	 * @param context
-	 * @param surveyResponse
+	 * @param
 	 * @return
 	 * @throws Exception
 	 */
@@ -1227,7 +1226,8 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 		if(createRevisionNoOnFormSubmit != null && true == createRevisionNoOnFormSubmit)
 		{
 			//The sequence order will be like below
-			*//*
+
+			/*
 			 * 1.01 interim
 			 * 1.02 interim
 			 * 1.03 interim
@@ -1235,7 +1235,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 			 * 2.01 interim
 			 * 2.02 interim
 			 * 2 final
-			 *//*
+			 */
 			if(ResponseSubmissionBookmark.SubmissionTypeEnum.Final == submissionType)
 			{
 				int finalSeq = sequenceIdGenerator.getNextSequence(ResponseSubmissionBookmark.name(), ""+respM.getTestProcPk(), ResponseSubmissionBookmark.SubmissionTypeEnum.Final.name(), null, null);
@@ -3216,9 +3216,9 @@ public  void rejectApproval(UserContext userContext, SurveyResponse sResponse, S
 									lockedUser.getFirstName() + " " + lockedUser.getLastName());
 						} else
 						{
-							*//*
+						/*
 							 * show locked by other user..
-							 *//*
+							 */
 							sectionResponseBean.setLockStatus(SectionLockStatusEnum.LockedByOther);
 							User lockedUser = accountService.getUser(lock.getUserPk());
 							sectionResponseBean.setLockedByUserPk((int) lockedUser.getPk());
