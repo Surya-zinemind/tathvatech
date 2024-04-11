@@ -6,6 +6,7 @@
  */
 package com.tathvatech.survey.service;
 import com.tathvatech.forms.common.*;
+import com.tathvatech.forms.report.FormListReport;
 import com.tathvatech.tasks.controller.TasksDelegate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -215,12 +216,6 @@ private final TimeEntryManager timeEntryManager;
 		return survey;
 	}
 
-	/**
-	 * @param account
-	 * @param _surveyName
-	 * @param _fileName
-	 * @param tableName
-	 */
 	public  Survey createSurveyNewVersion(UserContext context, Survey newVersion, FormQuery baseRevision) throws Exception
 	{
 		Survey survey = surveyMaster.getSurveyByPk(baseRevision.getPk());
@@ -261,12 +256,7 @@ private final TimeEntryManager timeEntryManager;
 		return survey;
 	}
 
-	/**
-	 * @param account
-	 * @param _surveyName
-	 * @param _fileName
-	 * @param tableName
-	 */
+
 	public  Survey createSurveyByCopy(UserContext context, Survey survey, int sourceSurveyPk) throws Exception
 	{
 		User user = (User)context.getUser();
@@ -313,7 +303,7 @@ private final TimeEntryManager timeEntryManager;
 	 * mark the survey status as deleted.// the survey list will not show these
 	 * items . a complete removal should be done manually.
 	 *
-	 * @param surveyDef
+	 * @param
 	 */
 	public  void deleteSurvey(int surveyPk) throws Exception
 	{

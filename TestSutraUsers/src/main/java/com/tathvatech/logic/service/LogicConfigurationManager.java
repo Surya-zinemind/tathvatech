@@ -7,12 +7,14 @@
 package com.tathvatech.logic.service;
 
 
+import com.tathvatech.logic.common.Condition;
+import com.tathvatech.logic.common.TextBoxCondition;
 import com.tathvatech.site.service.SiteServiceImpl;
 import com.tathvatech.survey.common.SurveyDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.locks.Condition;
+
 
 /**
  * @author Hari

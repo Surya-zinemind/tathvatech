@@ -1,6 +1,7 @@
 package com.tathvatech.openitem.andon.entity;
 
 import com.tathvatech.common.entity.AbstractEntity;
+import com.tathvatech.openitem.andon.oids.OpenItemOID;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -81,7 +82,7 @@ public class OpenItemV2 extends AbstractEntity implements Serializable
 
 	public OpenItemOID getOID() 
 	{
-		return new OpenItemOID(pk, referenceNo);
+		return new OpenItemOID((int) pk, referenceNo);
 	}
 
 	@Override
