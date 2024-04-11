@@ -61,7 +61,7 @@ public class WorkorderManager
 			throw new AppException("Workorders not supported for type " + requestBean.getEntityOID().getEntityType());
 		}
 
-		Workorder workorder =worgetWorkorderForEntity(requestBean.getEntityOID());
+		Workorder workorder =getWorkorderForEntity(requestBean.getEntityOID());
 		if(workorder != null)
 			return; // workorder already exists. so just return;
 		
