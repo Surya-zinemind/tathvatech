@@ -24,6 +24,7 @@ import com.tathvatech.forms.common.ObjectLockQuery;
 import com.tathvatech.forms.entity.*;
 import com.tathvatech.forms.oid.FormResponseOID;
 import com.tathvatech.forms.response.FormResponseBean;
+import com.tathvatech.forms.response.ResponseMaster;
 import com.tathvatech.project.service.ProjectService;
 import com.tathvatech.survey.common.*;
 import com.tathvatech.survey.entity.ResponseSubmissionBookmark;
@@ -127,7 +128,7 @@ public class SurveyResponseController
 		    }
 		    
 		    //check the workstation status.
-			UnitLocationQuery unitWorkstation = workstationService.getUnitWorkstationStatus(testProc.getUnitPk(), new ProjectOID(testProc.getProjectPk(), null), new WorkstationOID(testProc.getWorkstationPk(), null));
+			UnitLocationQuery unitWorkstation = workstationService.getUnitWorkstationStatus(new UnitOID(testProc.getUnitPk()), new ProjectOID(testProc.getProjectPk(), null), new WorkstationOID(testProc.getWorkstationPk(), null));
 			if(UnitLocation.STATUS_COMPLETED.equals(unitWorkstation.getStatus()))
 			{
 				throw new AppException("Workstation is complete for the unit, Form cannot be saved or submitted");
@@ -227,7 +228,7 @@ public class SurveyResponseController
 		    }
 		    
 		    //check the workstation status.
-			UnitLocationQuery unitWorkstation = workstationService.getUnitWorkstationStatus(testProc.getUnitPk(), new ProjectOID(testProc.getProjectPk(), null), new WorkstationOID(testProc.getWorkstationPk(), null));
+			UnitLocationQuery unitWorkstation = workstationService.getUnitWorkstationStatus(new UnitOID(testProc.getUnitPk()), new ProjectOID(testProc.getProjectPk(), null), new WorkstationOID(testProc.getWorkstationPk(), null));
 			if(UnitLocation.STATUS_COMPLETED.equals(unitWorkstation.getStatus()))
 			{
 				throw new AppException("Workstation is complete for the unit, Form cannot be saved or submitted");
@@ -255,8 +256,8 @@ public class SurveyResponseController
     }
 
     /**
-     * @param sd
-     * @param responseId
+     * @param
+     * @param
      */
     public  void finalizeSurveyResponse(UserContext userContext, SurveyDefinition surveyDef,
 	    SurveyResponse surveyResponse) throws Exception
@@ -306,7 +307,7 @@ public class SurveyResponseController
 			}
 		    
 		    //check the workstation status.
-			UnitLocationQuery unitWorkstation = workstationService.getUnitWorkstationStatus(testProc.getUnitPk(), new ProjectOID(testProc.getProjectPk(), null), new WorkstationOID(testProc.getWorkstationPk(), null));
+			UnitLocationQuery unitWorkstation = workstationService.getUnitWorkstationStatus(new UnitOID(testProc.getUnitPk()), new ProjectOID(testProc.getProjectPk(), null), new WorkstationOID(testProc.getWorkstationPk(), null));
 			if(UnitLocation.STATUS_COMPLETED.equals(unitWorkstation.getStatus()))
 			{
 				throw new AppException("Workstation is complete for the unit, Form cannot be submitted");
@@ -480,14 +481,14 @@ public class SurveyResponseController
 
     }
 
-    *//**
+    /*/**
      * called when the verifier or approver edits the response
      * @param userContext
      * @param surveyDef
      * @param responseId
      * @param surveyResponse
      * @throws Exception
-     *//*
+     *//*/*/
     public  SurveyResponse updateSurveyResponse(UserContext userContext, SurveyDefinition surveyDef,
 	    SurveyResponse surveyResponse) throws Exception
     {
@@ -524,7 +525,7 @@ public class SurveyResponseController
 		    }
 		    
 		    //check the workstation status.
-			UnitLocationQuery unitWorkstation =workstationService.getUnitWorkstationStatus(testProc.getUnitPk(), new ProjectOID(testProc.getProjectPk(), null), new WorkstationOID(testProc.getWorkstationPk(), null));
+			UnitLocationQuery unitWorkstation =workstationService.getUnitWorkstationStatus(new UnitOID(testProc.getUnitPk()), new ProjectOID(testProc.getProjectPk(), null), new WorkstationOID(testProc.getWorkstationPk(), null));
 			if(UnitLocation.STATUS_COMPLETED.equals(unitWorkstation.getStatus()))
 			{
 				throw new AppException("Workstation is complete for the unit, Form cannot be saved or submitted");

@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.tathvatech.common.common.DataTypes;
 import com.tathvatech.common.common.FileStoreManager;
 import com.tathvatech.common.enums.ResultEnum;
 import com.tathvatech.forms.response.*;
@@ -27,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.text.html.Option;
+
 
 
 
@@ -56,7 +57,7 @@ public class DeviceResponseExportProcessor
 	 * @return
 	 * @throws Exception
 	 */
-    public AdvancedBomInspectionItemResponseBean getFormItemResponsesBean(SurveyItem sItem, SurveyItemResponse aItemResponse) throws Exception
+    public FormItemResponseBase getFormItemResponsesBean(SurveyItem sItem, SurveyItemResponse aItemResponse) throws Exception
     {
         if(sItem instanceof RadioButtonAnswerType)
         {

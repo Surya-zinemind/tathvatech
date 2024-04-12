@@ -90,6 +90,7 @@ public class SurveyMaster
 private final WorkorderManager workorderManager;
 private final TestProcSectionDAO testProcSectionDAO;
 private final TimeEntryManager timeEntryManager;
+private FormListReport formListReport;
 
 
 
@@ -359,17 +360,17 @@ private final TimeEntryManager timeEntryManager;
 		return survey;
 	}
 
-	public static FormQuery getFormByPk(int formPk)
+	public  FormQuery getFormByPk(int formPk)
 	{
 		FormFilter filter = new FormFilter();
 		filter.setFormPk(formPk);
 		filter.setShowAllFormRevisions(true);
 		filter.setStatus(new String[]{Survey.STATUS_CLOSED, Survey.STATUS_DELETED, Survey.STATUS_OPEN});
-		ReportRequest req = new ReportRequest(FormListReport);
+		ReportRequest req = new ReportRequest(ReportTypes.FormListReport);
 		req.setFetchRowCount(false);
 		req.setFilter(filter);
 		req.setFetchAllRows(true);
-		ReportResponse response = new FormListReport().runReport(req);
+		ReportResponse response = formListReport.runReport(req);
 		List<FormQuery> list = (List<FormQuery>) response.getReportData();
 		if(list != null && list.size() > 0)
 			return list.get(0);
@@ -377,14 +378,14 @@ private final TimeEntryManager timeEntryManager;
 		return null;
 	}
 
-	public static List<FormQuery> getSurveyList() throws Exception
+	public  List<FormQuery> getSurveyList() throws Exception
 	{
 		FormFilter filter = new FormFilter();
-		ReportRequest req = new ReportRequest(FormListReport);
+		ReportRequest req = new ReportRequest(ReportTypes.FormListReport);
 		req.setFetchRowCount(false);
 		req.setFilter(filter);
 		req.setFetchAllRows(true);
-		ReportResponse response = new FormListReport().runReport(req);
+		ReportResponse response = formListReport.runReport(req);
 		List<FormQuery> list = (List<FormQuery>) response.getReportData();
 		if(list != null)
 			return list;
@@ -392,13 +393,13 @@ private final TimeEntryManager timeEntryManager;
 		return new ArrayList();
 	}
 
-	public static List<FormQuery> getSurveyList(FormFilter filter)
+	public  List<FormQuery> getSurveyList(FormFilter filter)
 	{
-		ReportRequest req = new ReportRequest(FormListReport);
+		ReportRequest req = new ReportRequest(ReportTypes.FormListReport);
 		req.setFetchRowCount(false);
 		req.setFilter(filter);
 		req.setFetchAllRows(true);
-		ReportResponse response = new FormListReport().runReport(req);
+		ReportResponse response =formListReport.runReport(req);
 		List<FormQuery> list = (List<FormQuery>) response.getReportData();
 		if(list != null)
 			return list;
@@ -406,7 +407,7 @@ private final TimeEntryManager timeEntryManager;
 		return new ArrayList();
 	}
 
-	public static List<FormQuery> getOpenSurveyList() throws Exception
+	public  List<FormQuery> getOpenSurveyList() throws Exception
 	{
 		FormFilter filter = new FormFilter();
 		filter.setStatus(new String[]{Survey.STATUS_OPEN});
@@ -414,7 +415,7 @@ private final TimeEntryManager timeEntryManager;
 		req.setFetchRowCount(false);
 		req.setFilter(filter);
 		req.setFetchAllRows(true);
-		ReportResponse response = new FormListReport().runReport(req);
+		ReportResponse response =formListReport.runReport(req);
 		List<FormQuery> list = (List<FormQuery>) response.getReportData();
 		if(list != null)
 			return list;
@@ -422,17 +423,17 @@ private final TimeEntryManager timeEntryManager;
 		return new ArrayList();
 	}
 
-	public static List<FormQuery> getAllVersionsForForm(int formMainPk)
+	public  List<FormQuery> getAllVersionsForForm(int formMainPk)
 	{
 		FormFilter filter = new FormFilter();
 		filter.setFormMainPk(formMainPk);
 		filter.setShowAllFormRevisions(true);
 		filter.setStatus(new String[]{Survey.STATUS_OPEN, Survey.STATUS_CLOSED, Survey.STATUS_DELETED});
-		ReportRequest req = new ReportRequest(FormListReport);
+		ReportRequest req = new ReportRequest(ReportTypes.FormListReport);
 		req.setFilter(filter);
 		req.setFetchRowCount(false);
 		req.setFetchAllRows(true);
-		ReportResponse response = new FormListReport().runReport(req);
+		ReportResponse response = formListReport.runReport(req);
 		List<FormQuery> list = (List<FormQuery>) response.getReportData();
 		if(list != null)
 			return list;
@@ -440,17 +441,17 @@ private final TimeEntryManager timeEntryManager;
 		return new ArrayList();
 	}
 
-	public static FormQuery getLatestVersionForForm(int formMainPk) throws Exception
+	public  FormQuery getLatestVersionForForm(int formMainPk) throws Exception
 	{
 		FormFilter filter = new FormFilter();
 		filter.setFormMainPk(formMainPk);
 		filter.setShowAllFormRevisions(false); // this will fetch the max version
 		filter.setStatus(new String[]{Survey.STATUS_OPEN, Survey.STATUS_CLOSED, Survey.STATUS_DELETED});
-		ReportRequest req = new ReportRequest(FormListReport);
+		ReportRequest req = new ReportRequest(ReportTypes.FormListReport);
 		req.setFilter(filter);
 		req.setFetchRowCount(false);
 		req.setFetchAllRows(true);
-		ReportResponse response = new FormListReport().runReport(req);
+		ReportResponse response =formListReport.runReport(req);
 		List<FormQuery> list = (List<FormQuery>) response.getReportData();
 		if(list != null && list.size() > 0)
 			return list.get(0);
@@ -464,17 +465,17 @@ private final TimeEntryManager timeEntryManager;
 		return getLatestPublishedVersionForForm(s.getFormMainPk());
 	}
 
-	public static FormQuery getLatestPublishedVersionForForm(int formMainPk) throws Exception
+	public  FormQuery getLatestPublishedVersionForForm(int formMainPk) throws Exception
 	{
 		FormFilter filter = new FormFilter();
 		filter.setFormMainPk(formMainPk);
 		filter.setShowAllFormRevisions(false); // this will fetch the max version
 		filter.setStatus(new String[]{Survey.STATUS_OPEN});
-		ReportRequest req = new ReportRequest(FormListReport);
+		ReportRequest req = new ReportRequest(ReportTypes.FormListReport);
 		req.setFilter(filter);
 		req.setFetchRowCount(false);
 		req.setFetchAllRows(true);
-		ReportResponse response = new FormListReport().runReport(req);
+		ReportResponse response = formListReport.runReport(req);
 		List<FormQuery> list = (List<FormQuery>) response.getReportData();
 		if(list != null && list.size() > 0)
 			return list.get(0);
@@ -548,7 +549,7 @@ private final TimeEntryManager timeEntryManager;
 	private  void notifyFormPublish(UserContext context, int surveyPk,
 			List<ProjectOID> projectUpgradeList, HashMap<ProjectOID, User> projectNotificationMap, HashMap<ProjectOID, List<Integer>> formsUpgradeMap) throws Exception
 	{
-		FormQuery formQuery = SurveyMaster.getFormByPk(surveyPk);
+		FormQuery formQuery = surveyMaster.getFormByPk(surveyPk);
 		
 		
 		StringBuffer sbText = new StringBuffer();

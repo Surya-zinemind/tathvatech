@@ -7,8 +7,7 @@
 package com.tathvatech.logic.service;
 
 
-import com.tathvatech.logic.common.Condition;
-import com.tathvatech.logic.common.TextBoxCondition;
+import com.tathvatech.logic.common.*;
 import com.tathvatech.site.service.SiteServiceImpl;
 import com.tathvatech.survey.common.SurveyDefinition;
 import org.slf4j.Logger;
@@ -29,7 +28,7 @@ public class LogicConfigurationManager extends Object
     private SurveyDefinition surveyDefinition;
 
     /**
-     * @param formQuery
+     * @param
      */
     public LogicConfigurationManager(SurveyDefinition surveyDef)
     {

@@ -11,6 +11,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
+
+import com.tathvatech.common.common.DataTypes;
 import com.tathvatech.forms.entity.FormResponseClientSubmissionRev;
 import com.tathvatech.activitylogging.common.ActivityLogQuery;
 import com.tathvatech.activitylogging.controller.ActivityLoggingDelegate;
@@ -74,6 +76,10 @@ import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.workstation.common.DummyWorkstation;
 import com.tathvatech.workstation.service.WorkstationService;
+//<<<<<<< Updated upstream
+//=======
+
+//>>>>>>> Stashed changes
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -1064,7 +1070,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 	{
 		finalizeSurveyResponseImpl(userContext, surveyDef, responseId, new Date());
 
-		saveResponseStateAsSubmitRecord(userContext, responseId, SubmissionTypeEnum.Final);
+		saveResponseStateAsSubmitRecord(userContext, responseId, ResponseSubmissionBookmark.SubmissionTypeEnum.Final);
 	}
 	@Override
 	public  void finalizeSurveyResponse(UserContext userContext, SurveyDefinition surveyDef, int responseId,
@@ -1072,10 +1078,10 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 	{
 		finalizeSurveyResponseImpl(userContext, surveyDef, responseId, responseCompleteTime);
 
-		saveResponseStateAsSubmitRecord(userContext, responseId, SubmissionTypeEnum.Final);
+		saveResponseStateAsSubmitRecord(userContext, responseId,ResponseSubmissionBookmark.SubmissionTypeEnum.Final);
 	}
 	/**
-	 * @param sd
+	 * @param
 	 * @param responseId
 	 */
 	@Override
@@ -1203,7 +1209,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 	 * @return
 	 * @throws Exception
 	 */
-	@Override
+
     public  void saveResponseStateAsSubmitRecord(UserContext context,
 												 int responseId, ResponseSubmissionBookmark.SubmissionTypeEnum submissionType) throws Exception
     {
@@ -1238,12 +1244,12 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 			 */
 			if(ResponseSubmissionBookmark.SubmissionTypeEnum.Final == submissionType)
 			{
-				int finalSeq = sequenceIdGenerator.getNextSequence(ResponseSubmissionBookmark.name(), ""+respM.getTestProcPk(), ResponseSubmissionBookmark.SubmissionTypeEnum.Final.name(), null, null);
+				int finalSeq = sequenceIdGenerator.getNextSequence(EntityTypeEnum.ResponseSubmissionBookmark.name(), ""+respM.getTestProcPk(), ResponseSubmissionBookmark.SubmissionTypeEnum.Final.name(), null, null);
 				revisionNo = finalSeq+"";
 			}
 			else if(ResponseSubmissionBookmark.SubmissionTypeEnum.Interim == submissionType)
 			{
-				Integer currentMainSeq = sequenceIdGenerator.getCurrentSequence(ResponseSubmissionBookmark.name(), ""+respM.getTestProcPk(), ResponseSubmissionBookmark.SubmissionTypeEnum.Final.name(), null, null);
+				Integer currentMainSeq = sequenceIdGenerator.getCurrentSequence(EntityTypeEnum.ResponseSubmissionBookmark.name(), ""+respM.getTestProcPk(), ResponseSubmissionBookmark.SubmissionTypeEnum.Final.name(), null, null);
 				if(currentMainSeq == null)
 				{
 					currentMainSeq = 1; //current main seq starts with 1.
@@ -1252,7 +1258,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 				{
 					currentMainSeq++;
 				}
-				int subSeq = sequenceIdGenerator.getNextSequence(ResponseSubmissionBookmark.name(), ""+respM.getTestProcPk(), ResponseSubmissionBookmark.SubmissionTypeEnum.Interim.name(), currentMainSeq+"", null);
+				int subSeq = sequenceIdGenerator.getNextSequence(EntityTypeEnum.ResponseSubmissionBookmark.name(), ""+respM.getTestProcPk(), ResponseSubmissionBookmark.SubmissionTypeEnum.Interim.name(), currentMainSeq+"", null);
 				String subSeqStr = null;
 				if(subSeq < 10)
 					subSeqStr = "0"+subSeq;
@@ -2896,18 +2902,18 @@ public  void rejectApproval(UserContext userContext, SurveyResponse sResponse, S
 					resultStatus.setCommentEntered(true);
 
 				if(answerStatus.isPassSelected())
-					resultStatus.setResult(ResultStatusEnum.Pass);
+					resultStatus.setResult(QuestionResponseStatus.ResultStatusEnum.Pass);
 
 				if(answerStatus.isFailSelected())
 				{
-					resultStatus.setResult(ResultStatusEnum.Fail);
+					resultStatus.setResult(QuestionResponseStatus.ResultStatusEnum.Fail);
 					if(((SurveySaveItem) sItem).getDataType() == DataTypes.DATATYPE_INTEGER)
 					{
 						resultStatus.setQuestionNumeric(true);
 					}
 				}
 				if(answerStatus.isNaSelected())
-					resultStatus.setResult(ResultStatusEnum.NA);
+					resultStatus.setResult(QuestionResponseStatus.ResultStatusEnum.NA);
 			}
 			else
 			{

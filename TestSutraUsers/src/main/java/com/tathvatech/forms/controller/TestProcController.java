@@ -6,6 +6,7 @@ import com.tathvatech.forms.entity.FormItemResponse;
 import com.tathvatech.ncr.enums.NcrEnum;
 import com.tathvatech.project.entity.Project;
 import com.tathvatech.project.service.ProjectService;
+import com.tathvatech.survey.common.AdvancedBomInspectItemAnswerType;
 import com.tathvatech.survey.common.BomInspectItemAnswerType;
 import com.tathvatech.survey.common.SurveyItem;
 import com.tathvatech.survey.response.SurveyItemResponse;
@@ -17,7 +18,7 @@ import com.tathvatech.unit.service.UnitService;
 import com.tathvatech.user.OID.UnitOID;
 import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.entity.Attachment;
-import jakarta.servlet.http.Part;
+
 
 import java.io.File;
 import java.util.ArrayList;

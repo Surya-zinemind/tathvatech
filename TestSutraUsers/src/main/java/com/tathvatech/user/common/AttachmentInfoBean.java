@@ -1,10 +1,12 @@
 package com.tathvatech.user.common;
 
-import javax.xml.bind.annotation.XmlRootElement;
+
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.tathvatech.ts.core.common.Attachment;
+
 import com.tathvatech.user.entity.Attachment;
+import jakarta.xml.bind.annotation.XmlRootElement;
+
 
 /**
  * @author Hari

@@ -1,10 +1,13 @@
 package com.tathvatech.forms.report;
 
 import com.tathvatech.common.common.QueryObject;
+import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.common.FormFilter;
+import com.tathvatech.forms.common.FormQuery;
 import com.tathvatech.forms.enums.FormTypeEnum;
 import com.tathvatech.report.request.ReportRequest;
 import com.tathvatech.report.response.ReportResponse;
+import com.tathvatech.survey.entity.Survey;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,10 +15,12 @@ import java.util.List;
 
 public class FormListReport
 {
-	public FormListReport()
+	private final PersistWrapper persistWrapper;
+	public FormListReport(PersistWrapper persistWrapper)
 	{
-		
-	}
+
+        this.persistWrapper = persistWrapper;
+    }
 	
 	public ReportResponse runReport(ReportRequest reportRequest)
 	{
@@ -28,7 +33,7 @@ public class FormListReport
 		{
 			//we need to find the count if the request is newRequest.
 			StringBuffer countQB = new StringBuffer("select count(*) from ( ").append(sql).append(" )data");
-			long totalRowCount = PersistWrapper.read(Long.class, countQB.toString(), (params.size() >0)?params.toArray(new Object[params.size()]):null);
+			long totalRowCount = persistWrapper.read(Long.class, countQB.toString(), (params.size() >0)?params.toArray(new Object[params.size()]):null);
 			response.setTotalRows(totalRowCount);
 		}
 
@@ -38,8 +43,8 @@ public class FormListReport
 			sql.append(" limit ").append(reportRequest.getStartIndex()).append(", ").append(reportRequest.getRowsToFetch());
 		}
 		
-		PersistWrapper p = new PersistWrapper();
-		List<FormQuery> data = p.readList(FormQuery.class, sql.toString(), (params.size() >0)?params.toArray(new Object[params.size()]):null);
+
+		List<FormQuery> data = persistWrapper.readList(FormQuery.class, sql.toString(), (params.size() >0)?params.toArray(new Object[params.size()]):null);
 		
 		response.setReportData(data);
 		return response;

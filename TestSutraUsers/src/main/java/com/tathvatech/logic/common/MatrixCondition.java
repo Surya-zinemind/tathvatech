@@ -6,20 +6,19 @@
  */
 package com.tathvatech.logic.common;
 
+import com.tathvatech.common.common.DataTypes;
+import com.tathvatech.site.service.SiteServiceImpl;
+import com.tathvatech.survey.common.HasOtherType;
+import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.common.SurveySaveItem;
+import com.tathvatech.survey.inf.SurveyItemBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 
-import com.tathvatech.ts.core.survey.Option;
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.TwoDOptionType;
-import com.tathvatech.ts.core.survey.surveyitem.SurveyItemBase;
-import com.tathvatech.ts.core.utils.OptionList;
-import com.thirdi.surveyside.survey.DataTypes;
-import com.thirdi.surveyside.survey.HasOtherType;
-import com.thirdi.surveyside.survey.SurveyItem;
-import com.thirdi.surveyside.survey.surveyitem.SurveySaveItem;
 
 /**
  * @author Hari
@@ -29,7 +28,7 @@ import com.thirdi.surveyside.survey.surveyitem.SurveySaveItem;
  */
 public class MatrixCondition extends TwoDCondition
 {
-    private static final Logger logger = Logger.getLogger(MatrixCondition.class);
+    private static final Logger logger = LoggerFactory.getLogger( MatrixCondition.class);
     
     public MatrixCondition(String subjectId, SurveyDefinition surveyDef)
     {

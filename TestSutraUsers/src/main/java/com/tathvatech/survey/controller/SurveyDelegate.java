@@ -54,7 +54,7 @@ public class SurveyDelegate {
     //private static HashMap surveyMap = new HashMap();
 
     /**
-     * @param surveyPk
+     * @param
      * @return
      */
     public String getSurveyDefFileName(int _surveyPk) throws Exception {
@@ -103,7 +103,7 @@ public class SurveyDelegate {
      * mark the survey status as deleted.// the survey list will not show these items .
      * a complete removal should be done manually.
      *
-     * @param surveyDef
+     * @param
      */
     public void deleteSurvey(int surveyPk) throws Exception {
 
@@ -121,32 +121,32 @@ public class SurveyDelegate {
     }
 
 
-    public static FormQuery getFormByPk(int formPk) {
-        return SurveyMaster.getFormByPk(formPk);
+    public  FormQuery getFormByPk(int formPk) {
+        return surveyMaster.getFormByPk(formPk);
     }
 
     public List<FormQuery> getSurveyList() throws Exception {
         return surveyMaster.getSurveyList();
     }
 
-    public static List<FormQuery> getOpenSurveyList() throws Exception {
-        return SurveyMaster.getOpenSurveyList();
+    public  List<FormQuery> getOpenSurveyList() throws Exception {
+        return surveyMaster.getOpenSurveyList();
     }
 
-    public static List<FormQuery> getSurveyList(FormFilter filter) {
-        return SurveyMaster.getSurveyList(filter);
+    public  List<FormQuery> getSurveyList(FormFilter filter) {
+        return surveyMaster.getSurveyList(filter);
     }
 
-    public static List<FormQuery> getAllVersionsForForm(int formMainPk) {
-        return SurveyMaster.getAllVersionsForForm(formMainPk);
+    public  List<FormQuery> getAllVersionsForForm(int formMainPk) {
+        return surveyMaster.getAllVersionsForForm(formMainPk);
     }
 
-    public static FormQuery getLatestVersionForForm(int formMainPk) throws Exception {
-        return SurveyMaster.getLatestVersionForForm(formMainPk);
+    public  FormQuery getLatestVersionForForm(int formMainPk) throws Exception {
+        return surveyMaster.getLatestVersionForForm(formMainPk);
     }
 
-    public static FormQuery getLatestPublishedVersionForForm(int formMainPk) throws Exception {
-        return SurveyMaster.getLatestPublishedVersionForForm(formMainPk);
+    public  FormQuery getLatestPublishedVersionForForm(int formMainPk) throws Exception {
+        return surveyMaster.getLatestPublishedVersionForForm(formMainPk);
     }
 
     public  FormQuery getLatestPublishedVersionOfForm(int formPk) throws Exception {
@@ -244,9 +244,9 @@ public class SurveyDelegate {
     /**
      * this is called by the admin useronly
      *
-     * @param unitPk
-     * @param workstationPk
-     * @param formPk
+     * @param
+     * @param
+     * @param
      * @param sectionId
      * @throws Exception
      */

@@ -19,126 +19,52 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.TimeZone;
 
-import org.apache.log4j.Logger;
-import org.jdom.Element;
+import com.tathvatech.common.common.DataTypes;
+import com.tathvatech.common.common.FileStoreManager;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.common.exception.AppException;
+import com.tathvatech.forms.common.ExpectedNumericValue;
+import com.tathvatech.forms.common.FormDesignListener;
+import com.tathvatech.forms.common.FormEventListner;
+import com.tathvatech.forms.controller.TestProcController;
+import com.tathvatech.forms.entity.FormItemResponse;
+import com.tathvatech.forms.enums.FormItemTypeEnum;
+import com.tathvatech.forms.response.ResponseMasterNew;
+import com.tathvatech.logic.common.Logic;
+import com.tathvatech.ncr.common.NcrItemQuery;
+import com.tathvatech.ncr.oid.NcrItemOID;
+import com.tathvatech.openitem.andon.entity.OpenItemV2;
+import com.tathvatech.project.service.ProjectService;
+import com.tathvatech.report.enums.ReportTypes;
+import com.tathvatech.report.request.ReportRequest;
+import com.tathvatech.site.service.SiteServiceImpl;
 
-import com.sarvasutra.etest.DesignSurveyFormNew.SurveyItemConfigHolder;
-import com.sarvasutra.etest.EtestApplication;
-import com.sarvasutra.etest.FormDesignListener;
-import com.sarvasutra.etest.FormEventListner;
-import com.sarvasutra.etest.ObjectEditListener;
-import com.sarvasutra.etest.QuestionSummaryViewer;
-import com.sarvasutra.etest.TestProcController;
-import com.sarvasutra.etest.api.model.AttachmentInfoBean;
-import com.sarvasutra.etest.components.CommentsThreadPopup;
-import com.sarvasutra.etest.components.ConfirmWindow;
-import com.sarvasutra.etest.components.EquipmentSelector;
-import com.sarvasutra.etest.components.ExpandableTextArea;
-import com.sarvasutra.etest.components.FileUploadForm;
-import com.sarvasutra.etest.components.InspectionItemImage;
-import com.sarvasutra.etest.components.SingleSelectCheckboxGroup;
-import com.sarvasutra.etest.components.TSTableContainer;
-import com.sarvasutra.etest.components.VSpacer;
-import com.sarvasutra.etest.components.WindowWithFooter;
-import com.sarvasutra.etest.components.bocomponents.AttachmentField;
-import com.sarvasutra.etest.components.bocomponents.AttachmentField.AttachmentFieldListener;
-import com.sarvasutra.etest.reports.InspectionItemAnswerViewerReport;
-import com.sarvasutra.etest.server.TestProcItemFailureTransferContext;
-import com.sarvasutra.etest.util.ListStringUtil;
-import com.tathvatech.testsutra.equipment.report.EquipmentListFilter;
-import com.tathvatech.testsutra.equipment.report.EquipmentListReport;
-import com.tathvatech.testsutra.equipment.report.EquipmentListReportRow;
-import com.tathvatech.testsutra.equipment.service.EquipmentOID;
-import com.tathvatech.testsutra.ncr.common.NcrGroupBean;
-import com.tathvatech.testsutra.ncr.common.NcrGroupOID;
-import com.tathvatech.testsutra.ncr.common.NcrItemOID;
-import com.tathvatech.testsutra.ncr.common.NcrItemQuery;
-import com.tathvatech.testsutra.ncr.service.NcrDelegate;
-import com.tathvatech.testsutra.ncr.service.UnitOfMeasures;
-import com.tathvatech.testsutra.ncr.web.NcrGroupForm;
-import com.tathvatech.testsutra.ncr.web.NcrGroupForm.NcrGroupViewMode;
-import com.tathvatech.testsutra.openitemv2.common.OpenItemInfoBean;
-import com.tathvatech.testsutra.openitemv2.common.OpenItemTypeEnum;
-import com.tathvatech.testsutra.openitemv2.service.OILDelegate;
-import com.tathvatech.testsutra.openitemv2.service.OpenItemV2;
-import com.tathvatech.testsutra.openitemv2.web.OpenItemEditForm;
-import com.tathvatech.testsutra.openitemv2.web.OpenItemFormListener;
-import com.tathvatech.testsutra.openitemv2.web.P8ListSelectorComponent;
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.core.SecurityContext;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.FileStoreManager;
-import com.tathvatech.ts.core.common.utils.LineSeperatorUtil;
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.project.UnitFormQuery;
-import com.tathvatech.ts.core.project.UnitOID;
-import com.tathvatech.ts.core.project.UnitObj;
-import com.tathvatech.ts.core.project.UnitQuery;
-import com.tathvatech.ts.core.survey.BomTypesEnum;
-import com.tathvatech.ts.core.survey.Option;
-import com.tathvatech.ts.core.survey.Survey;
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.response.AnswerPersistor;
-import com.tathvatech.ts.core.survey.response.FormItemResponse;
-import com.tathvatech.ts.core.survey.response.InvalidResponseException;
-import com.tathvatech.ts.core.survey.response.ResponseMasterNew;
-import com.tathvatech.ts.core.survey.response.ResponseUnit;
-import com.tathvatech.ts.core.survey.response.SimpleSurveyItemResponse;
-import com.tathvatech.ts.core.survey.response.SurveyItemResponse;
-import com.tathvatech.ts.core.survey.response.SurveyResponse;
-import com.tathvatech.ts.core.survey.response.TestItemOILTransferQuery;
-import com.tathvatech.ts.core.survey.surveyitem.LogicSubject;
-import com.tathvatech.ts.core.survey.surveyitem.SimpleAnswerPersistor;
-import com.tathvatech.ts.core.survey.surveyitem.SurveyItemManager;
-import com.tathvatech.ts.core.utils.OptionList;
-import com.tathvatech.ts.report.ReportTypes;
-import com.thirdi.surveyside.project.ProjectManager;
-import com.thirdi.surveyside.reportv2.ReportRequest;
-import com.thirdi.surveyside.security.PlanSecurityManager;
-import com.thirdi.surveyside.survey.DataTypes;
-import com.thirdi.surveyside.survey.ExpectedNumericValue;
-import com.thirdi.surveyside.survey.SurveyDisplayItem;
-import com.thirdi.surveyside.survey.SurveyMaster;
-import com.thirdi.surveyside.survey.logic.Logic;
-import com.thirdi.surveyside.survey.response.InspectionLineItemAnswerStatus;
-import com.thirdi.surveyside.survey.response.delegate.SurveyResponseDelegate;
-import com.thirdi.surveyside.utils.DateFormatter;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.Validator;
-import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
-import com.vaadin.event.FieldEvents.BlurEvent;
-import com.vaadin.event.FieldEvents.BlurListener;
-import com.vaadin.server.Sizeable;
-import com.vaadin.server.ThemeResource;
-import com.vaadin.server.UserError;
-import com.vaadin.shared.ui.datefield.Resolution;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.DateField;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.Form;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.OptionGroup;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.BaseTheme;
-import com.vaadin.ui.themes.ValoTheme;
+import com.tathvatech.survey.entity.Survey;
+import com.tathvatech.survey.enums.AnswerPersistor;
+import com.tathvatech.survey.response.SimpleSurveyItemResponse;
+import com.tathvatech.survey.response.SurveyItemResponse;
+import com.tathvatech.survey.response.SurveyResponse;
+import com.tathvatech.survey.service.SurveyItemManager;
+import com.tathvatech.survey.service.SurveyMaster;
+import com.tathvatech.survey.service.SurveyResponseService;
+import com.tathvatech.unit.common.UnitFormQuery;
+import com.tathvatech.unit.common.UnitObj;
+import com.tathvatech.unit.common.UnitQuery;
+import com.tathvatech.unit.response.ResponseUnit;
+import com.tathvatech.unit.service.UnitService;
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.UnitOID;
+import com.tathvatech.user.common.AttachmentInfoBean;
+import com.tathvatech.user.common.SecurityContext;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.service.PlanSecurityManager;
+import org.aspectj.apache.bcel.classfile.Field;
+import org.jdom2.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 
 /**
  * @author Hari
@@ -148,8 +74,11 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements BaseInspectionLineItemAnswerType, SurveyDisplayItem, LogicSubject
 {
-	private static final Logger logger = Logger.getLogger(AdvancedBomInspectItemAnswerType.class);
-
+	private static final Logger logger = LoggerFactory.getLogger(AdvancedBomInspectItemAnswerType.class);
+	private final SurveyResponseService surveyResponseService;
+	private final SurveyMaster surveyMaster;
+	private final ProjectService projectService;
+	private final UnitService unitService;
 	private enum DisplayModeEnum {ViewMode, DataEntryMode}; // this is currently used only for the P8Transfer Menu.
 	
 
@@ -206,19 +135,27 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 	/**
      *
      */
-	public AdvancedBomInspectItemAnswerType()
+	public AdvancedBomInspectItemAnswerType(SurveyResponseService surveyResponseService, SurveyMaster surveyMaster, ProjectService projectService, UnitService unitService)
 	{
 		super();
 
-	}
+        this.surveyResponseService = surveyResponseService;
+        this.surveyMaster = surveyMaster;
+        this.projectService = projectService;
+        this.unitService = unitService;
+    }
 
 	/**
 	 * @param _survey
 	 */
-	public AdvancedBomInspectItemAnswerType(SurveyDefinition _survey)
+	public AdvancedBomInspectItemAnswerType(SurveyDefinition _survey, SurveyResponseService surveyResponseService, SurveyMaster surveyMaster, ProjectService projectService, UnitService unitService)
 	{
 		super(_survey);
-	}
+        this.surveyResponseService = surveyResponseService;
+        this.surveyMaster = surveyMaster;
+        this.projectService = projectService;
+        this.unitService = unitService;
+    }
 
 	public String getTypeName()
 	{
@@ -1178,7 +1115,7 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 									{
 										
 										((SurveyItemConfigHolder)parent).getFormDesigner().addNewItemToForm(
-												SurveyItemManager.AdvancedBomInspectItemAnswerType.getDescription(), 
+												SurveyItemManager.AdvancedBomInspectItemAnswerType.getDescription(),
 												((SurveyItemConfigHolder)parent), getSurveyItemId());
 										break;
 									}
@@ -1267,7 +1204,7 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 	}
 
 	@Override
-	public Component drawResponseField(UnitFormQuery testProc, SurveyResponse sResponse, Component parent, String[] flags,  FormEventListner formEventListner)
+	public Component drawResponseField(UnitFormQuery testProc, SurveyResponse sResponse, Component parent, String[] flags, FormEventListner formEventListner)
 	{
 		return null;
 	}
@@ -1978,7 +1915,7 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 			if(sResponse != null)
 			{
 
-				formItemResponse = SurveyResponseDelegate.getFormItemResponse(sResponse.getResponseId(), AdvancedBomInspectItemAnswerType.this.getSurveyItemId(), true);
+				formItemResponse = surveyResponseService.getFormItemResponse(sResponse.getResponseId(), AdvancedBomInspectItemAnswerType.this.getSurveyItemId(), true);
 				oilItemList = OILDelegate.getTestProcItemFailureQuery(formItemResponse.getOID());
 				
 	// no need for comments during dataentry			
@@ -2010,7 +1947,7 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 			e.printStackTrace();
 			try
 			{
-				Survey s = SurveyMaster.getSurveyByPk(testProc.getFormPk());
+				Survey s = surveyMaster.getSurveyByPk(testProc.getFormPk());
 				logger.error(String.format("Error displaying AdvancedBomInspectionAnswerType, Id:%s in surveyFile:%s ", this.getSurveyItemId(), s.getDefFileName()));
 			}
 			catch (Exception e1)
@@ -2024,7 +1961,7 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 	
 	/**
 	 * This is used by OpenItemType after the change in AdvancedBom to use TSTable.. for now writing it here.
-	 * @param application
+	 * @param
 	 * @param sResponse
 	 * @param table
 	 * @param index
@@ -2954,8 +2891,7 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 
 	public boolean drawResponseDetailInt(final UserContext userContext, UnitFormQuery testProc, 
 			final SurveyResponse sResponse, TSTableContainer  table, int index, boolean isLatestResponse, String[] flags, 
-			final TestProcController testProcController)
-	{
+			final TestProcController testProcController) throws Exception {
 		this.testProc = testProc;
 		
 		List thisItemFlagList = this.getFlagsAsList();
@@ -2966,7 +2902,7 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 		{
 			formItemResponse = testProcController.getFormItemResponseMap().get(getSurveyItemId());
 			if(formItemResponse == null)
-				formItemResponse = SurveyResponseDelegate.createFormItemResponse(sResponse.getResponseId(), AdvancedBomInspectItemAnswerType.this.getSurveyItemId());
+				formItemResponse = surveyResponseService.createFormItemResponse(sResponse.getResponseId(), AdvancedBomInspectItemAnswerType.this.getSurveyItemId());
 		}		
 		List flagList = new ArrayList();
 		for (int i = 0; i < flags.length; i++)
@@ -3711,7 +3647,7 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 			if(imageAttachCols.size() > 0)
 			{
 				fileUpload = new FileUploadForm("Attach Picture", "jpg,jpeg,png,gif,tiff,tif", imageFileDisplayName, 
-						(imageFileName != null)?FileStoreManager.getFile(imageFileName):null, false, new FileUploadForm.FileUploadListener() {
+						(imageFileName != null)? FileStoreManager.getFile(imageFileName):null, false, new FileUploadForm.FileUploadListener() {
 							
 							@Override
 							public void uploadComplete(File file, String fileDisplayName)
@@ -4185,11 +4121,11 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 	
 	/**
 	 * Used by TestProcController to get the description when creating ncrs.
-	 * @param testProcQuery
-	 * @param sectionItem
-	 * @param passFailResult
-	 * @param tableAnswers
-	 * @param testerComment
+	 * @param
+	 * @param
+	 * @param
+	 * @param
+	 * @param
 	 * @return
 	 */
 	public String buildOpenItemTransferDescription()
@@ -4431,8 +4367,8 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 					{
 						if(aOil.getOilItemType() == EntityTypeEnum.OpenItem.getValue())
 						{
-							UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(AdvancedBomInspectItemAnswerType.this.testProc.getUnitPk()));
-							UnitQuery unitQuery = ProjectManager.getUnitQueryByPk(unit.getPk(), new ProjectOID(AdvancedBomInspectItemAnswerType.this.testProc.getProjectPk()));
+							UnitObj unit = unitService.getUnitByPk(new UnitOID(AdvancedBomInspectItemAnswerType.this.testProc.getUnitPk()));
+							UnitQuery unitQuery = unitService.getUnitQueryByPk((int) unit.getPk(), new ProjectOID(AdvancedBomInspectItemAnswerType.this.testProc.getProjectPk()));
 
 							OpenItemInfoBean openItemInfoBean = OILDelegate.getOpenItem(aOil.getOilItemPk());
 							OpenItemEditForm openItemEditForm = new OpenItemEditForm(OpenItemEditForm.FormMode.DetailViewMode, unitQuery, new ProjectOID(unitQuery.getProjectPk(), null), null, openItemInfoBean, new OpenItemFormListener() {
@@ -4496,13 +4432,13 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 			
 			p8Root.addItem("Link to an existing open item", selectedItem -> 
 			{
-				formItemResponse = SurveyResponseDelegate.getFormItemResponse(sResponse.getResponseId(), AdvancedBomInspectItemAnswerType.this.getSurveyItemId(), true);
+				formItemResponse =surveyResponseService.getFormItemResponse(sResponse.getResponseId(), AdvancedBomInspectItemAnswerType.this.getSurveyItemId(), true);
 
-				UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(AdvancedBomInspectItemAnswerType.this.testProc.getUnitPk()));
-				UnitQuery unitQuery = ProjectManager.getUnitQueryByPk(unit.getPk(), new ProjectOID(AdvancedBomInspectItemAnswerType.this.testProc.getProjectPk()));
+				UnitObj unit = unitService.getUnitByPk(new UnitOID(AdvancedBomInspectItemAnswerType.this.testProc.getUnitPk()));
+				UnitQuery unitQuery = unitService.getUnitQueryByPk((int) unit.getPk(), new ProjectOID(AdvancedBomInspectItemAnswerType.this.testProc.getProjectPk()));
 				
 				OpenItemV2.StatusEnum[] openItemStatus = null;
-				List<User> projectManagers = ProjectManager.getProjectManagers(unitQuery.getProjectOID());
+				List<User> projectManagers =projectService.getProjectManagers(unitQuery.getProjectOID());
 				if(projectManagers.contains(EtestApplication.getInstance().getUserContext().getUser()))
 				{
 					openItemStatus = new OpenItemV2.StatusEnum[]{OpenItemV2.StatusEnum.Draft, OpenItemV2.StatusEnum.Open, OpenItemV2.StatusEnum.Completed};
@@ -4566,10 +4502,10 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 
 			p8Root.addItem("Create new open item", selectedItem -> 
 			{
-				formItemResponse = SurveyResponseDelegate.getFormItemResponse(sResponse.getResponseId(), AdvancedBomInspectItemAnswerType.this.getSurveyItemId(), true);
+				formItemResponse =surveyResponseService.getFormItemResponse(sResponse.getResponseId(), AdvancedBomInspectItemAnswerType.this.getSurveyItemId(), true);
 
-				UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(AdvancedBomInspectItemAnswerType.this.testProc.getUnitPk()));
-				UnitQuery unitQuery = ProjectManager.getUnitQueryByPk(unit.getPk(), new ProjectOID(AdvancedBomInspectItemAnswerType.this.testProc.getProjectPk()));
+				UnitObj unit = unitService.getUnitByPk(new UnitOID(AdvancedBomInspectItemAnswerType.this.testProc.getUnitPk()));
+				UnitQuery unitQuery = unitService.getUnitQueryByPk((int) unit.getPk(), new ProjectOID(AdvancedBomInspectItemAnswerType.this.testProc.getProjectPk()));
 				OpenItemEditForm openItemEditForm = new OpenItemEditForm(OpenItemEditForm.FormMode.EditViewMode, unitQuery, new ProjectOID(unitQuery.getProjectPk(), null), null, new OpenItemInfoBean(), new OpenItemFormListener() {
 
 					@Override

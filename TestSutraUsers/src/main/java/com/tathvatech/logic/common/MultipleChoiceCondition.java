@@ -9,18 +9,15 @@ package com.tathvatech.logic.common;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import com.tathvatech.common.common.DataTypes;
+import com.tathvatech.site.service.SiteServiceImpl;
 
-import com.tathvatech.ts.core.survey.MultipleChoiceType;
-import com.tathvatech.ts.core.survey.OneDOptionType;
-import com.tathvatech.ts.core.survey.Option;
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.surveyitem.SurveyItemBase;
-import com.tathvatech.ts.core.utils.OptionList;
-import com.thirdi.surveyside.survey.DataTypes;
-import com.thirdi.surveyside.survey.HasOtherType;
-import com.thirdi.surveyside.survey.SurveyItem;
-import com.thirdi.surveyside.survey.surveyitem.SurveySaveItem;
+import com.tathvatech.survey.common.HasOtherType;
+import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.common.SurveySaveItem;
+import com.tathvatech.survey.inf.SurveyItemBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Hari
@@ -30,7 +27,7 @@ import com.thirdi.surveyside.survey.surveyitem.SurveySaveItem;
  */
 public class MultipleChoiceCondition extends SimpleCondition
 {
-    private static final Logger logger = Logger.getLogger(MultipleChoiceCondition.class);
+    private static final Logger logger = LoggerFactory.getLogger(SiteServiceImpl.class);
     
     public MultipleChoiceCondition(String subjectId, SurveyDefinition surveyDef)
     {

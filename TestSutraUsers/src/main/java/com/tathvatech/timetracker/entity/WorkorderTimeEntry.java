@@ -1,9 +1,11 @@
 package com.tathvatech.timetracker.entity;
 
+import com.tathvatech.common.entity.AbstractEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.io.Serializable;
 import java.util.Date;
 
 
@@ -11,7 +13,7 @@ import java.util.Date;
 @Entity
 
 @Table(name = "workorder_timeentry")
-public class WorkorderTimeEntry {
+public class WorkorderTimeEntry extends AbstractEntity implements Serializable {
 	@Id
 	private long  pk;
 	private int shiftInstanceFk;
