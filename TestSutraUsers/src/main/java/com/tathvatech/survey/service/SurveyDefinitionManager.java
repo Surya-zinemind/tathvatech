@@ -62,24 +62,21 @@ public class SurveyDefinitionManager extends Object
     private  SurveyMaster surveyMaster;
 
     /**
-     * @param survey
+     * @param
      */
-    public SurveyDefinitionManager(Survey survey, SurveyDefFactory surveyDefFactory)throws Exception
+    public SurveyDefinitionManager(Survey survey)throws Exception
     {
         this.survey = survey;
         this.surveyDefinition = surveyDefFactory.getSurveyDefinition(new FormOID((int) survey.getPk(), survey.getIdentityNumber()));
-        this.surveyDefFactory = surveyDefFactory;
     }
-    
-    public SurveyDefinitionManager(FormOID formOID, SurveyDefFactory surveyDefFactory)throws Exception
+
+    public SurveyDefinitionManager(FormOID formOID)throws Exception
     {
         this.survey = surveyMaster.getSurveyByPk((int) formOID.getPk());
         this.surveyDefinition = surveyDefFactory.getSurveyDefinition(formOID);
-        this.surveyDefFactory = surveyDefFactory;
     }
 
-    public SurveyDefinitionManager(Survey survey) {
-    }
+
 
 
     public Survey getSurvey()
