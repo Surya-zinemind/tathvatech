@@ -3,6 +3,7 @@ package com.tathvatech.pdf.common;
 public class ItemPrintAreaDef
 {
 	String identifier;
+	boolean isIdentifierEncoded = false;
 	PdfPrintArea[] printAreas;
 	
 	public ItemPrintAreaDef()
@@ -22,6 +23,14 @@ public class ItemPrintAreaDef
 	public void setIdentifier(String identifier)
 	{
 		this.identifier = identifier;
+	}
+	public boolean isIdentifierEncoded()
+	{
+		return isIdentifierEncoded;
+	}
+	public void setIdentifierEncoded(boolean isIdentifierEncoded)
+	{
+		this.isIdentifierEncoded = isIdentifierEncoded;
 	}
 	public PdfPrintArea[] getPrintAreas()
 	{

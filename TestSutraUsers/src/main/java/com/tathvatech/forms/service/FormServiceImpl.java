@@ -15,7 +15,14 @@ import com.tathvatech.forms.report.TestProcStatusSummaryReport;
 import com.tathvatech.forms.request.TestProcStatusSummaryReportRequest;
 import com.tathvatech.forms.request.TestProcStatusSummaryReportResult;
 import com.tathvatech.forms.request.TestProcStatusSummaryReportResultRow;
+import com.tathvatech.forms.response.ResponseMasterNew;
+import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.common.SurveyForm;
 import com.tathvatech.survey.entity.Survey;
+import com.tathvatech.survey.response.SurveyResponse;
+import com.tathvatech.survey.service.SurveyDefFactory;
+import com.tathvatech.survey.service.SurveyMaster;
+import com.tathvatech.survey.service.SurveyResponseService;
 import com.tathvatech.unit.common.UnitFormQuery;
 import com.tathvatech.unit.common.UnitWorkstationListReportFilter;
 import com.tathvatech.unit.common.UnitWorkstationListReportResultRow;
@@ -23,24 +30,28 @@ import com.tathvatech.unit.dao.UnitInProjectDAO;
 import com.tathvatech.unit.entity.UnitLocation;
 import com.tathvatech.unit.report.UnitWorkstationListReport;
 import com.tathvatech.unit.service.UnitManager;
-import com.tathvatech.unit.service.UnitService;
 import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.service.CommonServiceManager;
 import com.tathvatech.user.utils.DateUtils;
 import com.tathvatech.workstation.common.DummyWorkstation;
 import com.tathvatech.workstation.common.UnitInProjectObj;
 import com.tathvatech.workstation.entity.UnitWorkstation;
+import com.tathvatech.workstation.oid.UnitWorkstationOID;
 import com.tathvatech.workstation.service.WorkstationService;
 import lombok.RequiredArgsConstructor;
-import com.tathvatech.workstation.oid.UnitWorkstationOID;
-import com.tathvatech.survey.service.SurveyMaster;
-import com.tathvatech.unit.service.UnitManager;
-import com.tathvatech.user.service.CommonServiceManager;
-import java.util.*;
+import org.springframework.stereotype.Service;
 
+import java.util.*;
+import java.util.logging.Logger;
+
+@Service
 @RequiredArgsConstructor
 public class FormServiceImpl implements  FormService{
+    private  final Logger logger = Logger.getLogger(String.valueOf(FormServiceImpl.class));
+
     private final TestProcService testProcService;
     private final DummyWorkstation dummyWorkstation;
     private final PersistWrapper persistWrapper;
@@ -49,6 +60,8 @@ public class FormServiceImpl implements  FormService{
     private final UnitManager unitManager;
     private final CommonServiceManager commonServiceManager;
     private final UnitInProjectDAO unitInProjectDAO;
+    private final SurveyResponseService surveyResponseService;
+    private final SurveyDefFactory surveyDefFactory;
     private UnitFormQuery unitFormQuery;
     @Override
     public  void saveTestProcSchedule(UserContext context, TestProcOID testProcOID,
@@ -446,5 +459,65 @@ public class FormServiceImpl implements  FormService{
                 formQuery.getFormMainPk());
 
         return l;
+    }
+
+    @Override
+    public  TestProcObj upgradeFormForUnit(UserContext context, TestProcOID testProcOID, int surveyPk)
+            throws Exception
+    {
+        // we have to delete the responses for the selected projects
+        // i am changing the mind, i dont think we need o delete the response,
+        // but we can one
+        // with a new one.. so the old one is available in history.
+        // ResponseMasterNew[] responses =
+        // SurveyResponseManager.getLatestResponseMastersForUnitForForm(
+        // context, aUnitPk, survey.getFormMainPk());
+        // for (int i = 0; i < responses.length; i++)
+        // {
+        // ResponseMasterNew aResponse = responses[i];
+        // SurveyResponseManager.deleteResponse(aResponse.getFormPk(), new
+        // int[]{aResponse.getResponseId()});
+        // }
+
+        TestProcDAO tpDAO = new TestProcDAO();
+        TestProcObj testProc = tpDAO.getTestProc((int) testProcOID.getPk());
+
+        // now mark the old response as old and create the new dummy response
+        // for the updated testProc if one existed for it...
+        ResponseMasterNew response = surveyResponseService.getLatestResponseMasterForTest(testProc.getOID());
+        if (response != null && response.getFormPk() != surveyPk)
+        {
+            // means the response for this testProc already exists.. now the
+            // formPk on the testProc changes..
+            surveyResponseService.markResponseAsOld(context, response);
+        }
+
+        // update the formPk in the testProc. A new _H record will get created.
+        testProc.setFormPk(surveyPk);
+        testProc.setAppliedByUserFk((int) context.getUser().getPk());
+        testProc = tpDAO.saveTestProc(context, testProc);
+
+        // create the new dummy response for the updated testProc if one existed
+        // for the old response...
+        if (response != null && response.getFormPk() != surveyPk)
+        {
+            SurveyDefinition sd = surveyDefFactory.getSurveyDefinition(new FormOID(surveyPk, null));
+            SurveyResponse sResponse = new SurveyResponse(sd);
+            sResponse.setSurveyPk(surveyPk);
+            sResponse.setTestProcPk(testProc.getPk());
+            sResponse.setResponseStartTime(new Date());
+            sResponse.setResponseCompleteTime(new Date());
+            // ipaddress and mode set
+            sResponse.setIpaddress("0.0.0.0");
+            sResponse.setResponseMode(SurveyForm.RESPONSEMODE_NORMAL);
+            sResponse.setUser((User) context.getUser());
+            sResponse = surveyResponseService.ceateDummyResponse(context, sResponse);
+            // the createDummyResponse automatically creates a new workflow
+            // entry for you..
+            // so we need not create another one..
+            logger.info("Created the new dummy response");
+        }
+
+        return testProc;
     }
 }

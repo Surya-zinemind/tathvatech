@@ -10,6 +10,7 @@ import com.tathvatech.ncr.common.NcrItemQuery;
 import com.tathvatech.forms.processor.FormUpgradeRevertProcessor;
 import com.tathvatech.ncr.oid.NcrItemOID;
 import com.tathvatech.user.OID.*;
+import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.user.service.AccountService;
@@ -100,6 +101,13 @@ public class FormController {
     public  List<UnitFormQuery> getTestProcsByForm(FormQuery formQuery) throws Exception
     {
         return formService.getTestProcsByForm(formQuery);
+    }
+
+    public  TestProcObj upgradeFormForUnit(UserContext context, TestProcOID testProcOID, int surveyPk)
+            throws Exception
+    {
+            return formService.upgradeFormForUnit(context, testProcOID, surveyPk);
+
     }
 
 }

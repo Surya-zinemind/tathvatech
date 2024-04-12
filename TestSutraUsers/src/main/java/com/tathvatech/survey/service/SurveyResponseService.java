@@ -220,4 +220,8 @@ public interface SurveyResponseService {
     FormResponseBean getFormResponseBeanForSyncErrorReview(int entityVersionReviewPk) throws Exception;
 
     void removeEntityReviewEntry(int reviewEntityPk);
+
+    List<ResponseSubmissionBookmark> getResponseSubmissionBookmarks(TestProcOID testprocOID);
+
+    ResponseSubmissionBookmark getLastResponseSubmissionBookmark(TestProcOID testprocOID);
 }

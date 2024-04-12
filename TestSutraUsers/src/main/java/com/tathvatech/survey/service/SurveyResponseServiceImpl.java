@@ -2062,8 +2062,8 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 		String surveyTable = survey.getDbTable();
 		String sql = Sqls.getResponseMastersForRespondentId;
 		sql = sql.replaceAll("<tableName>", survey.getDbTable());
-		sql = sql.replaceAll("<respondentPk>", new Integer(respondentPk).toString());
-		sql = sql.replaceAll("<surveyPk>", new Integer(survey.getPk()).toString());
+		sql = sql.replaceAll("<respondentPk>", new Long(respondentPk).toString());
+		sql = sql.replaceAll("<surveyPk>", new Long(survey.getPk()).toString());
 
 		if (logger.isDebugEnabled())
 		{
@@ -2138,7 +2138,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 		String sql = Sqls.getResponseMaster;
 		sql = sql.replaceAll("<tableName>", survey.getDbTable());
 		sql = sql.replaceAll("<responseId>", responseId);
-		sql = sql.replaceAll("<surveyPk>", new Integer(survey.getPk()).toString());
+		sql = sql.replaceAll("<surveyPk>", new Integer((int) survey.getPk()).toString());
 
 		if (logger.isDebugEnabled())
 		{
@@ -3167,7 +3167,7 @@ public  void rejectApproval(UserContext userContext, SurveyResponse sResponse, S
 			SurveyResponse surveyResponse = getSurveyResponse(surveyDefinition, responseId);
 			List<SectionResponseQuery> sectionSummaryList = getSectionResponseSummary(surveyDefinition, responseId);
 			FormResponseBean formResponseBean = new FormResponseBean();
-			formResponseBean.setVersionKey(respMaster.getLastUpdated().getTime());
+			formResponseBean.setObjectVersionKey(respMaster.getLastUpdated().getTime());
 			if (surveyResponse != null)
 			{
 				FormResponseStats stats = surveyResponseService

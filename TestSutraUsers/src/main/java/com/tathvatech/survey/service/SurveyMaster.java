@@ -7,6 +7,7 @@
 package com.tathvatech.survey.service;
 import com.tathvatech.forms.common.*;
 import com.tathvatech.forms.report.FormListReport;
+import com.tathvatech.forms.service.FormService;
 import com.tathvatech.report.enums.ReportTypes;
 import com.tathvatech.tasks.controller.TasksDelegate;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ import com.tathvatech.timetracker.request.WorkorderRequestBean;
 import com.tathvatech.timetracker.service.WorkorderManager;
 import com.tathvatech.unit.entity.UnitBookmark;
 import com.tathvatech.unit.service.UnitManager;
+import com.tathvatech.unit.service.UnitService;
 import com.tathvatech.user.Asynch.AsyncProcessor;
 import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.TestProcObj;
@@ -90,6 +92,7 @@ public class SurveyMaster
 private final WorkorderManager workorderManager;
 private final TestProcSectionDAO testProcSectionDAO;
 private final TimeEntryManager timeEntryManager;
+private final FormService formService;
 private FormListReport formListReport;
 
 
@@ -650,7 +653,7 @@ private FormListReport formListReport;
 				Survey current = getSurveyByPk(uForm.getFormPk());
 				if(current.getVersionNo() < survey.getPk())
 				{
-					ProjectManager.upgradeFormForUnit(context, uForm.getOID(), survey.getPk());
+					formService.upgradeFormForUnit(context, uForm.getOID(), (int) survey.getPk());
 				}				
 			}
 		}
