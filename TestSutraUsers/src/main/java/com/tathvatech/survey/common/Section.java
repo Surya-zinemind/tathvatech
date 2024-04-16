@@ -8,9 +8,11 @@ package com.tathvatech.survey.common;
 
 import com.tathvatech.common.common.FileStoreManager;
 import com.tathvatech.common.entity.AttachmentIntf;
+import com.tathvatech.common.utils.LineSeperatorUtil;
 import com.tathvatech.forms.common.FormDesignListener;
 import com.tathvatech.forms.common.ObjectLockQuery;
 import com.tathvatech.forms.common.TestProcSectionObj;
+import com.tathvatech.forms.controller.TestProcController;
 import com.tathvatech.forms.entity.FormSection;
 import com.tathvatech.forms.entity.ObjectLock;
 import com.tathvatech.forms.intf.SectionBase;
@@ -62,7 +64,9 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 {
 	private final SurveyResponseService surveyResponseService;
 	private final TestProcService testProcService;
+	private final SurveyDelegate surveyDelegate;
 	private final UnitService unitService;
+	private final FormDBManager formDBManager;
 	private final AccountService accountService;
 	private String				pageTitle;
 	private String 				description;
@@ -77,25 +81,29 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 	VerticalLayout childLayoutContainer;
 	HorizontalLayout manageChildrenControlLayoutArea;
 	
-	public Section(SurveyResponseService surveyResponseService, TestProcService testProcService, UnitService unitService, AccountService accountService)
+	public Section(SurveyResponseService surveyResponseService, TestProcService testProcService, SurveyDelegate surveyDelegate, UnitService unitService, FormDBManager formDBManager, AccountService accountService)
 	{
 		super();
         this.surveyResponseService = surveyResponseService;
         this.testProcService = testProcService;
+        this.surveyDelegate = surveyDelegate;
         this.unitService = unitService;
+        this.formDBManager = formDBManager;
         this.accountService = accountService;
     }
 
 	/**
 	 * @param _survey
 	 */
-	public Section(SurveyDefinition _survey, SurveyResponseService surveyResponseService, TestProcService testProcService, UnitService unitService, AccountService accountService)
+	public Section(SurveyDefinition _survey, SurveyResponseService surveyResponseService, TestProcService testProcService, SurveyDelegate surveyDelegate, UnitService unitService, FormDBManager formDBManager, AccountService accountService)
 	{
 		super(_survey);
 		// TODO Auto-generated constructor stub
         this.surveyResponseService = surveyResponseService;
         this.testProcService = testProcService;
+        this.surveyDelegate = surveyDelegate;
         this.unitService = unitService;
+        this.formDBManager = formDBManager;
         this.accountService = accountService;
     }
 
@@ -423,7 +431,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 			{
 				try
 				{
-					ObjectLock l = SurveyDelegate.lockSectionToEdit(EtestApplication.getInstance().getUserContext(),
+					ObjectLock l = surveyDelegate.lockSectionToEdit(EtestApplication.getInstance().getUserContext(),
 							getFormResponseContext().getUser(), 
 							getFormResponseContext().getResponseMaster().getOID(), 
 							Section.this.getSurveyItemId());
@@ -597,7 +605,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 			{
 				try
 				{
-					SurveyDelegate.releaseSectionEditLock(EtestApplication.getInstance().getUserContext(), getFormResponseContext().getResponseMaster().getOID(), 
+					surveyDelegate.releaseSectionEditLock(EtestApplication.getInstance().getUserContext(), getFormResponseContext().getResponseMaster().getOID(),
 							Section.this.getSurveyItemId());
 
 					expp.setLockStatus(LockUnlockExpandPanel.LOCKSTATUS_UNLOCKED);
@@ -668,7 +676,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 				@Override
 				public void buttonClick(ClickEvent event)
 				{
-					FormSection formSection = new FormDBManager().getFormSection(getSurveyItemId(), testProc.getFormPk());
+					FormSection formSection =formDBManager.getFormSection(getSurveyItemId(), testProc.getFormPk());
 					TestProcSectionObj testprocSection = testProcService.getTestProcSection(testProc.getOID(), formSection.getOID());
 					Workorder wo = WorkorderDelegate.getWorkorderForEntity(testprocSection.getOID());
 					if(wo != null)

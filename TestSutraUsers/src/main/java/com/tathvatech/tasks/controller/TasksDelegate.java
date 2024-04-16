@@ -1,10 +1,13 @@
 package com.tathvatech.tasks.controller;
 
+import com.tathvatech.tasks.common.TaskFilter;
+import com.tathvatech.tasks.entity.Task;
+import com.tathvatech.tasks.enums.TaskStatus;
 import com.tathvatech.tasks.service.TasksManager;
 import com.tathvatech.user.OID.OID;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.TaskDefBean;
-import org.springframework.scheduling.config.Task;
+
 
 import java.util.List;
 

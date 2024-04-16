@@ -18,10 +18,14 @@ import java.util.Properties;
 import java.util.TimeZone;
 
 import com.tathvatech.common.common.DataTypes;
+import com.tathvatech.common.exception.InvalidResponseException;
+import com.tathvatech.common.utils.DataConversionUtil;
 import com.tathvatech.forms.common.FormDesignListener;
 import com.tathvatech.forms.controller.TestProcController;
 import com.tathvatech.logic.common.Logic;
 import com.tathvatech.survey.enums.AnswerPersistor;
+import com.tathvatech.survey.intf.LogicSubject;
+import com.tathvatech.survey.intf.MultiDataTypeQuestionType;
 import com.tathvatech.survey.response.SimpleSurveyItemResponse;
 import com.tathvatech.survey.response.SurveyItemResponse;
 import com.tathvatech.survey.response.SurveyResponse;
@@ -42,8 +46,7 @@ import org.slf4j.LoggerFactory;
  *         TODO To change the template for this generated type comment go to
  *         Window - Preferences - Java - Code Style - Code Templates
  */
-public class TextAreaAnswerType extends SurveySaveItem implements SurveyDisplayItem, LogicSubject,
-		MultiDataTypeQuestionType
+public class TextAreaAnswerType extends SurveySaveItem implements SurveyDisplayItem, LogicSubject, MultiDataTypeQuestionType
 {
 	private static final Logger logger = LoggerFactory.getLogger(TextAreaAnswerType.class);
 

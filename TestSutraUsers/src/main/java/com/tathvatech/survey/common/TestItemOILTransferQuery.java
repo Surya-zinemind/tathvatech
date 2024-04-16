@@ -6,19 +6,18 @@
  */
 package com.tathvatech.survey.common;
 
+import com.tathvatech.common.enums.EntityTypeEnum;
+
 import java.io.Serializable;
 import java.util.Date;
 
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-
-import net.sf.persist.annotations.NoTable;
 
 /**
  * @author Hari
  * 
  */
 
-@NoTable
+
 public class TestItemOILTransferQuery implements Serializable
 {
 	private int	pk;

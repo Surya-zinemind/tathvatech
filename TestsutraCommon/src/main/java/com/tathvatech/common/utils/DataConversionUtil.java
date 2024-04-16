@@ -4,22 +4,19 @@
 
 package com.tathvatech.common.utils;
 
+import com.tathvatech.common.exception.BaseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-import org.apache.log4j.Logger;
 
-import com.tathvatech.ts.caf.core.exception.BaseException;
-import com.tathvatech.ts.caf.core.exception.ConvertorNotDefinedException;
-import com.tathvatech.ts.caf.core.exception.InvalidDataFormatException;
-import com.tathvatech.ts.caf.core.framework.typeconvertor.DataTypeConvertor;
-import com.tathvatech.ts.caf.core.metadata.MetadataFactory;
 
 public class DataConversionUtil
 {
-	public static final Logger logger = Logger
-			.getLogger(DataConversionUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(DataConversionUtil.class);
 	
     public static String inputDateFormat = "MM/dd/yyyy";
     

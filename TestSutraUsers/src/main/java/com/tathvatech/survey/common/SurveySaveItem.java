@@ -6,6 +6,7 @@
  */
 package com.tathvatech.survey.common;
 
+import com.tathvatech.common.exception.InvalidResponseException;
 import com.tathvatech.survey.enums.AnswerPersistor;
 import com.tathvatech.survey.intf.LogicAnchor;
 import com.tathvatech.survey.intf.SurveySaveItemBase;

@@ -10,11 +10,15 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.tathvatech.common.common.DataTypes;
+import com.tathvatech.common.common.Option;
+import com.tathvatech.common.utils.OptionList;
 import com.tathvatech.site.service.SiteServiceImpl;
 
 import com.tathvatech.survey.common.HasOtherType;
 import com.tathvatech.survey.common.SurveyDefinition;
 import com.tathvatech.survey.common.SurveySaveItem;
+import com.tathvatech.survey.intf.MultipleChoiceType;
+import com.tathvatech.survey.intf.OneDOptionType;
 import com.tathvatech.survey.intf.SurveyItemBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,6 +1,8 @@
 package com.tathvatech.activitylogging.common;
 
-import com.tathvatech.ts.core.accounts.UserOID;
+
+import com.tathvatech.common.enums.BaseActions;
+import com.tathvatech.user.OID.UserOID;
 
 public class ActivityLogRequestBeanBase
 {

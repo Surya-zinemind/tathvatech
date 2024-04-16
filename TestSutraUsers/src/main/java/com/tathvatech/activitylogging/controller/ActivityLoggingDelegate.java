@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import com.tathvatech.activitylogging.common.ActivityLogCommonQuery;
+import com.tathvatech.activitylogging.common.ActivityLogRequestBeanBase;
+import com.tathvatech.activitylogging.entity.ActivityLog;
+import com.tathvatech.activitylogging.entity.ActivityLogCommon;
 import com.tathvatech.user.OID.UserOID;
 import com.tathvatech.activitylogging.common.ActivityLogQuery;
 import com.tathvatech.common.enums.BaseActions;
@@ -155,14 +159,14 @@ public class ActivityLoggingDelegate {
 			act.setAction(activityLogBean.getAction().value());
 			act.setActionTime(new Date());
 			act.setComment(activityLogBean.getComment());
-			act.setExecutedByPk(activityLogBean.getExecutedBy().getPk());
+			act.setExecutedByPk((int) activityLogBean.getExecutedBy().getPk());
 			persistWrapper.createEntity(act);
 		    
 
 	}
 	
 	
-	public static List<ActivityLogCommonQuery> getActivityLogs(UserOID userOID, Date startDate, Date endDate, BaseActions action) throws Exception
+	public  List<ActivityLogCommonQuery> getActivityLogs(UserOID userOID, Date startDate, Date endDate, BaseActions action) throws Exception
 	{
 		Calendar cal = Calendar.getInstance();
 		if(endDate == null)
@@ -210,7 +214,7 @@ public class ActivityLoggingDelegate {
 		
 		sql.append(" order by actionTime desc");
 		
-		return PersistWrapper.readList(ActivityLogCommonQuery.class, 
+		return persistWrapper.readList(ActivityLogCommonQuery.class,
 				sql.toString(), 
 				objs.toArray(new Object[objs.size()]));
 	}

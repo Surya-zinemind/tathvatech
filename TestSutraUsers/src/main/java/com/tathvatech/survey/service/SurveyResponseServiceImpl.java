@@ -13,7 +13,7 @@ import java.util.*;
 import java.util.Date;
 
 import com.tathvatech.common.common.DataTypes;
-import com.tathvatech.forms.entity.FormResponseClientSubmissionRev;
+import com.tathvatech.forms.entity.*;
 import com.tathvatech.activitylogging.common.ActivityLogQuery;
 import com.tathvatech.activitylogging.controller.ActivityLoggingDelegate;
 import com.tathvatech.common.common.ApplicationProperties;
@@ -24,9 +24,6 @@ import com.tathvatech.common.exception.RestAppException;
 import com.tathvatech.forms.common.EntityVersionReviewProxy;
 import com.tathvatech.forms.common.ObjectLockQuery;
 import com.tathvatech.forms.common.QuestionResponseStatus;
-import com.tathvatech.forms.entity.FormItemResponse;
-import com.tathvatech.forms.entity.FormResponseMaster;
-import com.tathvatech.forms.entity.FormWorkflow;
 import com.tathvatech.forms.oid.FormResponseOID;
 import com.tathvatech.forms.response.*;
 import com.tathvatech.forms.service.FormDBManager;
@@ -41,7 +38,6 @@ import com.tathvatech.common.common.ErrorCode;
 import com.tathvatech.common.common.ServiceLocator;
 import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.common.exception.AppException;
-import com.tathvatech.forms.entity.FormSection;
 import com.tathvatech.project.entity.Project;
 import com.tathvatech.project.enums.ProjectPropertyEnum;
 import com.tathvatech.survey.entity.ResponseSubmissionBookmark;
@@ -616,7 +612,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 					if(sectionResponse != null)
 					{
 						//update existing
-						sectionResponse.setSubmittedBy(recordSaveAsUser.getPk());
+						sectionResponse.setSubmittedBy((int) recordSaveAsUser.getPk());
 						//start date should not be reset when updating as existing one as it is the date of first save of the section
 						if(sectionResponse.getPercentComplete() != 100 && responseStat.getPercentComplete() == 100)
 						{
@@ -632,8 +628,8 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 						sectionResponse.setNaCount(responseStat.getNaCount());
 						persistWrapper.update(sectionResponse);
 
-						ActivityLogQuery aLog = new ActivityLogQuery(actionPerformedByUser.getPk(), Actions.saveSection,
-								"Section Saved", new Date(), new Date(), project.getPk(), testProc.getPk(), mItem.getPk(), testProc.getWorkstationPk(),
+						ActivityLogQuery aLog = new ActivityLogQuery((int) actionPerformedByUser.getPk(), (BaseActions) Actions.saveSection,
+								"Section Saved", new Date(), new Date(), (int) project.getPk(), testProc.getPk(), (int) mItem.getPk(), testProc.getWorkstationPk(),
 								surveyResponse.getSurveyPk(), sectionResponse.getSectionId(), surveyResponse.getResponseId());
 
 						aLog.setTotalQCount(responseStat.getTotalQCount());
@@ -650,11 +646,11 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 						//create new
 						sectionResponse = new SectionResponse();
 						sectionResponse.setResponseId(surveyResponse.getResponseId());
-						sectionResponse.setFormSectionFk(formSection.getPk());
+						sectionResponse.setFormSectionFk((int) formSection.getPk());
 						sectionResponse.setSectionId(aSection.getSurveyItemId());
 						sectionResponse.setName(aSection.getQuestionText());
 						sectionResponse.setDescription(aSection.getDescription());
-						sectionResponse.setSubmittedBy(recordSaveAsUser.getPk());
+						sectionResponse.setSubmittedBy((int) recordSaveAsUser.getPk());
 						sectionResponse.setStartDate(new Date());
 						sectionResponse.setPercentComplete(responseStat.getPercentComplete());
 						sectionResponse.setNoOfComments(responseStat.getCommentsCount());
@@ -670,8 +666,8 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 						}
 						persistWrapper.createEntity(sectionResponse);
 
-						ActivityLogQuery aLog = new ActivityLogQuery(actionPerformedByUser.getPk(), Actions.saveSection,
-								"Section Saved", new Date(), new Date(), project.getPk(), testProc.getPk(), mItem.getPk(), testProc.getWorkstationPk(),
+						ActivityLogQuery aLog = new ActivityLogQuery((int) actionPerformedByUser.getPk(), (BaseActions) Actions.saveSection,
+								"Section Saved", new Date(), new Date(), (int) project.getPk(), testProc.getPk(), (int) mItem.getPk(), testProc.getWorkstationPk(),
 								surveyResponse.getSurveyPk(), sectionResponse.getSectionId(), surveyResponse.getResponseId());
 
 						aLog.setTotalQCount(responseStat.getTotalQCount());
@@ -916,7 +912,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 					//update existing
 					if(dontChangeSubmittedUserAndCompletionDate == false)
 					{
-						sectionResponse.setSubmittedBy(recordSaveAsUser.getPk());
+						sectionResponse.setSubmittedBy((int) recordSaveAsUser.getPk());
 
 						if(sectionResponse.getPercentComplete() != 100 && responseStat.getPercentComplete() == 100)
 						{
@@ -935,8 +931,8 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 					//start date should not be reset when updating as existing one as it is the date of first save of the section
 					persistWrapper.update(sectionResponse);
 
-					ActivityLogQuery aLog = new ActivityLogQuery(actionPerformedByUser.getPk(), Actions.saveSection,
-							"Section Saved", new Date(), new Date(), project.getPk(), testProc.getPk(), unit.getPk(), testProc.getWorkstationPk(),
+					ActivityLogQuery aLog = new ActivityLogQuery((int) actionPerformedByUser.getPk(), (BaseActions) Actions.saveSection,
+							"Section Saved", new Date(), new Date(), (int) project.getPk(), testProc.getPk(), (int) unit.getPk(), testProc.getWorkstationPk(),
 							surveyResponse.getSurveyPk(), sectionResponse.getSectionId(), surveyResponse.getResponseId());
 
 					aLog.setTotalQCount(responseStat.getTotalQCount());
@@ -953,11 +949,11 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 					//create new
 					sectionResponse = new SectionResponse();
 					sectionResponse.setResponseId(surveyResponse.getResponseId());
-					sectionResponse.setFormSectionFk(formSection.getPk());
+					sectionResponse.setFormSectionFk((int) formSection.getPk());
 					sectionResponse.setSectionId(aSection.getSurveyItemId());
 					sectionResponse.setName(aSection.getQuestionText());
 					sectionResponse.setDescription(aSection.getDescription());
-					sectionResponse.setSubmittedBy(recordSaveAsUser.getPk());
+					sectionResponse.setSubmittedBy((int) recordSaveAsUser.getPk());
 					sectionResponse.setStartDate(new Date());
 					sectionResponse.setPercentComplete(responseStat.getPercentComplete());
 					sectionResponse.setNoOfComments(responseStat.getCommentsCount());
@@ -973,8 +969,8 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 					}
 					persistWrapper.createEntity(sectionResponse);
 
-					ActivityLogQuery aLog = new ActivityLogQuery(actionPerformedByUser.getPk(), Actions.saveSection,
-							"Section Saved", new Date(), new Date(), project.getPk(), testProc.getPk(), unit.getPk(), testProc.getWorkstationPk(),
+					ActivityLogQuery aLog = new ActivityLogQuery((int) actionPerformedByUser.getPk(), (BaseActions) Actions.saveSection,
+							"Section Saved", new Date(), new Date(), (int) project.getPk(), testProc.getPk(), (int) unit.getPk(), testProc.getWorkstationPk(),
 							surveyResponse.getSurveyPk(), sectionResponse.getSectionId(), surveyResponse.getResponseId());
 
 					aLog.setTotalQCount(responseStat.getTotalQCount());
@@ -1973,8 +1969,8 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 	 * count of responses recieved for a survey between the given dates.
 	 * includes the responses recieved on the start and end date
 	 *
-	 * @param startDate
-	 * @param endDate
+	 * @param
+	 * @param
 	 */
 	// public static long getResponseCountByDateRange(Survey survey, Date
 	// startDate, Date endDate)throws Exception

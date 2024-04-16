@@ -1,6 +1,9 @@
 package com.tathvatech.tasks.service;
 
 import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.tasks.common.TaskFilter;
+import com.tathvatech.tasks.entity.Task;
+import com.tathvatech.tasks.enums.TaskStatus;
 import com.tathvatech.user.OID.OID;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.TaskDefBean;
@@ -24,19 +27,19 @@ public class TasksManager {
 
         if(assignedTo != null)
         {
-        	task.setAssignedToPk(assignedTo.getPk());
+        	task.setAssignedToPk((int) assignedTo.getPk());
         	task.setAssignedToType(assignedTo.getEntityType().getValue());
         }
         task.setTaskDef(taskDef.getDefString());
         task.setTaskType(taskDef.getTaskType().getValue());
-        task.setObjectPk(associatedObjectOid.getPk());
+        task.setObjectPk((int) associatedObjectOid.getPk());
         task.setObjectType(associatedObjectOid.getEntityType().getValue());
         task.setStatus(TaskStatus.New.getValue());
         
 
 		if(task.getPk() == 0)
 		{
-	        task.setCreatedBy(userContext.getUser().getPk());
+	        task.setCreatedBy((int) userContext.getUser().getPk());
 	        task.setCreatedDate(new Date());
 			persistWrapper.createEntity(task);
 		}
@@ -48,7 +51,7 @@ public class TasksManager {
 
 	public  Task getTask(int taskPk)throws Exception
 	{
-		return persistWrapper.readByPrimaryKey(Task.class, taskPk);
+		return (Task) persistWrapper.readByPrimaryKey(Task.class, taskPk);
 	}
 	
 	public  List<Task> getTasks(UserContext userContext, TaskFilter taskFilter) throws Exception
@@ -114,10 +117,9 @@ public class TasksManager {
 	}
 
 	public  void markTaskPerformed(UserContext context, Task task,
-			TaskStatus resultStatus) 
-	{
+			TaskStatus resultStatus) throws Exception {
 		task.setStatus(resultStatus.getValue());
-		task.setPerformedBy(context.getUser().getPk());
+		task.setPerformedBy((int) context.getUser().getPk());
 		task.setPerformedDate(new Date());
 
 		persistWrapper.update(task);

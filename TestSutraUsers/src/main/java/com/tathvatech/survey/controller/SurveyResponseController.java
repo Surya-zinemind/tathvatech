@@ -19,6 +19,7 @@ import com.tathvatech.activitylogging.common.ActivityLogQuery;
 import com.tathvatech.activitylogging.controller.ActivityLoggingDelegate;
 import com.tathvatech.common.enums.BaseActions;
 import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.forms.common.AssignedTestsQuery;
 import com.tathvatech.forms.common.EntityVersionReviewProxy;
 import com.tathvatech.forms.common.ObjectLockQuery;
 import com.tathvatech.forms.entity.*;
@@ -32,6 +33,7 @@ import com.tathvatech.survey.entity.Survey;
 import com.tathvatech.survey.exception.LockedByAnotherUserException;
 import com.tathvatech.survey.response.SurveyItemResponse;
 import com.tathvatech.survey.service.SurveyMaster;
+import com.tathvatech.survey.service.SurveyResponseServiceImpl;
 import com.tathvatech.survey.service.WorkflowManager;
 import com.tathvatech.unit.common.UnitLocationQuery;
 import com.tathvatech.unit.entity.UnitLocation;
@@ -81,6 +83,7 @@ public class SurveyResponseController
     private final WorkstationService workstationService;
 	private final PersistWrapper persistWrapper;
 	private  final WorkflowManager workflowManager;
+	private final SurveyResponseServiceImpl surveyResponseServiceImpl;
     /**
      * Called when the workstation is changed to in progress
      */
@@ -553,8 +556,8 @@ public class SurveyResponseController
 				//carry on editing the form and resubmitting it
 				//create the new response, and set the current = true
 				FormResponseMaster respMaster = persistWrapper.readByResponseId(FormResponseMaster.class, surveyResponse.getResponseId());
-				List<SectionResponse> sections = PersistWrapper.readList(SectionResponse.class, "select * from TAB_SECTION_RESPONSE where responseId = ?", surveyResponse.getResponseId());
-				List<FormResponseDesc> itemResponses = PersistWrapper.readList(FormResponseDesc.class, "select * from TAB_RESPONSE_desc where responseId = ?", surveyResponse.getResponseId());
+				List<SectionResponse> sections = persistWrapper.readList(SectionResponse.class, "select * from TAB_SECTION_RESPONSE where responseId = ?", surveyResponse.getResponseId());
+				List<FormResponseDesc> itemResponses = persistWrapper.readList(FormResponseDesc.class, "select * from TAB_RESPONSE_desc where responseId = ?", surveyResponse.getResponseId());
 				respMaster.setResponseId(0);
 				respMaster.setCurrent(true);
 				int newResponseId = (int) persistWrapper.createEntity(respMaster);
@@ -622,8 +625,8 @@ public class SurveyResponseController
      * count of responses recieved for a survey between the given dates.
      * includes the responses recieved on the start and end date
      * 
-     * @param startDate
-     * @param endDate
+     * @param
+     * @param
      */
     // public  long getResponseCountByDateRange(Survey survey, Date
     // startDate, Date endDate)throws Exception
@@ -676,7 +679,7 @@ public class SurveyResponseController
 	}
     public  ResponseMasterNew[] getLatestResponseMastersForUnitInWorkstation(int unitPk, ProjectOID projectOID, WorkstationOID workstationOID) throws Exception
 	{
-		return surveyResponseService.getLatestResponseMastersForUnitInWorkstation(new UnitOID(unitPk, null), projectOID, workstationOID);
+		return surveyResponseServiceImpl.getLatestResponseMastersForUnitInWorkstation(new UnitOID(unitPk, null), projectOID, workstationOID);
 	}
     
 	public  ResponseMasterNew getResponseMasterForTestHistoryRecord(TestProcOID testProcOID, FormOID formOID)
@@ -826,9 +829,9 @@ public class SurveyResponseController
     /**
      * returns if sections are locked by other users
      * parameter surveyQuestions is filledout by this function with the sections that should be saved.
-     * @param surveyResponse
+     * @param
      * @param surveyQuestions
-     * @param errors
+     * @param
      * @return
      * @throws Exception
      */

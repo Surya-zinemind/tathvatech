@@ -7,6 +7,8 @@
 package com.tathvatech.logic.common;
 
 import com.tathvatech.common.common.DataTypes;
+import com.tathvatech.common.common.Option;
+import com.tathvatech.common.utils.OptionList;
 import com.tathvatech.survey.common.HasOtherType;
 import com.tathvatech.survey.common.SurveyDefinition;
 import com.tathvatech.survey.common.SurveySaveItem;

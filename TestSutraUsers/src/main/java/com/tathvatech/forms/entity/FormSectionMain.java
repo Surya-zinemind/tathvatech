@@ -11,6 +11,7 @@ import java.util.Date;
 
 
 import com.tathvatech.common.entity.AbstractEntity;
+import com.tathvatech.survey.oid.FormSectionMainOID;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -103,7 +104,7 @@ public class FormSectionMain extends AbstractEntity implements Serializable
 	}
 
 	public FormSectionMainOID getOID() {
-		return new FormSectionMainOID(pk, itemNo);
+		return new FormSectionMainOID((int) pk, itemNo);
 	}
 
 }

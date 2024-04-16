@@ -6,19 +6,22 @@
  */
 package com.tathvatech.survey.common;
 
+
+import com.tathvatech.survey.enums.AnswerPersistor;
+import com.tathvatech.survey.intf.SurveySaveItemBase;
+import com.tathvatech.survey.response.SurveyItemResponse;
+import com.tathvatech.unit.response.ResponseUnit;
+import com.tathvatech.user.utils.Sqls;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.tathvatech.survey.intf.SurveyItemBase;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.response.AnswerPersistor;
-import com.tathvatech.ts.core.survey.response.ResponseUnit;
-import com.tathvatech.ts.core.survey.response.SurveyItemResponse;
-import com.tathvatech.ts.core.utils.Sqls;
 
 /**
  * @author Hari
@@ -28,14 +31,14 @@ import com.tathvatech.ts.core.utils.Sqls;
  */
 public class SimpleAnswerPersistor implements AnswerPersistor
 {
-    private static final Logger logger = Logger.getLogger(SimpleAnswerPersistor.class);
-    
+
+    private static final Logger logger = LoggerFactory.getLogger(SimpleAnswerPersistor .class);
     private SurveyItemResponse answer;
     private SurveySaveItemBase surveyItem;
     
     /**
-     * @param question
-     * @param answer
+     * @param
+     * @param
      */
     public SimpleAnswerPersistor(SurveySaveItemBase sItem)
     {
@@ -43,7 +46,7 @@ public class SimpleAnswerPersistor implements AnswerPersistor
     }
 
     /**
-     * @param question
+     * @param
      * @param answer
      */
     public SimpleAnswerPersistor(SurveySaveItemBase sItem, SurveyItemResponse answer)
@@ -182,7 +185,7 @@ public class SimpleAnswerPersistor implements AnswerPersistor
 			    }
 			    
 			    pStmt.setInt(5, responseId);
-			    pStmt.setInt(6, ((SurveyItemBase) surveyItem).getSurveyDefinition().getSurveyConfig().getPk());
+			    pStmt.setInt(6, (int) ((SurveyItemBase) surveyItem).getSurveyDefinition().getSurveyConfig().getPk());
 			    pStmt.setString(7, surveyItem.getSurveyItemId());
 			    
 			    pStmt.execute();

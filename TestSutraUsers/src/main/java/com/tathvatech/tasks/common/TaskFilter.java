@@ -1,12 +1,15 @@
 package com.tathvatech.tasks.common;
 
-import com.tathvatech.ts.core.common.OID;
+
+import com.tathvatech.forms.enums.TaskTypes;
+import com.tathvatech.tasks.enums.TaskStatus;
+import com.tathvatech.user.OID.OID;
 
 
 public class TaskFilter {
-	int createdBy;
-	TaskTypes taskType;
-	OID objectOID; //associated To object pk .. optional
-	OID assignedToOID; // user/role etc.. in the future.
-	TaskStatus[] status;
+	public int createdBy;
+	public TaskTypes taskType;
+	public OID objectOID; //associated To object pk .. optional
+	public OID assignedToOID; // user/role etc.. in the future.
+	public TaskStatus[] status;
 }

@@ -1,10 +1,11 @@
 package com.tathvatech.common.utils;
 
+import com.tathvatech.common.common.Option;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.tathvatech.ts.core.survey.Option;
 
 
 /**

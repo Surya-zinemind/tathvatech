@@ -14,11 +14,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
+import com.tathvatech.survey.intf.LogicSubject;
+import com.tathvatech.common.common.DataTypes;
 import com.tathvatech.common.common.FileStoreManager;
+import com.tathvatech.common.common.Option;
 import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.common.exception.AppException;
+import com.tathvatech.common.exception.InvalidResponseException;
+import com.tathvatech.common.utils.LineSeperatorUtil;
 import com.tathvatech.common.utils.ListStringUtil;
+import com.tathvatech.common.utils.OptionList;
 import com.tathvatech.forms.common.FormDesignListener;
 import com.tathvatech.forms.common.FormEventListner;
 import com.tathvatech.forms.controller.TestProcController;
@@ -32,6 +37,7 @@ import com.tathvatech.logic.common.Logic;
 import com.tathvatech.survey.response.SimpleSurveyItemResponse;
 import com.tathvatech.survey.response.SurveyItemResponse;
 import com.tathvatech.survey.response.SurveyResponse;
+import com.tathvatech.survey.service.SurveyItemManager;
 import com.tathvatech.survey.service.SurveyResponseService;
 import com.tathvatech.unit.common.UnitFormQuery;
 import com.tathvatech.unit.common.UnitObj;
@@ -1118,7 +1124,7 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 							{
 								
 								((SurveyItemConfigHolder)parent).getFormDesigner().addNewItemToForm(
-										SurveyItemManager.BomInspectItemAnswerType.getDescription(), 
+										SurveyItemManager.BomInspectItemAnswerType.getDescription(),
 										((SurveyItemConfigHolder)parent), getSurveyItemId());
 								break;
 							}
@@ -1191,7 +1197,7 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 	}
 
 	@Override
-	public TextAreaAnswerType.ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
+	public Component drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		return new ConfigForm(this, formDesignListener);
 	}

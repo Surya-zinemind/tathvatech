@@ -2,9 +2,8 @@ package com.tathvatech.forms.common;
 
 import java.util.Date;
 
-import net.sf.persist.annotations.NoTable;
 
-@NoTable
+
 public class FormWorkflowQuery
 {
 

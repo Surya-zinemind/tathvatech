@@ -1,8 +1,9 @@
 package com.tathvatech.survey.oid;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.OID;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.user.OID.OID;
+
 
 public class FormSectionMainOID extends OID {
 
@@ -26,7 +27,7 @@ public class FormSectionMainOID extends OID {
 
 	@Override
 	public int hashCode() {
-		return super.getPk();
+		return (int) super.getPk();
 	}
 
 }
