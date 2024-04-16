@@ -7,8 +7,10 @@
 package com.tathvatech.survey.service;
 
 import java.util.Date;
+import java.util.List;
 
 import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.forms.common.FormWorkflowQuery;
 import com.tathvatech.forms.entity.FormWorkflow;
 import com.tathvatech.forms.response.ResponseMasterNew;
 import org.slf4j.Logger;
@@ -74,7 +76,7 @@ public class WorkflowManager
 		persistWrapper.createEntity(nwf);
 	}
 
-	public  List<FormWorkflowQuery> getWorkflowsForTestProc(TestProcOID testProcOid) throws Exception
+	public List<FormWorkflowQuery> getWorkflowsForTestProc(TestProcOID testProcOid) throws Exception
 	{
 		return persistWrapper.readList(FormWorkflowQuery.class,
 			    FormWorkflowQuery.sql + " and fwf.testProcPk=? and fwf.action != ?", 

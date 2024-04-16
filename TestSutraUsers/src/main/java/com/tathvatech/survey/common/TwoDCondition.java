@@ -6,16 +6,17 @@
  */
 package com.tathvatech.survey.common;
 
+import com.tathvatech.common.common.DataTypes;
+import com.tathvatech.common.exception.AppException;
+import com.tathvatech.logic.common.Condition;
+import com.tathvatech.site.service.SiteServiceImpl;
+import com.tathvatech.survey.intf.SurveyItemBase;
+import org.jdom2.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-import org.jdom.Element;
-
-import com.tathvatech.ts.caf.core.exception.AppException;
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.surveyitem.SurveyItemBase;
-import com.thirdi.surveyside.survey.DataTypes;
-import com.thirdi.surveyside.survey.surveyitem.SurveySaveItem;
 
 /**
  * @author Hari
@@ -25,7 +26,7 @@ import com.thirdi.surveyside.survey.surveyitem.SurveySaveItem;
  */
 public abstract class TwoDCondition implements Condition
 {
-    private static final Logger logger = Logger.getLogger(TwoDCondition.class);
+    private static final Logger logger = LoggerFactory.getLogger(TwoDCondition.class);
     
     protected SurveyDefinition surveyDef;
 

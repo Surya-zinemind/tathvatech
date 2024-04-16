@@ -9,15 +9,12 @@ package com.tathvatech.survey.common;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 
-import com.tathvatech.ts.core.survey.MultiTextBoxType;
-import com.tathvatech.ts.core.survey.Option;
-import com.tathvatech.ts.core.survey.SurveyDefinition;
-import com.tathvatech.ts.core.survey.surveyitem.SurveyItemBase;
-import com.thirdi.surveyside.survey.DataTypes;
-import com.thirdi.surveyside.survey.SurveyItem;
-import com.thirdi.surveyside.survey.surveyitem.SurveySaveItem;
+import com.tathvatech.common.common.DataTypes;
+import com.tathvatech.common.common.Option;
+import com.tathvatech.survey.intf.SurveyItemBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Hari
@@ -27,7 +24,7 @@ import com.thirdi.surveyside.survey.surveyitem.SurveySaveItem;
  */
 public class MultiTextCondition extends TwoDCondition
 {
-    private static final Logger logger = Logger.getLogger(MultiTextCondition.class);
+    private static final Logger logger = LoggerFactory.getLogger(MultiTextCondition.class);
     
     public MultiTextCondition(String subjectId, SurveyDefinition surveyDef)
     {

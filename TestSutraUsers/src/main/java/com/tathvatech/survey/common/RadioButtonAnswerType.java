@@ -15,6 +15,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import com.tathvatech.common.common.Option;
+import com.tathvatech.common.exception.InvalidResponseException;
+import com.tathvatech.common.utils.LineSeperatorUtil;
+import com.tathvatech.common.utils.OptionList;
+import com.tathvatech.survey.intf.LogicSubject;
+import com.tathvatech.survey.intf.MultipleChoiceType;
+import com.tathvatech.survey.intf.OneDOptionType;
 import com.tathvatech.common.common.DataTypes;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.forms.common.FormDesignListener;
@@ -680,7 +687,7 @@ public class RadioButtonAnswerType extends SurveySaveItem implements SurveyDispl
 	}
 
 	@Override
-	public TextAreaAnswerType.ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
+	public Component drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		return new ConfigForm(this, formDesignListener);
 	}

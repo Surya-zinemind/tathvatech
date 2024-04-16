@@ -19,6 +19,8 @@ import java.util.Properties;
 import java.util.TimeZone;
 
 import com.tathvatech.common.common.DataTypes;
+import com.tathvatech.common.exception.InvalidResponseException;
+import com.tathvatech.common.utils.DataConversionUtil;
 import com.tathvatech.forms.common.FormDesignListener;
 import com.tathvatech.forms.common.FormEventListner;
 import com.tathvatech.forms.controller.TestProcController;
@@ -26,6 +28,8 @@ import com.tathvatech.logic.common.Logic;
 
 
 import com.tathvatech.survey.enums.AnswerPersistor;
+import com.tathvatech.survey.intf.LogicSubject;
+import com.tathvatech.survey.intf.MultiDataTypeQuestionType;
 import com.tathvatech.survey.response.SimpleSurveyItemResponse;
 import com.tathvatech.survey.response.SurveyItemResponse;
 import com.tathvatech.survey.response.SurveyResponse;
@@ -301,7 +305,7 @@ public class TextBoxAnswerType extends SurveySaveItem implements SurveyDisplayIt
 	 * @see
 	 * com.thirdi.surveyside.survey.AnswerType#drawQuestionConfigurationForm()
 	 */
-	public TextAreaAnswerType.ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
+	public Component drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		return new ConfigForm(this, formDesignListener);
 	}

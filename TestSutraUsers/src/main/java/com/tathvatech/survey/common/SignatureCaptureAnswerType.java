@@ -5,13 +5,14 @@
  * Window - Preferences - Java - Code Style - Code Templates
  */
 package com.tathvatech.survey.common;
-
+import com.tathvatech.common.exception.InvalidResponseException;
+import com.tathvatech.survey.intf.LogicSubject;
 import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
+import com.tathvatech.survey.intf.MultiDataTypeQuestionType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -236,7 +237,7 @@ public class SignatureCaptureAnswerType extends SurveySaveItem implements Survey
 	 * @see
 	 * com.thirdi.surveyside.survey.AnswerType#drawQuestionConfigurationForm()
 	 */
-	public TextAreaAnswerType.ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
+	public  Component  drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		return new ConfigForm(this, formDesignListener);
 	}
