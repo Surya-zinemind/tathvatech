@@ -1,5 +1,7 @@
 package com.tathvatech.pdf.common;
 
+import com.itextpdf.text.Element;
+
 public class PdfPrintArea
 {
 	public int pageNo, left, width, top, height, leading, hAlign, vAlign;
