@@ -4,19 +4,18 @@
  * TODO To change the template for this generated file go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-package com.tathvatech.logic.common;
+package com.tathvatech.survey.common;
 
 import java.util.Map;
 
-import com.tathvatech.common.common.DataTypes;
-import com.tathvatech.common.exception.AppException;
-import com.tathvatech.survey.common.SurveyDefinition;
-import com.tathvatech.survey.common.SurveySaveItem;
-import com.tathvatech.survey.intf.SurveyItemBase;
-import org.jdom2.Element;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.jdom.Element;
 
+import com.tathvatech.ts.caf.core.exception.AppException;
+import com.tathvatech.ts.core.survey.SurveyDefinition;
+import com.tathvatech.ts.core.survey.surveyitem.SurveyItemBase;
+import com.thirdi.surveyside.survey.DataTypes;
+import com.thirdi.surveyside.survey.surveyitem.SurveySaveItem;
 
 /**
  * @author Hari
@@ -24,17 +23,18 @@ import org.slf4j.LoggerFactory;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public abstract class SimpleCondition implements Condition
+public abstract class TwoDCondition implements Condition
 {
-    private static final Logger logger = LoggerFactory.getLogger(SimpleCondition.class);
+    private static final Logger logger = Logger.getLogger(TwoDCondition.class);
     
     protected SurveyDefinition surveyDef;
 
     protected String subjectId;
+    protected String keyId;
     protected String operator;
     protected String value;
     
-    public SimpleCondition(SurveyDefinition surveyDef)
+    public TwoDCondition(SurveyDefinition surveyDef)
     {
         this.surveyDef = surveyDef;
     }
@@ -61,7 +61,17 @@ public abstract class SimpleCondition implements Condition
         this.subjectId = subjectId;
     }
     
-    /**
+    public String getKeyId() 
+    {
+		return keyId;
+	}
+
+	public void setKeyId(String keyId) 
+	{
+		this.keyId = keyId;
+	}
+
+	/**
      * 
      * @return Returns the subject of this condition. it is the same subject referred by the getSubjectId call
      */
@@ -109,6 +119,12 @@ public abstract class SimpleCondition implements Condition
             logger.debug("Inside setConfiguration");
         }
 
+        String[] kVal = (String[])paramMap.get("keyId");
+        if(kVal != null)
+        {
+            keyId = kVal[0];
+        }
+
         String[] cVal = (String[])paramMap.get("operator");
         if(cVal != null)
         {
@@ -146,6 +162,7 @@ public abstract class SimpleCondition implements Condition
     public void setConfiguration(Element element)
     {
         this.setSubjectId(element.getAttributeValue("subject"));
+        this.setKeyId(element.getAttributeValue("keyId"));
         this.setOperator(element.getAttributeValue("operator"));
         this.setValue(element.getAttributeValue("value"));
     }
@@ -177,6 +194,15 @@ public abstract class SimpleCondition implements Condition
         else
         {
             element.setAttribute("subjectType", "unknown");
+        }
+
+        if(keyId != null)
+        {
+            element.setAttribute("keyId", keyId);
+        }
+        else
+        {
+            element.setAttribute("keyId", "unknown");
         }
 
         if(operator != null)

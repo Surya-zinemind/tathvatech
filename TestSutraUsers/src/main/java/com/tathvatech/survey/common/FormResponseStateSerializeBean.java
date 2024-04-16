@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tathvatech.forms.response.FormResponseStats;
 import com.tathvatech.forms.response.ResponseMasterNew;
 import com.tathvatech.survey.entity.ResponseFlags;
-import com.tathvatech.survey.inf.SurveySaveItemBase;
+import com.tathvatech.survey.intf.SurveySaveItemBase;
 import com.tathvatech.survey.response.SimpleSurveyItemResponse;
 import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.user.entity.User;

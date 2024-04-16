@@ -4,20 +4,20 @@
  * TODO To change the template for this generated file go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-package com.tathvatech.logic.common;
-
-import com.tathvatech.common.common.DataTypes;
-import com.tathvatech.survey.common.HasOtherType;
-import com.tathvatech.survey.common.SurveyDefinition;
-import com.tathvatech.survey.common.SurveySaveItem;
-import com.tathvatech.survey.intf.SurveyItemBase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package com.tathvatech.survey.common;
 
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 
+import com.tathvatech.ts.core.survey.MultiTextBoxType;
+import com.tathvatech.ts.core.survey.Option;
+import com.tathvatech.ts.core.survey.SurveyDefinition;
+import com.tathvatech.ts.core.survey.surveyitem.SurveyItemBase;
+import com.thirdi.surveyside.survey.DataTypes;
+import com.thirdi.surveyside.survey.SurveyItem;
+import com.thirdi.surveyside.survey.surveyitem.SurveySaveItem;
 
 /**
  * @author Hari
@@ -25,11 +25,11 @@ import java.util.List;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public class MatrixCondition extends TwoDCondition
+public class MultiTextCondition extends TwoDCondition
 {
-    private static final Logger logger = LoggerFactory.getLogger( MatrixCondition.class);
+    private static final Logger logger = Logger.getLogger(MultiTextCondition.class);
     
-    public MatrixCondition(String subjectId, SurveyDefinition surveyDef)
+    public MultiTextCondition(String subjectId, SurveyDefinition surveyDef)
     {
         super(surveyDef);
 		this.setSubjectId(subjectId);
@@ -46,7 +46,7 @@ public class MatrixCondition extends TwoDCondition
         	if(keyId != null)
         	{
 	            int key1 = Integer.parseInt(keyId);
-                sb.append(((TwoDOptionType)sItem).getRowOptions().getOptionByValue(key1).getText());
+                sb.append(((MultiTextBoxType)sItem).getOptions().getOptionByIndex((key1-1)));
         	}
         	
         	sb.append( " " + operator + " ");
@@ -56,8 +56,7 @@ public class MatrixCondition extends TwoDCondition
             }
             else
             {
-	            int valueInt = Integer.parseInt(value);
-                sb.append(((TwoDOptionType)sItem).getColumnOptions().getOptionByValue(valueInt).getText());
+                sb.append(value);
             }
         }
         else
@@ -75,7 +74,7 @@ public class MatrixCondition extends TwoDCondition
         }
         
         SurveyItemBase subject = this.surveyDef.getQuestion(getSubjectId());
-        TwoDOptionType tItem = (TwoDOptionType)subject;
+        MultiTextBoxType tItem = (MultiTextBoxType)subject;
         int dataType = ((SurveySaveItem)tItem).getDataType();
         List operators = DataTypes.getOperators(dataType);
         
@@ -88,16 +87,15 @@ public class MatrixCondition extends TwoDCondition
 		
 		sb.append("<TD colspan=\"2\" valign=\"top\">");
         sb.append("Value of <SELECT id=\"required\" NAME=\"keyId\" SIZE=\"1\">\n");
-        for (int i=0; i<tItem.getRowOptions().size(); i++)
+        for (int i=0; i<tItem.getOptions().size(); i++)
         {
-        	Option rowOption = tItem.getRowOptions().getOptionByIndex(i);
-            String choice = rowOption.getText();
-            sb.append("<option value=\""+ rowOption.getValue() + "\" ");
-            if(choice.equals(keyId))
+        	Option aOption = tItem.getOptions().getOptionByIndex(i);
+            sb.append("<option value=\""+ aOption.getValue() + "\" ");
+            if(new Integer(aOption.getValue()).toString().equals(keyId))
             {
                 sb.append("selected ");
             }
-            sb.append(">" + choice + "</option>\n");  
+            sb.append(">" + aOption.getText() + "</option>\n");  
         }
         sb.append("</SELECT>");
 		sb.append("&nbsp;</TD>");
@@ -123,30 +121,13 @@ public class MatrixCondition extends TwoDCondition
 		sb.append("&nbsp;</TD>");
 
 		sb.append("<TD valign=\"top\">&nbsp;");
-		sb.append("<select name=\"value\" id=\"required\" >\n");
-        OptionList colOptions = tItem.getColumnOptions();
-		for (int i=0; i<colOptions.size(); i++)
-        {
-			Option colOption = colOptions.getOptionByIndex(i);
-            sb.append("<option VALUE=\""+ colOption.getValue() + "\" ");
-            if(Integer.toString(colOption.getValue()).equals(getValue()))
-            {
-                sb.append("selected ");
-            }
-            sb.append(">" + colOption.getText() + "</option>\n");  
-        }
+		String valueString = "";
+		if(value != null)
+		{
+		    valueString = value;
+		}
+        sb.append("<INPUT TYPE=\"text\" id=\"f_" + subject.getSurveyItemId() + "-required\" NAME=\"value\" VALUE=\""+valueString+"\" SIZE=\"20\" >");  
 
-		//add the other option if applicable
-        if(tItem instanceof HasOtherType && ((HasOtherType)tItem).isAddOtherField())
-        {
-            sb.append("<option VALUE=\""+ HasOtherType.OTHER_KEY + "\" ");
-            if("0".equals(getValue()))
-            {
-                sb.append("selected ");
-            }
-            sb.append(">" + ((HasOtherType)tItem).getOtherFieldLabel() + "</option>\n<br><br>");  
-        }
-        
 		sb.append("</TD>");
    		sb.append("</TR>");
 

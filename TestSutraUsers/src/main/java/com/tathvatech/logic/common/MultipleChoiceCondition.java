@@ -15,7 +15,7 @@ import com.tathvatech.site.service.SiteServiceImpl;
 import com.tathvatech.survey.common.HasOtherType;
 import com.tathvatech.survey.common.SurveyDefinition;
 import com.tathvatech.survey.common.SurveySaveItem;
-import com.tathvatech.survey.inf.SurveyItemBase;
+import com.tathvatech.survey.intf.SurveyItemBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

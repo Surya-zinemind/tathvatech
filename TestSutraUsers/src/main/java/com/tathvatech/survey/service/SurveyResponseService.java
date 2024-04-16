@@ -15,7 +15,7 @@ import com.tathvatech.survey.common.SurveyItem;
 import com.tathvatech.survey.common.SurveySaveItem;
 import com.tathvatech.survey.entity.ResponseSubmissionBookmark;
 import com.tathvatech.survey.entity.Survey;
-import com.tathvatech.survey.inf.SurveySaveItemBase;
+import com.tathvatech.survey.intf.SurveySaveItemBase;
 import com.tathvatech.survey.response.SurveyItemResponse;
 import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.unit.common.TestableEntity;

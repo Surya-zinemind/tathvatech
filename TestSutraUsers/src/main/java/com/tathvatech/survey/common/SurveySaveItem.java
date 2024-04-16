@@ -7,8 +7,8 @@
 package com.tathvatech.survey.common;
 
 import com.tathvatech.survey.enums.AnswerPersistor;
-import com.tathvatech.survey.inf.LogicAnchor;
-import com.tathvatech.survey.inf.SurveySaveItemBase;
+import com.tathvatech.survey.intf.LogicAnchor;
+import com.tathvatech.survey.intf.SurveySaveItemBase;
 import com.tathvatech.survey.response.SurveyItemResponse;
 import org.jdom2.Element;
 

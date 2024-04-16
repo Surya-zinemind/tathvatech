@@ -18,7 +18,7 @@ import com.tathvatech.forms.common.FormEventListner;
 import com.tathvatech.forms.common.FormResponseContext;
 import com.tathvatech.forms.controller.TestProcController;
 import com.tathvatech.logic.common.Logic;
-import com.tathvatech.survey.inf.SurveyItemBase;
+import com.tathvatech.survey.intf.SurveyItemBase;
 import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.unit.common.UnitFormQuery;
 import com.tathvatech.user.common.UserContext;

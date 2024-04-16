@@ -6,9 +6,8 @@
  */
 package com.tathvatech.survey.service;
 
-import com.tathvatech.site.service.SiteServiceImpl;
 import com.tathvatech.survey.common.SurveyItemType;
-import com.tathvatech.survey.inf.SurveyItemBase;
+import com.tathvatech.survey.intf.SurveyItemBase;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;

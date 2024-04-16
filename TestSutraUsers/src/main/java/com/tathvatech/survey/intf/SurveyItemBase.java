@@ -1,4 +1,4 @@
-package com.tathvatech.survey.inf;
+package com.tathvatech.survey.intf;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -8,8 +8,6 @@ import com.tathvatech.survey.common.SurveyDefinitionBase;
 import com.tathvatech.survey.common.SurveyItemType;
 import com.tathvatech.survey.enums.ContainerBase;
 import com.tathvatech.survey.enums.LogicIntf;
-import com.tathvatech.user.service.AccountServiceImpl;
-
 
 
 import org.jdom2.Element;

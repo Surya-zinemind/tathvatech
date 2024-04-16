@@ -1,4 +1,4 @@
-package com.tathvatech.survey.inf;
+package com.tathvatech.survey.intf;
 
 
 import com.tathvatech.survey.common.SurveyDefinitionBase;

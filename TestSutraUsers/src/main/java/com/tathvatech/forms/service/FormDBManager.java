@@ -7,7 +7,7 @@ import com.tathvatech.forms.oid.FormMainOID;
 import com.tathvatech.survey.common.Section;
 import com.tathvatech.survey.common.SurveyDefinition;
 import com.tathvatech.survey.entity.Survey;
-import com.tathvatech.survey.inf.SurveyItemBase;
+import com.tathvatech.survey.intf.SurveyItemBase;
 import com.tathvatech.survey.service.SurveyDefinitionManager;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.OID.FormOID;

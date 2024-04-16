@@ -6,7 +6,7 @@
  */
 package com.tathvatech.survey.common;
 
-import com.tathvatech.survey.inf.SurveyItemBase;
+import com.tathvatech.survey.intf.SurveyItemBase;
 
 import java.util.Comparator;
 

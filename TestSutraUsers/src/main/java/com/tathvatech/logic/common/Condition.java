@@ -8,7 +8,7 @@ package com.tathvatech.logic.common;
 
 import java.util.Map;
 
-import com.tathvatech.survey.inf.SurveyItemBase;
+import com.tathvatech.survey.intf.SurveyItemBase;
 
 import org.jdom2.Element;
 

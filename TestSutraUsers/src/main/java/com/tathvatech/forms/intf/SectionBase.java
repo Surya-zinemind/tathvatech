@@ -1,6 +1,6 @@
 package com.tathvatech.forms.intf;
 
-import com.tathvatech.survey.inf.SurveyItemBase;
+import com.tathvatech.survey.intf.SurveyItemBase;
 
 import java.util.List;
 
