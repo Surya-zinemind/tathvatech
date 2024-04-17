@@ -7,7 +7,7 @@
 package com.tathvatech.survey.intf;
 
 
-import com.tathvatech.common.utils.OptionList;
+import com.tathvatech.user.utils.OptionList;
 
 /**
  * @author Hari

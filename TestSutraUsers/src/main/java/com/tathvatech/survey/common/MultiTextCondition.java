@@ -11,7 +11,7 @@ import java.util.List;
 
 
 import com.tathvatech.common.common.DataTypes;
-import com.tathvatech.common.common.Option;
+import com.tathvatech.user.common.Option;
 import com.tathvatech.survey.intf.SurveyItemBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

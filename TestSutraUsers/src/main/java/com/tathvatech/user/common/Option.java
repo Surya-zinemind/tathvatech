@@ -1,4 +1,4 @@
-package com.tathvatech.common.common;
+package com.tathvatech.user.common;
 import com.tathvatech.survey.enums.BomTypesEnum;
 public class Option
 {

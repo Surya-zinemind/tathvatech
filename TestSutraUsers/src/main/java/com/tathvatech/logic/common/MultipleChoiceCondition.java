@@ -10,8 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.tathvatech.common.common.DataTypes;
-import com.tathvatech.common.common.Option;
-import com.tathvatech.common.utils.OptionList;
+import com.tathvatech.user.common.Option;
+import com.tathvatech.user.utils.OptionList;
 import com.tathvatech.site.service.SiteServiceImpl;
 
 import com.tathvatech.survey.common.HasOtherType;

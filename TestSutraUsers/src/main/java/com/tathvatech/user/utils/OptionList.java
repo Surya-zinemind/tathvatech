@@ -1,6 +1,6 @@
-package com.tathvatech.common.utils;
+package com.tathvatech.user.utils;
 
-import com.tathvatech.common.common.Option;
+import com.tathvatech.user.common.Option;
 
 import java.util.ArrayList;
 import java.util.Iterator;

@@ -15,10 +15,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import com.tathvatech.common.common.Option;
+import com.tathvatech.user.common.Option;
 import com.tathvatech.common.exception.InvalidResponseException;
 import com.tathvatech.common.utils.LineSeperatorUtil;
-import com.tathvatech.common.utils.OptionList;
+import com.tathvatech.user.utils.OptionList;
 import com.tathvatech.survey.intf.LogicSubject;
 import com.tathvatech.survey.intf.MultipleChoiceType;
 import com.tathvatech.survey.intf.OneDOptionType;
