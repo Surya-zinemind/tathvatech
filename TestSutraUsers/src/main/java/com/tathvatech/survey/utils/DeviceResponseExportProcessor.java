@@ -13,6 +13,7 @@ import java.util.List;
 
 import com.tathvatech.common.common.DataTypes;
 import com.tathvatech.common.common.FileStoreManager;
+import com.tathvatech.user.common.AttachmentInfoBean;
 import com.tathvatech.user.common.Option;
 import com.tathvatech.common.enums.ResultEnum;
 import com.tathvatech.forms.response.*;
@@ -122,8 +123,10 @@ public class DeviceResponseExportProcessor
 			}
 			else if (AdvancedBomInspectItemAnswerType.imageKey == aUnit.getKey2())
 			{
-				bean.setImageFileName(aUnit.getKey4());
-				bean.setImageFileDisplayName(aUnit.getKey4());
+				AttachmentInfoBean aAtt = new AttachmentInfoBean();
+				aAtt.setFileName(aUnit.getKey4());
+				aAtt.setFileDisplayName(aUnit.getKey4());
+				bean.getAttachments().add(aAtt);
 			}
 			else if (AdvancedBomInspectItemAnswerType.equipmentSelectorKey == aUnit.getKey2() && aUnit.getKey4() != null)
 			{
@@ -300,8 +303,10 @@ public class DeviceResponseExportProcessor
 			}
 			else if(sItem.imageKey == aUnit.getKey2())
 			{
-				bean.setImageFileName(aUnit.getKey4());
-				bean.setImageFileDisplayName(aUnit.getKey4());
+				AttachmentInfoBean aAtt = new AttachmentInfoBean();
+				aAtt.setFileName(aUnit.getKey4());
+				aAtt.setFileDisplayName(aUnit.getKey4());
+				bean.getAttachments().add(aAtt);
 			}
 		}
 
