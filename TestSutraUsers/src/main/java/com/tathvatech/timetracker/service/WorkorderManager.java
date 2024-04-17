@@ -103,7 +103,7 @@ public class WorkorderManager
 				workorderNo, workorderNo);
 	}
 
-	protected  Workorder getWorkorderForEntity(OID entityOID)
+	public Workorder getWorkorderForEntity(OID entityOID)
 	{
 		StringBuffer sql = new StringBuffer("select wo.* from workorder wo where wo.entityPk = ? and wo.entityType = ? and wo.estatus = 1 ");
 		

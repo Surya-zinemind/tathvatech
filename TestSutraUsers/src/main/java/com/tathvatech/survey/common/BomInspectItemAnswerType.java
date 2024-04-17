@@ -14,6 +14,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import com.tathvatech.survey.enums.BomTypesEnum;
 import com.tathvatech.survey.intf.LogicSubject;
 import com.tathvatech.common.common.DataTypes;
 import com.tathvatech.common.common.FileStoreManager;
@@ -413,7 +415,7 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 				}
 
 				ResponseUnit aUnit = new ResponseUnit();
-				aUnit.setKey1(Integer.parseInt(aOption.getValue()));
+				aUnit.setKey1(Integer.parseInt(String.valueOf(aOption.getValue())));
 				aUnit.setKey4(answerText.trim());
 				itemResponse.addResponseUnit(aUnit);
 			}

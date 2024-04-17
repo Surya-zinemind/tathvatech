@@ -24,6 +24,7 @@ import com.tathvatech.survey.controller.SurveyDelegate;
 import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.survey.service.SurveyResponseService;
 import com.tathvatech.timetracker.entity.Workorder;
+import com.tathvatech.timetracker.service.WorkorderManager;
 import com.tathvatech.unit.common.UnitFormQuery;
 import com.tathvatech.unit.service.UnitService;
 import com.tathvatech.user.OID.ProjectOID;
@@ -35,6 +36,7 @@ import com.tathvatech.user.entity.Attachment;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.user.service.AccountService;
 import com.tathvatech.user.service.PlanSecurityManager;
+
 
 import org.aspectj.apache.bcel.classfile.Field;
 import org.jdom2.Element;
@@ -60,6 +62,9 @@ import java.util.Map;
  *         TODO To change the template for this generated type comment go to
  *         Window - Preferences - Java - Code Style - Code Templates
  */
+
+
+
 public class Section extends SurveyItem implements SectionBase, SurveyDisplayItem, Container
 {
 	private final SurveyResponseService surveyResponseService;
@@ -68,8 +73,11 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 	private final UnitService unitService;
 	private final FormDBManager formDBManager;
 	private final AccountService accountService;
+	private final WorkorderManager workorderManager;
+
 	private String				pageTitle;
 	private String 				description;
+
     String instructionFileName;
     String instructionFileDisplayName;
 	
@@ -81,30 +89,34 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 	VerticalLayout childLayoutContainer;
 	HorizontalLayout manageChildrenControlLayoutArea;
 	
-	public Section(SurveyResponseService surveyResponseService, TestProcService testProcService, SurveyDelegate surveyDelegate, UnitService unitService, FormDBManager formDBManager, AccountService accountService)
+	public Section(SurveyResponseService surveyResponseService, TestProcService testProcService, SurveyDelegate surveyDelegate, UnitService unitService, FormDBManager formDBManager, AccountService accountService, WorkorderManager workorderManager)
 	{
 		super();
+
         this.surveyResponseService = surveyResponseService;
         this.testProcService = testProcService;
         this.surveyDelegate = surveyDelegate;
         this.unitService = unitService;
         this.formDBManager = formDBManager;
         this.accountService = accountService;
+        this.workorderManager = workorderManager;
     }
 
 	/**
 	 * @param _survey
 	 */
-	public Section(SurveyDefinition _survey, SurveyResponseService surveyResponseService, TestProcService testProcService, SurveyDelegate surveyDelegate, UnitService unitService, FormDBManager formDBManager, AccountService accountService)
+	public Section(SurveyDefinition _survey, SurveyResponseService surveyResponseService, TestProcService testProcService, SurveyDelegate surveyDelegate, UnitService unitService, FormDBManager formDBManager, AccountService accountService, WorkorderManager workorderManager)
 	{
 		super(_survey);
 		// TODO Auto-generated constructor stub
+
         this.surveyResponseService = surveyResponseService;
         this.testProcService = testProcService;
         this.surveyDelegate = surveyDelegate;
         this.unitService = unitService;
         this.formDBManager = formDBManager;
         this.accountService = accountService;
+        this.workorderManager = workorderManager;
     }
 
 	public String getQuestionText()
@@ -409,7 +421,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 			{
 				try
 				{
-					SurveyDelegate.releaseSectionEditLock(EtestApplication.getInstance().getUserContext(), getFormResponseContext().getResponseMaster().getOID(),
+					surveyDelegate.releaseSectionEditLock(EtestApplication.getInstance().getUserContext(), getFormResponseContext().getResponseMaster().getOID(),
 							Section.this.getSurveyItemId());
 
 					exp.setLockStatus(LockUnlockExpandPanel.LOCKSTATUS_UNLOCKED);
@@ -513,7 +525,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 					getFormResponseContext().getWorkstationQuery().getOID(), User.ROLE_TESTER);
 			if(isUserInRole || User.USER_PRIMARY.equals(EtestApplication.getInstance().getUserContext().getUser().getUserType()))
 			{
-				ObjectLockQuery lock = SurveyDelegate.getCurrentLock(getFormResponseContext().getResponseMaster().getOID(),
+				ObjectLockQuery lock = surveyDelegate.getCurrentLock(getFormResponseContext().getResponseMaster().getOID(),
 						Section.this.getSurveyItemId());
 			
 				if(lock == null)
@@ -673,12 +685,12 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 			timeLogButton.setStyleName(ValoTheme.BUTTON_QUIET);
 			timeLogButton.addClickListener(new ClickListener() {
 				
-				@Override
+
 				public void buttonClick(ClickEvent event)
 				{
 					FormSection formSection =formDBManager.getFormSection(getSurveyItemId(), testProc.getFormPk());
 					TestProcSectionObj testprocSection = testProcService.getTestProcSection(testProc.getOID(), formSection.getOID());
-					Workorder wo = WorkorderDelegate.getWorkorderForEntity(testprocSection.getOID());
+					Workorder wo =workorderManager.getWorkorderForEntity(testprocSection.getOID());
 					if(wo != null)
 					{
 						WorkorderListReportFilter woFilter = new WorkorderListReportFilter();
@@ -718,7 +730,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 
 				if(getFormResponseContext().getResponseMaster() != null)
 				{
-					lock = SurveyDelegate.getCurrentLock(getFormResponseContext().getResponseMaster().getOID(), 
+					lock = surveyDelegate.getCurrentLock(getFormResponseContext().getResponseMaster().getOID(),
 							Section.this.getSurveyItemId());
 				}
 				if(lock == null)
@@ -737,7 +749,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 					//show locked by other user..
 					expp.setLockStatus(LockUnlockExpandPanel.LOCKSTATUS_LOCKED_BYOTHER);
 					expp.setLockedByPk(lock.getUserPk());
-					User lockedUser = AccountDelegate.getUser(lock.getUserPk());
+					User lockedUser =accountService.getUser(lock.getUserPk());
 					expp.setLockedByName(lockedUser.getDisplayString());
 				}
 			}
