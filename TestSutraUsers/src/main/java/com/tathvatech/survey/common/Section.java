@@ -520,7 +520,8 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 		
 		try
 		{
-			boolean isUserInRole = unitService.isUsersForUnitInRole((int) getFormResponseContext().getUser().getPk(),getFormResponseContext().getUnitQuery().getUnitPk(), new ProjectOID(getFormResponseContext().getUnitQuery().getProjectPk(), null),
+			boolean isUserInRole = unitService.isUsersForUnitInRole(new ProjectOID(getFormResponseContext().getUnitQuery().getProjectPk(), null),
+                    (int) getFormResponseContext().getUser().getPk(), getFormResponseContext().getUnitQuery().getUnitPk(),
 					getFormResponseContext().getWorkstationQuery().getOID(), User.ROLE_TESTER);
 			if(isUserInRole || User.USER_PRIMARY.equals(EtestApplication.getInstance().getUserContext().getUser().getUserType()))
 			{
