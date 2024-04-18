@@ -57,6 +57,9 @@ public interface UnitService {
 
     boolean isUsersForUnitInRole(int userPk, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID, String roleName);
 
+    public  boolean isUsersForUnitInRole(ProjectOID projectOID, int userPk, int unitPk,
+                                         WorkstationOID workstationOID, String roleName);
+
     void removeAllUsersFromUnit(UserContext context, UnitOID unitOID, ProjectOID projectOID, WorkstationOID workstationOID);
 
     void addTesterToUnit(UserContext context, int unitPk, ProjectOID projectOID, WorkstationOID workstationOID, int userPk);

@@ -37,6 +37,7 @@ import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.Account;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.user.service.CommonServiceManager;
+import com.tathvatech.workstation.common.DummyWorkstation;
 import com.tathvatech.workstation.common.UnitInProjectObj;
 import com.tathvatech.workstation.common.WorkstationQuery;
 import com.tathvatech.workstation.entity.UnitWorkstation;
@@ -65,6 +66,7 @@ public class UnitServiceImpl implements UnitService{
     private final SurveyDefFactory surveyDefFactory;
     private final  UnitInProjectListReport report;
     private final UnitDAO unitDAO;
+    private final DummyWorkstation dummyWorkstation;
     @Lazy
     @Autowired
     private  WorkstationService workstationService;
@@ -1063,6 +1065,17 @@ public  void updateUnit(UnitObj unit) throws Exception
         return persistWrapper.readList(User.class,
                 "select distinct u.* from TAB_USER u, TAB_UNIT_USERS uu where uu.userPk = u.pk and uu.unitPk=? and uu.projectPk = ? and uu.workstationPk=? and uu.role=?",
                 unitPk, projectOID.getPk(), workstationOID.getPk(), roleName);
+    }
+    public  boolean isUsersForUnitInRole(ProjectOID projectOID, int userPk, int unitPk,
+                                               WorkstationOID workstationOID, String roleName)
+    {
+        if (dummyWorkstation.getPk() == workstationOID.getPk())
+        {
+            return projectService.isUsersForProjectInRole(userPk, projectOID, workstationOID, roleName);
+        } else
+        {
+            return isUsersForUnitInRole(userPk, unitPk, projectOID, workstationOID, roleName);
+        }
     }
     public  boolean isUsersForUnitInRole(int userPk, int unitPk, ProjectOID projectOID,
                                                WorkstationOID workstationOID, String roleName)
