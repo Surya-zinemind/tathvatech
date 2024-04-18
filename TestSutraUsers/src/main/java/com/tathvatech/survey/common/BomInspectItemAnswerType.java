@@ -6,7 +6,7 @@
  */
 package com.tathvatech.survey.common;
 
-import java.awt.*;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;

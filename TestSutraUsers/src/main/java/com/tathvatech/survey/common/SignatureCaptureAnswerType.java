@@ -7,7 +7,7 @@
 package com.tathvatech.survey.common;
 import com.tathvatech.common.exception.InvalidResponseException;
 import com.tathvatech.survey.intf.LogicSubject;
-import java.awt.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;

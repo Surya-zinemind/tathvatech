@@ -6,7 +6,7 @@
  */
 package com.tathvatech.survey.common;
 
-import java.awt.*;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -150,7 +150,7 @@ public abstract class SurveyItem extends SurveyItemBase
 		this.loadLogicItems(element);
     }
 
-    public abstract TextAreaAnswerType.ConfigForm drawConfigurationView(
+    public abstract Component drawConfigurationView(
 	    FormDesignListener formDesignListener);
 
     public abstract Component drawDesignView(boolean isPreviewMode, FormDesignListener formDesignListener);

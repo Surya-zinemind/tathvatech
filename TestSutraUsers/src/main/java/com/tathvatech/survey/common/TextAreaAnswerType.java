@@ -6,7 +6,7 @@
  */
 package com.tathvatech.survey.common;
 
-import java.awt.*;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -284,7 +284,7 @@ public class TextAreaAnswerType extends SurveySaveItem implements SurveyDisplayI
 	 * @see
 	 * com.thirdi.surveyside.survey.AnswerType#drawQuestionConfigurationForm()
 	 */
-	public ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
+	public Component drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		return new ConfigForm(this, formDesignListener);
 	}

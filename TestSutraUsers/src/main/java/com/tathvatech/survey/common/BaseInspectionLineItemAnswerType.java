@@ -11,7 +11,7 @@ import com.tathvatech.user.common.Option;
 import com.tathvatech.user.utils.OptionList;
 import com.tathvatech.forms.common.ExpectedNumericValue;
 import com.tathvatech.forms.common.FormDesignListener;
-import jakarta.persistence.Table;
+
 import com.tathvatech.survey.response.SurveyItemResponse;
 
 

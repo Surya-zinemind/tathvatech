@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-import java.awt.*;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -285,7 +285,7 @@ public class Logic extends SurveyItem implements LogicIntf, LogicBase
 
 
 	@Override
-	public TextAreaAnswerType.ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
+	public Component drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		// TODO Auto-generated method stub
 		return null;

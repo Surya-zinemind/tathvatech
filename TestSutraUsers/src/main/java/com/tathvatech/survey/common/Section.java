@@ -41,7 +41,7 @@ import com.tathvatech.user.service.PlanSecurityManager;
 import org.aspectj.apache.bcel.classfile.Field;
 import org.jdom2.Element;
 
-import java.awt.*;
+
 import java.io.File;
 import java.io.InputStream;
 
@@ -217,7 +217,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 	 * @see
 	 * com.thirdi.surveyside.survey.AnswerType#drawQuestionConfigurationForm()
 	 */
-	public TextAreaAnswerType.ConfigForm drawConfigurationView(FormDesignListener formDesignListener)
+	public Component drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		return new ConfigForm(this, formDesignListener);
 	}
@@ -520,8 +520,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 		
 		try
 		{
-			boolean isUserInRole = unitService.isUsersForUnitInRole(new ProjectOID(getFormResponseContext().getUnitQuery().getProjectPk(), null),
-					getFormResponseContext().getUser().getPk(), getFormResponseContext().getUnitQuery().getUnitPk(),
+			boolean isUserInRole = unitService.isUsersForUnitInRole((int) getFormResponseContext().getUser().getPk(),getFormResponseContext().getUnitQuery().getUnitPk(), new ProjectOID(getFormResponseContext().getUnitQuery().getProjectPk(), null),
 					getFormResponseContext().getWorkstationQuery().getOID(), User.ROLE_TESTER);
 			if(isUserInRole || User.USER_PRIMARY.equals(EtestApplication.getInstance().getUserContext().getUser().getUserType()))
 			{
@@ -545,7 +544,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 					//show locked by other user..
 					exp.setLockStatus(LockUnlockExpandPanel.LOCKSTATUS_LOCKED_BYOTHER);
 					exp.setLockedByPk(lock.getUserPk());
-					User lockedUser = AccountDelegate.getUser(lock.getUserPk());
+					User lockedUser =accountService.getUser(lock.getUserPk());
 					exp.setLockedByName(lockedUser.getDisplayString());
 				}
 			}
