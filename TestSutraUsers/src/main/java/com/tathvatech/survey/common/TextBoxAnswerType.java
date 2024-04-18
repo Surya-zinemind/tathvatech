@@ -67,7 +67,7 @@ public class TextBoxAnswerType extends SurveySaveItem implements SurveyDisplayIt
 	private boolean required;
 	private String presetValue = null;
 
-	private TextField textField;
+	//private TextField textField;
 
 	/**
      *
@@ -305,7 +305,8 @@ public class TextBoxAnswerType extends SurveySaveItem implements SurveyDisplayIt
 	 * @see
 	 * com.thirdi.surveyside.survey.AnswerType#drawQuestionConfigurationForm()
 	 */
-	public Component drawConfigurationView(FormDesignListener formDesignListener)
+	//commenting methods using vaadin component
+	/*public Component drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		return new ConfigForm(this, formDesignListener);
 	}
@@ -360,7 +361,7 @@ public class TextBoxAnswerType extends SurveySaveItem implements SurveyDisplayIt
 
 		return p;
 	}
-
+*/
 	public void setConfiguration(List<List<String>> fileContents)
 	{
 		try
@@ -462,8 +463,9 @@ public class TextBoxAnswerType extends SurveySaveItem implements SurveyDisplayIt
 		}
 		return elem;
 	}
+	//commenting methods using vaadin component
 
-	public class ConfigForm extends CustomComponent
+	/*public class ConfigForm extends CustomComponent
 	{
 		FormDesignListener formDesignListener;
 		TextBoxAnswerType surveyItem;
@@ -547,7 +549,7 @@ public class TextBoxAnswerType extends SurveySaveItem implements SurveyDisplayIt
 
 			fieldGroup.getField("questionText").focus();
 
-			/* Add buttons in the form. */
+			*//* Add buttons in the form. *//*
 			HorizontalLayout buttonArea = new HorizontalLayout();
 			buttonArea.setSpacing(true);
 			content.addComponent(buttonArea);
@@ -730,7 +732,7 @@ public class TextBoxAnswerType extends SurveySaveItem implements SurveyDisplayIt
 		}
 
 		return p;
-	}
+	}*/
 
 	@Override
 	public SurveyItemResponse captureResponse() throws InvalidResponseException
@@ -740,8 +742,8 @@ public class TextBoxAnswerType extends SurveySaveItem implements SurveyDisplayIt
 			maxAnswerLengthDB = maxLength;
 		
 		SimpleSurveyItemResponse itemResponse = new SimpleSurveyItemResponse();
-
-		String answerString = (String) textField.getValue();
+//commenting methods using vaadin component
+	/*	String answerString = (String) textField.getValue();
 		if(answerString != null)
 		{
 			answerString = answerString.trim();
@@ -800,7 +802,7 @@ public class TextBoxAnswerType extends SurveySaveItem implements SurveyDisplayIt
 			ResponseUnit aUnit = new ResponseUnit();
 			aUnit.setKey4(answerString);
 			itemResponse.addResponseUnit(aUnit);
-		}
+		}*/
 		
 		return itemResponse;
 	}
@@ -844,8 +846,8 @@ public class TextBoxAnswerType extends SurveySaveItem implements SurveyDisplayIt
 		else
 			return errors;
 	}
-
-	@Override
+	//commenting methods using vaadin component
+	/*@Override
 	public Component drawResponseDetail(UserContext userContext, UnitFormQuery testProc, SurveyResponse sResponse, Component parent,
 										boolean expandedView, boolean isLatestResponse, String[] flags, final TestProcController testProcController)
 	{
@@ -984,5 +986,5 @@ public class TextBoxAnswerType extends SurveySaveItem implements SurveyDisplayIt
 		
 		return (msgs.size() == 0)?null:(String[])msgs.toArray(new String[msgs.size()]);
 
-	}
+	}*/
 }

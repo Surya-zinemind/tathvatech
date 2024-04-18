@@ -82,12 +82,12 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
     String instructionFileDisplayName;
 	
 	private List<SurveyItem>	children	= new ArrayList<SurveyItem>();
-	
-	LockUnlockExpandPanel exp = null;
+	//commenting methods using vaadin components
+	/*LockUnlockExpandPanel exp = null;
 	SectionDetailViewExpandPanel expp = null;
 	
 	VerticalLayout childLayoutContainer;
-	HorizontalLayout manageChildrenControlLayoutArea;
+	HorizontalLayout manageChildrenControlLayoutArea;*/
 	
 	public Section(SurveyResponseService surveyResponseService, TestProcService testProcService, SurveyDelegate surveyDelegate, UnitService unitService, FormDBManager formDBManager, AccountService accountService, WorkorderManager workorderManager)
 	{
@@ -217,7 +217,8 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 	 * @see
 	 * com.thirdi.surveyside.survey.AnswerType#drawQuestionConfigurationForm()
 	 */
-	public Component drawConfigurationView(FormDesignListener formDesignListener)
+	//commenting methods using vaadin components
+	/*public Component drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		return new ConfigForm(this, formDesignListener);
 	}
@@ -268,7 +269,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 	public AbstractOrderedLayout getManageChildrenControlsLayoutArea()
 	{
 		return manageChildrenControlLayoutArea;
-	}
+	}*/
 	
 	/*
 	 * (non-Javadoc)
@@ -397,9 +398,9 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 			e.printStackTrace();
 		}
 	}
-	
 
-	@Override
+//commenting methods using vaadin components
+	/*@Override
 	public Component drawResponseField(UnitFormQuery testProc, final SurveyResponse sResponse, Component parent, String[] flags,
 									   FormEventListner formEventListner)
 	{
@@ -780,7 +781,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 		expp.setBodyContent(childLayoutContainer);
 
 		return expp;
-	}
+	}*/
 
 	@Override
 	public List getChildren()
@@ -794,7 +795,8 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 		this.children = children;
 
 	}
-
+	//commenting methods using vaadin components
+/*
 	public class ConfigForm extends CustomComponent
 	{
 		FormDesignListener	formDesignListener;
@@ -879,7 +881,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 			});
 			content.addComponent(fileUpload);
 
-			/* Add buttons in the form. */
+			*//* Add buttons in the form. *//*
 			HorizontalLayout buttonArea = new HorizontalLayout();
 			buttonArea.setSpacing(true);
 			content.addComponent(buttonArea);
@@ -943,6 +945,6 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 			fieldGroup.discard();
 			formDesignListener.formItemConfigurationCancelled(surveyItem);
 		}
-	}
+	}*/
 
 }

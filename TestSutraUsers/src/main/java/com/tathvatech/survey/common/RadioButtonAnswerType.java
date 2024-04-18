@@ -573,7 +573,7 @@ public class RadioButtonAnswerType extends SurveySaveItem implements SurveyDispl
         {
             Option choice = (Option) options.getOptionByIndex(i);
             String choiceString = choice.getText();
-            int choiceValue = Integer.parseInt(choice.getValue());
+            int choiceValue = Integer.parseInt(String.valueOf(choice.getValue()));
             boolean answer = false;
             if(itemResponse != null)
             {
@@ -646,8 +646,8 @@ public class RadioButtonAnswerType extends SurveySaveItem implements SurveyDispl
 		return elem;
 	 }
 
-
-	public Component drawDesignView(boolean isPreviewMode, FormDesignListener formDesignListener)
+    //commenting methods using vaadin components
+	/*public Component drawDesignView(boolean isPreviewMode, FormDesignListener formDesignListener)
 	{
 		Panel p = new Panel();
 		VerticalLayout qLayout = new VerticalLayout();
@@ -789,7 +789,7 @@ public class RadioButtonAnswerType extends SurveySaveItem implements SurveyDispl
 		
 		return p;
 	}
-
+*/
 	@Override
 	public SurveyItemResponse captureResponse()
 		throws InvalidResponseException
@@ -825,8 +825,8 @@ public class RadioButtonAnswerType extends SurveySaveItem implements SurveyDispl
 	{
 		return null;
 	}
-
-	@Override
+//commenting methods using vaadin components
+	/*@Override
 	public Component drawResponseDetail(UserContext userContext, UnitFormQuery testProc, SurveyResponse sResponse,
                                         Component parent, boolean expandedView, boolean isLatestResponse, String[] flags, final TestProcController testProcController)
 	{
@@ -1057,7 +1057,7 @@ public class RadioButtonAnswerType extends SurveySaveItem implements SurveyDispl
 			
 			content.addComponent(new HSpacer(20));
 			
-			/* Add buttons in the form. */
+			*//* Add buttons in the form. *//*
 			HorizontalLayout buttonArea = new HorizontalLayout();
 			buttonArea.setSpacing(true);
 			content.addComponent(buttonArea);
@@ -1150,7 +1150,7 @@ public class RadioButtonAnswerType extends SurveySaveItem implements SurveyDispl
 			fieldGroup.discard();
 			formDesignListener.formItemConfigurationCancelled(surveyItem);
 		}
-	}
+	}*/
 	
 	
 }

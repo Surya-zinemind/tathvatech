@@ -58,7 +58,8 @@ public class TextAreaAnswerType extends SurveySaveItem implements SurveyDisplayI
 	private String				questionTextDescription	= "";
 	private boolean				required;
 
-	private TextArea textField;
+//commenting fields using vaadin component
+	//private TextArea textField;
 
 	/**
      *
@@ -278,13 +279,14 @@ public class TextAreaAnswerType extends SurveySaveItem implements SurveyDisplayI
 		}
 	}
 
+//commenting methods using vaadin component
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see
 	 * com.thirdi.surveyside.survey.AnswerType#drawQuestionConfigurationForm()
 	 */
-	public Component drawConfigurationView(FormDesignListener formDesignListener)
+	/*public Component drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		return new ConfigForm(this, formDesignListener);
 	}
@@ -337,7 +339,7 @@ public class TextAreaAnswerType extends SurveySaveItem implements SurveyDisplayI
 		questionArea.addComponent(textField);
 
 		return p;
-	}
+	}*/
 
 	public void setConfiguration(List<List<String>> fileContents)
 	{
@@ -434,6 +436,9 @@ public class TextAreaAnswerType extends SurveySaveItem implements SurveyDisplayI
 		return elem;
 	}
 
+//commenting methods using vaadin component
+
+/*
 	public class ConfigForm extends CustomComponent
 	{
 		FormDesignListener	formDesignListener;
@@ -494,7 +499,9 @@ public class TextAreaAnswerType extends SurveySaveItem implements SurveyDisplayI
 
 			fieldGroup.getField("questionText").focus();
 
-			/* Add buttons in the form. */
+			*/
+/* Add buttons in the form. *//*
+
 			HorizontalLayout buttonArea = new HorizontalLayout();
 			buttonArea.setSpacing(true);
 			content.addComponent(buttonArea);
@@ -645,7 +652,7 @@ public class TextAreaAnswerType extends SurveySaveItem implements SurveyDisplayI
 
 		return p;
 	}
-
+*/
 	@Override
 	public SurveyItemResponse captureResponse() throws InvalidResponseException
 	{
@@ -654,8 +661,8 @@ public class TextAreaAnswerType extends SurveySaveItem implements SurveyDisplayI
 			maxAnswerLengthDB = maxLength;
 		
 		SimpleSurveyItemResponse itemResponse = new SimpleSurveyItemResponse();
-
-		String answerString = (String) textField.getValue();
+//commenting methods using vaadin component
+		/*String answerString = (String) textField.getValue();
 
 		if (answerString != null && answerString.trim().length() > maxAnswerLengthDB)
 		{
@@ -667,10 +674,11 @@ public class TextAreaAnswerType extends SurveySaveItem implements SurveyDisplayI
 			ResponseUnit aUnit = new ResponseUnit();
 			aUnit.setKey4(answerString);
 			itemResponse.addResponseUnit(aUnit);
-		}
+		}*/
 
 		return itemResponse;
 	}
+
 
 	public List<String> validateResponse(SurveyItemResponse itemResponse)
 	{
@@ -712,7 +720,8 @@ public class TextAreaAnswerType extends SurveySaveItem implements SurveyDisplayI
 			
 	}
 
-	@Override
+//commenting methods using vaadin component
+	/*@Override
 	public Component drawResponseDetail(UserContext userContext, UnitFormQuery testProc, SurveyResponse sResponse, Component parent,
 										boolean expandedView, boolean isLatestResponse, String[] flags, final TestProcController testProcController)
 	{
@@ -851,5 +860,5 @@ public class TextAreaAnswerType extends SurveySaveItem implements SurveyDisplayI
 
 		return (msgs.size() == 0) ? null : (String[]) msgs.toArray(new String[msgs.size()]);
 
-	}
+	}*/
 }

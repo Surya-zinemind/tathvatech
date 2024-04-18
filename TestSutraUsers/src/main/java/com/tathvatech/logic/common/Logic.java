@@ -282,9 +282,9 @@ public class Logic extends SurveyItem implements LogicIntf, LogicBase
     {
         this.conditionList.add(condition);
     }
-
-
-	@Override
+//
+    //commenting methods using vaadin components
+	/*@Override
 	public Component drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		// TODO Auto-generated method stub
@@ -315,5 +315,5 @@ public class Logic extends SurveyItem implements LogicIntf, LogicBase
 	{
 	    // TODO Auto-generated method stub
 	    return null;
-	}
+	}*/
 }

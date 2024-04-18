@@ -37,14 +37,14 @@ public interface SurveyResponseService {
 
     SurveyResponse ceateDummyResponse(UserContext context, SurveyResponse surveyResponse) throws Exception;
 
-    SurveyResponse updateSurveyResponse(UserContext context, Project project, TestableEntity unit, SurveyDefinition surveyDef,
-                                        int responseId, HashMap<SurveySaveItemBase, SurveyItemResponse> surveyItemResponseMap, List sectionsToSave) throws Exception;
+    /*SurveyResponse updateSurveyResponse(UserContext context, Project project, TestableEntity unit, SurveyDefinition surveyDef,
+                                        int responseId, HashMap<SurveySaveItemBase, SurveyItemResponse> surveyItemResponseMap, List sectionsToSave) throws Exception;*/
 
-    SurveyResponse saveSectionResponses(UserContext context, Project project, TestableEntity unit,
-                                        SurveyResponse surveyResponse, List sectionsToSave) throws Exception;
+    /*SurveyResponse saveSectionResponses(UserContext context, Project project, TestableEntity unit,
+                                        SurveyResponse surveyResponse, List sectionsToSave) throws Exception;*/
 
-    SurveyResponse saveSpecificQuestionResponse(UserContext context, Project project, TestableEntity mItem,
-                                                SurveyResponse surveyResponse, List questions) throws Exception;
+   /* SurveyResponse saveSpecificQuestionResponse(UserContext context, Project project, TestableEntity mItem,
+                                                SurveyResponse surveyResponse, List questions) throws Exception;*/
 
     void finalizeSurveyResponse(UserContext userContext, SurveyDefinition surveyDef, int responseId)
             throws Exception;
@@ -185,11 +185,11 @@ public interface SurveyResponseService {
     //		else
     //			return false;
     //	}
-    List<SectionResponseQuery> getSectionResponseSummary(SurveyDefinition sd);
+    //List<SectionResponseQuery> getSectionResponseSummary(SurveyDefinition sd);
 
     List<SectionResponseQuery> getSectionResponseSummary(SurveyDefinition sd, int responseId)throws Exception;
 
-    SectionResponseQuery getSectionResponseSummary(SurveyDefinition sd, int responseId, String sectionId)throws Exception;
+   // SectionResponseQuery getSectionResponseSummary(SurveyDefinition sd, int responseId, String sectionId)throws Exception;
 
     SectionResponseQuery getSectionResponseSummary(int responseId, String sectionId)throws Exception;
 
@@ -208,7 +208,7 @@ public interface SurveyResponseService {
 
     FormResponseClientSubmissionRev saveFormClientSubmissionRevision(UserContext context, int responseId, String revision) throws Exception;
 
-    FormResponseBean getFormResponseBean(UserContext context, int responseId)throws Exception;
+    //FormResponseBean getFormResponseBean(UserContext context, int responseId)throws Exception;
 
     void saveSyncErrorResponse(UserContext context, int responseId,
                                FormResponseBean formResponseBean)throws Exception;

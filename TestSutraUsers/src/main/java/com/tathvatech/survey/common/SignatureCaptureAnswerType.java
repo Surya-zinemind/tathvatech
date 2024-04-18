@@ -69,9 +69,9 @@ public class SignatureCaptureAnswerType extends SurveySaveItem implements Survey
 	private String questionText;
 	private String questionTextDescription = "";
 	private boolean required;
-
-	private FileUploadFormMulti signatureField;
-	private TextField signedByField = new TextField("Signed by:");
+	//Commenting fields using Vaadin components
+	/*private FileUploadFormMulti signatureField;
+	private TextField signedByField = new TextField("Signed by:");*/
 
 	
 	// value gets saved into these attributes when the file upload happens.
@@ -237,7 +237,8 @@ public class SignatureCaptureAnswerType extends SurveySaveItem implements Survey
 	 * @see
 	 * com.thirdi.surveyside.survey.AnswerType#drawQuestionConfigurationForm()
 	 */
-	public  Component  drawConfigurationView(FormDesignListener formDesignListener)
+	//commenting components using vaadin component
+	/*public  Component  drawConfigurationView(FormDesignListener formDesignListener)
 	{
 		return new ConfigForm(this, formDesignListener);
 	}
@@ -288,7 +289,7 @@ public class SignatureCaptureAnswerType extends SurveySaveItem implements Survey
 		questionArea.addComponent(signedByField);
 
 		return p;
-	}
+	}*/
 
 	public void setConfiguration(List<List<String>> fileContents)
 	{
@@ -378,8 +379,8 @@ public class SignatureCaptureAnswerType extends SurveySaveItem implements Survey
 		}
 		return elem;
 	}
-
-	public class ConfigForm extends CustomComponent
+//commenting components using vaadin component
+	/*public class ConfigForm extends CustomComponent
 	{
 		FormDesignListener formDesignListener;
 		SignatureCaptureAnswerType surveyItem;
@@ -434,7 +435,7 @@ public class SignatureCaptureAnswerType extends SurveySaveItem implements Survey
 
 			fieldGroup.getField("questionText").focus();
 
-			/* Add buttons in the form. */
+			*//* Add buttons in the form. *//*
 			HorizontalLayout buttonArea = new HorizontalLayout();
 			buttonArea.setSpacing(true);
 			content.addComponent(buttonArea);
@@ -623,7 +624,7 @@ public class SignatureCaptureAnswerType extends SurveySaveItem implements Survey
 		}
 
 		return p;
-	}
+	}*/
 
 	@Override
 	public SurveyItemResponse captureResponse() throws InvalidResponseException
@@ -638,7 +639,8 @@ public class SignatureCaptureAnswerType extends SurveySaveItem implements Survey
 				SignatureCaptureItemResponse itemResp = new SignatureCaptureItemResponse();
 				itemResp.setImageFileName(signatureFileName);
 				itemResp.setSignatureTimestamp(new Date());
-				itemResp.setSignedBy(signedByField.getValue());
+				//commenting because using vaadin component
+				//itemResp.setSignedBy(signedByField.getValue());
 				
 				ResponseUnit aUnit = new ResponseUnit();
 				aUnit.setKey4(new ObjectMapper().writeValueAsString(itemResp));
@@ -705,7 +707,8 @@ public class SignatureCaptureAnswerType extends SurveySaveItem implements Survey
 			return errors;
 	}
 
-	@Override
+	//commenting methods using vaadin component
+	/*@Override
 	public Component drawResponseDetail(UserContext userContext, UnitFormQuery testProc, SurveyResponse sResponse, Component parent,
 										boolean expandedView, boolean isLatestResponse, String[] flags, final TestProcController testProcController)
 	{
@@ -859,8 +862,8 @@ public class SignatureCaptureAnswerType extends SurveySaveItem implements Survey
 		return (msgs.size() == 0)?null:(String[])msgs.toArray(new String[msgs.size()]);
 
 	}
-	
-	public class PictureRenderer extends StreamSource {
+	*/
+	/*public class PictureRenderer extends StreamSource {
 		String fileName;
 		public PictureRenderer(String fileName)
 		{
@@ -883,7 +886,7 @@ public class SignatureCaptureAnswerType extends SurveySaveItem implements Survey
 			return null;
 		}
 
-	}
+	}*/
 	
 	
 	public static void main(String[] args)

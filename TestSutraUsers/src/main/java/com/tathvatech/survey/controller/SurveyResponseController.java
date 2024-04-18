@@ -94,12 +94,12 @@ public class SurveyResponseController
 			    surveyResponse);
         return resp;
     }
-    
+    // Commenting the methods using Vaadin
     
     /**
      * 
      */
-    public  SurveyResponse savePageResponse(UserContext context, 
+   /* public  SurveyResponse savePageResponse(UserContext context,
 	    SurveyResponse surveyResponse) throws Exception
     {
 
@@ -172,7 +172,7 @@ public class SurveyResponseController
 		return resp;
 
     }
-    
+    */
     
     /**
      * this function is just a save of the current response. we also take a history printout of the current response data and save it as an attachment
@@ -183,7 +183,7 @@ public class SurveyResponseController
      * @return
      * @throws Exception
      */
-    public  SurveyResponse submitInterimResponse(UserContext context, 
+   /* public  SurveyResponse submitInterimResponse(UserContext context,
     	    SurveyResponse surveyResponse) throws Exception
     {
 
@@ -194,12 +194,12 @@ public class SurveyResponseController
 		    
 		    surveyResponseService.saveResponseStateAsSubmitRecord(context, sResponseAfterSave.getResponseId(), ResponseSubmissionBookmark.SubmissionTypeEnum.Interim);
 			return sResponseAfterSave;
-	}
+	}*/
 
     /**
      * save a specific set of questions and not a complete section.
      */
-    public  SurveyResponse saveQuestionResponses(UserContext context, 
+   /* public  SurveyResponse saveQuestionResponses(UserContext context,
 	    SurveyResponse surveyResponse, List questionsToSave) throws Exception
     {
 
@@ -256,13 +256,13 @@ public class SurveyResponseController
 	
 		    return resp;
 
-    }
+    }*/
 
     /**
      * @param
      * @param
      */
-    public  void finalizeSurveyResponse(UserContext userContext, SurveyDefinition surveyDef,
+   /* public  void finalizeSurveyResponse(UserContext userContext, SurveyDefinition surveyDef,
 	    SurveyResponse surveyResponse) throws Exception
     {
 
@@ -431,7 +431,7 @@ public class SurveyResponseController
 			throw ax;
 		}
 
-    }
+    }*/
 
     public  List<ResponseSubmissionBookmark> getResponseSubmissionBookmarks(TestProcOID testprocOID)
     {
@@ -448,11 +448,12 @@ public class SurveyResponseController
      * import action. difference between addSurveyResponse and this one is that
      * addSurveyResponse calls the notify function after adding the response.
      * @param surveyDef
-     * @param surveyResponse
+     * @param
      * @return
      * @throws Exception
      */
-    public  long importSurveyResponse(UserContext userContext, SurveyDefinition surveyDef,
+	//commenting methods using vaadin components
+    /*public  long importSurveyResponse(UserContext userContext, SurveyDefinition surveyDef,
 	    SurveyResponse surveyResponse) throws Exception
     {
 
@@ -482,7 +483,7 @@ public class SurveyResponseController
 
 	    return resp.getResponseId();
 
-    }
+    }*/
 
     /*/**
      * called when the verifier or approver edits the response
@@ -492,7 +493,7 @@ public class SurveyResponseController
      * @param surveyResponse
      * @throws Exception
      *//*/*/
-    public  SurveyResponse updateSurveyResponse(UserContext userContext, SurveyDefinition surveyDef,
+   /* public  SurveyResponse updateSurveyResponse(UserContext userContext, SurveyDefinition surveyDef,
 	    SurveyResponse surveyResponse) throws Exception
     {
 
@@ -599,7 +600,7 @@ public class SurveyResponseController
 
 			return responseToReturn;
 
-    }
+    }*/
 
     public  List getSurveyItemResponse(SurveyDefinition surveyDef,
 	    String surveyItemId, ResponseMaster[] responseMasterSet)
@@ -884,20 +885,20 @@ public class SurveyResponseController
 	}
 	
 	
-	public  List<SectionResponseQuery> getSectionResponseSummary(SurveyDefinition sd)
+	/*public  List<SectionResponseQuery> getSectionResponseSummary(SurveyDefinition sd)
 	{
 		return surveyResponseService.getSectionResponseSummary(sd);
-	}
+	}*/
 
 	public  List<SectionResponseQuery> getSectionResponseSummary(SurveyDefinition sd, int responseId)throws Exception
 	{
 		return surveyResponseService.getSectionResponseSummary(sd, responseId);
 	}
-
-	public  SectionResponseQuery getSectionResponseSummary(SurveyDefinition sd, int responseId, String sectionId)throws Exception
+//commenting methods using vaadin components
+	/*public  SectionResponseQuery getSectionResponseSummary(SurveyDefinition sd, int responseId, String sectionId)throws Exception
 	{
 		return surveyResponseService.getSectionResponseSummary(sd, responseId, sectionId);
-	}
+	}*/
 
 	public  SectionResponseQuery getSectionResponseSummary(int responseId, String sectionId)throws Exception
 	{

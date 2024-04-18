@@ -88,6 +88,7 @@ import org.springframework.stereotype.Service;
  *         TODO To change the template for this generated type comment go to
  *         Window - Preferences - Java - Code Style - Code Templates
  */
+@SuppressWarnings("ALL")
 @Service
 public class SurveyResponseServiceImpl implements SurveyResponseService
 {
@@ -349,11 +350,11 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 			}
 		}
 	}
-
+//commenting methods using vaadin components
 	/**
      * This function
      */
-	@Override
+	/*@Override
 	public  SurveyResponse updateSurveyResponse(UserContext context, Project project, TestableEntity unit, SurveyDefinition surveyDef,
 												int responseId, HashMap<SurveySaveItemBase, SurveyItemResponse> surveyItemResponseMap, List sectionsToSave) throws Exception
 	{
@@ -402,12 +403,12 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 		unitManager.addUnitBookMark(context, testProc.getUnitPk(), testProc.getProjectPk(), UnitBookmark.BookmarkModeEnum.Auto);
 
 		return surveyResponse;
-	}
+	}*/
 
 	/**
      * Save all the questions with in the sections .
 	 */
-	@Override
+	/*@Override
 	public  SurveyResponse saveSectionResponses(UserContext context, Project project, TestableEntity unit,
 			SurveyResponse surveyResponse, List sectionsToSave) throws Exception
 	{
@@ -424,9 +425,9 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 		}
 		return saveQuestionResponses((User)context.getUser(), (User)context.getUser(), project, unit,
 				surveyResponse, sectionsToSave, allQuestionsToSave);
-	}
+	}*/
 
-	@Override
+	/*@Override
 	public  SurveyResponse saveSpecificQuestionResponse(UserContext context, Project project, TestableEntity mItem,
 														SurveyResponse surveyResponse, List questions) throws Exception
 	{
@@ -437,7 +438,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 		// find the container sections
 		if(questions != null && questions.size() > 0)
 		{
-			LinkedHashSet<Section> containerSections = new LinkedHashSet();
+			LinkedHashSet<> containerSections = new LinkedHashSet();
 			SurveyDefinition surveyDef = surveyResponse.getSurveyDefinition();
 
 			for (Iterator iterator = questions.iterator(); iterator.hasNext();)
@@ -482,7 +483,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 		//nothing to do here
 		return surveyResponse;
 	}
-
+*/
 	/**
      * allQuestionstoSave will be saved.. the sectionsToRecalc should be the list of sections which hold any the questions to save.
      * when ever a question is saved, the section level stats need to be recalculated. I dont want to find the sections from the questionList
@@ -493,7 +494,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
      *
 	 */
 
-	private  SurveyResponse saveQuestionResponses(User actionPerformedByUser, User recordSaveAsUser, Project project, TestableEntity mItem,
+	/*private  SurveyResponse saveQuestionResponses(User actionPerformedByUser, User recordSaveAsUser, Project project, TestableEntity mItem,
 			SurveyResponse surveyResponse, Collection sectionsToReCalc, List allQuestionsToSave) throws Exception
 	{
 
@@ -765,7 +766,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 			{
 			}
 		}
-	}
+	}*/
 
 	private  void saveSurveyItems(int responseId, SurveyDefinition surveyDef, HashMap<SurveySaveItemBase, SurveyItemResponse> surveyItemResponseMap, List allQuestionsToSave) throws Exception
 	{
@@ -886,8 +887,9 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 			}
 		}
 	}
+	//commenting methods using vaadin components
 
-	private  void saveSectionResponses(User actionPerformedByUser, User recordSaveAsUser, Project project, TestableEntity unit,
+	/*private  void saveSectionResponses(User actionPerformedByUser, User recordSaveAsUser, Project project, TestableEntity unit,
 			SurveyResponse surveyResponse, List sectionsToSave, boolean dontChangeSubmittedUserAndCompletionDate)throws Exception
 	{
 		//save the SectionResponses for the sections saved in this submit
@@ -985,7 +987,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 
 			}
 		}
-	}
+	}*/
 
 	private  void setResponseStats(FormResponseStats responseStat, User actionPerformedByUser, User recordSaveAsUser,
 			SurveyDefinition surveyDef, SurveyResponse surveyResponse)throws Exception
@@ -2951,7 +2953,8 @@ public  void rejectApproval(UserContext userContext, SurveyResponse sResponse, S
 //		else
 //			return false;
 //	}
-@Override
+//commenting methods using vaadin components
+/*@Override
 	public  List<SectionResponseQuery> getSectionResponseSummary(SurveyDefinition sd)
 	{
 		List<SectionResponseQuery> returnList = new ArrayList<SectionResponseQuery>();
@@ -2969,14 +2972,15 @@ public  void rejectApproval(UserContext userContext, SurveyResponse sResponse, S
 			}
 		}
 		return returnList;
-	}
+	}*/
 	@Override
 	public  List<SectionResponseQuery> getSectionResponseSummary(SurveyDefinition sd, int responseId)throws Exception
 	{
 		FormResponseMaster resp = persistWrapper.readByResponseId(FormResponseMaster.class, responseId);
 		return persistWrapper.readList(SectionResponseQuery.class, SectionResponseQuery.SQL + " where tfa.testProcFk = ?", resp.getTestProcPk());
 	}
-	@Override
+	//commenting methods using vaadin components
+	/*@Override
 	public  SectionResponseQuery getSectionResponseSummary(SurveyDefinition sd, int responseId, String sectionId)throws Exception
 	{
 		SectionResponseQuery sqr = new SectionResponseQuery();
@@ -3001,7 +3005,7 @@ public  void rejectApproval(UserContext userContext, SurveyResponse sResponse, S
 			sqr.setCompletionDate(sq.getCompletionDate());
 		}
 		return sq;
-	}
+	}*/
 	@Override
 	public  SectionResponseQuery getSectionResponseSummary(int responseId, String sectionId)throws Exception
 	{
@@ -3139,7 +3143,7 @@ public  void rejectApproval(UserContext userContext, SurveyResponse sResponse, S
 
 	}
 
-	@Override
+	/*@Override
 	public  FormResponseBean getFormResponseBean(UserContext context, int responseId)throws Exception
 	{
 		try
@@ -3218,9 +3222,9 @@ public  void rejectApproval(UserContext userContext, SurveyResponse sResponse, S
 									lockedUser.getFirstName() + " " + lockedUser.getLastName());
 						} else
 						{
-						/*
+						*//*
 							 * show locked by other user..
-							 */
+							 *//*
 							sectionResponseBean.setLockStatus(SectionLockStatusEnum.LockedByOther);
 							User lockedUser = accountService.getUser(lock.getUserPk());
 							sectionResponseBean.setLockedByUserPk((int) lockedUser.getPk());
@@ -3266,7 +3270,7 @@ public  void rejectApproval(UserContext userContext, SurveyResponse sResponse, S
 			throw e;
 		}
 
-	}
+	}*/
 	@Override
 	public  void saveSyncErrorResponse(UserContext context, int responseId,
 									   FormResponseBean formResponseBean)throws Exception

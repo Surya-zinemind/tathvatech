@@ -61,7 +61,8 @@ public class DeviceResponseExportProcessor
 	 * @return
 	 * @throws Exception
 	 */
-    public FormItemResponseBase getFormItemResponsesBean(SurveyItem sItem, SurveyItemResponse aItemResponse) throws Exception
+	//commenting methods using vaadin components
+   /* public FormItemResponseBase getFormItemResponsesBean(SurveyItem sItem, SurveyItemResponse aItemResponse) throws Exception
     {
         if(sItem instanceof RadioButtonAnswerType)
         {
@@ -403,5 +404,5 @@ public class DeviceResponseExportProcessor
 		}
         bean.setValue(ans);
     	return bean;
-    }
+    }*/
 }

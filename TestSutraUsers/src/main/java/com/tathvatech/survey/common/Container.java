@@ -4,8 +4,8 @@ import com.tathvatech.survey.enums.ContainerBase;
 
 public interface Container extends ContainerBase
 {
-	public AbstractOrderedLayout getChildrenLayoutContainer();
+	//public AbstractOrderedLayout getChildrenLayoutContainer();
 	
-	public AbstractOrderedLayout getManageChildrenControlsLayoutArea();
+	//public AbstractOrderedLayout getManageChildrenControlsLayoutArea();
 
 }

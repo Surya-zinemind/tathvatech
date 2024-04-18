@@ -39,21 +39,21 @@ public class TestProcController {
 	HashMap<String, FormItemResponse> formItemResponseMap;
 	HashMap<String, List<TestItemOILTransferQuery>> oilTransferMap = new HashMap<String, List<TestItemOILTransferQuery>>();
 	
-	ResponseDetailForm responseDetailForm;
+	//ResponseDetailForm responseDetailForm;
 	
 	HashMap<SurveyItem, FormItemResponse> selectedItems = new HashMap<SurveyItem, FormItemResponse>();
 	
 	
-	public TestProcController(ResponseDetailForm responseDetailForm, TestProcObj testProc, UnitService unitService, ProjectService projectService, SurveyResponseService surveyResponseService)
+	public TestProcController( TestProcObj testProc, UnitService unitService, ProjectService projectService, SurveyResponseService surveyResponseService)
 	{
-		this.responseDetailForm = responseDetailForm;
+
 		this.testProc = testProc;
         this.unitService = unitService;
         this.projectService = projectService;
         this.surveyResponseService = surveyResponseService;
     }
 
-	public ResponseDetailForm getResponseDetailForm()
+	/*public ResponseDetailForm getResponseDetailForm()
 	{
 		return responseDetailForm;
 	}
@@ -61,7 +61,7 @@ public class TestProcController {
 	public void setResponseDetailForm(ResponseDetailForm responseDetailForm)
 	{
 		this.responseDetailForm = responseDetailForm;
-	}
+	}*/
 
 	public void itemSelected(SurveyItem sItem, FormItemResponse formItemResponse)
 	{
@@ -72,8 +72,8 @@ public class TestProcController {
 	{
 		selectedItems.remove(sItem);
 	}
-
-	public void createNCROnSelected() 
+//Uncomment do while doing NCR
+	/*public void createNCROnSelected()
 	{
 		UnitObj unit =unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 		Project project =projectService.getProject(testProc.getProjectPk());
@@ -178,7 +178,7 @@ public class TestProcController {
 		EtestApplication.getInstance().showPanel(ncrGroupForm);
 		
 	}
-
+*/
 	public void setFormItemResponseMap(HashMap<String, FormItemResponse> formItemResponseMap)
 	{
 		this.formItemResponseMap = formItemResponseMap;
@@ -203,10 +203,10 @@ public class TestProcController {
 	{
 		this.oilTransferMap = oilTransferMap;
 	}
-
-	public void loadOILTransferMap(int responseId)
+//Uncomment do while doing OpenItem
+	/*public void loadOILTransferMap(int responseId)
 	{
 		HashMap<String, List<TestItemOILTransferQuery>> oilTransferMap = OILDelegate.getTestProcItemFailureQueryMap(responseId);
 		setOilTransferListMap(oilTransferMap);
-	}
+	}*/
 }

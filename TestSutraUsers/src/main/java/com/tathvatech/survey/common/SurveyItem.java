@@ -149,8 +149,8 @@ public abstract class SurveyItem extends SurveyItemBase
 
 		this.loadLogicItems(element);
     }
-
-    public abstract Component drawConfigurationView(
+//commenting methods using vaadin components
+   /* public abstract Component drawConfigurationView(
 	    FormDesignListener formDesignListener);
 
     public abstract Component drawDesignView(boolean isPreviewMode, FormDesignListener formDesignListener);
@@ -158,7 +158,7 @@ public abstract class SurveyItem extends SurveyItemBase
     public abstract Component drawResponseField(UnitFormQuery testProc, SurveyResponse response, Component parent, String[] flags, FormEventListner formEventListner);
     public abstract Component drawResponseDetail(UserContext userContext, UnitFormQuery testProc, SurveyResponse response, Component parent,
 												 boolean expandedView, boolean isLatestResponse, String[] flags, final TestProcController testProcController);
-
+*/
     /**
      * This text identifies the item uniquely, For a question, it could be the
      * question text, and for a page break, it could be a word "PageBreak"

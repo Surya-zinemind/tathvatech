@@ -77,7 +77,7 @@ import org.slf4j.LoggerFactory;
  *         TODO To change the template for this generated type comment go to
  *         Window - Preferences - Java - Code Style - Code Templates
  */
-public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements BaseInspectionLineItemAnswerType, SurveyDisplayItem, LogicSubject
+public class AdvancedBomInspectItemAnswerType //extends SurveySaveItem implements BaseInspectionLineItemAnswerType, SurveyDisplayItem, LogicSubject
 {
 	private static final Logger logger = LoggerFactory.getLogger(AdvancedBomInspectItemAnswerType.class);
 	private final SurveyResponseService surveyResponseService;
@@ -117,8 +117,8 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 	public static int passVal = 11;
 	public static int failVal = 12;
 	public static int naVal = 13;
-	
-	ExpandableTextArea commentsTxt;
+	//commenting methods using vaadin components
+	/*ExpandableTextArea commentsTxt;
 	SingleSelectCheckboxGroup result;
 	HashMap tableFields = new HashMap<Integer, Field>();
 	EquipmentSelector equipmentSelector = new EquipmentSelector();
@@ -137,9 +137,11 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 	FormItemResponse formItemResponse;
 	List<TestItemOILTransferQuery> oilItemList; // openItem associated with this item
 
-	/**
+	*//**
      *
+     *//*
      */
+
 	public AdvancedBomInspectItemAnswerType(SurveyResponseService surveyResponseService, SurveyMaster surveyMaster, ProjectService projectService, UnitService unitService)
 	{
 		super();
@@ -150,9 +152,7 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
         this.unitService = unitService;
     }
 
-	/**
-	 * @param _survey
-	 */
+	/*
 	public AdvancedBomInspectItemAnswerType(SurveyDefinition _survey, SurveyResponseService surveyResponseService, SurveyMaster surveyMaster, ProjectService projectService, UnitService unitService)
 	{
 		super(_survey);
@@ -172,9 +172,9 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 		return true;
 	}
 
-	/**
+	*//**
 	 * @return Returns the isRequired.
-	 */
+	 *//*
 	public boolean isRequired()
 	{
 		Option[] actualFieldOptions = getActualFieldOptions();
@@ -291,9 +291,9 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 		this.commentFieldMaxLength = commentFieldMaxLength;
 	}
 
-	/**
+	*//**
 	 * @return Returns the questionText.
-	 */
+	 *//*
 	public String getQuestionText()
 	{
 		if(customFields != null && customFields.size() > 0)
@@ -415,12 +415,12 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 	// return options;
 	// }
 
-	/*
+	*//*
 	 * (non-Javadoc)
 	 * 
 	 * @see
 	 * com.thirdi.surveyside.survey.SurveySaveItem#getResponse(java.util.Map)
-	 */
+	 *//*
 	public SurveyItemResponse getResponse(Map paramMap, Properties props) throws InvalidResponseException
 	{
 		SimpleSurveyItemResponse itemResponse = new SimpleSurveyItemResponse();
@@ -511,33 +511,33 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 		return itemResponse;
 	}
 
-	/*
+	*//*
 	 * (non-Javadoc)
 	 * 
 	 * @see
 	 * com.thirdi.surveyside.survey.AnswerType#getPersistor(java.lang.Object)
-	 */
+	 *//*
 	public AnswerPersistor getPersistor()
 	{
 		return new SimpleAnswerPersistor(this);
 	}
 
-	/*
+	*//*
 	 * (non-Javadoc)
 	 * 
 	 * @see
 	 * com.thirdi.surveyside.survey.AnswerType#getPersistor(java.lang.Object)
-	 */
+	 *//*
 	public AnswerPersistor getPersistor(SurveyItemResponse answer)
 	{
 		return new SimpleAnswerPersistor(this, answer);
 	}
 
-	/*
+	*//*
 	 * (non-Javadoc)
 	 * 
 	 * @see com.thirdi.surveyside.survey.AnswerType#getDataType()
-	 */
+	 *//*
 	public int getDataType()
 	{
 		return dataType;
@@ -548,12 +548,12 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 		this.dataType = dataType;
 	}
 
-	/*
+	*//*
 	 * (non-Javadoc)
 	 * 
 	 * @see
 	 * com.thirdi.surveyside.survey.AnswerType#saveConfiguration(java.util.Map)
-	 */
+	 *//*
 	public void setConfiguration(Map paramMap) throws Exception
 	{
 		if (logger.isDebugEnabled())
@@ -593,13 +593,13 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 		}
 	}
 
-	/*
+	*//*
 	 * (non-Javadoc)
 	 * 
 	 * @see
 	 * com.thirdi.surveyside.survey.AnswerType#setConfiguration(org.jdom.Element
 	 * )
-	 */
+	 *//*
 	public void setConfiguration(Element element)
 	{
 		super.setSurveyItemConfiguration(element);
@@ -648,11 +648,11 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 		//not required for now.. set from the BomGroup
 	}
 	
-	/*
+	*//*
 	 * (non-Javadoc)
 	 * 
 	 * @see com.thirdi.surveyside.survey.AnswerType#toXML(org.jdom.Element)
-	 */
+	 *//*
 	public Element toXML()
 	{
 		// if (logger.isDebugEnabled())
@@ -696,11 +696,11 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 		return element;
 	}
 
-	/*
+	*//*
 	 * (non-Javadoc)
 	 * 
 	 * @see com.thirdi.surveyside.survey.SurveyItem#getLogic(java.lang.String)
-	 */
+	 *//*
 	public Logic getLogic(String logicId)
 	{
 		return super.getLogicFromList(logicId);
@@ -1964,7 +1964,7 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 	}
 
 	
-	/**
+	*//**
 	 * This is used by OpenItemType after the change in AdvancedBom to use TSTable.. for now writing it here.
 	 * @param
 	 * @param sResponse
@@ -1972,7 +1972,7 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 	 * @param index
 	 * @param flags
 	 * @param formEventListner
-	 */
+	 *//*
 	public void drawResponseFieldInt(UnitFormQuery testProc, final SurveyResponse sResponse, 
 			Table table, int index, String[] flags,  final FormEventListner formEventListner)
 	{
@@ -3678,7 +3678,7 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 			
 			root.addComponent(new VSpacer(20));
 			
-			/* Add buttons in the form. */
+			*//* Add buttons in the form. *//*
 			HorizontalLayout buttonArea = new HorizontalLayout();
 			buttonArea.setSpacing(true);
 			root.addComponent(buttonArea);
@@ -4124,7 +4124,7 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 		return answerStatus;
 	}
 	
-	/**
+	*//**
 	 * Used by TestProcController to get the description when creating ncrs.
 	 * @param
 	 * @param
@@ -4132,7 +4132,7 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 	 * @param
 	 * @param
 	 * @return
-	 */
+	 *//*
 	public String buildOpenItemTransferDescription()
 	{
 		return buildOpenItemTransferDescription(testProc, (Section) this.getParent().getParent(), passFailResult, tableAnswers, canswer);
@@ -4612,5 +4612,5 @@ public class AdvancedBomInspectItemAnswerType extends SurveySaveItem implements 
 			});
 			
 		}
-	}
+	}*/
 }

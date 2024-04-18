@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import com.tathvatech.survey.enums.BomTypesEnum;
+import com.tathvatech.survey.enums.IndexKeys;
 import com.tathvatech.survey.intf.LogicSubject;
 import com.tathvatech.common.common.DataTypes;
 import com.tathvatech.common.common.FileStoreManager;
@@ -53,7 +54,6 @@ import com.tathvatech.user.common.SecurityContext;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.user.service.PlanSecurityManager;
-import jakarta.persistence.Table;
 import org.jdom2.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,12 +104,12 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 	public static int passVal = 11;
 	public static int failVal = 12;
 	public static int naVal = 13;
-	
-	TextField actualValueTxt;
+	//commenting methods using vaadin components
+	/*TextField actualValueTxt;
 	ExpandableTextArea commentsTxt;
 	SingleSelectCheckboxGroup result;
 
-	Table table; // Table to which it is added as a row to.
+	Table table; // Table to which it is added as a row to.*/
 	
 	String imageAttachCol = null; //column where image should be attached.
 	String answer = "";
@@ -124,13 +124,8 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 	/**
      *
      */
-	public BomInspectItemAnswerType(SurveyResponseService surveyResponseService, UnitService unitService)
-	{
-		super();
 
-        this.surveyResponseService = surveyResponseService;
-        this.unitService = unitService;
-    }
+
 
 	/**
 	 * @param _survey
@@ -864,8 +859,8 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 		}
 		return null;
 	}
-
-	@Override
+	//commenting methods using vaadin components
+	/*@Override
 	public Component drawDesignView(boolean isPreviewMode, FormDesignListener formDesignListener)
 	{
 		// TODO Auto-generated method stub
@@ -1657,13 +1652,14 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 		}
 		return vlayout;
 	}
-
+*/
 	@Override
 	public SurveyItemResponse captureResponse() throws InvalidResponseException
 	{
+		//commenting methods using vaadin components
 		SimpleSurveyItemResponse itemResponse = new SimpleSurveyItemResponse();
 
-		if(actualValueTxt != null)
+		/*if(actualValueTxt != null)
 		{
 			String answerText = (String) actualValueTxt.getValue();
 			if(answerText != null && answerText.trim().length() > 0)
@@ -1722,7 +1718,7 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 				sUnit.setKey4(aFileName);
 				itemResponse.addResponseUnit(sUnit);
 			}
-		}
+		}*/
 			
 		return itemResponse;
 	}
@@ -1828,8 +1824,8 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 			return errors;
 			
 	}
-
-	@Override
+//commenting methods using vaadin components
+	/*@Override
 	public Component drawResponseDetail(UserContext userContext, UnitFormQuery testProc, SurveyResponse sResponse, Component parent, 
 			boolean expandedView, boolean isLatestResponse, String[] flags, final TestProcController testProcController)
 	{
@@ -2482,7 +2478,7 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 			
 			root.addComponent(new VSpacer(20));
 			
-			/* Add buttons in the form. */
+			*//* Add buttons in the form. *//*
 			HorizontalLayout buttonArea = new HorizontalLayout();
 			buttonArea.setSpacing(true);
 			root.addComponent(buttonArea);
@@ -2704,7 +2700,7 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 			UI.getCurrent().removeWindow(EtestApplication.getEnclosingWindow(this));
 			formDesignListener.formItemConfigurationCancelled(surveyItem);
 		}
-	}
+	}*/
 
 	@Override
 	public Option[] getResponseFieldOptions()
@@ -2766,11 +2762,11 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 
 	/**
 	 * Used by TestProcController to get the description when creating ncrs.
-	 * @param testProcQuery
-	 * @param sectionItem
-	 * @param passFailResult
-	 * @param tableAnswers
-	 * @param testerComment
+	 * @param
+	 * @param
+	 * @param
+	 * @param
+	 * @param
 	 * @return
 	 */
 	public String buildOpenItemTransferDescription()
@@ -2863,8 +2859,8 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 		if(commentCols.length() > 0)sb.append("\n\n").append(commentCols);
 		return sb.toString();
 	}
-	
-	private class P8TransferMenuBar extends MenuBar
+	//commenting methods using vaadin components
+	/*private class P8TransferMenuBar extends MenuBar
 	{
 		SurveyResponse sResponse;
 		DisplayModeEnum displayMode;
@@ -3131,6 +3127,6 @@ public class BomInspectItemAnswerType extends SurveySaveItem implements BaseInsp
 			});
 			
 		}
-	}
+	}*/
 	
 }
