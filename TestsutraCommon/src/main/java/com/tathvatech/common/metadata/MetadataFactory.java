@@ -6,9 +6,7 @@ package com.tathvatech.common.metadata;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.jdom2.Element;
-import org.jdom2.Document;
-import org.jdom2.input.SAXBuilder;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -25,7 +23,7 @@ public class MetadataFactory
     protected HashMap fieldMetadataMap = new HashMap();
     protected HashMap dataTypeConvertorMap = new HashMap();
 
-	public static MetadataFactory getInstance()
+	/*public static MetadataFactory getInstance()
 	{
 		if (instance == null)
 		{
@@ -90,5 +88,5 @@ public class MetadataFactory
     public String getDataTypeConvertor(String key)
     {
         return (String)dataTypeConvertorMap.get(key);
-    }
+    }*/
 }

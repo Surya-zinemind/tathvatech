@@ -31,8 +31,8 @@ public class DataConversionUtil
     public static String FORMAT_DATE_SURVEY = "dd MMM yy"; //format used for import
     public static String FORMAT_DATE_IMPORT = "dd MMM yy"; //format used for import
     public static String FORMAT_DATETIME_IMPORT = "dd MMM yy hh:mm a"; //format used for import
-
-    public static DataTypeConvertor getDataConvertor(String dataType)
+    //Not using now, will uncomment when it is used
+    /*public static DataTypeConvertor getDataConvertor(String dataType)
     {
         String convertor = MetadataFactory.getInstance().getDataTypeConvertor(dataType);
 
@@ -84,7 +84,7 @@ public class DataConversionUtil
             throw new InvalidDataFormatException();
         }
     }
-
+*/
     public static Date getDateFromString(String dateString, String format)
     {
         if(dateString == null || dateString.trim().equals(""))

@@ -8,8 +8,8 @@ import java.util.HashMap;
 
 
 public interface DataTypeConvertor
-{
-	public Object convert(Object obj)throws InvalidValidationConstraintException, ValidationException;
+{//Not using now, will uncomment when it is used
+	/*public Object convert(Object obj)throws InvalidValidationConstraintException, ValidationException;
 
 	public Object convertBack(Object obj);
 
@@ -19,9 +19,9 @@ public interface DataTypeConvertor
 
     public void setConstraintMap(HashMap constraintMap);
 
-    /**
+    *//**
      * @param prop
      * @return
-     */
-    public String formatAsString(Object prop);
+     *//*
+    public String formatAsString(Object prop);*/
 }
