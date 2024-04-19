@@ -1,7 +1,10 @@
 package com.tathvatech.forms.controller;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.exception.RestAppException;
+import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.forms.common.*;
+import com.tathvatech.site.service.SiteService;
+import com.tathvatech.survey.service.SurveyDefFactory;
 import com.tathvatech.forms.entity.FormSection;
 import com.tathvatech.forms.entity.ObjectLock;
 import com.tathvatech.forms.enums.FormStatusEnum;
@@ -9,6 +12,8 @@ import com.tathvatech.forms.report.TestProcListReport;
 import com.tathvatech.forms.report.TestProcStatusSummaryReport;
 import com.tathvatech.forms.request.*;
 import com.tathvatech.forms.response.*;
+import com.tathvatech.forms.service.FormDBManager;
+import com.tathvatech.forms.service.TestProcService;
 import com.tathvatech.ncr.controller.NcrDelegate;
 import com.tathvatech.common.entity.EntityReference;
 import com.tathvatech.common.enums.EntityTypeEnum;
@@ -17,12 +22,22 @@ import com.tathvatech.ncr.common.NcrItemQuery;
 import com.tathvatech.forms.processor.FormUpgradeRevertProcessor;
 import com.tathvatech.ncr.oid.NcrItemOID;
 import com.tathvatech.project.entity.Project;
+import com.tathvatech.project.enums.ProjectPropertyEnum;
+import com.tathvatech.project.service.ProjectService;
+import com.tathvatech.survey.common.SignatureCaptureAnswerType;
+import com.tathvatech.survey.common.SurveyDefinition;
 import com.tathvatech.survey.common.SurveyItem;
+import com.tathvatech.survey.controller.SurveyDelegate;
 import com.tathvatech.survey.entity.Survey;
 import com.tathvatech.survey.enums.SectionLockStatusEnum;
 import com.tathvatech.survey.exception.LockedByAnotherUserException;
+import com.tathvatech.survey.service.SurveyMaster;
+import com.tathvatech.survey.service.SurveyResponseService;
 import com.tathvatech.timetracker.entity.Workorder;
+import com.tathvatech.timetracker.service.WorkorderManager;
 import com.tathvatech.unit.common.UnitEntityQuery;
+import com.tathvatech.unit.service.UnitManager;
+import com.tathvatech.unit.service.UnitService;
 import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.DateRangeFilter;
 import com.tathvatech.user.common.TestProcObj;
@@ -32,7 +47,9 @@ import com.tathvatech.user.entity.User;
 import com.tathvatech.user.service.AccountService;
 import com.tathvatech.user.service.CommonServicesDelegate;
 import com.tathvatech.user.utils.DateUtils;
+import com.tathvatech.workstation.common.DummyWorkstation;
 import com.tathvatech.workstation.entity.Workstation;
+import com.tathvatech.workstation.service.WorkstationService;
 import lombok.RequiredArgsConstructor;
 import com.tathvatech.unit.common.UnitFormQuery;
 import org.jdom2.Document;
@@ -49,6 +66,22 @@ public class FormController {
    private final AccountService accountService;
    private final FormUpgradeRevertProcessor formUpgradeRevertProcessor;
    private final NcrDelegate ncrDelegate;
+   private final ProjectService projectService;
+   private final WorkorderManager workorderManager;
+    private final TestProcService testProcService;
+   private final PersistWrapper persistWrapper;
+
+   private final UnitManager unitManager;
+   private final UnitService unitService;
+   private final DummyWorkstation dummyWorkstation;
+   private final SurveyResponseService surveyResponseService;
+   private final SurveyMaster surveyMaster;
+   private final SurveyDelegate surveyDelegate;
+   private final SiteService siteService;
+   private final FormDBManager formDBManager;
+   private final WorkstationService workstationService;
+   private final SurveyDefFactory surveyDefFactory;
+
     public  void saveTestProcSchedule(UserContext context, TestProcOID testProcOID,
                                       ObjectScheduleRequestBean objectScheduleRequestBean) throws Exception
     {
@@ -134,7 +167,7 @@ public class FormController {
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         try
         {
-            List<AssignedTestsQuery> forms = ProjectManager.getAssignedFormsNew(context.getUser().getOID(),
+            List<AssignedTestsQuery> forms =formService.getAssignedFormsNew(context.getUser().getOID(),
                     User.ROLE_TESTER);
 
             List<TestProcBean> tList = new ArrayList<TestProcBean>();
@@ -179,7 +212,7 @@ public class FormController {
                 ProjectConfigSettings projectConfig =  projectSettingsMap.get(new ProjectOID(tBean.getProjectPk()));
                 if(projectConfig == null || projectConfig.EnableInterimSubmitForChecksheets == null)
                 {
-                    Boolean enableInterimSubmitForChecksheets = (Boolean) new CommonServicesDelegate().getEntityPropertyValue(new ProjectOID(tBean.getProjectPk()), ProjectPropertyEnum.EnableInterimSubmitForChecksheets.getId(), Boolean.class);
+                    Boolean enableInterimSubmitForChecksheets = (Boolean) commonServicesDelegate.getEntityPropertyValue(new ProjectOID(tBean.getProjectPk()), ProjectPropertyEnum.EnableInterimSubmitForChecksheets.getId(), Boolean.class);
                     if(projectConfig == null)
                     {
                         projectConfig = new ProjectConfigSettings();
@@ -496,10 +529,10 @@ public class FormController {
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         try
         {
-            TestProcObj testProc = TestProcManager.getTestProc(formRequestBean.getTestProcPk());
-            ResponseMasterNew respMaster = SurveyResponseDelegate
+            TestProcObj testProc =testProcService.getTestProc(formRequestBean.getTestProcPk());
+            ResponseMasterNew respMaster =surveyResponseService
                     .getLatestResponseMasterForTest((TestProcOID) testProc.getOID());
-            Survey survey = SurveyMaster.getSurveyByPk(testProc.getFormPk());
+            Survey survey = surveyMaster.getSurveyByPk(testProc.getFormPk());
             if (testProc == null)
             {
                 throw new RestAppException("MSG-FormNotFound:" + formRequestBean.getTestProcPk());
@@ -537,19 +570,19 @@ public class FormController {
                 // check if that section is locked by another user
                 try
                 {
-                    ObjectLock objectLock = SurveyDelegate.lockSectionToEdit(context, (User) context.getUser(),
+                    ObjectLock objectLock = surveyDelegate.lockSectionToEdit(context, (User) context.getUser(),
                             respMaster.getOID(), aSection);
-                    aSectionBean.setLockedByUserPk(context.getUser().getPk());
+                    aSectionBean.setLockedByUserPk((int) context.getUser().getPk());
                     aSectionBean.setLockedByUserDisplayName(
                             context.getUser().getFirstName() + " " + context.getUser().getLastName());
                     aSectionBean.setLockStatus(SectionLockStatusEnum.LockedBySelf);
 
                     // get the workorderfk and set it.
-                    FormSection formSection = new FormDBManager().getFormSection(aSection, testProc.getFormPk());
-                    TestProcSectionObj testprocSection = TestProcManager.getTestProcSection(testProc.getOID(),
+                    FormSection formSection =formDBManager.getFormSection(aSection, testProc.getFormPk());
+                    TestProcSectionObj testprocSection = testProcService.getTestProcSection(testProc.getOID(),
                             formSection.getOID());
-                    Workorder wo = WorkorderDelegate.getWorkorderForEntity(testprocSection.getOID());
-                    aSectionBean.setWorkorderFk(wo.getPk());
+                    Workorder wo =workorderManager.getWorkorderForEntity(testprocSection.getOID());
+                    aSectionBean.setWorkorderFk((int) wo.getPk());
 
                 }
                 catch (LockedByAnotherUserException e)
@@ -567,7 +600,7 @@ public class FormController {
                  * so I record form access when the lock to acquired.
                  */
 
-                ProjectDelegate.recordWorkstationFormAccess(testProc.getOID());
+                workstationService.recordWorkstationFormAccess(testProc.getOID());
 
                 aSectionBean.setFormItemId(aSection);
                 sectionResponseBeans[i] = aSectionBean;
@@ -597,10 +630,10 @@ public class FormController {
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         try
         {
-            TestProcObj testProc = TestProcManager.getTestProc(formRequestBean.getTestProcPk());
-            ResponseMasterNew respMaster = SurveyResponseDelegate
+            TestProcObj testProc = testProcService.getTestProc(formRequestBean.getTestProcPk());
+            ResponseMasterNew respMaster =surveyResponseService
                     .getLatestResponseMasterForTest((TestProcOID) testProc.getOID());
-            Survey survey = SurveyMaster.getSurveyByPk(testProc.getFormPk());
+            Survey survey = surveyMaster.getSurveyByPk(testProc.getFormPk());
             if (testProc == null)
             {
                 throw new RestAppException("MSG-FormNotFound:" + formRequestBean.getTestProcPk());
@@ -640,7 +673,7 @@ public class FormController {
                 try
                 {
                     User user = (User) context.getUser();
-                    SurveyDelegate.releaseSectionEditLock(context, user, respMaster.getOID(), aSection);
+                    surveyDelegate.releaseSectionEditLock(context, user, respMaster.getOID(), aSection);
 
                     aSectionBean.setLockedByUserPk(0);
                     aSectionBean.setLockedByUserDisplayName(null);
@@ -649,7 +682,7 @@ public class FormController {
                 catch (LockedByAnotherUserException e)
                 {
                     aSectionBean.setLockStatus(SectionLockStatusEnum.LockedByOther);
-                    aSectionBean.setLockedByUserPk(e.getObjectLock().getLockedByUser().getPk());
+                    aSectionBean.setLockedByUserPk((int) e.getObjectLock().getLockedByUser().getPk());
                     aSectionBean.setLockedByUserDisplayName(e.getObjectLock().getLockedByUser().getFirstName() + " "
                             + e.getObjectLock().getLockedByUser().getLastName());
                 }
@@ -661,7 +694,7 @@ public class FormController {
                  * acquired.
                  */
 
-                ProjectDelegate.recordWorkstationFormAccess(testProc.getOID());
+                workstationService.recordWorkstationFormAccess(testProc.getOID());
                 aSectionBean.setFormItemId(aSection);
                 returnSections[i] = aSectionBean;
             }
@@ -689,8 +722,8 @@ public class FormController {
         try
         {
             SectionLockUnlockRequestBean sectionLockBean = null;
-            TestProcObj testProc = TestProcManager.getTestProc(formRequestBean.getTestProcPk());
-            ResponseMasterNew respMaster = SurveyResponseDelegate
+            TestProcObj testProc = testProcService.getTestProc(formRequestBean.getTestProcPk());
+            ResponseMasterNew respMaster = surveyResponseService
                     .getLatestResponseMasterForTest((TestProcOID) testProc.getOID());
             if (testProc == null)
             {
@@ -711,7 +744,7 @@ public class FormController {
                 throw new RestAppException(
                         "Invalid test response, the test is upgraded, submitted or not available anymore.");
             }
-            SurveyDefinition surveyDefinition = SurveyDefFactory
+            SurveyDefinition surveyDefinition = surveyDefFactory
                     .getSurveyDefinition(new FormOID(testProc.getFormPk(), null));
             if (surveyDefinition == null)
             {
@@ -743,16 +776,16 @@ public class FormController {
                      * get the workorderfk and set it.
                      */
 
-                    FormSection formSection = new FormDBManager().getFormSection(aSectionId, testProc.getFormPk());
-                    TestProcSectionObj testprocSection = TestProcManager.getTestProcSection(testProc.getOID(),
+                    FormSection formSection = formDBManager.getFormSection(aSectionId, testProc.getFormPk());
+                    TestProcSectionObj testprocSection = testProcService.getTestProcSection(testProc.getOID(),
                             formSection.getOID());
-                    Workorder wo = WorkorderDelegate.getWorkorderForEntity(testprocSection.getOID());
+                    Workorder wo = workorderManager.getWorkorderForEntity(testprocSection.getOID());
                     if (wo != null)
-                        aSectionBean.setWorkorderFk(wo.getPk());
+                        aSectionBean.setWorkorderFk((int) wo.getPk());
 
                     try
                     {
-                        ObjectLockQuery lock = SurveyDelegate.getCurrentLock(respMaster.getOID(), aSectionId);
+                        ObjectLockQuery lock =surveyMaster.getCurrentLock(respMaster.getOID(), aSectionId);
                         if (lock == null)
                         {
 
@@ -779,7 +812,7 @@ public class FormController {
 
                             aSectionBean.setLockStatus(SectionLockStatusEnum.LockedByOther);
                             aSectionBean.setLockedByUserPk(lock.getUserPk());
-                            User lockedUser = AccountDelegate.getUser(lock.getUserPk());
+                            User lockedUser = accountService.getUser(lock.getUserPk());
                             aSectionBean.setLockedByUserDisplayName(
                                     lockedUser.getFirstName() + " " + lockedUser.getLastName());
                         }
@@ -1278,7 +1311,7 @@ public class FormController {
             filter.setIncludeChildren(false);
             filter.setFetchWorkstationForecastAsTestForecast(false);
             filter.setTestStatus(new FormStatusEnum[] { FormStatusEnum.INPROGRESS });
-            List<UnitFormQuery> unitFormQueries = new TestProcListReport(context, filter).getTestProcs();
+            List<UnitFormQuery> unitFormQueries = new TestProcListReport(context, filter,persistWrapper,unitManager,dummyWorkstation).getTestProcs();
             List<TestProcBean> testProcBeans = new ArrayList<TestProcBean>();
             for (UnitFormQuery unitForm : unitFormQueries)
             {
@@ -1322,7 +1355,7 @@ public class FormController {
                 Boolean permT = permMap.get(tBean.getUnitPk()+"-"+tBean.getProjectPk()+"-"+tBean.getWorkstationPk()+"-"+User.ROLE_TESTER);
                 if(permT == null)
                 {
-                    List tusers = ProjectManager.getUsersForUnitInRole(tBean.getUnitPk(), new ProjectOID(tBean.getProjectPk()), new WorkstationOID(tBean.getWorkstationPk()),User.ROLE_TESTER);
+                    List tusers = unitService.getUsersForUnitInRole(tBean.getUnitPk(), new ProjectOID(tBean.getProjectPk()), new WorkstationOID(tBean.getWorkstationPk()),User.ROLE_TESTER);
                     if(tusers != null && tusers.contains(context.getUser()))
                     {
                         permMap.put(tBean.getUnitPk()+"-"+tBean.getProjectPk()+"-"+tBean.getWorkstationPk()+"-"+User.ROLE_TESTER, true);
@@ -1339,7 +1372,7 @@ public class FormController {
                 Boolean permV = permMap.get(tBean.getUnitPk()+"-"+tBean.getProjectPk()+"-"+tBean.getWorkstationPk()+"-"+User.ROLE_VERIFY);
                 if(permV == null)
                 {
-                    List tusers = ProjectManager.getUsersForUnitInRole(tBean.getUnitPk(), new ProjectOID(tBean.getProjectPk()), new WorkstationOID(tBean.getWorkstationPk()),User.ROLE_VERIFY);
+                    List tusers = unitService.getUsersForUnitInRole(tBean.getUnitPk(), new ProjectOID(tBean.getProjectPk()), new WorkstationOID(tBean.getWorkstationPk()),User.ROLE_VERIFY);
                     if(tusers != null && tusers.contains(context.getUser()))
                     {
                         permMap.put(tBean.getUnitPk()+"-"+tBean.getProjectPk()+"-"+tBean.getWorkstationPk()+"-"+User.ROLE_VERIFY, true);
@@ -1356,7 +1389,7 @@ public class FormController {
                 Boolean permA = permMap.get(tBean.getUnitPk()+"-"+tBean.getProjectPk()+"-"+tBean.getWorkstationPk()+"-"+User.ROLE_APPROVE);
                 if(permA == null)
                 {
-                    List tusers = ProjectManager.getUsersForUnitInRole(tBean.getUnitPk(), new ProjectOID(tBean.getProjectPk()), new WorkstationOID(tBean.getWorkstationPk()),User.ROLE_APPROVE);
+                    List tusers = unitService.getUsersForUnitInRole(tBean.getUnitPk(), new ProjectOID(tBean.getProjectPk()), new WorkstationOID(tBean.getWorkstationPk()),User.ROLE_APPROVE);
                     if(tusers != null && tusers.contains(context.getUser()))
                     {
                         permMap.put(tBean.getUnitPk()+"-"+tBean.getProjectPk()+"-"+tBean.getWorkstationPk()+"-"+User.ROLE_APPROVE, true);
@@ -1404,14 +1437,14 @@ public class FormController {
             UnitEntityQuery unit = new UnitEntityQuery();
             Site site = new Site();
             if (formSummaryRequestBean.getWorkstationOID() != null)
-                workstation = ProjectDelegate.getWorkstation(formSummaryRequestBean.getWorkstationOID().getPk());
+                workstation = workstationService.getWorkstation(new WorkstationOID((int) formSummaryRequestBean.getWorkstationOID().getPk()));
             if (formSummaryRequestBean.getProjectOID() != null)
-                project = ProjectDelegate.getProject(formSummaryRequestBean.getProjectOID().getPk());
+                project = projectService.getProject(formSummaryRequestBean.getProjectOID().getPk());
             if (formSummaryRequestBean.getUnitOID() != null)
-                unit = UnitDelegate.getUnitEntityQueryByPk(new UnitOID(formSummaryRequestBean.getUnitOID().getPk()));
+                unit = unitManager.getUnitEntityQueryByPk(new UnitOID((int) formSummaryRequestBean.getUnitOID().getPk()));
             if (formSummaryRequestBean.getSiteOID() != null)
             {
-                site = SiteDelegate.getSite(formSummaryRequestBean.getSiteOID().getPk());
+                site = siteService.getSite((int) formSummaryRequestBean.getSiteOID().getPk());
             } else
             {
                 site = context.getSite();
@@ -1431,7 +1464,7 @@ public class FormController {
             summaryReportRequest.setProjectOIDList(Arrays.asList(formSummaryRequestBean.getProjectOID()));
             summaryReportRequest.setUnitOID(formSummaryRequestBean.getUnitOID());
             summaryReportRequest.setGroupingSet(Arrays.asList(TestProcStatusSummaryReportRequest.GroupingCol.unit));
-            TestProcStatusSummaryReport testProcSummaryReport = new TestProcStatusSummaryReport(context,
+            TestProcStatusSummaryReport testProcSummaryReport = new TestProcStatusSummaryReport(persistWrapper, dummyWorkstation, unitManager,context,
                     summaryReportRequest);
             TestProcStatusSummaryReportResult testProcSummaryReportResult = testProcSummaryReport.runReport();
             if (testProcSummaryReportResult != null && testProcSummaryReportResult.getReportResult() != null)
@@ -1464,7 +1497,7 @@ public class FormController {
                     FormStatusEnum.INPROGRESS, FormStatusEnum.PAUSED, FormStatusEnum.VERIFIED });
             summaryReportRequestOD
                     .setGroupingSet(Arrays.asList(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestEndDate));
-            TestProcStatusSummaryReport testProcSummaryReportOD = new TestProcStatusSummaryReport(context,
+            TestProcStatusSummaryReport testProcSummaryReportOD = new TestProcStatusSummaryReport(persistWrapper, dummyWorkstation,unitManager,context,
                     summaryReportRequestOD);
             TestProcStatusSummaryReportResult testProcSummaryReportResultOD = testProcSummaryReportOD.runReport();
             if (testProcSummaryReportResultOD != null && testProcSummaryReportResultOD.getReportResult() != null)
@@ -1505,24 +1538,24 @@ public class FormController {
             UnitEntityQuery unit = new UnitEntityQuery();
             Site site = new Site();
             if (formSummaryRequestBean.getWorkstationOID() != null)
-                workstation = ProjectDelegate.getWorkstation(formSummaryRequestBean.getWorkstationOID().getPk());
+                workstation = workstationService.getWorkstation(new WorkstationOID((int) formSummaryRequestBean.getWorkstationOID().getPk()));
             if (formSummaryRequestBean.getProjectOID() != null)
-                project = ProjectDelegate.getProject(formSummaryRequestBean.getProjectOID().getPk());
+                project = projectService.getProject(formSummaryRequestBean.getProjectOID().getPk());
             if (formSummaryRequestBean.getUnitOID() != null)
-                unit = UnitDelegate.getUnitEntityQueryByPk(new UnitOID(formSummaryRequestBean.getUnitOID().getPk()));
+                unit =unitManager.getUnitEntityQueryByPk(new UnitOID((int) formSummaryRequestBean.getUnitOID().getPk()));
             if (formSummaryRequestBean.getSiteOID() != null)
             {
-                site = SiteDelegate.getSite(formSummaryRequestBean.getSiteOID().getPk());
+                site = siteService.getSite((int) formSummaryRequestBean.getSiteOID().getPk());
             } else
             {
                 site = context.getSite();
             }
             DateUtils dateUtils = new DateUtils(TimeZone.getTimeZone(site.getTimeZone()));
             FormScheduleResponseBean formScheduleResponseBean = new FormScheduleResponseBean();
-            formScheduleResponseBean.setWorkstationPk(workstation.getPk());
+            formScheduleResponseBean.setWorkstationPk((int) workstation.getPk());
             formScheduleResponseBean.setWorkstationName(workstation.getWorkstationName());
             formScheduleResponseBean.setWorkstationDescription(workstation.getDescription());
-            formScheduleResponseBean.setProjectPk(project.getPk());
+            formScheduleResponseBean.setProjectPk((int) project.getPk());
             formScheduleResponseBean.setProjectName(project.getProjectName());
             formScheduleResponseBean.setProjectDescription(project.getProjectDescription());
             formScheduleResponseBean.setUnitPk(unit.getPk());
@@ -1541,7 +1574,7 @@ public class FormController {
                     FormStatusEnum.INPROGRESS, FormStatusEnum.PAUSED, FormStatusEnum.VERIFIED });
             summaryReportRequestOD
                     .setGroupingSet(Arrays.asList(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestEndDate));
-            TestProcStatusSummaryReport testProcSummaryReportOD = new TestProcStatusSummaryReport(context,
+            TestProcStatusSummaryReport testProcSummaryReportOD = new TestProcStatusSummaryReport(persistWrapper,dummyWorkstation,unitManager, context,
                     summaryReportRequestOD);
             TestProcStatusSummaryReportResult testProcSummaryReportResultOD = testProcSummaryReportOD.runReport();
             if (testProcSummaryReportResultOD != null && testProcSummaryReportResultOD.getReportResult() != null)
@@ -1568,7 +1601,7 @@ public class FormController {
             summaryReportRequestInProgress.setResponseStatus(new FormStatusEnum[] { FormStatusEnum.INPROGRESS });
             summaryReportRequestInProgress
                     .setGroupingSet(Arrays.asList(TestProcStatusSummaryReportRequest.GroupingCol.unit));
-            TestProcStatusSummaryReport testProcSummaryReportInProgress = new TestProcStatusSummaryReport(context,
+            TestProcStatusSummaryReport testProcSummaryReportInProgress = new TestProcStatusSummaryReport(persistWrapper,dummyWorkstation, unitManager, context,
                     summaryReportRequestInProgress);
             TestProcStatusSummaryReportResult testProcSummaryReportResultInProgress = testProcSummaryReportInProgress
                     .runReport();
@@ -1596,7 +1629,7 @@ public class FormController {
                             FormStatusEnum.COMPLETE, FormStatusEnum.PAUSED, FormStatusEnum.VERIFIED });
             summaryReportRequestToBeStartToday.setGroupingSet(
                     Arrays.asList(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestStartDate));
-            TestProcStatusSummaryReport testProcSummaryReportToBeStartToday = new TestProcStatusSummaryReport(context,
+            TestProcStatusSummaryReport testProcSummaryReportToBeStartToday = new TestProcStatusSummaryReport(persistWrapper,dummyWorkstation,unitManager,context,
                     summaryReportRequestToBeStartToday);
             TestProcStatusSummaryReportResult testProcSummaryReportResultToBeStartToday = testProcSummaryReportToBeStartToday
                     .runReport();
@@ -1627,7 +1660,7 @@ public class FormController {
                     FormStatusEnum.COMPLETE, FormStatusEnum.PAUSED, FormStatusEnum.VERIFIED });
             summaryReportRequestStartedToday.setGroupingSet(
                     Arrays.asList(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestStartDate));
-            TestProcStatusSummaryReport testProcSummaryReportStartedToday = new TestProcStatusSummaryReport(context,
+            TestProcStatusSummaryReport testProcSummaryReportStartedToday = new TestProcStatusSummaryReport(persistWrapper,dummyWorkstation,unitManager, context,
                     summaryReportRequestStartedToday);
             TestProcStatusSummaryReportResult testProcSummaryReportResultStartedToday = testProcSummaryReportStartedToday
                     .runReport();
@@ -1659,7 +1692,7 @@ public class FormController {
             summaryReportRequestToBeCompleteToday
                     .setGroupingSet(Arrays.asList(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestEndDate));
             TestProcStatusSummaryReport testProcSummaryReportToBeCompleteToday = new TestProcStatusSummaryReport(
-                    context, summaryReportRequestToBeCompleteToday);
+                    persistWrapper,dummyWorkstation,unitManager, context, summaryReportRequestToBeCompleteToday);
             TestProcStatusSummaryReportResult testProcSummaryReportResultToBeCompleteToday = testProcSummaryReportToBeCompleteToday
                     .runReport();
             if (testProcSummaryReportResultToBeCompleteToday != null
@@ -1687,7 +1720,7 @@ public class FormController {
             summaryReportRequestCompletedToday.setResponseStatus(new FormStatusEnum[] { FormStatusEnum.COMPLETE });
             summaryReportRequestCompletedToday
                     .setGroupingSet(Arrays.asList(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestEndDate));
-            TestProcStatusSummaryReport testProcSummaryReportCompletedToday = new TestProcStatusSummaryReport(context,
+            TestProcStatusSummaryReport testProcSummaryReportCompletedToday = new TestProcStatusSummaryReport(persistWrapper, dummyWorkstation,unitManager,context,
                     summaryReportRequestCompletedToday);
             TestProcStatusSummaryReportResult testProcSummaryReportResultCompletedToday = testProcSummaryReportCompletedToday
                     .runReport();
@@ -1721,7 +1754,7 @@ public class FormController {
             summaryReportRequestStartedToday.setGroupingSet(
                     Arrays.asList(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestStartDate));
             TestProcStatusSummaryReport testProcSummaryReportToBeStartInNext5D = new TestProcStatusSummaryReport(
-                    context, summaryReportRequestToBeStartInNext5D);
+                    persistWrapper,dummyWorkstation, unitManager,context, summaryReportRequestToBeStartInNext5D);
             TestProcStatusSummaryReportResult testProcSummaryReportResultToBeStartInNext5D = testProcSummaryReportToBeStartInNext5D
                     .runReport();
             if (testProcSummaryReportResultToBeStartInNext5D != null
@@ -1751,7 +1784,7 @@ public class FormController {
                     FormStatusEnum.COMPLETE, FormStatusEnum.PAUSED, FormStatusEnum.VERIFIED });
             summaryReportRequestStartedToday.setGroupingSet(
                     Arrays.asList(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestStartDate));
-            TestProcStatusSummaryReport testProcSummaryReportStartedInNext5D = new TestProcStatusSummaryReport(context,
+            TestProcStatusSummaryReport testProcSummaryReportStartedInNext5D = new TestProcStatusSummaryReport(persistWrapper,dummyWorkstation,unitManager, context,
                     summaryReportRequestStartedInNext5D);
             TestProcStatusSummaryReportResult testProcSummaryReportResultStartedInNext5D = testProcSummaryReportStartedInNext5D
                     .runReport();
@@ -1784,7 +1817,7 @@ public class FormController {
             summaryReportRequestToBeCompleteNext5D
                     .setGroupingSet(Arrays.asList(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestEndDate));
             TestProcStatusSummaryReport testProcSummaryReportToBeCompleteNext5D = new TestProcStatusSummaryReport(
-                    context, summaryReportRequestToBeCompleteNext5D);
+                    persistWrapper, dummyWorkstation,unitManager,context, summaryReportRequestToBeCompleteNext5D);
             TestProcStatusSummaryReportResult testProcSummaryReportResultToBeCompleteNext5D = testProcSummaryReportToBeCompleteNext5D
                     .runReport();
             if (testProcSummaryReportResultToBeCompleteNext5D != null
@@ -1814,7 +1847,7 @@ public class FormController {
             summaryReportRequestCompletedNext5D.setResponseStatus(new FormStatusEnum[] { FormStatusEnum.COMPLETE });
             summaryReportRequestCompletedNext5D
                     .setGroupingSet(Arrays.asList(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestEndDate));
-            TestProcStatusSummaryReport testProcSummaryReportCompletedNext5D = new TestProcStatusSummaryReport(context,
+            TestProcStatusSummaryReport testProcSummaryReportCompletedNext5D = new TestProcStatusSummaryReport(persistWrapper,dummyWorkstation, unitManager, context,
                     summaryReportRequestCompletedNext5D);
             TestProcStatusSummaryReportResult testProcSummaryReportResultCompletedNext5D = testProcSummaryReportCompletedNext5D
                     .runReport();
@@ -1849,7 +1882,7 @@ public class FormController {
             summaryReportRequestStartedToday.setGroupingSet(
                     Arrays.asList(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestStartDate));
             TestProcStatusSummaryReport testProcSummaryReportToBeStartInLast5D = new TestProcStatusSummaryReport(
-                    context, summaryReportRequestToBeStartInLast5D);
+                    persistWrapper, dummyWorkstation, unitManager, context, summaryReportRequestToBeStartInLast5D);
             TestProcStatusSummaryReportResult testProcSummaryReportResultToBeStartInLast5D = testProcSummaryReportToBeStartInLast5D
                     .runReport();
             if (testProcSummaryReportResultToBeStartInLast5D != null
@@ -1881,7 +1914,7 @@ public class FormController {
                     FormStatusEnum.COMPLETE, FormStatusEnum.PAUSED, FormStatusEnum.VERIFIED });
             summaryReportRequestStartedToday.setGroupingSet(
                     Arrays.asList(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestStartDate));
-            TestProcStatusSummaryReport testProcSummaryReportStartedInLast5D = new TestProcStatusSummaryReport(context,
+            TestProcStatusSummaryReport testProcSummaryReportStartedInLast5D = new TestProcStatusSummaryReport(persistWrapper,  dummyWorkstation,  unitManager, context,
                     summaryReportRequestStartedInLast5D);
             TestProcStatusSummaryReportResult testProcSummaryReportResultStartedInLast5D = testProcSummaryReportStartedInLast5D
                     .runReport();
@@ -1915,7 +1948,7 @@ public class FormController {
             summaryReportRequestToBeCompleteLast5D
                     .setGroupingSet(Arrays.asList(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestEndDate));
             TestProcStatusSummaryReport testProcSummaryReportToBeCompleteLast5D = new TestProcStatusSummaryReport(
-                    context, summaryReportRequestToBeCompleteLast5D);
+                    persistWrapper, dummyWorkstation, unitManager, context, summaryReportRequestToBeCompleteLast5D);
             TestProcStatusSummaryReportResult testProcSummaryReportResultToBeCompleteLast5D = testProcSummaryReportToBeCompleteLast5D
                     .runReport();
             if (testProcSummaryReportResultToBeCompleteLast5D != null
@@ -1946,7 +1979,7 @@ public class FormController {
             summaryReportRequestCompletedLast5D.setResponseStatus(new FormStatusEnum[] { FormStatusEnum.COMPLETE });
             summaryReportRequestCompletedLast5D
                     .setGroupingSet(Arrays.asList(TestProcStatusSummaryReportRequest.GroupingCol.forecastTestEndDate));
-            TestProcStatusSummaryReport testProcSummaryReportCompletedLast5D = new TestProcStatusSummaryReport(context,
+            TestProcStatusSummaryReport testProcSummaryReportCompletedLast5D = new TestProcStatusSummaryReport(persistWrapper, dummyWorkstation,unitManager,context,
                     summaryReportRequestCompletedLast5D);
             TestProcStatusSummaryReportResult testProcSummaryReportResultCompleteLast5D = testProcSummaryReportCompletedLast5D
                     .runReport();
@@ -1989,7 +2022,7 @@ public class FormController {
             summaryReportRequest.setUnitOID(formSummaryRequestBean.getUnitOID());
             summaryReportRequest
                     .setGroupingSet(Arrays.asList(TestProcStatusSummaryReportRequest.GroupingCol.workstation));
-            TestProcStatusSummaryReport testProcSummaryReport = new TestProcStatusSummaryReport(context,
+            TestProcStatusSummaryReport testProcSummaryReport = new TestProcStatusSummaryReport(persistWrapper, dummyWorkstation,unitManager,context,
                     summaryReportRequest);
             TestProcStatusSummaryReportResult testProcSummaryReportResult = testProcSummaryReport.runReport();
             if (testProcSummaryReportResult != null && testProcSummaryReportResult.getReportResult() != null)

@@ -1,6 +1,7 @@
 package com.tathvatech.survey.utils;
 
 import com.tathvatech.survey.common.SurveyDefinition;
+import com.tathvatech.survey.service.SurveyDefFactory;
 import com.tathvatech.user.OID.FormOID;
 import org.apache.commons.collections4.map.LRUMap;
 
@@ -8,6 +9,7 @@ import org.apache.commons.collections4.map.LRUMap;
 
 public class SurveyDefinitionCacheSingleton
 {
+	private SurveyDefFactory surveyDefFactory;
 	private static SurveyDefinitionCacheSingleton instance;
 	private LRUMap<FormOID, SurveyDefinition> sdMap = new LRUMap<FormOID, SurveyDefinition>(200);
 	
@@ -38,7 +40,7 @@ public class SurveyDefinitionCacheSingleton
 		SurveyDefinition sd = sdMap.get(formOID);
 		if(sd == null)
 		{
-			sd = SurveyDefFactory.getSurveyDefinition(formOID);
+			sd = surveyDefFactory.getSurveyDefinition(formOID);
 			sdMap.put(formOID, sd);
 		}
 		return sd;

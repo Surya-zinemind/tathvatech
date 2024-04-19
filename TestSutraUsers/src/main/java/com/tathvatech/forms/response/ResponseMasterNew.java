@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import com.tathvatech.forms.oid.FormResponseOID;
 
 
 /**
@@ -391,10 +391,10 @@ public class ResponseMasterNew implements Serializable
 	}
 	//fix it later
 	@JsonIgnore
-	/*public FormResponseOID getOID()
+	public FormResponseOID getOID()
 	{
 		return new FormResponseOID(responseId);
-	}*/
+	}
 
 	public static String	fetchQuery		
 						= "select res.responseId, res.responseRefNo, "
