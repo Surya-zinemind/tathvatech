@@ -6,7 +6,8 @@
  */
 package com.tathvatech.survey.intf;
 
-import com.tathvatech.ts.core.utils.OptionList;
+
+import com.tathvatech.user.utils.OptionList;
 
 /**
  * @author Hari

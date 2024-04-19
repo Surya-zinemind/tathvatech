@@ -7,6 +7,7 @@
 package com.tathvatech.logic.common;
 
 import com.tathvatech.common.common.DataTypes;
+import com.tathvatech.survey.intf.TwoDOptionType;
 import com.tathvatech.user.common.Option;
 import com.tathvatech.user.utils.OptionList;
 import com.tathvatech.survey.common.HasOtherType;

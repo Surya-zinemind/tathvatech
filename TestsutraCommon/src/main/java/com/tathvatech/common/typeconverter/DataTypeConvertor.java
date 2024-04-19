@@ -6,7 +6,6 @@ package com.tathvatech.common.typeconverter;
 
 import java.util.HashMap;
 
-import com.tathvatech.ts.caf.core.exception.*;
 
 public interface DataTypeConvertor
 {

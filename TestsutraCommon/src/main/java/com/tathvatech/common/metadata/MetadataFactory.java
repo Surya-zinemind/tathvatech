@@ -4,20 +4,20 @@
 
 package com.tathvatech.common.metadata;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.jdom2.Element;
+import org.jdom2.Document;
+import org.jdom2.input.SAXBuilder;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
 
-import com.tathvatech.ts.caf.util.ServiceLocator;
 
 public class MetadataFactory
 {
-    private static Logger logger = Logger.getLogger(MetadataFactory.class);
+	private static final Logger logger = LoggerFactory.getLogger(MetadataFactory.class);
 
     private static MetadataFactory instance = null;
 
@@ -48,11 +48,11 @@ public class MetadataFactory
 
 	private void loadMetadata(String entityConfigFileName)
 	{
-		SAXBuilder   builder = new SAXBuilder();
+		SAXBuilder builder = new SAXBuilder();
 		try
 		{
 
-			Document     doc = builder.build(new File(entityConfigFileName));
+			Document doc = builder.build(new File(entityConfigFileName));
 //			Document     doc = builder.build(ClassLoader.getSystemResourceAsStream(fieldMetadataFileName));
 			Element      fieldMetadataRoot = doc.getRootElement();
 

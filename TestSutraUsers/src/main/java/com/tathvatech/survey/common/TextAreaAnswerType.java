@@ -20,6 +20,7 @@ import java.util.TimeZone;
 import com.tathvatech.common.common.DataTypes;
 import com.tathvatech.common.exception.InvalidResponseException;
 import com.tathvatech.common.utils.DataConversionUtil;
+import com.tathvatech.common.utils.EmailValidator;
 import com.tathvatech.forms.common.FormDesignListener;
 import com.tathvatech.forms.controller.TestProcController;
 import com.tathvatech.logic.common.Logic;

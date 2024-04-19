@@ -7,6 +7,7 @@
 package com.tathvatech.forms.entity;
 
 import com.tathvatech.common.entity.AbstractEntity;
+import com.tathvatech.survey.oid.SectionResponseOID;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -224,6 +225,6 @@ public class SectionResponse extends AbstractEntity implements Serializable
 	
 	public SectionResponseOID getOID()
 	{
-		return new SectionResponseOID(pk);
+		return new SectionResponseOID((int) pk);
 	}
 }
