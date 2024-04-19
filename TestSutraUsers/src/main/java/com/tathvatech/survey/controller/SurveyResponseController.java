@@ -994,11 +994,12 @@ public class SurveyResponseController
 
 
 	}
-	
-	public  FormResponseBean getFormResponseBean(UserContext context, int responseId)throws Exception
+
+//commenting methods using vaadin component
+/*	public  FormResponseBean getFormResponseBean(UserContext context, int responseId)throws Exception
 	{
 		return surveyResponseService.getFormResponseBean(context, responseId);
-	}
+	}*/
 	
 	public EntityVersionReviewProxy getEntityRevisionReviewProxy(UserContext context, int responseId) throws Exception
 	{

@@ -37,6 +37,7 @@ public interface SurveyResponseService {
 
     SurveyResponse ceateDummyResponse(UserContext context, SurveyResponse surveyResponse) throws Exception;
 
+//commenting methods using vaadin component
     /*SurveyResponse updateSurveyResponse(UserContext context, Project project, TestableEntity unit, SurveyDefinition surveyDef,
                                         int responseId, HashMap<SurveySaveItemBase, SurveyItemResponse> surveyItemResponseMap, List sectionsToSave) throws Exception;*/
 
@@ -208,6 +209,7 @@ public interface SurveyResponseService {
 
     FormResponseClientSubmissionRev saveFormClientSubmissionRevision(UserContext context, int responseId, String revision) throws Exception;
 
+//commenting methods using vaadin component
     //FormResponseBean getFormResponseBean(UserContext context, int responseId)throws Exception;
 
     void saveSyncErrorResponse(UserContext context, int responseId,

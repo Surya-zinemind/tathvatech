@@ -76,7 +76,7 @@ public class RadioButtonAnswerType extends SurveySaveItem implements SurveyDispl
     protected String otherFieldLabel = RadioButtonAnswerType.OTHER;
     protected String otherFieldType;
 
-    private OptionGroup optionGroup;
+    //private OptionGroup optionGroup;
     /**
      * @param _survey
      */
@@ -796,7 +796,8 @@ public class RadioButtonAnswerType extends SurveySaveItem implements SurveyDispl
 	{
 		SimpleSurveyItemResponse itemResponse = new SimpleSurveyItemResponse();
 
-		if(multiSelect)
+//commenting methods using vaadin component
+		/*if(multiSelect)
 		{
 			Collection answers = (Collection)optionGroup.getValue();
 			for (Iterator iterator = answers.iterator(); iterator.hasNext();)
@@ -817,7 +818,7 @@ public class RadioButtonAnswerType extends SurveySaveItem implements SurveyDispl
 				aUnit.setKey1(selection);
 				itemResponse.addResponseUnit(aUnit);
 			}
-		}		
+		}	*/
 		return itemResponse;
 	}
 
