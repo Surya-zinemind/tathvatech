@@ -1,12 +1,10 @@
 package com.tathvatech.forms.service;
 
+import com.tathvatech.forms.common.AssignedTestsQuery;
 import com.tathvatech.forms.common.FormQuery;
 import com.tathvatech.forms.common.ObjectScheduleRequestBean;
 import com.tathvatech.unit.common.UnitFormQuery;
-import com.tathvatech.user.OID.OID;
-import com.tathvatech.user.OID.ProjectOID;
-import com.tathvatech.user.OID.TestProcOID;
-import com.tathvatech.user.OID.UnitOID;
+import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
 
@@ -24,4 +22,5 @@ public interface FormService {
     List<UnitFormQuery> getTestProcsByForm(FormQuery formQuery) throws Exception;
 
     TestProcObj upgradeFormForUnit(UserContext context, TestProcOID testProcOID, int surveyPk) throws Exception;
+    public  List<AssignedTestsQuery> getAssignedFormsNew(UserOID user, String role) throws Exception;
 }

@@ -520,4 +520,65 @@ public class FormServiceImpl implements  FormService{
 
         return testProc;
     }
+    public  List<AssignedTestsQuery> getAssignedFormsNew(UserOID user, String role) throws Exception
+    {
+        String lookForTestStatus = "";
+        String workFlowStatus = "";
+        String commonWorkFlowStatus = ResponseMasterNew.STATUS_REJECTED;
+        if (role.equals(User.ROLE_TESTER))
+        {
+            lookForTestStatus = ResponseMasterNew.STATUS_INPROGRESS;
+            workFlowStatus = ResponseMasterNew.STATUS_INPROGRESS;
+        } else if (role.equals(User.ROLE_VERIFY))
+        {
+            lookForTestStatus = ResponseMasterNew.STATUS_COMPLETE;
+            workFlowStatus = ResponseMasterNew.STATUS_COMPLETE;
+        } else if (role.equals(User.ROLE_APPROVE))
+        {
+            lookForTestStatus = ResponseMasterNew.STATUS_VERIFIED;
+            workFlowStatus = ResponseMasterNew.STATUS_VERIFIED;
+        }
+
+        String sql = "select ut.pk as testProcPk, uth.name as testProcName,"
+                + " p.pk as projectPk, p.projectName as projectName, p.projectDescription as projectDescription,"
+                + " uth.unitPk as unitPk, uh.unitName as unitName, uh.unitDescription as unitDescription,"
+                + " uth.workstationPk as workstationPk, w.workstationName as workstationName, w.description as workstationDescription, w.orderNo as workstationOrderNo,"
+                + " site.name as workstationSiteName, f.formMainPk as formMainPk, tfa.formFk as formPk, f.identityNumber as formName, f.description as formDescription,"
+                + " f.revision as formRevision," + " f.versionNo as formVersion,"
+                + " fwf.comments as comment, fwf.date as assignedDate,"
+                + " r.responseId, r.percentComplete, r.totalQCount, r.totalACount, r.noOfComments as commentCount, r.passCount, r.failCount,"
+                + " r.dimentionalFailCount, r.naCount, r.status as responseStatus, "
+                + " transferData.transferCount as oilTransferCount" + " from "
+                + " unit_testproc ut "
+                + " join testproc_form_assign tfa on tfa.testProcFk = ut.pk and tfa.current = 1 "
+                + " join unit_testproc_h uth on uth.unitTestProcFk = ut.pk and now() between uth.effectiveDateFrom and uth.effectiveDateTo "
+                + " join TAB_RESPONSE r on r.testProcPk = ut.pk and r.surveyPk = tfa.formFk and r.current = 1 "
+                + " left outer join " + "		(select ut1.pk ufPk, count(*) as transferCount "
+                + "		from unit_testproc ut1 "
+                + "     join testproc_form_assign tfa1 on tfa1.testProcFk = ut1.pk and tfa1.current = 1 "
+                + " 	join unit_testproc_h uth1 on uth1.unitTestProcFk = ut1.pk and now() between uth1.effectiveDateFrom and uth1.effectiveDateTo "
+                + " 	join  TAB_RESPONSE r on r.testProcPk = ut1.pk and r.surveyPk = tfa1.formFk and r.current = 1 "
+                + "		join TAB_UNIT_USERS uu on uu.unitPk = uth1.unitPk and uu.projectPk = uth1.projectPk and uu.workstationPk = uth1.workstationPk "
+                + " 	join  TAB_ITEM_RESPONSE ires on ires.responseId = r.responseId "
+                + " 	join TESTITEM_OIL_TRANSFER oilTransfer on oilTransfer.itemResponsePk = ires.pk "
+                + "		where " + "		uu.userPk = ? and uu.role = ? and r.status=? "
+                + " 	group by ut1.pk) transferData on transferData.ufPk = ut.pk "
+                + " join TAB_UNIT u on uth.unitPk = u.pk "
+                + " join TAB_UNIT_H uh on uh.unitPk = u.pk and now() between uh.effectiveDateFrom and uh.effectiveDateTo "
+                + " join TAB_PROJECT p on uth.projectPk = p.pk and p.status = 'Open' "
+                + " join TAB_WORKSTATION w on uth.workstationPk = w.pk "
+                + " join unit_project_ref upr on upr.projectPk = uth.projectPk and upr.unitPk = uth.unitPk "
+                + " join unit_project_ref_h uprh on uprh.unitInProjectPk = upr.pk and now() between uprh.effectiveDateFrom and uprh.effectiveDateTo and uprh.status= 'Open' "
+                + " join site on w.sitePk = site.pk "
+                + " join TAB_UNIT_USERS uu on uu.unitPk = uth.unitPk and uu.projectPk = uth.projectPk and uu.workstationPk = uth.workstationPk "
+                + " join TAB_UNIT_LOCATION ul on ul.unitPk = uth.unitPk and ul.projectPk = uth.projectPk and ul.workstationPk = uth.workstationPk and ul.status = 'In Progress' and ul.current = 1 "
+                + " join TAB_FORM_WORKFLOW fwf on fwf.responseId = r.responseId and fwf.current  = 1  "
+                + " join TAB_SURVEY f on r.surveyPk = f.pk and f.formType = 1 " + " where "
+                + " uu.userPk = ? and uu.role = ? and r.status=? " + " order by fwf.date desc";
+
+        List<AssignedTestsQuery> myAssignments = persistWrapper.readList(AssignedTestsQuery.class, sql, user.getPk(),
+                role, lookForTestStatus, user.getPk(), role, lookForTestStatus);
+        return myAssignments;
+    }
+
 }
