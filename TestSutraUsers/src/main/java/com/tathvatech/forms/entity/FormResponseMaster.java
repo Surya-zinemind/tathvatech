@@ -13,6 +13,7 @@ import com.tathvatech.common.entity.AbstractEntity;
 import com.tathvatech.forms.oid.FormResponseOID;
 import com.tathvatech.user.OID.Authorizable;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 
@@ -28,6 +29,7 @@ import jakarta.persistence.Table;
 @Table(name="TAB_RESPONSE")
 public  class FormResponseMaster extends AbstractEntity implements Serializable
 {
+	@Id
 	private int		responseId;
 
 	private int unitPk;

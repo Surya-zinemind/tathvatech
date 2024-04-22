@@ -11,11 +11,13 @@ import com.tathvatech.survey.intf.SurveyItemBase;
 import com.tathvatech.survey.service.SurveyDefinitionManager;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.OID.FormOID;
+import org.springframework.stereotype.Service;
+
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-
+@Service
 public class FormDBManager
 {
 	private final PersistWrapper persistWrapper;

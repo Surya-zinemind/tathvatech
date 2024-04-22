@@ -730,7 +730,7 @@ private FormListReport formListReport;
 
 	public synchronized  ObjectLock lockSectionToEdit(UserContext context, User lockForUser, FormResponseOID responseOID, String sectionId)throws LockedByAnotherUserException, Exception
 	{
-		FormResponseMaster respMaster = persistWrapper.readByResponseId(FormResponseMaster.class, responseOID.getPk());
+		FormResponseMaster respMaster /*= persistWrapper.readByResponseId(FormResponseMaster.class, responseOID.getPk())*/ = null;
 		FormSection formSection = formDBManager.getFormSection(sectionId, respMaster.getSurveyPk());
 		
 		ObjectLock objectLock = persistWrapper.read(ObjectLock.class, "select * from tab_sectionlock where " +

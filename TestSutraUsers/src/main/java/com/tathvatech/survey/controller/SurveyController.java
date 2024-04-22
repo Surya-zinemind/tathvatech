@@ -7,8 +7,6 @@ package com.tathvatech.survey.controller;
  */
 
 
-import java.sql.Connection;
-
 import java.util.HashMap;
 import java.util.List;
 import com.tathvatech.common.enums.WorkItem;
@@ -37,14 +35,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class SurveyDelegate {
+public class SurveyController {
 
-    private static final Logger logger = LoggerFactory.getLogger(SurveyDelegate.class);
+    private static final Logger logger = LoggerFactory.getLogger(SurveyController.class);
     private final SurveyMaster surveyMaster;
     private final SurveyResponseService surveyResponseService;
     private final WorkstationService workstationService;
 
-    public SurveyDelegate(SurveyMaster surveyMaster, SurveyResponseService surveyResponseService, WorkstationService workstationService) {
+    public SurveyController(SurveyMaster surveyMaster, SurveyResponseService surveyResponseService, WorkstationService workstationService) {
         this.surveyMaster = surveyMaster;
         this.surveyResponseService = surveyResponseService;
         this.workstationService = workstationService;

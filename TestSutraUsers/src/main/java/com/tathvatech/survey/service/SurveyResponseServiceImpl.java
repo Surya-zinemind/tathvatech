@@ -2976,7 +2976,7 @@ public  void rejectApproval(UserContext userContext, SurveyResponse sResponse, S
 	@Override
 	public  List<SectionResponseQuery> getSectionResponseSummary(SurveyDefinition sd, int responseId)throws Exception
 	{
-		FormResponseMaster resp = persistWrapper.readByResponseId(FormResponseMaster.class, responseId);
+		FormResponseMaster resp/*  =persistWrapper.readByResponseId(FormResponseMaster.class, responseId)*/ = null;
 		return persistWrapper.readList(SectionResponseQuery.class, SectionResponseQuery.SQL + " where tfa.testProcFk = ?", resp.getTestProcPk());
 	}
 	//commenting methods using vaadin components

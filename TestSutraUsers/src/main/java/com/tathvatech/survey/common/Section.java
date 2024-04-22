@@ -6,48 +6,18 @@
  */
 package com.tathvatech.survey.common;
 
-import com.tathvatech.common.common.FileStoreManager;
-import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.common.utils.LineSeperatorUtil;
-import com.tathvatech.forms.common.FormDesignListener;
-import com.tathvatech.forms.common.ObjectLockQuery;
-import com.tathvatech.forms.common.TestProcSectionObj;
-import com.tathvatech.forms.controller.TestProcController;
-import com.tathvatech.forms.entity.FormSection;
-import com.tathvatech.forms.entity.ObjectLock;
 import com.tathvatech.forms.intf.SectionBase;
 import com.tathvatech.forms.service.FormDBManager;
 import com.tathvatech.forms.service.TestProcService;
 import com.tathvatech.logic.common.Logic;
-
-import com.tathvatech.survey.controller.SurveyDelegate;
-import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.survey.service.SurveyResponseService;
-import com.tathvatech.timetracker.entity.Workorder;
 import com.tathvatech.timetracker.service.WorkorderManager;
-import com.tathvatech.unit.common.UnitFormQuery;
 import com.tathvatech.unit.service.UnitService;
-import com.tathvatech.user.OID.ProjectOID;
-import com.tathvatech.user.OID.ReworkOrderOID;
-import com.tathvatech.user.OID.WorkstationOID;
-import com.tathvatech.user.common.SecurityContext;
-import com.tathvatech.user.common.UserContext;
-import com.tathvatech.user.entity.Attachment;
-import com.tathvatech.user.entity.User;
 import com.tathvatech.user.service.AccountService;
-import com.tathvatech.user.service.PlanSecurityManager;
-
-
-import org.aspectj.apache.bcel.classfile.Field;
 import org.jdom2.Element;
 
-
-import java.io.File;
-import java.io.InputStream;
-
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -69,7 +39,7 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 {
 	private final SurveyResponseService surveyResponseService;
 	private final TestProcService testProcService;
-	private final SurveyDelegate surveyDelegate;
+
 	private final UnitService unitService;
 	private final FormDBManager formDBManager;
 	private final AccountService accountService;
@@ -89,13 +59,12 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 	VerticalLayout childLayoutContainer;
 	HorizontalLayout manageChildrenControlLayoutArea;*/
 	
-	public Section(SurveyResponseService surveyResponseService, TestProcService testProcService, SurveyDelegate surveyDelegate, UnitService unitService, FormDBManager formDBManager, AccountService accountService, WorkorderManager workorderManager)
+	public Section(SurveyResponseService surveyResponseService, TestProcService testProcService, UnitService unitService, FormDBManager formDBManager, AccountService accountService, WorkorderManager workorderManager)
 	{
 		super();
 
         this.surveyResponseService = surveyResponseService;
         this.testProcService = testProcService;
-        this.surveyDelegate = surveyDelegate;
         this.unitService = unitService;
         this.formDBManager = formDBManager;
         this.accountService = accountService;
@@ -105,14 +74,13 @@ public class Section extends SurveyItem implements SectionBase, SurveyDisplayIte
 	/**
 	 * @param _survey
 	 */
-	public Section(SurveyDefinition _survey, SurveyResponseService surveyResponseService, TestProcService testProcService, SurveyDelegate surveyDelegate, UnitService unitService, FormDBManager formDBManager, AccountService accountService, WorkorderManager workorderManager)
+	public Section(SurveyDefinition _survey, SurveyResponseService surveyResponseService, TestProcService testProcService,  UnitService unitService, FormDBManager formDBManager, AccountService accountService, WorkorderManager workorderManager)
 	{
 		super(_survey);
 		// TODO Auto-generated constructor stub
 
         this.surveyResponseService = surveyResponseService;
         this.testProcService = testProcService;
-        this.surveyDelegate = surveyDelegate;
         this.unitService = unitService;
         this.formDBManager = formDBManager;
         this.accountService = accountService;

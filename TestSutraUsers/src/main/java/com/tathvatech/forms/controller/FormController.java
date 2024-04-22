@@ -27,7 +27,6 @@ import com.tathvatech.project.service.ProjectService;
 import com.tathvatech.survey.common.SignatureCaptureAnswerType;
 import com.tathvatech.survey.common.SurveyDefinition;
 import com.tathvatech.survey.common.SurveyItem;
-import com.tathvatech.survey.controller.SurveyDelegate;
 import com.tathvatech.survey.entity.Survey;
 import com.tathvatech.survey.enums.SectionLockStatusEnum;
 import com.tathvatech.survey.exception.LockedByAnotherUserException;
@@ -36,7 +35,6 @@ import com.tathvatech.survey.service.SurveyResponseService;
 import com.tathvatech.timetracker.entity.Workorder;
 import com.tathvatech.timetracker.service.WorkorderManager;
 import com.tathvatech.unit.common.UnitEntityQuery;
-import com.tathvatech.unit.controller.UnitController;
 import com.tathvatech.unit.service.UnitManager;
 import com.tathvatech.unit.service.UnitService;
 import com.tathvatech.user.OID.*;
@@ -82,7 +80,6 @@ public class FormController {
    private final DummyWorkstation dummyWorkstation;
    private final SurveyResponseService surveyResponseService;
    private final SurveyMaster surveyMaster;
-   private final SurveyDelegate surveyDelegate;
    private final SiteService siteService;
    private final FormDBManager formDBManager;
    private final WorkstationService workstationService;
@@ -583,7 +580,7 @@ public class FormController {
                 // check if that section is locked by another user
                 try
                 {
-                    ObjectLock objectLock = surveyDelegate.lockSectionToEdit(context, (User) context.getUser(),
+                    ObjectLock objectLock = surveyMaster.lockSectionToEdit(context, (User) context.getUser(),
                             respMaster.getOID(), aSection);
                     aSectionBean.setLockedByUserPk((int) context.getUser().getPk());
                     aSectionBean.setLockedByUserDisplayName(
@@ -687,7 +684,7 @@ public class FormController {
                 try
                 {
                     User user = (User) context.getUser();
-                    surveyDelegate.releaseSectionEditLock(context, user, respMaster.getOID(), aSection);
+                    surveyMaster.releaseSectionEditLock(context, user, respMaster.getOID(), aSection);
 
                     aSectionBean.setLockedByUserPk(0);
                     aSectionBean.setLockedByUserDisplayName(null);

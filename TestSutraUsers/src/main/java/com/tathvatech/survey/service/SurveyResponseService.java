@@ -19,10 +19,7 @@ import com.tathvatech.survey.intf.SurveySaveItemBase;
 import com.tathvatech.survey.response.SurveyItemResponse;
 import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.unit.common.TestableEntity;
-import com.tathvatech.user.OID.FormItemResponseOID;
-import com.tathvatech.user.OID.FormOID;
-import com.tathvatech.user.OID.TestProcOID;
-import com.tathvatech.user.OID.UserOID;
+import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.UserContext;
 
 import java.util.Date;
@@ -226,4 +223,6 @@ public interface SurveyResponseService {
     List<ResponseSubmissionBookmark> getResponseSubmissionBookmarks(TestProcOID testprocOID);
 
     ResponseSubmissionBookmark getLastResponseSubmissionBookmark(TestProcOID testprocOID);
+
+    public  ResponseMasterNew[] getLatestResponseMastersForUnitInWorkstation(UnitOID unitOID, ProjectOID projectOID, WorkstationOID workstationOID) throws Exception;
 }

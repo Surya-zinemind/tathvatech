@@ -88,7 +88,7 @@ public class SurveyResponseController
     private final WorkstationService workstationService;
 	private final PersistWrapper persistWrapper;
 	private  final WorkflowManager workflowManager;
-	private final SurveyResponseServiceImpl surveyResponseServiceImpl;
+
     /**
      * Called when the workstation is changed to in progress
      */
@@ -695,7 +695,7 @@ public class SurveyResponseController
     @GetMapping("/getLatestResponseMastersForUnitInWorkstation")
 	public  ResponseMasterNew[] getLatestResponseMastersForUnitInWorkstation(@RequestBody GetLatestResponseMastersForUnitInWorkstationRequest getLatestResponseMastersForUnitInWorkstationRequest) throws Exception
 	{
-		return surveyResponseServiceImpl.getLatestResponseMastersForUnitInWorkstation(new UnitOID(getLatestResponseMastersForUnitInWorkstationRequest.getUnitPk(), null), getLatestResponseMastersForUnitInWorkstationRequest.getProjectOID(),getLatestResponseMastersForUnitInWorkstationRequest.getWorkstationOID());
+		return surveyResponseService.getLatestResponseMastersForUnitInWorkstation(new UnitOID(getLatestResponseMastersForUnitInWorkstationRequest.getUnitPk(), null), getLatestResponseMastersForUnitInWorkstationRequest.getProjectOID(),getLatestResponseMastersForUnitInWorkstationRequest.getWorkstationOID());
 	}
     
 	@GetMapping("/getResponseMasterForTestHistoryRecord")
