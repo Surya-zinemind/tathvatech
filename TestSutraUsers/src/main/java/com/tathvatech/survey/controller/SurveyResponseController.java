@@ -27,6 +27,7 @@ import com.tathvatech.forms.oid.FormResponseOID;
 import com.tathvatech.forms.response.FormResponseBean;
 import com.tathvatech.forms.response.ResponseMaster;
 import com.tathvatech.project.service.ProjectService;
+import com.tathvatech.survey.Request.*;
 import com.tathvatech.survey.common.*;
 import com.tathvatech.survey.entity.ResponseSubmissionBookmark;
 import com.tathvatech.survey.entity.Survey;
@@ -58,6 +59,8 @@ import com.tathvatech.workstation.service.WorkstationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 
 /**
@@ -87,9 +90,11 @@ public class SurveyResponseController
     /**
      * Called when the workstation is changed to in progress
      */
-    public SurveyResponse ceateDummyResponse(UserContext context,
+    @PostMapping("/ceateDummyResponse")
+	public SurveyResponse ceateDummyResponse(@RequestBody
 											 SurveyResponse surveyResponse) throws Exception
     {
+		UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		SurveyResponse resp = surveyResponseService.ceateDummyResponse(context,
 			    surveyResponse);
         return resp;
@@ -433,12 +438,14 @@ public class SurveyResponseController
 
     }*/
 
-    public  List<ResponseSubmissionBookmark> getResponseSubmissionBookmarks(TestProcOID testprocOID)
+    @GetMapping("/getResponseSubmissionBookmarks")
+	public  List<ResponseSubmissionBookmark> getResponseSubmissionBookmarks(@RequestBody TestProcOID testprocOID)
     {
     	return surveyResponseService.getResponseSubmissionBookmarks(testprocOID);
     }
 
-    public  ResponseSubmissionBookmark getLastResponseSubmissionBookmark(TestProcOID testprocOID)
+    @GetMapping("/getLastResponseSubmissionBookmark")
+	public  ResponseSubmissionBookmark getLastResponseSubmissionBookmark(@RequestBody TestProcOID testprocOID)
     {
     	return surveyResponseService.getLastResponseSubmissionBookmark(testprocOID);
     }
@@ -447,7 +454,7 @@ public class SurveyResponseController
      * Adds a new response entry to a form. Function called by response bulk
      * import action. difference between addSurveyResponse and this one is that
      * addSurveyResponse calls the notify function after adding the response.
-     * @param surveyDef
+     * @param
      * @param
      * @return
      * @throws Exception
@@ -602,23 +609,24 @@ public class SurveyResponseController
 
     }*/
 
-    public  List getSurveyItemResponse(SurveyDefinition surveyDef,
-	    String surveyItemId, ResponseMaster[] responseMasterSet)
+    @GetMapping("/getSurveyItemResponse")
+	public  List getSurveyItemResponse(@RequestBody GetSurveyItemResponseRequest getSurveyItemResponseRequest)
 	    throws Exception
     {
-    	return surveyResponseService.getSurveyItemResponse(surveyDef,
-		surveyItemId, responseMasterSet);
+    	return surveyResponseService.getSurveyItemResponse(getSurveyItemResponseRequest.getSurveyDef(),
+		getSurveyItemResponseRequest.getSurveyItemId(), getSurveyItemResponseRequest.getResponseMasterSet());
     }
 
-	public  SurveyResponse getSurveyResponse(int responseId) throws Exception
+	@GetMapping("/getSurveyResponse/{responseId}")
+	public  SurveyResponse getSurveyResponse(@PathVariable int responseId) throws Exception
 	{
 		return surveyResponseService.getSurveyResponse(responseId);
 	}
 
-	public  SurveyResponse getSurveyResponse(SurveyDefinition surveyDef,
-	    int responseId) throws Exception
+	@GetMapping("/getSurveyResponse")
+	public  SurveyResponse getSurveyResponse(@RequestBody GetSurveyResponseRequest getSurveyResponseRequest) throws Exception
     {
-    	return surveyResponseService.getSurveyResponse(surveyDef, responseId);
+    	return surveyResponseService.getSurveyResponse(getSurveyResponseRequest.getSurveyDef(), getSurveyResponseRequest.getResponseId());
     }
 
 
@@ -636,8 +644,10 @@ public class SurveyResponseController
     // startDate, endDate);
     // }
 
-	public  List<String> getResponseStatusSetForForm(UserContext context, Survey survey) throws Exception
+	@GetMapping("/getResponseStatusSetForForm")
+	public  List<String> getResponseStatusSetForForm(@RequestBody Survey survey) throws Exception
 	{
+		UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		return surveyResponseService.getResponseStatusSetForForm(context, survey);
 	}
 
@@ -645,63 +655,69 @@ public class SurveyResponseController
      * returns all the responseMaster records for a survey by a respondent in
      * descenting order of responseTime
      * 
-     * @param surveyPk
-     * @param respondentPk
+     * @param
+     * @param
      * @return
      */
-    public  List getResponseMastersForRespondent(int surveyPk,
-	    int respondentPk) throws Exception
+    @GetMapping("/getResponseMastersForRespondent")
+	public  List getResponseMastersForRespondent(@RequestBody GetResponseMastersForRespondentRequest getResponseMastersForRespondentRequest) throws Exception
     {
-    	return surveyResponseService.getResponseMastersForRespondent(surveyPk,
-    			respondentPk);
+    	return surveyResponseService.getResponseMastersForRespondent(getResponseMastersForRespondentRequest.getSurveyPk(),
+    			getResponseMastersForRespondentRequest.getRespondentPk());
     }
 
     /**
-     * @param surveyPk
-     * @param responseId
+     * @param
+     * @param
      * @return
      */
-    public  ResponseMaster getResponseMaster(int surveyPk,
-	    String responseId) throws Exception
+   @GetMapping("/getResponseMaster")
+   public  ResponseMaster getResponseMaster(@RequestBody GetResponseMasterRequest getResponseMasterRequest) throws Exception
     {
-    	return surveyResponseService.getResponseMaster(surveyPk, responseId);
+    	return surveyResponseService.getResponseMaster(getResponseMasterRequest.getSurveyPk(), getResponseMasterRequest.getResponseId());
     }
 
 
     // ///////////////// for testsutra
-	public  ResponseMasterNew getResponseMaster(int responseId) throws Exception
+	@GetMapping("/getResponseMaster/{responseId}")
+	public  ResponseMasterNew getResponseMaster(@PathVariable int responseId) throws Exception
 	{
 		return surveyResponseService.getResponseMaster(responseId);
 	}
 
-	public  ResponseMasterNew getLatestResponseMasterForTest(TestProcOID testProcOid) throws Exception
+	@GetMapping("/getLatestResponseMasterForTest")
+	public  ResponseMasterNew getLatestResponseMasterForTest(@RequestBody TestProcOID testProcOid) throws Exception
 	{
 		return surveyResponseService.getLatestResponseMasterForTest(testProcOid);
 	}
-    public  ResponseMasterNew[] getLatestResponseMastersForUnitInWorkstation(int unitPk, ProjectOID projectOID, WorkstationOID workstationOID) throws Exception
+    @GetMapping("/getLatestResponseMastersForUnitInWorkstation")
+	public  ResponseMasterNew[] getLatestResponseMastersForUnitInWorkstation(@RequestBody GetLatestResponseMastersForUnitInWorkstationRequest getLatestResponseMastersForUnitInWorkstationRequest) throws Exception
 	{
-		return surveyResponseServiceImpl.getLatestResponseMastersForUnitInWorkstation(new UnitOID(unitPk, null), projectOID, workstationOID);
+		return surveyResponseServiceImpl.getLatestResponseMastersForUnitInWorkstation(new UnitOID(getLatestResponseMastersForUnitInWorkstationRequest.getUnitPk(), null), getLatestResponseMastersForUnitInWorkstationRequest.getProjectOID(),getLatestResponseMastersForUnitInWorkstationRequest.getWorkstationOID());
 	}
     
-	public  ResponseMasterNew getResponseMasterForTestHistoryRecord(TestProcOID testProcOID, FormOID formOID)
+	@GetMapping("/getResponseMasterForTestHistoryRecord")
+	public  ResponseMasterNew getResponseMasterForTestHistoryRecord(@RequestBody GetResponseMasterForTestHistoryRecordRequest getResponseMasterForTestHistoryRecordRequest)
 	{
-		return surveyResponseService.getResponseMasterForTestHistoryRecord(testProcOID, formOID);
+		return surveyResponseService.getResponseMasterForTestHistoryRecord(
+				getResponseMasterForTestHistoryRecordRequest.getTestProcOID(), getResponseMasterForTestHistoryRecordRequest.getFormOID());
 	}
     
 
-    public  void verifyResponse(UserContext userContext,
-	    SurveyResponse sResponse, String comments) throws Exception
+    @PutMapping("/verifyResponse")
+	public  void verifyResponse(
+	    @RequestBody VerifyResponseRequest verifyResponseRequest) throws Exception
     {
 
-
+		UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 			surveyResponseService.verifyResponse(userContext,
-				    sResponse, comments);
-			TestProcObj testProc = testProcService.getTestProc(sResponse.getTestProcPk());
+				   verifyResponseRequest.getSResponse(), verifyResponseRequest.getComments());
+			TestProcObj testProc = testProcService.getTestProc(verifyResponseRequest.getSResponse().getTestProcPk());
 		    UnitObj unit =unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 		    Project project = projectService.getProject(testProc.getProjectPk());
 		    ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), (BaseActions) Actions.verifyForm,
 					"Form Verified", new Date(), new Date(), (int) project.getPk(), testProc.getPk(), (int) unit.getPk(), testProc.getWorkstationPk(),
-					sResponse.getSurveyPk(), null, sResponse.getResponseId());
+					verifyResponseRequest.getSResponse().getSurveyPk(), null, verifyResponseRequest.getSResponse().getResponseId());
 			activityLoggingDelegate.logActivity(aLog);
 
 
@@ -709,73 +725,77 @@ public class SurveyResponseController
 
     }
 
-    public  void rejectResponse(UserContext userContext,
-	    SurveyResponse sResponse, String comments) throws Exception
+    @PutMapping("/rejectResponse")
+	public  void rejectResponse(
+	    @RequestBody RejectResponseRequest rejectResponseRequest) throws Exception
     {
-
+		UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 	
 			surveyResponseService.rejectResponse(userContext,
-				    sResponse, comments);
-			TestProcObj testProc = testProcService.getTestProc(sResponse.getTestProcPk());
+				    rejectResponseRequest.getSResponse(),rejectResponseRequest.getComments());
+			TestProcObj testProc = testProcService.getTestProc(rejectResponseRequest.getSResponse().getTestProcPk());
 		    UnitObj unit = unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 		    Project project = projectService.getProject(testProc.getProjectPk());
 			ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), (BaseActions) Actions.rejectVerifyForm,
 					"Form Verification Rejected", new Date(), new Date(), (int) project.getPk(), testProc.getPk(),
                     (int) unit.getPk(), testProc.getWorkstationPk(),
-					sResponse.getSurveyPk(), null, sResponse.getResponseId());
+					rejectResponseRequest.getSResponse().getSurveyPk(), null, rejectResponseRequest.getSResponse().getResponseId());
 			activityLoggingDelegate.logActivity(aLog);
 	
 
 
     }
 
-    public  void approveResponse(UserContext userContext,
-    		ResponseMasterNew resp, String comments) throws Exception
+   @PutMapping("/approveResponse")
+   public  void approveResponse(
+    		@RequestBody ApproveResponseRequest  approveResponseRequest) throws Exception
     {
-
+		UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 	
-	    	surveyResponseService.approveResponse(userContext, resp, comments);
-	    	TestProcObj testProc = testProcService.getTestProc(resp.getTestProcPk());
+	    	surveyResponseService.approveResponse(userContext,approveResponseRequest.getResp(), approveResponseRequest.getComments());
+	    	TestProcObj testProc = testProcService.getTestProc(approveResponseRequest.getResp().getTestProcPk());
 //		    UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 //		    Project project = ProjectManager.getProject(testProc.getProjectPk());
 	    	ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), Actions.approveForm,
 	    				"Form Approved", new Date(), new Date(), testProc.getProjectPk(), testProc.getPk(), 
 	    				testProc.getUnitPk(), testProc.getWorkstationPk(), 
-	    				testProc.getFormPk(), null, resp.getResponseId());
+	    				testProc.getFormPk(), null, approveResponseRequest.getResp().getResponseId());
 	    	activityLoggingDelegate.logActivity(aLog);
 	
 
     }
 
-    public  void approveResponseWithComments(UserContext userContext,
-    		ResponseMasterNew resp, String comments) throws Exception
+    @PutMapping("/approveResponseWithComments")
+	public  void approveResponseWithComments(
+    		@RequestBody ApproveResponseWithCommentsRequest approveResponseWithCommentsRequest) throws Exception
     {
 
-	
-	    	surveyResponseService.approveResponseWithComments(userContext, resp, comments);
-	    	TestProcObj testProc = testProcService.getTestProc(resp.getTestProcPk());
+		UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	    	surveyResponseService.approveResponseWithComments(userContext, approveResponseWithCommentsRequest.getResp(), approveResponseWithCommentsRequest.getComments());
+	    	TestProcObj testProc = testProcService.getTestProc(approveResponseWithCommentsRequest.getResp().getTestProcPk());
 //		    UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 //		    Project project = ProjectManager.getProject(testProc.getProjectPk());
 	    	ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), Actions.approveForm,
 	    				"Form approved with comments", new Date(), new Date(), testProc.getProjectPk(), testProc.getPk(), 
 	    				testProc.getUnitPk(), testProc.getWorkstationPk(), 
-	    				testProc.getFormPk(), null, resp.getResponseId());
+	    				testProc.getFormPk(), null, approveResponseWithCommentsRequest.getResp().getResponseId());
 	    	activityLoggingDelegate.logActivity(aLog);
 	
 
     }
 
-	public  void approveResponseInBulk(UserContext userContext, List<AssignedTestsQuery> selectedList, String comment) throws Exception
+	@PutMapping("/approveResponseInBulk")
+	public  void approveResponseInBulk(@RequestBody ApproveResponseInBulkRequest approveResponseInBulkRequest) throws Exception
 	{
 
-
+		UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 	
-    		for (Iterator iterator = selectedList.iterator(); iterator.hasNext();) {
+    		for (Iterator iterator =approveResponseInBulkRequest.getSelectedList().iterator(); iterator.hasNext();) {
 				AssignedTestsQuery assignedTestsQuery = (AssignedTestsQuery) iterator.next();
 
 				ResponseMasterNew resp = surveyResponseService.getResponseMaster(assignedTestsQuery.getResponseId());
 
-				surveyResponseService.approveResponse(userContext, resp, comment);
+				surveyResponseService.approveResponse(userContext, resp, approveResponseInBulkRequest.getComment());
 
 				TestProcObj testProc = testProcService.getTestProc(resp.getTestProcPk());
 
@@ -788,39 +808,41 @@ public class SurveyResponseController
 	}
 	
     
-    public  void rejectApproval(UserContext userContext,
-	    SurveyResponse sResponse, String comments) throws Exception
+    @PutMapping("/rejectApproval")
+	public  void rejectApproval(
+	    @RequestBody RejectApprovalRequest  rejectApprovalRequest) throws Exception
     {
 
-	
+		UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 			surveyResponseService.rejectApproval(userContext,
-				    sResponse, comments);
-			TestProcObj testProc = testProcService.getTestProc(sResponse.getTestProcPk());
+				    rejectApprovalRequest.getSResponse(), rejectApprovalRequest.getComments());
+			TestProcObj testProc = testProcService.getTestProc(rejectApprovalRequest.getSResponse().getTestProcPk());
 		    UnitObj unit =unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 		    Project project = projectService.getProject(testProc.getProjectPk());
 			ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), (BaseActions) Actions.rejectApproveForm,
 					"Form Approval Rejected", new Date(), new Date(), (int) project.getPk(), testProc.getPk(),
 					testProc.getUnitPk(), testProc.getWorkstationPk(), 
-					sResponse.getSurveyPk(), null, sResponse.getResponseId());
+					rejectApprovalRequest.getSResponse().getSurveyPk(), null, rejectApprovalRequest.getSResponse().getResponseId());
 		activityLoggingDelegate.logActivity(aLog);
 	
 
     }
     
 
-    public  void reopenApproved(UserContext userContext, SurveyResponse sResponse, String comments) throws Exception
+    @PutMapping("/reopenApproved ")
+	public  void reopenApproved( @RequestBody ReopenApprovedRequest reopenApprovedRequest) throws Exception
     {
 
-	
+		UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 	    	surveyResponseService.reopenApprovedForm(userContext,
-	    		    sResponse, comments);
-	    	TestProcObj testProc = testProcService.getTestProc(sResponse.getTestProcPk());
+	    		    reopenApprovedRequest.getSResponse(), reopenApprovedRequest.getComments());
+	    	TestProcObj testProc = testProcService.getTestProc(reopenApprovedRequest.getSResponse().getTestProcPk());
 		    UnitObj unit = unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 		    Project project = projectService.getProject(testProc.getProjectPk());
 	    	ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), (BaseActions) Actions.rejectApproveForm,
 	    			"Approved form reopened", new Date(), new Date(), (int) project.getPk(), testProc.getPk(),
 	    			testProc.getUnitPk(), testProc.getWorkstationPk(), 
-	    			sResponse.getSurveyPk(), null, sResponse.getResponseId());
+	    			reopenApprovedRequest.getSResponse().getSurveyPk(), null, reopenApprovedRequest.getSResponse().getResponseId());
 	    	activityLoggingDelegate.logActivity(aLog);
 	
 
@@ -831,21 +853,22 @@ public class SurveyResponseController
      * returns if sections are locked by other users
      * parameter surveyQuestions is filledout by this function with the sections that should be saved.
      * @param
-     * @param surveyQuestions
+     * @param
      * @param
      * @return
      * @throws Exception
      */
-	private  boolean getQuestionsToSaveResponsesFor(UserContext context, SurveyDefinition surveyDef, List<Section> surveyQuestions, 
-			FormResponseOID responseOID)throws Exception
+	@GetMapping("/getQuestionsToSaveResponsesFor")
+	private  boolean getQuestionsToSaveResponsesFor(@RequestBody GetQuestionsToSaveResponsesForRequest getQuestionsToSaveResponsesForRequest)throws Exception
 	{
+		UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		boolean hasSectionsLockedByOthers = false;
-		for (Iterator iter = surveyDef.getQuestions().iterator(); iter.hasNext();)
+		for (Iterator iter = getQuestionsToSaveResponsesForRequest.getSurveyDef().getQuestions().iterator(); iter.hasNext();)
 		{
 			SurveyItem aItem = (SurveyItem) iter.next();
 			if(aItem instanceof Section)
 			{
-				ObjectLockQuery lock = surveyMaster.getCurrentLock(responseOID,
+				ObjectLockQuery lock = surveyMaster.getCurrentLock(getQuestionsToSaveResponsesForRequest.getResponseOID(),
 						aItem.getSurveyItemId());
 			
 				if(lock == null)
@@ -855,7 +878,7 @@ public class SurveyResponseController
 				else if(lock.getUserPk() == context.getUser().getPk())
 				{
 					//locked my me.. 
-					surveyQuestions.add((Section)aItem);
+					getQuestionsToSaveResponsesForRequest.getSurveyQuestions().add((Section)aItem);
 				}
 				else
 				{
@@ -867,15 +890,16 @@ public class SurveyResponseController
 		return hasSectionsLockedByOthers;
 	}
 
-	public  LinkedHashMap<String, List<String>> validateResponse(SurveyResponse surveyResponse, List surveyQuestions)
+	@GetMapping("/validateResponse")
+	public  LinkedHashMap<String, List<String>> validateResponse(@RequestBody ValidateResponseRequest validateResponseRequest)
 	{
 		LinkedHashMap<String, List<String>> errors = new LinkedHashMap<String, List<String>>();
-		for (Iterator iter = surveyQuestions.iterator(); iter.hasNext();)
+		for (Iterator iter = validateResponseRequest.getSurveyQuestions().iterator(); iter.hasNext();)
 		{
 			SurveyItem aItem = (SurveyItem) iter.next();
 			if(aItem instanceof SurveySaveItem)
 			{
-				SurveyItemResponse sItemResponse = surveyResponse.getAnswer((SurveySaveItem)aItem);
+				SurveyItemResponse sItemResponse =validateResponseRequest.getSurveyResponse().getAnswer((SurveySaveItem)aItem);
 				List<String> er = ((SurveySaveItem)aItem).validateResponse(sItemResponse);
 				if(er != null)
 					errors.put(aItem.getSurveyItemId(), er);
@@ -890,9 +914,10 @@ public class SurveyResponseController
 		return surveyResponseService.getSectionResponseSummary(sd);
 	}*/
 
-	public  List<SectionResponseQuery> getSectionResponseSummary(SurveyDefinition sd, int responseId)throws Exception
+	@GetMapping("/getSectionResponseSummary")
+	public  List<SectionResponseQuery> getSectionResponseSummary(@RequestBody GetSectionResponseSummaryRequest getSectionResponseSummaryRequest)throws Exception
 	{
-		return surveyResponseService.getSectionResponseSummary(sd, responseId);
+		return surveyResponseService.getSectionResponseSummary(getSectionResponseSummaryRequest.getSd(), getSectionResponseSummaryRequest.getResponseId());
 	}
 //commenting methods using vaadin components
 	/*public  SectionResponseQuery getSectionResponseSummary(SurveyDefinition sd, int responseId, String sectionId)throws Exception
@@ -900,18 +925,19 @@ public class SurveyResponseController
 		return surveyResponseService.getSectionResponseSummary(sd, responseId, sectionId);
 	}*/
 
-	public  SectionResponseQuery getSectionResponseSummary(int responseId, String sectionId)throws Exception
+	@GetMapping("/getSectionResponseSummarys")
+	public  SectionResponseQuery getSectionResponseSummary(@RequestBody GetSectionResponseSummarysRequest  getSectionResponseSummarysRequest)throws Exception
 	{
-		return surveyResponseService.getSectionResponseSummary(responseId, sectionId);
+		return surveyResponseService.getSectionResponseSummary(getSectionResponseSummarysRequest.getResponseId(),getSectionResponseSummarysRequest.getSectionId());
 	}
 
 
-	public  void addToResponseVAComments(UserContext userContext,	ResponseMasterNew responseMaster, String vCommentToAdd,
-			String aCommentToAdd) throws Exception 
+	@PostMapping("/addToResponseVAComments")
+	public  void addToResponseVAComments(@RequestBody AddToResponseVACommentsRequest addToResponseVACommentsRequest) throws Exception
 	{
 
-
-    		surveyResponseService.addToResponseVAComments(userContext, responseMaster, vCommentToAdd, aCommentToAdd);
+		UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    		surveyResponseService.addToResponseVAComments(userContext, addToResponseVACommentsRequest.getResponseMaster(),addToResponseVACommentsRequest.getVCommentToAdd(), addToResponseVACommentsRequest.getACommentToAdd());
     		
 
 	}
@@ -939,57 +965,64 @@ public class SurveyResponseController
 //	}
 
 	
-	public FormItemResponse getFormItemResponse(FormItemResponseOID formItemResponseOID)
+	@GetMapping("/getFormItemResponse")
+	public FormItemResponse getFormItemResponse(@RequestBody  FormItemResponseOID formItemResponseOID)
 	{
 		return	surveyResponseService.getFormItemResponse(formItemResponseOID);
 	}
 
 	
-	public  FormItemResponse createFormItemResponse(int responseId, String surveyItemId) throws Exception {
+	@PostMapping("/createFormItemResponse")
+	public  FormItemResponse createFormItemResponse(@RequestBody CreateFormItemResponseRequest createFormItemResponseRequest) throws Exception {
 
 
-    		FormItemResponse r = surveyResponseService.createFormItemResponse(responseId, surveyItemId);
+    		FormItemResponse r = surveyResponseService.createFormItemResponse(createFormItemResponseRequest.getResponseId(), createFormItemResponseRequest.getSurveyItemId());
 
 			return r;
 	}
 
-	public  FormItemResponse getFormItemResponse(int responseId, String surveyItemId, boolean createIfNoExist) throws Exception {
+	@GetMapping("/getFormItemResponse")
+	public  FormItemResponse getFormItemResponse(@RequestBody GetFormItemResponseRequest getFormItemResponseRequest) throws Exception {
 
 
-    		FormItemResponse r = surveyResponseService.getFormItemResponse(responseId, surveyItemId, createIfNoExist);
+    		FormItemResponse r = surveyResponseService.getFormItemResponse(getFormItemResponseRequest.getResponseId(), getFormItemResponseRequest.getSurveyItemId(), getFormItemResponseRequest.isCreateIfNoExist());
 
 			return r;
 
 
 	}
 
-	public  HashMap<String, FormItemResponse> getFormItemResponses(int responseId)
+	@GetMapping("/getFormItemResponses/{responseId}")
+	public  HashMap<String, FormItemResponse> getFormItemResponses(@PathVariable int responseId)
 	{
 		return	surveyResponseService.getFormItemResponses(responseId);
 	}
 
 
-	public  FormResponseClientSubmissionRev getFormClientSubmissionRevision(int responseId)
+	@GetMapping("/getFormClientSubmissionRevision/{responseId}")
+	public  FormResponseClientSubmissionRev getFormClientSubmissionRevision(@PathVariable int responseId)
 	{
 		return surveyResponseService.getFormClientSubmissionRevision(responseId);
 }
 	
-	public  FormResponseClientSubmissionRev saveFormClientSubmissionRevision(UserContext context, int responseId, String revision) throws Exception
+	@PostMapping("/saveFormClientSubmissionRevision")
+	public  FormResponseClientSubmissionRev saveFormClientSubmissionRevision(@RequestBody SaveFormClientSubmissionRevisionRequest saveFormClientSubmissionRevisionRequest) throws Exception
 	{
 
-
-            FormResponseClientSubmissionRev r = surveyResponseService.saveFormClientSubmissionRevision(context, responseId, revision);
+		UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            FormResponseClientSubmissionRev r = surveyResponseService.saveFormClientSubmissionRevision(context, saveFormClientSubmissionRevisionRequest.getResponseId(), saveFormClientSubmissionRevisionRequest.getRevision());
 
 			return r;
 
 	}
 
 
-	public  void saveSyncErrorResponse(UserContext context, int responseId, FormResponseBean formResponseBean) throws Exception
+	@PostMapping("/saveSyncErrorResponse")
+	public  void saveSyncErrorResponse(@RequestBody SaveSyncErrorResponseRequest saveSyncErrorResponseRequest) throws Exception
 	{
+		UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-
-            surveyResponseService.saveSyncErrorResponse(context, responseId, formResponseBean);
+            surveyResponseService.saveSyncErrorResponse(context, saveSyncErrorResponseRequest.getResponseId(),saveSyncErrorResponseRequest.getFormResponseBean());
 
 
 
@@ -1001,12 +1034,15 @@ public class SurveyResponseController
 		return surveyResponseService.getFormResponseBean(context, responseId);
 	}*/
 	
-	public EntityVersionReviewProxy getEntityRevisionReviewProxy(UserContext context, int responseId) throws Exception
+	@GetMapping("/getEntityRevisionReviewProxy/{responseId}")
+	public EntityVersionReviewProxy getEntityRevisionReviewProxy(@PathVariable int responseId) throws Exception
 	{
+		UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		return surveyResponseService.getEntityRevisionForReview(context.getUser().getOID(), responseId);
 	}
 	
-	public FormResponseBean getFormResponseBeanForSyncErrorReview(int entityVersionReviewPk) throws Exception
+	@GetMapping("/getFormResponseBeanForSyncErrorReview/{entityVersionReviewPk}")
+	public FormResponseBean getFormResponseBeanForSyncErrorReview(@PathVariable int entityVersionReviewPk) throws Exception
 	{
 		return surveyResponseService.getFormResponseBeanForSyncErrorReview(entityVersionReviewPk);
 	}

@@ -55,6 +55,10 @@ import com.tathvatech.unit.common.UnitFormQuery;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.*;
 
@@ -82,38 +86,40 @@ public class FormController {
    private final WorkstationService workstationService;
    private final SurveyDefFactory surveyDefFactory;
 
-    public  void saveTestProcSchedule(UserContext context, TestProcOID testProcOID,
-                                      ObjectScheduleRequestBean objectScheduleRequestBean) throws Exception
+    @PostMapping("/saveTestProcSchedule")
+    public  void saveTestProcSchedule(@RequestBody SaveTestProcScheduleRequest saveTestProcScheduleRequest) throws Exception
     {
-
-        formService.saveTestProcSchedule(context, testProcOID, objectScheduleRequestBean);
+        UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        formService.saveTestProcSchedule(context, saveTestProcScheduleRequest.getTestProcOID(), saveTestProcScheduleRequest.getObjectScheduleRequestBean());
     }
 
-    public  void saveTestProcSchedules(UserContext context, ProjectOID projectOID, UnitOID rootUnit,
-                                       List<ObjectScheduleRequestBean> scheduleList) throws Exception
+    @PostMapping("/saveTestProcSchedules")
+    public  void saveTestProcSchedules( @RequestBody SaveTestProcSchedulesRequest saveTestProcSchedulesRequest) throws Exception
     {
-
-        formService.saveTestProcSchedules(context, projectOID, rootUnit, scheduleList);
-
-    }
-
-    public  void moveTestProcsToUnit(UserContext userContext, List<TestProcOID> testProcsToMove,
-                                           UnitOID unitOIDToMoveTo, ProjectOID projectOIDToMoveTo) throws Exception
-    {
-
-        formService.moveTestProcsToUnit(userContext, testProcsToMove, unitOIDToMoveTo, projectOIDToMoveTo);
-    }
-
-    public  void renameTestForms(UserContext userContext, List<TestProcOID> selectedTestProcs,
-                                 List<OID> referencesToAdd, String name, String renameOption) throws Exception
-    {
-
-        formService.renameTestForms(userContext, selectedTestProcs, referencesToAdd, name, renameOption);
+        UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        formService.saveTestProcSchedules(context,saveTestProcSchedulesRequest.getProjectOID(), saveTestProcSchedulesRequest.getRootUnit(), saveTestProcSchedulesRequest.getScheduleList());
 
     }
 
-    public  List<EntityReferenceBean> getReferencesForTestProc(UserContext context, TestProcOID oid)
+    @PostMapping("/moveTestProcsToUnit")
+    public  void moveTestProcsToUnit( @RequestBody MoveTestProcsToUnitRequest moveTestProcsToUnitRequest) throws Exception
     {
+        UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        formService.moveTestProcsToUnit(userContext, moveTestProcsToUnitRequest.getTestProcsToMove(), moveTestProcsToUnitRequest.getUnitOIDToMoveTo(), moveTestProcsToUnitRequest.getProjectOIDToMoveTo());
+    }
+
+    @PutMapping("/renameTestForms")
+    public  void renameTestForms(@RequestBody RenameTestFormsRequest  renameTestFormsRequest) throws Exception
+    {
+        UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        formService.renameTestForms(userContext, renameTestFormsRequest.getSelectedTestProcs(), renameTestFormsRequest.getReferencesToAdd(), renameTestFormsRequest.getName(), renameTestFormsRequest.getRenameOption());
+
+    }
+
+    @GetMapping("/getReferencesForTestProc")
+    public  List<EntityReferenceBean> getReferencesForTestProc(@RequestBody TestProcOID oid)
+    {
+        UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<EntityReferenceBean> returnList = new ArrayList<EntityReferenceBean>();
         List<EntityReference> refList = commonServicesDelegate.getEntityReferences(oid);
         for (Iterator iterator = refList.iterator(); iterator.hasNext();)
@@ -145,24 +151,28 @@ public class FormController {
         return returnList;
     }
 
-    public  void revertFormUpgradeOnTestProc(TestProcOID testprocOID, FormOID currentFormOID,
-                                                   FormOID revertToFormOID) throws Exception
+    @PutMapping("/revertFormUpgradeOnTestProc")
+    public  void revertFormUpgradeOnTestProc(@RequestBody RevertFormUpgradeOnTestProcRequest revertFormUpgradeOnTestProcRequest) throws Exception
     {
-       formUpgradeRevertProcessor.process(testprocOID, currentFormOID, revertToFormOID);
+       formUpgradeRevertProcessor.process(revertFormUpgradeOnTestProcRequest.getTestprocOID(), revertFormUpgradeOnTestProcRequest.getCurrentFormOID(), revertFormUpgradeOnTestProcRequest.getRevertToFormOID());
     }
-    public  List<UnitFormQuery> getTestProcsByForm(FormQuery formQuery) throws Exception
+    @GetMapping("/getTestProcsByForm")
+    public  List<UnitFormQuery> getTestProcsByForm(@RequestBody FormQuery formQuery) throws Exception
     {
         return formService.getTestProcsByForm(formQuery);
     }
 
-    public  TestProcObj upgradeFormForUnit(UserContext context, TestProcOID testProcOID, int surveyPk)
+   @PostMapping("/upgradeFormForUnit")
+   public  TestProcObj upgradeFormForUnit( @RequestBody UpgradeFormForUnitRequest upgradeFormForUnitRequest)
             throws Exception
     {
-            return formService.upgradeFormForUnit(context, testProcOID, surveyPk);
+        UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return formService.upgradeFormForUnit(context, upgradeFormForUnitRequest.getTestProcOID(), upgradeFormForUnitRequest.getSurveyPk());
 
     }
 
-    public List<TestProcBean> getFormList() throws Exception
+   @GetMapping("/getFormList")
+   public List<TestProcBean> getFormList() throws Exception
     {
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         try
@@ -523,7 +533,8 @@ public class FormController {
      */
 
 
-    public SectionLockUnlockRequestBean acquireLock(FormRequestBean formRequestBean)
+   @PostMapping("/acquireLock")
+   public SectionLockUnlockRequestBean acquireLock(@RequestBody  FormRequestBean formRequestBean)
             throws RestAppException, Exception
     {
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -624,7 +635,8 @@ public class FormController {
      */
 
 
-    public SectionLockUnlockRequestBean releaseLock(FormRequestBean formRequestBean)
+    @PostMapping("/releaseLock")
+    public SectionLockUnlockRequestBean releaseLock(@RequestBody FormRequestBean formRequestBean)
             throws RestAppException, Exception
     {
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -715,7 +727,8 @@ public class FormController {
      * Refresh Lock
      */
 
-    public SectionLockUnlockRequestBean refreshLock(FormRequestBean formRequestBean)
+    @PostMapping("/refreshLock")
+    public SectionLockUnlockRequestBean refreshLock(@RequestBody  FormRequestBean formRequestBean)
             throws RestAppException, Exception
     {
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -1262,6 +1275,7 @@ public class FormController {
     }
 
 */
+    @GetMapping("/getTestListOnItem")
     public Element getTestListOnItem() throws Exception
     {
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -1297,7 +1311,8 @@ public class FormController {
      * Form List With Filters
      */
 
-    public List<TestProcBean> getFormListWithFilters(
+   @GetMapping("/getFormListWithFilters")
+   public List<TestProcBean> getFormListWithFilters(@RequestBody
             TestProcListRequestBean requestBean) throws Exception
     {
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -1425,7 +1440,8 @@ public class FormController {
      * Form Summary
      */
 
-    public FormSummaryResponseBean getFormSummary(
+    @GetMapping("/getFormSummary")
+    public FormSummaryResponseBean getFormSummary(@RequestBody
             FormSummaryRequestBean formSummaryRequestBean) throws Exception
     {
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -1527,7 +1543,8 @@ public class FormController {
      * Form Schedule
      */
 
-    public FormScheduleResponseBean getFormSchedule(
+    @GetMapping("/getFormSchedule")
+    public FormScheduleResponseBean getFormSchedule(@RequestBody
             FormSummaryRequestBean formSummaryRequestBean) throws Exception
     {
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -2010,7 +2027,8 @@ public class FormController {
      * Form workstation summary
      */
 
-    public List<FormWorkstationSummaryResponseBean> getFormWorkstationSummary(
+    @GetMapping("/getFormWorkstationSummary")
+    public List<FormWorkstationSummaryResponseBean> getFormWorkstationSummary(@RequestBody
             FormSummaryRequestBean formSummaryRequestBean) throws Exception
     {
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -2081,7 +2099,7 @@ public class FormController {
         rootElement.setAttribute("status", status);
         rootElement.setAttribute("message", message);
 
-        if (output != null)
+        if (output!= null)
         {
             rootElement.addContent(createFormListXML(output));
         }
@@ -2533,7 +2551,8 @@ public class FormController {
          return aBean;
      }
  */
-    private FormItemBase getSignatureCaptureAnswerTypeBean(SurveyItem sItem)
+    @GetMapping("/getSignatureCaptureAnswerTypeBean")
+    private FormItemBase getSignatureCaptureAnswerTypeBean(@RequestBody  SurveyItem sItem)
     {
         SignatureCaptureAnswerType item = (SignatureCaptureAnswerType) sItem;
 
