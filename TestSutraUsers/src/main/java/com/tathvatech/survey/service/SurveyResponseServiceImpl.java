@@ -60,6 +60,7 @@ import com.tathvatech.user.common.UserContextImpl;
 import com.tathvatech.user.entity.Site;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.user.service.AccountService;
+import com.tathvatech.user.service.CommonServiceManager;
 import com.tathvatech.user.service.CommonServicesDelegate;
 import com.tathvatech.user.utils.DateUtils;
 import com.tathvatech.user.utils.Sqls;
@@ -98,11 +99,11 @@ public class SurveyResponseServiceImpl implements SurveyResponseService
 
 	private final DummyWorkstation dummyWorkstation;
 	private final FormDBManager formDBManager;
-	private final SurveyResponseService surveyResponseService;
+
 	private final SurveyDefFactory surveyDefFactory;
 	private final UnitManager unitManager;
 	private final SurveyMaster surveyMaster;
-	private final CommonServicesDelegate commonServicesDelegate;
+private final CommonServiceManager commonServiceManager;
 	private SequenceIdGenerator sequenceIdGenerator;
 	private final AccountService accountService;
 	private final TestProcService testProcService;
@@ -111,15 +112,16 @@ public class SurveyResponseServiceImpl implements SurveyResponseService
 	private final ActivityLoggingDelegate activityLoggingDelegate;
 	private final SiteService siteService;
 
-    public SurveyResponseServiceImpl(PersistWrapper persistWrapper, DummyWorkstation dummyWorkstation, FormDBManager formDBManager, SurveyResponseService surveyResponseService, SurveyDefFactory surveyDefFactory, UnitManager unitManager, SurveyMaster surveyMaster, CommonServicesDelegate commonServicesDelegate, AccountService accountService, TestProcService testProcService, WorkflowManager workflowManager, WorkstationService workstationService, ActivityLoggingDelegate activityLoggingDelegate, SiteService siteService) {
+    public SurveyResponseServiceImpl(PersistWrapper persistWrapper, DummyWorkstation dummyWorkstation, FormDBManager formDBManager, SurveyDefFactory surveyDefFactory, UnitManager unitManager, SurveyMaster surveyMaster,  CommonServiceManager commonServiceManager, AccountService accountService, TestProcService testProcService, WorkflowManager workflowManager, WorkstationService workstationService, ActivityLoggingDelegate activityLoggingDelegate, SiteService siteService) {
         this.persistWrapper = persistWrapper;
         this.dummyWorkstation = dummyWorkstation;
         this.formDBManager = formDBManager;
-        this.surveyResponseService = surveyResponseService;
+        this.commonServiceManager = commonServiceManager;
+
         this.surveyDefFactory = surveyDefFactory;
         this.unitManager = unitManager;
         this.surveyMaster = surveyMaster;
-        this.commonServicesDelegate = commonServicesDelegate;
+
         this.accountService = accountService;
         this.testProcService = testProcService;
         this.workflowManager = workflowManager;
@@ -279,11 +281,11 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 
 
 			//new reload the surveyResponse
-			surveyResponse = surveyResponseService.getSurveyResponse(surveyDef, responseId);
+			surveyResponse = getSurveyResponse(surveyDef, responseId);
 
 
 			//and get the percent complete and number of comments at the form level and save
-			FormResponseStats responseStat =surveyResponseService.getCommentCountAndPercentComplete(surveyDef.getQuestions(), surveyResponse);
+			FormResponseStats responseStat =getCommentCountAndPercentComplete(surveyDef.getQuestions(), surveyResponse);
 
 
 			pStmt = conn.prepareStatement("update TAB_RESPONSE set userPk=?, "
@@ -1086,7 +1088,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 	public void finalizeSurveyResponseImpl(UserContext userContext, SurveyDefinition surveyDef, int responseId,
 										   Date responseCompleteTime) throws Exception
 	{
-		SurveyResponse sResponse = surveyResponseService.getSurveyResponse(surveyDef, responseId);
+		SurveyResponse sResponse =getSurveyResponse(surveyDef, responseId);
 
 		if (logger.isDebugEnabled())
 		{
@@ -1213,7 +1215,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
     {
 		ResponseMasterNew respM = getResponseMaster(responseId);
 		TestProcObj tp = testProcService.getTestProc(respM.getTestProcPk());
-		Boolean saveResponseState = (Boolean) commonServicesDelegate.getEntityPropertyValue(new ProjectOID(tp.getProjectPk()), ProjectPropertyEnum.SaveResponseStateOnFormSubmit.getId(), Boolean.class);
+		Boolean saveResponseState = (Boolean) commonServiceManager.getEntityPropertyValue(new ProjectOID(tp.getProjectPk()), ProjectPropertyEnum.SaveResponseStateOnFormSubmit.getId(), null,null,Boolean.class);
 		if(saveResponseState == null || saveResponseState == false)
 			return;
 
@@ -1226,7 +1228,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 		String revisionNo = null;
 
 	    //get the FormResponseBean and then save this as a backup to save the inetrim/final submitted response state.
-		Boolean createRevisionNoOnFormSubmit = (Boolean) commonServicesDelegate.getEntityPropertyValue(new ProjectOID(tp.getProjectPk()), ProjectPropertyEnum.CreateRevisionNoForFormSubmit.getId(), Boolean.class);
+		Boolean createRevisionNoOnFormSubmit = (Boolean) commonServiceManager.getEntityPropertyValue(new ProjectOID(tp.getProjectPk()), ProjectPropertyEnum.CreateRevisionNoForFormSubmit.getId(),null,null, Boolean.class);
 		if(createRevisionNoOnFormSubmit != null && true == createRevisionNoOnFormSubmit)
 		{
 			//The sequence order will be like below
@@ -1471,7 +1473,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 			}
 
 			//new reload the surveyResponse
-			surveyResponse = surveyResponseService.getSurveyResponse(surveyDef, responseId);
+			surveyResponse =getSurveyResponse(surveyDef, responseId);
 
 
 			//copy the SectionResponses to the new Response
@@ -2422,7 +2424,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 
 			//create a copy of the response and mark it as incomplete so that the tester can
 			//carry on editing the form and resubmitting it
-			SurveyResponse newResponse = surveyResponseService.copyResponse(userContext, sResponse.getResponseId());
+			SurveyResponse newResponse =copyResponse(userContext, sResponse.getResponseId());
 
 			//create the FormResponseClientSubmissionRevision entry if its there for the unit.
 			updateFormResponseClientSubmissionRevisionOnNewResponse(userContext, sResponse.getResponseId(), newResponse.getResponseId());
