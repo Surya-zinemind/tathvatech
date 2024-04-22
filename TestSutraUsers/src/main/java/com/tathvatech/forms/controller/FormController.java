@@ -36,6 +36,7 @@ import com.tathvatech.survey.service.SurveyResponseService;
 import com.tathvatech.timetracker.entity.Workorder;
 import com.tathvatech.timetracker.service.WorkorderManager;
 import com.tathvatech.unit.common.UnitEntityQuery;
+import com.tathvatech.unit.controller.UnitController;
 import com.tathvatech.unit.service.UnitManager;
 import com.tathvatech.unit.service.UnitService;
 import com.tathvatech.user.OID.*;
@@ -54,17 +55,18 @@ import lombok.RequiredArgsConstructor;
 import com.tathvatech.unit.common.UnitFormQuery;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/form")
 public class FormController {
-
+    private  final Logger logger = LoggerFactory.getLogger(FormController.class);
    private final FormService formService;
    private final CommonServicesDelegate commonServicesDelegate;
    private final AccountService accountService;

@@ -70,7 +70,9 @@ import org.springframework.web.bind.annotation.*;
  *         Window - Preferences - Java - Code Style - Code Templates
  */
 
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/survey")
 public class SurveyResponseController
 {
     private  final Logger logger = LoggerFactory
@@ -618,7 +620,7 @@ public class SurveyResponseController
     }
 
 	@GetMapping("/getSurveyResponse/{responseId}")
-	public  SurveyResponse getSurveyResponse(@PathVariable int responseId) throws Exception
+	public  SurveyResponse getSurveyResponse(@PathVariable("responseId") int responseId) throws Exception
 	{
 		return surveyResponseService.getSurveyResponse(responseId);
 	}
@@ -680,7 +682,7 @@ public class SurveyResponseController
 
     // ///////////////// for testsutra
 	@GetMapping("/getResponseMaster/{responseId}")
-	public  ResponseMasterNew getResponseMaster(@PathVariable int responseId) throws Exception
+	public  ResponseMasterNew getResponseMaster(@PathVariable("responseId") int responseId) throws Exception
 	{
 		return surveyResponseService.getResponseMaster(responseId);
 	}
@@ -993,14 +995,14 @@ public class SurveyResponseController
 	}
 
 	@GetMapping("/getFormItemResponses/{responseId}")
-	public  HashMap<String, FormItemResponse> getFormItemResponses(@PathVariable int responseId)
+	public  HashMap<String, FormItemResponse> getFormItemResponses(@PathVariable("responseId") int responseId)
 	{
 		return	surveyResponseService.getFormItemResponses(responseId);
 	}
 
 
 	@GetMapping("/getFormClientSubmissionRevision/{responseId}")
-	public  FormResponseClientSubmissionRev getFormClientSubmissionRevision(@PathVariable int responseId)
+	public  FormResponseClientSubmissionRev getFormClientSubmissionRevision(@PathVariable("responseId") int responseId)
 	{
 		return surveyResponseService.getFormClientSubmissionRevision(responseId);
 }
@@ -1035,14 +1037,14 @@ public class SurveyResponseController
 	}*/
 	
 	@GetMapping("/getEntityRevisionReviewProxy/{responseId}")
-	public EntityVersionReviewProxy getEntityRevisionReviewProxy(@PathVariable int responseId) throws Exception
+	public EntityVersionReviewProxy getEntityRevisionReviewProxy(@PathVariable("responseId") int responseId) throws Exception
 	{
 		UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		return surveyResponseService.getEntityRevisionForReview(context.getUser().getOID(), responseId);
 	}
 	
 	@GetMapping("/getFormResponseBeanForSyncErrorReview/{entityVersionReviewPk}")
-	public FormResponseBean getFormResponseBeanForSyncErrorReview(@PathVariable int entityVersionReviewPk) throws Exception
+	public FormResponseBean getFormResponseBeanForSyncErrorReview(@PathVariable("entityVersionReviewPk") int entityVersionReviewPk) throws Exception
 	{
 		return surveyResponseService.getFormResponseBeanForSyncErrorReview(entityVersionReviewPk);
 	}
