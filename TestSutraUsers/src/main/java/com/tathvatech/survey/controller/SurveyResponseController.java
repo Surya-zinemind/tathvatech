@@ -967,8 +967,8 @@ public class SurveyResponseController
 //	}
 
 	
-	@GetMapping("/getFormItemResponse")
-	public FormItemResponse getFormItemResponse(@RequestBody  FormItemResponseOID formItemResponseOID)
+	@GetMapping("/getFormItemResponses")
+	public FormItemResponse getFormItemResponses(@RequestBody  FormItemResponseOID formItemResponseOID)
 	{
 		return	surveyResponseService.getFormItemResponse(formItemResponseOID);
 	}

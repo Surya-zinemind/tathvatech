@@ -32,6 +32,7 @@ import com.tathvatech.workstation.common.DummyWorkstation;
 import com.tathvatech.workstation.service.WorkstationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +49,7 @@ import java.util.logging.Logger;
  * Window - Preferences - Java - Code Style - Code Templates
  */
 @Service
+
 @RequiredArgsConstructor
 public class TestProcServiceImpl implements TestProcService
 {
@@ -55,12 +57,17 @@ public class TestProcServiceImpl implements TestProcService
     private final PersistWrapper persistWrapper;
     private final UnitManager unitManager;
 	private final DummyWorkstation dummyWorkstation;
-	private final SurveyDefFactory surveyDefFactory;
+	@Autowired
+	@Lazy
+	private  SurveyDefFactory surveyDefFactory;
+
 	private final TestProcSectionDAO testProcSectionDAO;
 	@Autowired
 	@Lazy
 	private  WorkstationService workstationService;
-	private final SurveyResponseService surveyResponseService;
+	@Autowired
+	@Lazy
+	private  SurveyResponseService surveyResponseService;
 	private UnitFormQuery unitFormQuery;
 
 	@Override

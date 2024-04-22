@@ -15,8 +15,10 @@ import com.tathvatech.common.enums.BaseActions;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
+@Service
 public class ActivityLoggingDelegate {
           private final PersistWrapper persistWrapper;
 

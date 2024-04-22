@@ -7,12 +7,15 @@ import com.tathvatech.tasks.service.TasksManager;
 import com.tathvatech.user.OID.OID;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.TaskDefBean;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
 
 import java.util.List;
 
 
 
+@Service
 public class TasksDelegate {
 	private final TasksManager tasksManager;
 

@@ -16,6 +16,7 @@ import com.tathvatech.forms.response.ResponseMasterNew;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.tathvatech.user.OID.TestProcOID;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Hari
@@ -23,6 +24,7 @@ import com.tathvatech.user.OID.TestProcOID;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
+@Service
 public class WorkflowManager
 {
 	private final PersistWrapper persistWrapper;

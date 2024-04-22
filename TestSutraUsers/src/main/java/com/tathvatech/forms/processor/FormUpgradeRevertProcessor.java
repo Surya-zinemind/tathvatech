@@ -19,10 +19,11 @@ import com.tathvatech.common.exception.AppException;
 import java.util.Iterator;
 import java.util.List;
 import com.tathvatech.forms.response.ResponseMasterNew;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
 
-
-
+@Service
 public class FormUpgradeRevertProcessor
 {
 	private final WorkstationService workstationService;
@@ -30,7 +31,7 @@ public class FormUpgradeRevertProcessor
 	private final PersistWrapper persistWrapper;
 	private final TestProcService testProcService;
 	private final SurveyMaster surveyMaster;
-    public FormUpgradeRevertProcessor(WorkstationService workstationService, SurveyResponseService surveyResponseService, PersistWrapper persistWrapper, TestProcService testProcService, SurveyMaster surveyMaster) {
+    public FormUpgradeRevertProcessor(@Lazy WorkstationService workstationService, SurveyResponseService surveyResponseService, PersistWrapper persistWrapper, TestProcService testProcService, SurveyMaster surveyMaster) {
         this.workstationService = workstationService;
         this.surveyResponseService = surveyResponseService;
         this.persistWrapper = persistWrapper;

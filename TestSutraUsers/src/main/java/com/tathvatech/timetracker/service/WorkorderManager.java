@@ -30,6 +30,7 @@ import com.tathvatech.user.common.UserContext;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 
 /**
@@ -37,15 +38,16 @@ import org.slf4j.LoggerFactory;
  *
  * Currently work order is supported for types testproc, ncr, ncrUnitAssign, vcr, Mod, openitems.
  */
+@Service
 public class WorkorderManager
 {
 	private static final Logger logger = LoggerFactory.getLogger(WorkorderManager.class);
 	private final PersistWrapper persistWrapper;
-	private final WorkorderManager workorderManager;
 
-    public WorkorderManager(PersistWrapper persistWrapper, WorkorderManager workorderManager) {
+
+    public WorkorderManager(PersistWrapper persistWrapper) {
         this.persistWrapper = persistWrapper;
-        this.workorderManager = workorderManager;
+
     }
 
     public  void createWorkorder(UserContext context, WorkorderRequestBean requestBean) throws Exception

@@ -79,6 +79,8 @@ import com.tathvatech.workstation.service.WorkstationService;
 //>>>>>>> Stashed changes
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 
@@ -102,7 +104,8 @@ public class SurveyResponseServiceImpl implements SurveyResponseService
 
 	private final SurveyDefFactory surveyDefFactory;
 	private final UnitManager unitManager;
-	private final SurveyMaster surveyMaster;
+
+	private final  SurveyMaster surveyMaster;
 private final CommonServiceManager commonServiceManager;
 	private SequenceIdGenerator sequenceIdGenerator;
 	private final AccountService accountService;
@@ -112,7 +115,7 @@ private final CommonServiceManager commonServiceManager;
 	private final ActivityLoggingDelegate activityLoggingDelegate;
 	private final SiteService siteService;
 
-    public SurveyResponseServiceImpl(PersistWrapper persistWrapper, DummyWorkstation dummyWorkstation, FormDBManager formDBManager, SurveyDefFactory surveyDefFactory, UnitManager unitManager, SurveyMaster surveyMaster,  CommonServiceManager commonServiceManager, AccountService accountService, TestProcService testProcService, WorkflowManager workflowManager, WorkstationService workstationService, ActivityLoggingDelegate activityLoggingDelegate, SiteService siteService) {
+    public SurveyResponseServiceImpl(PersistWrapper persistWrapper, DummyWorkstation dummyWorkstation, FormDBManager formDBManager, @Lazy SurveyDefFactory surveyDefFactory, UnitManager unitManager, @Lazy SurveyMaster surveyMaster, CommonServiceManager commonServiceManager, AccountService accountService,  TestProcService testProcService, WorkflowManager workflowManager,@Lazy WorkstationService workstationService, ActivityLoggingDelegate activityLoggingDelegate, SiteService siteService) {
         this.persistWrapper = persistWrapper;
         this.dummyWorkstation = dummyWorkstation;
         this.formDBManager = formDBManager;

@@ -4,14 +4,10 @@ import com.tathvatech.ncr.common.NcrItemQuery;
 import com.tathvatech.ncr.oid.NcrItemOID;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.ncr.service.NcrManager;
+import org.springframework.stereotype.Service;
 
 
-
-
-
-
-
-
+@Service
 public class NcrDelegate {
 	private final NcrManager ncrManager;
 	public static String APPROVED_MILESTONE = "Approved";

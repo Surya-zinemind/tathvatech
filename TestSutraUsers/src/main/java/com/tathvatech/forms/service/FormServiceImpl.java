@@ -42,13 +42,14 @@ import com.tathvatech.workstation.entity.UnitWorkstation;
 import com.tathvatech.workstation.oid.UnitWorkstationOID;
 import com.tathvatech.workstation.service.WorkstationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.logging.Logger;
 
 @Service
-@RequiredArgsConstructor
+
 public class FormServiceImpl implements  FormService{
     private  final Logger logger = Logger.getLogger(String.valueOf(FormServiceImpl.class));
 
@@ -63,6 +64,20 @@ public class FormServiceImpl implements  FormService{
     private final SurveyResponseService surveyResponseService;
     private final SurveyDefFactory surveyDefFactory;
     private UnitFormQuery unitFormQuery;
+
+    public FormServiceImpl(TestProcService testProcService, DummyWorkstation dummyWorkstation, PersistWrapper persistWrapper,@Lazy SurveyMaster surveyMaster, WorkstationService workstationService, UnitManager unitManager, CommonServiceManager commonServiceManager, UnitInProjectDAO unitInProjectDAO, SurveyResponseService surveyResponseService, SurveyDefFactory surveyDefFactory) {
+        this.testProcService = testProcService;
+        this.dummyWorkstation = dummyWorkstation;
+        this.persistWrapper = persistWrapper;
+        this.surveyMaster = surveyMaster;
+        this.workstationService = workstationService;
+        this.unitManager = unitManager;
+        this.commonServiceManager = commonServiceManager;
+        this.unitInProjectDAO = unitInProjectDAO;
+        this.surveyResponseService = surveyResponseService;
+        this.surveyDefFactory = surveyDefFactory;
+    }
+
     @Override
     public  void saveTestProcSchedule(UserContext context, TestProcOID testProcOID,
                                             ObjectScheduleRequestBean objectScheduleRequestBean) throws Exception

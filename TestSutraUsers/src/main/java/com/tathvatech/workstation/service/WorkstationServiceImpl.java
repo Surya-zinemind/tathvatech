@@ -69,7 +69,9 @@ public class WorkstationServiceImpl implements WorkstationService{
 
     private final DummyWorkstation dummyWorkstation;
 
-    private final UnitService unitService;
+    @Autowired
+    @Lazy
+    private  UnitService unitService;
 
     private final AuthorizationManager authorizationManager;
 

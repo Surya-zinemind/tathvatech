@@ -24,6 +24,7 @@ import org.jdom2.output.XMLOutputter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 
@@ -47,11 +48,13 @@ import java.sql.Statement;
  * Window - Preferences - Java - Code Style - Code Templates
  */
 @Service
+
 public class SurveyDefFactory
 {
     private static final Logger logger = LoggerFactory.getLogger(SurveyDefFactory.class);
 
     @Autowired
+    @Lazy
     private SurveyMaster surveyMaster;
   // private static ReferenceMap defMap = new ReferenceMap(ReferenceMap.SOFT, ReferenceMap.SOFT);
     

@@ -25,6 +25,8 @@ import com.tathvatech.user.entity.UserQuery;
 import com.tathvatech.user.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,6 +36,7 @@ import java.util.List;
 
 
 
+@Service
 public class TimeEntryManager
 {
 	private static final Logger logger = LoggerFactory.getLogger(TimeEntryManager.class);
@@ -43,7 +46,7 @@ public class TimeEntryManager
 	private final WorkorderManager workorderManager;
 	private  OpenCheckinListReport openCheckinListReport;
 
-    public TimeEntryManager(PersistWrapper persistWrapper, ProjectService projectService, SurveyMaster surveyMaster, WorkorderManager workorderManager) {
+    public TimeEntryManager(PersistWrapper persistWrapper, ProjectService projectService, @Lazy SurveyMaster surveyMaster, WorkorderManager workorderManager) {
         this.persistWrapper = persistWrapper;
         this.projectService = projectService;
         this.surveyMaster = surveyMaster;

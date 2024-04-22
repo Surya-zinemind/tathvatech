@@ -62,6 +62,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 
@@ -74,7 +76,7 @@ import org.springframework.stereotype.Service;
  *         Window - Preferences - Java - Code Style - Code Templates
  */
 @Service
-@RequiredArgsConstructor
+
 public class SurveyMaster
 {
 	private static final Logger logger = LoggerFactory.getLogger(SurveyMaster.class);
@@ -83,8 +85,9 @@ public class SurveyMaster
 	private final SurveyResponseService surveyResponseService;
 	private final SequenceIdGenerator sequenceIdGenerator;
 	private final UnitManager unitManager;
-	private final SurveyMaster surveyMaster;
-	private final SurveyDefFactory surveyDefFactory;
+
+
+	private final  SurveyDefFactory surveyDefFactory;
    private final TestProcService testProcService;
    private final AccountService accountService;
    private final FormDBManager formDBManager;
@@ -92,9 +95,27 @@ public class SurveyMaster
 private final WorkorderManager workorderManager;
 private final TestProcSectionDAO testProcSectionDAO;
 private final TimeEntryManager timeEntryManager;
+
 private final FormService formService;
 private FormListReport formListReport;
 
+    public SurveyMaster(PersistWrapper persistWrapper, ProjectService projectService, SurveyResponseService surveyResponseService, SequenceIdGenerator sequenceIdGenerator, UnitManager unitManager, SurveyDefFactory surveyDefFactory, TestProcService testProcService, AccountService accountService, FormDBManager formDBManager, TasksDelegate tasksDelegate, WorkorderManager workorderManager, TestProcSectionDAO testProcSectionDAO, TimeEntryManager timeEntryManager, FormService formService) {
+        this.persistWrapper = persistWrapper;
+        this.projectService = projectService;
+        this.surveyResponseService = surveyResponseService;
+        this.sequenceIdGenerator = sequenceIdGenerator;
+        this.unitManager = unitManager;
+
+        this.surveyDefFactory = surveyDefFactory;
+        this.testProcService = testProcService;
+        this.accountService = accountService;
+        this.formDBManager = formDBManager;
+        this.tasksDelegate = tasksDelegate;
+        this.workorderManager = workorderManager;
+        this.testProcSectionDAO = testProcSectionDAO;
+        this.timeEntryManager = timeEntryManager;
+        this.formService = formService;
+    }
 
 
 // TODO:: implement a cache with this hashmap
@@ -223,7 +244,7 @@ private FormListReport formListReport;
 
 	public  Survey createSurveyNewVersion(UserContext context, Survey newVersion, FormQuery baseRevision) throws Exception
 	{
-		Survey survey = surveyMaster.getSurveyByPk(baseRevision.getPk());
+		Survey survey = getSurveyByPk(baseRevision.getPk());
 		
 		Account account = (Account)context.getAccount();
 		User user = (User)context.getUser();
@@ -314,7 +335,7 @@ private FormListReport formListReport;
 	{
 		List errors = new ArrayList();
 		
-		Survey surveyConfig = surveyMaster.getSurveyByPk(surveyPk);
+		Survey surveyConfig =getSurveyByPk(surveyPk);
 		int masterPk = surveyConfig.getFormMainPk();
 
 		if(!(Survey.STATUS_CLOSED.equals(surveyConfig.getStatus())))
@@ -490,7 +511,7 @@ private FormListReport formListReport;
 	{
 		List errors = new ArrayList();
 		
-		Survey surveyConfig = surveyMaster.getSurveyByPk(surveyVersionPk);
+		Survey surveyConfig = getSurveyByPk(surveyVersionPk);
 		if(!(Survey.STATUS_CLOSED.equals(surveyConfig.getStatus())))
 		{
 			throw new AppException("Only a form in draft status can be deleted.");
@@ -552,7 +573,7 @@ private FormListReport formListReport;
 	private  void notifyFormPublish(UserContext context, int surveyPk,
 			List<ProjectOID> projectUpgradeList, HashMap<ProjectOID, User> projectNotificationMap, HashMap<ProjectOID, List<Integer>> formsUpgradeMap) throws Exception
 	{
-		FormQuery formQuery = surveyMaster.getFormByPk(surveyPk);
+		FormQuery formQuery = getFormByPk(surveyPk);
 		
 		
 		StringBuffer sbText = new StringBuffer();

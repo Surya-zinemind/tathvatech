@@ -7,11 +7,15 @@ import com.tathvatech.user.OID.FormSectionOID;
 import com.tathvatech.user.OID.TestProcOID;
 import com.tathvatech.user.utils.DateUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
 
 
+@Repository
 public class TestProcSectionDAO
 {
 	private final PersistWrapper persistWrapper;

@@ -15,6 +15,7 @@ import com.tathvatech.user.OID.PartRevisionOID;
 import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.WhereFoundOID;
 import com.tathvatech.user.common.UserContext;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 
 
 
+@Service
 public class NcrManager
 {
     private final PersistWrapper persistWrapper;

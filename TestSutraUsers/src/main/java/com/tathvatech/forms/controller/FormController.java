@@ -55,19 +55,43 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
 @RestController
-@RequiredArgsConstructor
+
 @RequestMapping("/form")
 public class FormController {
     private  final Logger logger = LoggerFactory.getLogger(FormController.class);
    private final FormService formService;
+
+    public FormController(@Lazy FormService formService, CommonServicesDelegate commonServicesDelegate, AccountService accountService,@Lazy FormUpgradeRevertProcessor formUpgradeRevertProcessor, NcrDelegate ncrDelegate, ProjectService projectService, WorkorderManager workorderManager, TestProcService testProcService, PersistWrapper persistWrapper, UnitManager unitManager,@Lazy UnitService unitService, DummyWorkstation dummyWorkstation, SurveyResponseService surveyResponseService,SurveyMaster surveyMaster, SiteService siteService, FormDBManager formDBManager, WorkstationService workstationService, SurveyDefFactory surveyDefFactory) {
+        this.formService = formService;
+        this.commonServicesDelegate = commonServicesDelegate;
+        this.accountService = accountService;
+        this.formUpgradeRevertProcessor = formUpgradeRevertProcessor;
+        this.ncrDelegate = ncrDelegate;
+        this.projectService = projectService;
+        this.workorderManager = workorderManager;
+        this.testProcService = testProcService;
+        this.persistWrapper = persistWrapper;
+        this.unitManager = unitManager;
+        this.unitService = unitService;
+        this.dummyWorkstation = dummyWorkstation;
+        this.surveyResponseService = surveyResponseService;
+        this.surveyMaster = surveyMaster;
+        this.siteService = siteService;
+        this.formDBManager = formDBManager;
+        this.workstationService = workstationService;
+        this.surveyDefFactory = surveyDefFactory;
+    }
    private final CommonServicesDelegate commonServicesDelegate;
    private final AccountService accountService;
+
    private final FormUpgradeRevertProcessor formUpgradeRevertProcessor;
    private final NcrDelegate ncrDelegate;
    private final ProjectService projectService;
@@ -79,7 +103,8 @@ public class FormController {
    private final UnitService unitService;
    private final DummyWorkstation dummyWorkstation;
    private final SurveyResponseService surveyResponseService;
-   private final SurveyMaster surveyMaster;
+
+   private final  SurveyMaster surveyMaster;
    private final SiteService siteService;
    private final FormDBManager formDBManager;
    private final WorkstationService workstationService;
