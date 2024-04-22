@@ -110,7 +110,7 @@ public class SurveyDefinitionManager extends Object
         }
 
 		Thread.sleep(2); // just to make sure that a unique id is created
-        String seq = new Long(new Date().getTime()).toString();
+        String seq = Long.valueOf(new Date().getTime()).toString();
         String idString = "SurveyItem_" + seq;
 
         //set the question attribures
@@ -164,7 +164,7 @@ public class SurveyDefinitionManager extends Object
 					aChild.setSurveyDefinition(surveyDefinition);
 					aChild.setParent((SurveyItemBase) sItem);
 					Thread.sleep(2); // just to make sure that a unique id is created
-					String cseq = new Long(new Date().getTime()).toString();
+					String cseq =Long.valueOf(new Date().getTime()).toString();
 			        String cidString = "SurveyItem_" + cseq;
 
 			        //set the question attribures
@@ -211,7 +211,7 @@ public class SurveyDefinitionManager extends Object
 					if(aChild.getSurveyItemId() == null)
 					{
 						Thread.sleep(2); // just to make sure that a unique id is created
-				        String seq = new Long(new Date().getTime()).toString();
+				        String seq =Long.valueOf(new Date().getTime()).toString();
 				        String idString = "SurveyItem_" + seq;
 	
 				        //set the question attribures
@@ -744,7 +744,7 @@ public class SurveyDefinitionManager extends Object
             SurveyParamBase aParam = (SurveyParamBase) iter.next();
             Element aParamElement = new Element("surveyParam");
             aParamElement.setAttribute("name", aParam.getName());
-            aParamElement.setAttribute("dataType", new Integer(aParam.getDataType()).toString());
+            aParamElement.setAttribute("dataType",  Integer.valueOf(aParam.getDataType()).toString());
             paramRoot.addContent(aParamElement);
         }
 
@@ -1242,7 +1242,7 @@ public class SurveyDefinitionManager extends Object
 		newSection.setDescription(section.getDescription());
 		newSection.setFlags(section.getFlags());
 		Thread.sleep(2); // just to make sure that a unique id is created
-		String seq = new Long(new Date().getTime()).toString();
+		String seq =Long.valueOf(new Date().getTime()).toString();
         String idString = "SurveyItem_" + seq;
         newSection.setSurveyItemId(idString);
         newSection.setOrderNum((float)(section.getOrderNum() + 0.1));
@@ -1392,7 +1392,7 @@ public class SurveyDefinitionManager extends Object
         newBom.setSurveyDefinition(surveyDefinition);
         newBom.setConfiguration(((SurveyItem)bom).toXML());
 		Thread.sleep(2); // just to make sure that a unique id is created
-        String seq = new Long(new Date().getTime()).toString();
+        String seq =Long.valueOf(new Date().getTime()).toString();
         String idString = "SurveyItem_" + seq;
         newBom.setSurveyItemId(idString);
         newBom.setOrderNum((float)(((SurveyItem)bom).getOrderNum() + 0.1));

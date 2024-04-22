@@ -4,7 +4,7 @@ package com.tathvatech.survey.common;
 
 public class SurveyForm
 {
-    private static final int maxLongValLength = new Long(Long.MAX_VALUE).toString().length();
+    private static final int maxLongValLength =  Long.valueOf(Long.MAX_VALUE).toString().length();
 
     public static final String RESPONSEMODE_DATAENTRY = "DataEntry";
     public static final String RESPONSEMODE_NORMAL = "Normal";

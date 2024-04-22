@@ -90,7 +90,7 @@ public abstract class SurveySaveItem extends SurveyItem implements SurveySaveIte
         
         if(element.getAttributeValue("hidden") != null)
         {
-        	this.hidden = new Boolean(element.getAttributeValue("hidden")).booleanValue();
+        	this.hidden =  Boolean.valueOf(element.getAttributeValue("hidden")).booleanValue();
         }
         else
         {
@@ -102,7 +102,7 @@ public abstract class SurveySaveItem extends SurveyItem implements SurveySaveIte
     {
         super.toXML(qElement);
         
-        qElement.setAttribute("hidden", new Boolean(hidden).toString());
+        qElement.setAttribute("hidden",  Boolean.valueOf(hidden).toString());
 
         return qElement;
     }
