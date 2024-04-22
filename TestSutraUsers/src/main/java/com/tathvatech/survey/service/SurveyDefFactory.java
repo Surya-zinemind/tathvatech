@@ -11,7 +11,6 @@ import com.tathvatech.common.common.ServiceLocator;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.survey.common.SurveyDefinition;
 import com.tathvatech.survey.entity.Survey;
-import com.tathvatech.unit.service.UnitManager;
 import com.tathvatech.user.OID.FormOID;
 
 
@@ -55,7 +54,7 @@ public class SurveyDefFactory
 
     @Autowired
     @Lazy
-    private SurveyMaster surveyMaster;
+    private SurveyMasterService surveyMasterService;
   // private static ReferenceMap defMap = new ReferenceMap(ReferenceMap.SOFT, ReferenceMap.SOFT);
     
 
@@ -67,7 +66,7 @@ public class SurveyDefFactory
 //        if(surveyDef != null)
 //        	return surveyDef;
         
-    	Survey survey = surveyMaster.getSurveyByPk((int) surveyOID.getPk());
+    	Survey survey = surveyMasterService.getSurveyByPk((int) surveyOID.getPk());
         if(survey == null)
         {
             logger.warn("Survey not found, pk - " + surveyOID.getPk());
@@ -156,7 +155,7 @@ public class SurveyDefFactory
 
         try
 		{
-            String surveyDefFile = surveyMaster.getSurveyDefFileName(sourceSurveyPk);
+            String surveyDefFile = surveyMasterService.getSurveyDefFileName(sourceSurveyPk);
 
             if(surveyDefFile == null || surveyDefFile.trim().length() == 0)
             {
@@ -251,7 +250,7 @@ public class SurveyDefFactory
 
     public  SurveyDefinitionManager getSurveyDefinitionManager(int surveyPk) throws Exception
     {
-        Survey survey = surveyMaster.getSurveyByPk(surveyPk);
+        Survey survey = surveyMasterService.getSurveyByPk(surveyPk);
         SurveyDefinitionManager surveyMgr = new SurveyDefinitionManager(survey);
 
 		return surveyMgr;

@@ -30,7 +30,7 @@ import com.tathvatech.survey.common.SurveyItem;
 import com.tathvatech.survey.entity.Survey;
 import com.tathvatech.survey.enums.SectionLockStatusEnum;
 import com.tathvatech.survey.exception.LockedByAnotherUserException;
-import com.tathvatech.survey.service.SurveyMaster;
+import com.tathvatech.survey.service.SurveyMasterService;
 import com.tathvatech.survey.service.SurveyResponseService;
 import com.tathvatech.timetracker.entity.Workorder;
 import com.tathvatech.timetracker.service.WorkorderManager;
@@ -49,13 +49,11 @@ import com.tathvatech.user.utils.DateUtils;
 import com.tathvatech.workstation.common.DummyWorkstation;
 import com.tathvatech.workstation.entity.Workstation;
 import com.tathvatech.workstation.service.WorkstationService;
-import lombok.RequiredArgsConstructor;
 import com.tathvatech.unit.common.UnitFormQuery;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -69,7 +67,7 @@ public class FormController {
     private  final Logger logger = LoggerFactory.getLogger(FormController.class);
    private final FormService formService;
 
-    public FormController(@Lazy FormService formService, CommonServicesDelegate commonServicesDelegate, AccountService accountService,@Lazy FormUpgradeRevertProcessor formUpgradeRevertProcessor, NcrDelegate ncrDelegate, ProjectService projectService, WorkorderManager workorderManager, TestProcService testProcService, PersistWrapper persistWrapper, UnitManager unitManager,@Lazy UnitService unitService, DummyWorkstation dummyWorkstation, SurveyResponseService surveyResponseService,SurveyMaster surveyMaster, SiteService siteService, FormDBManager formDBManager, WorkstationService workstationService, SurveyDefFactory surveyDefFactory) {
+    public FormController(@Lazy FormService formService, CommonServicesDelegate commonServicesDelegate, AccountService accountService, @Lazy FormUpgradeRevertProcessor formUpgradeRevertProcessor, NcrDelegate ncrDelegate, ProjectService projectService, WorkorderManager workorderManager, TestProcService testProcService, PersistWrapper persistWrapper, UnitManager unitManager, @Lazy UnitService unitService, DummyWorkstation dummyWorkstation, SurveyResponseService surveyResponseService, SurveyMasterService surveyMasterService, SiteService siteService, FormDBManager formDBManager, WorkstationService workstationService, SurveyDefFactory surveyDefFactory) {
         this.formService = formService;
         this.commonServicesDelegate = commonServicesDelegate;
         this.accountService = accountService;
@@ -83,7 +81,7 @@ public class FormController {
         this.unitService = unitService;
         this.dummyWorkstation = dummyWorkstation;
         this.surveyResponseService = surveyResponseService;
-        this.surveyMaster = surveyMaster;
+        this.surveyMasterService = surveyMasterService;
         this.siteService = siteService;
         this.formDBManager = formDBManager;
         this.workstationService = workstationService;
@@ -104,7 +102,7 @@ public class FormController {
    private final DummyWorkstation dummyWorkstation;
    private final SurveyResponseService surveyResponseService;
 
-   private final  SurveyMaster surveyMaster;
+   private final SurveyMasterService surveyMasterService;
    private final SiteService siteService;
    private final FormDBManager formDBManager;
    private final WorkstationService workstationService;
@@ -567,7 +565,7 @@ public class FormController {
             TestProcObj testProc =testProcService.getTestProc(formRequestBean.getTestProcPk());
             ResponseMasterNew respMaster =surveyResponseService
                     .getLatestResponseMasterForTest((TestProcOID) testProc.getOID());
-            Survey survey = surveyMaster.getSurveyByPk(testProc.getFormPk());
+            Survey survey = surveyMasterService.getSurveyByPk(testProc.getFormPk());
             if (testProc == null)
             {
                 throw new RestAppException("MSG-FormNotFound:" + formRequestBean.getTestProcPk());
@@ -605,7 +603,7 @@ public class FormController {
                 // check if that section is locked by another user
                 try
                 {
-                    ObjectLock objectLock = surveyMaster.lockSectionToEdit(context, (User) context.getUser(),
+                    ObjectLock objectLock = surveyMasterService.lockSectionToEdit(context, (User) context.getUser(),
                             respMaster.getOID(), aSection);
                     aSectionBean.setLockedByUserPk((int) context.getUser().getPk());
                     aSectionBean.setLockedByUserDisplayName(
@@ -669,7 +667,7 @@ public class FormController {
             TestProcObj testProc = testProcService.getTestProc(formRequestBean.getTestProcPk());
             ResponseMasterNew respMaster =surveyResponseService
                     .getLatestResponseMasterForTest((TestProcOID) testProc.getOID());
-            Survey survey = surveyMaster.getSurveyByPk(testProc.getFormPk());
+            Survey survey = surveyMasterService.getSurveyByPk(testProc.getFormPk());
             if (testProc == null)
             {
                 throw new RestAppException("MSG-FormNotFound:" + formRequestBean.getTestProcPk());
@@ -709,7 +707,7 @@ public class FormController {
                 try
                 {
                     User user = (User) context.getUser();
-                    surveyMaster.releaseSectionEditLock(context, user, respMaster.getOID(), aSection);
+                    surveyMasterService.releaseSectionEditLock(context, user, respMaster.getOID(), aSection);
 
                     aSectionBean.setLockedByUserPk(0);
                     aSectionBean.setLockedByUserDisplayName(null);
@@ -822,7 +820,7 @@ public class FormController {
 
                     try
                     {
-                        ObjectLockQuery lock =surveyMaster.getCurrentLock(respMaster.getOID(), aSectionId);
+                        ObjectLockQuery lock = surveyMasterService.getCurrentLock(respMaster.getOID(), aSectionId);
                         if (lock == null)
                         {
 

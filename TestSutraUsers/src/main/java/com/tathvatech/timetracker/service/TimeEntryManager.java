@@ -1,36 +1,26 @@
 package com.tathvatech.timetracker.service;
 
-import com.tathvatech.common.enums.EStatusEnum;
 import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.common.enums.WorkItem;
-import com.tathvatech.forms.dao.TestProcDAO;
-import com.tathvatech.forms.entity.TestProcFormAssign;
-import com.tathvatech.forms.entity.TestProcFormSection;
-import com.tathvatech.report.request.ReportRequest;
 import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.project.service.ProjectService;
+import com.tathvatech.survey.service.SurveyMasterService;
 import com.tathvatech.timetracker.report.OpenCheckinListReport;
-import com.tathvatech.survey.service.SurveyMaster;
 import com.tathvatech.timetracker.common.OpenCheckinListReportResultRow;
 import com.tathvatech.timetracker.common.WorkOrderTimeEntryListObj;
 import com.tathvatech.timetracker.entity.Workorder;
 import com.tathvatech.timetracker.entity.WorkorderTimeEntry;
 import com.tathvatech.timetracker.request.OpenCheckinListReportRequest;
 import com.tathvatech.user.OID.*;
-import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
-import com.tathvatech.user.entity.User;
 import com.tathvatech.user.entity.UserQuery;
-import com.tathvatech.user.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -42,14 +32,14 @@ public class TimeEntryManager
 	private static final Logger logger = LoggerFactory.getLogger(TimeEntryManager.class);
 	private final PersistWrapper persistWrapper;
 	private final ProjectService projectService;
-	private final SurveyMaster surveyMaster;
+	private final SurveyMasterService surveyMasterService;
 	private final WorkorderManager workorderManager;
 	private  OpenCheckinListReport openCheckinListReport;
 
-    public TimeEntryManager(PersistWrapper persistWrapper, ProjectService projectService, @Lazy SurveyMaster surveyMaster, WorkorderManager workorderManager) {
+    public TimeEntryManager(PersistWrapper persistWrapper, ProjectService projectService, @Lazy SurveyMasterService surveyMasterService, WorkorderManager workorderManager) {
         this.persistWrapper = persistWrapper;
         this.projectService = projectService;
-        this.surveyMaster = surveyMaster;
+        this.surveyMasterService = surveyMasterService;
         this.workorderManager = workorderManager;
     }
 //uncomment while doing timetracker
@@ -240,10 +230,10 @@ public class TimeEntryManager
         Workorder wo = workorderManager.getWorkorder(workorderOID);
         WorkItem workItem = WorkorderManager.getWorkItem(wo.getEntityPk(), (EntityTypeEnum) EntityTypeEnum.fromValue(wo.getEntityType()));
         
-        UserQuery currentAttributedUser =surveyMaster.getAttributionUser(workItem);
+        UserQuery currentAttributedUser = surveyMasterService.getAttributionUser(workItem);
         if(currentAttributedUser != null && currentAttributedUser.getPk() == timeForUserOID.getPk())
         {
-            surveyMaster.setAttribution(context, workItem, null);
+            surveyMasterService.setAttribution(context, workItem, null);
         }
 		
 		return date;

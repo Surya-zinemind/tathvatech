@@ -6,9 +6,6 @@
  */
 package com.tathvatech.survey.controller;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,7 +20,6 @@ import com.tathvatech.forms.common.AssignedTestsQuery;
 import com.tathvatech.forms.common.EntityVersionReviewProxy;
 import com.tathvatech.forms.common.ObjectLockQuery;
 import com.tathvatech.forms.entity.*;
-import com.tathvatech.forms.oid.FormResponseOID;
 import com.tathvatech.forms.response.FormResponseBean;
 import com.tathvatech.forms.response.ResponseMaster;
 import com.tathvatech.project.service.ProjectService;
@@ -31,30 +27,22 @@ import com.tathvatech.survey.Request.*;
 import com.tathvatech.survey.common.*;
 import com.tathvatech.survey.entity.ResponseSubmissionBookmark;
 import com.tathvatech.survey.entity.Survey;
-import com.tathvatech.survey.exception.LockedByAnotherUserException;
 import com.tathvatech.survey.response.SurveyItemResponse;
-import com.tathvatech.survey.service.SurveyMaster;
-import com.tathvatech.survey.service.SurveyResponseServiceImpl;
+import com.tathvatech.survey.service.SurveyMasterService;
 import com.tathvatech.survey.service.WorkflowManager;
-import com.tathvatech.unit.common.UnitLocationQuery;
-import com.tathvatech.unit.entity.UnitLocation;
 import com.tathvatech.unit.enums.Actions;
 import com.tathvatech.unit.service.UnitManager;
 
-import com.tathvatech.common.exception.AppException;
 import com.tathvatech.forms.response.ResponseMasterNew;
 import com.tathvatech.forms.service.TestProcService;
 import com.tathvatech.project.entity.Project;
 import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.survey.service.SurveyResponseService;
 import com.tathvatech.unit.common.UnitObj;
-import com.tathvatech.unit.entity.UnitInProject;
 import com.tathvatech.unit.service.UnitService;
 import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
-import com.tathvatech.user.entity.User;
-import com.tathvatech.workstation.common.UnitInProjectObj;
 import com.tathvatech.workstation.service.WorkstationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -84,7 +72,7 @@ public class SurveyResponseController
      private final UnitService unitService;
 	 private final ActivityLoggingDelegate activityLoggingDelegate;
     private final ProjectService projectService;
-    private final SurveyMaster surveyMaster;
+    private final SurveyMasterService surveyMasterService;
     private final WorkstationService workstationService;
 	private final PersistWrapper persistWrapper;
 	private  final WorkflowManager workflowManager;
@@ -870,7 +858,7 @@ public class SurveyResponseController
 			SurveyItem aItem = (SurveyItem) iter.next();
 			if(aItem instanceof Section)
 			{
-				ObjectLockQuery lock = surveyMaster.getCurrentLock(getQuestionsToSaveResponsesForRequest.getResponseOID(),
+				ObjectLockQuery lock = surveyMasterService.getCurrentLock(getQuestionsToSaveResponsesForRequest.getResponseOID(),
 						aItem.getSurveyItemId());
 			
 				if(lock == null)

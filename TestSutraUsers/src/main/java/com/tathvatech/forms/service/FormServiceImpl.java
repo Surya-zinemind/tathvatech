@@ -21,7 +21,7 @@ import com.tathvatech.survey.common.SurveyForm;
 import com.tathvatech.survey.entity.Survey;
 import com.tathvatech.survey.response.SurveyResponse;
 import com.tathvatech.survey.service.SurveyDefFactory;
-import com.tathvatech.survey.service.SurveyMaster;
+import com.tathvatech.survey.service.SurveyMasterService;
 import com.tathvatech.survey.service.SurveyResponseService;
 import com.tathvatech.unit.common.UnitFormQuery;
 import com.tathvatech.unit.common.UnitWorkstationListReportFilter;
@@ -41,7 +41,6 @@ import com.tathvatech.workstation.common.UnitInProjectObj;
 import com.tathvatech.workstation.entity.UnitWorkstation;
 import com.tathvatech.workstation.oid.UnitWorkstationOID;
 import com.tathvatech.workstation.service.WorkstationService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -56,7 +55,7 @@ public class FormServiceImpl implements  FormService{
     private final TestProcService testProcService;
     private final DummyWorkstation dummyWorkstation;
     private final PersistWrapper persistWrapper;
-    private final SurveyMaster surveyMaster;
+    private final SurveyMasterService surveyMasterService;
     private final WorkstationService workstationService;
     private final UnitManager unitManager;
     private final CommonServiceManager commonServiceManager;
@@ -65,11 +64,11 @@ public class FormServiceImpl implements  FormService{
     private final SurveyDefFactory surveyDefFactory;
     private UnitFormQuery unitFormQuery;
 
-    public FormServiceImpl(TestProcService testProcService, DummyWorkstation dummyWorkstation, PersistWrapper persistWrapper,@Lazy SurveyMaster surveyMaster, WorkstationService workstationService, UnitManager unitManager, CommonServiceManager commonServiceManager, UnitInProjectDAO unitInProjectDAO, SurveyResponseService surveyResponseService, SurveyDefFactory surveyDefFactory) {
+    public FormServiceImpl(TestProcService testProcService, DummyWorkstation dummyWorkstation, PersistWrapper persistWrapper, @Lazy SurveyMasterService surveyMasterService, WorkstationService workstationService, UnitManager unitManager, CommonServiceManager commonServiceManager, UnitInProjectDAO unitInProjectDAO, SurveyResponseService surveyResponseService, SurveyDefFactory surveyDefFactory) {
         this.testProcService = testProcService;
         this.dummyWorkstation = dummyWorkstation;
         this.persistWrapper = persistWrapper;
-        this.surveyMaster = surveyMaster;
+        this.surveyMasterService = surveyMasterService;
         this.workstationService = workstationService;
         this.unitManager = unitManager;
         this.commonServiceManager = commonServiceManager;
@@ -297,7 +296,7 @@ public class FormServiceImpl implements  FormService{
             if (testProc.getProjectPk() != projectOIDToMoveTo.getPk())
                 throw new AppException("You can only move a form within the same project.");
 
-            Survey form = surveyMaster.getSurveyByPk(testProc.getFormPk());
+            Survey form = surveyMasterService.getSurveyByPk(testProc.getFormPk());
             UnitFormQuery targetTest = targetUnitTestMap
                     .get(testProc.getName() + "-" + form.getFormMainPk() + "-" + testProc.getWorkstationPk());
             if (targetTest != null)
@@ -419,7 +418,7 @@ public class FormServiceImpl implements  FormService{
             TestProcDAO dao = new TestProcDAO();
             TestProcObj testProc = dao.getTestProc((int) testProcOID.getPk());
 
-            Survey form = surveyMaster.getSurveyByPk(testProc.getFormPk());
+            Survey form = surveyMasterService.getSurveyByPk(testProc.getFormPk());
 
             if ("Append text to existing test name".equals(renameOption) || "Rename test".equals(renameOption))
             {

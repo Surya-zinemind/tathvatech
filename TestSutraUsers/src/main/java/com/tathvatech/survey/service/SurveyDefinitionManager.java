@@ -58,7 +58,7 @@ public class SurveyDefinitionManager extends Object
     private SurveyDefinition surveyDefinition;
     private SequenceIdGenerator sequenceIdGenerator;
     private  SurveyDefFactory surveyDefFactory;
-    private  SurveyMaster surveyMaster;
+    private SurveyMasterService surveyMasterService;
 
     /**
      * @param
@@ -71,7 +71,7 @@ public class SurveyDefinitionManager extends Object
 
     public SurveyDefinitionManager(FormOID formOID)throws Exception
     {
-        this.survey = surveyMaster.getSurveyByPk((int) formOID.getPk());
+        this.survey = surveyMasterService.getSurveyByPk((int) formOID.getPk());
         this.surveyDefinition = surveyDefFactory.getSurveyDefinition(formOID);
     }
 

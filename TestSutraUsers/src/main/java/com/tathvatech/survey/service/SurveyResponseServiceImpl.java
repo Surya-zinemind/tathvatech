@@ -14,17 +14,12 @@ import java.util.Date;
 
 import com.tathvatech.common.common.DataTypes;
 import com.tathvatech.forms.entity.*;
-import com.tathvatech.activitylogging.common.ActivityLogQuery;
 import com.tathvatech.activitylogging.controller.ActivityLoggingDelegate;
 import com.tathvatech.common.common.ApplicationProperties;
-import com.tathvatech.common.enums.BaseActions;
 import com.tathvatech.common.enums.EStatusEnum;
 import com.tathvatech.common.exception.CreateException;
-import com.tathvatech.common.exception.RestAppException;
 import com.tathvatech.forms.common.EntityVersionReviewProxy;
-import com.tathvatech.forms.common.ObjectLockQuery;
 import com.tathvatech.forms.common.QuestionResponseStatus;
-import com.tathvatech.forms.oid.FormResponseOID;
 import com.tathvatech.forms.response.*;
 import com.tathvatech.forms.service.FormDBManager;
 import com.tathvatech.forms.service.TestProcService;
@@ -34,34 +29,23 @@ import com.tathvatech.survey.entity.EntityVersionReview;
 import com.tathvatech.survey.entity.ResponseFlags;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tathvatech.common.utils.SequenceIdGenerator;
-import com.tathvatech.common.common.ErrorCode;
 import com.tathvatech.common.common.ServiceLocator;
 import com.tathvatech.common.enums.EntityTypeEnum;
-import com.tathvatech.common.exception.AppException;
-import com.tathvatech.project.entity.Project;
 import com.tathvatech.project.enums.ProjectPropertyEnum;
 import com.tathvatech.survey.entity.ResponseSubmissionBookmark;
 import com.tathvatech.survey.entity.Survey;
 import com.tathvatech.survey.enums.AnswerPersistor;
-import com.tathvatech.survey.enums.SectionLockStatusEnum;
-import com.tathvatech.survey.intf.SurveyItemBase;
 import com.tathvatech.survey.intf.SurveySaveItemBase;
 import com.tathvatech.survey.response.SimpleSurveyItemResponse;
 import com.tathvatech.survey.response.SurveyItemResponse;
 import com.tathvatech.survey.response.SurveyResponse;
-import com.tathvatech.survey.utils.DeviceResponseExportProcessor;
-import com.tathvatech.unit.common.TestableEntity;
 import com.tathvatech.unit.entity.UnitBookmark;
 import com.tathvatech.unit.entity.UnitLocation;
-import com.tathvatech.unit.enums.Actions;
 import com.tathvatech.unit.response.ResponseUnit;
 import com.tathvatech.unit.service.UnitManager;
-import com.tathvatech.user.common.UserContextImpl;
-import com.tathvatech.user.entity.Site;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.user.service.AccountService;
 import com.tathvatech.user.service.CommonServiceManager;
-import com.tathvatech.user.service.CommonServicesDelegate;
 import com.tathvatech.user.utils.DateUtils;
 import com.tathvatech.user.utils.Sqls;
 import com.tathvatech.common.wrapper.PersistWrapper;
@@ -79,7 +63,6 @@ import com.tathvatech.workstation.service.WorkstationService;
 //>>>>>>> Stashed changes
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -105,7 +88,7 @@ public class SurveyResponseServiceImpl implements SurveyResponseService
 	private final SurveyDefFactory surveyDefFactory;
 	private final UnitManager unitManager;
 
-	private final  SurveyMaster surveyMaster;
+	private final SurveyMasterService surveyMasterService;
 private final CommonServiceManager commonServiceManager;
 	private SequenceIdGenerator sequenceIdGenerator;
 	private final AccountService accountService;
@@ -115,7 +98,7 @@ private final CommonServiceManager commonServiceManager;
 	private final ActivityLoggingDelegate activityLoggingDelegate;
 	private final SiteService siteService;
 
-    public SurveyResponseServiceImpl(PersistWrapper persistWrapper, DummyWorkstation dummyWorkstation, FormDBManager formDBManager, @Lazy SurveyDefFactory surveyDefFactory, UnitManager unitManager, @Lazy SurveyMaster surveyMaster, CommonServiceManager commonServiceManager, AccountService accountService,  TestProcService testProcService, WorkflowManager workflowManager,@Lazy WorkstationService workstationService, ActivityLoggingDelegate activityLoggingDelegate, SiteService siteService) {
+    public SurveyResponseServiceImpl(PersistWrapper persistWrapper, DummyWorkstation dummyWorkstation, FormDBManager formDBManager, @Lazy SurveyDefFactory surveyDefFactory, UnitManager unitManager, @Lazy SurveyMasterService surveyMasterService, CommonServiceManager commonServiceManager, AccountService accountService, TestProcService testProcService, WorkflowManager workflowManager, @Lazy WorkstationService workstationService, ActivityLoggingDelegate activityLoggingDelegate, SiteService siteService) {
         this.persistWrapper = persistWrapper;
         this.dummyWorkstation = dummyWorkstation;
         this.formDBManager = formDBManager;
@@ -123,7 +106,7 @@ private final CommonServiceManager commonServiceManager;
 
         this.surveyDefFactory = surveyDefFactory;
         this.unitManager = unitManager;
-        this.surveyMaster = surveyMaster;
+        this.surveyMasterService = surveyMasterService;
 
         this.accountService = accountService;
         this.testProcService = testProcService;
@@ -2060,7 +2043,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 	@Override
 	public  List getResponseMastersForRespondent(int surveyPk, int respondentPk) throws Exception
 	{
-		Survey survey = surveyMaster.getSurveyByPk(surveyPk);
+		Survey survey = surveyMasterService.getSurveyByPk(surveyPk);
 
 		String surveyTable = survey.getDbTable();
 		String sql = Sqls.getResponseMastersForRespondentId;
@@ -2135,7 +2118,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 	@Override
 	public  ResponseMaster getResponseMaster(int surveyPk, String responseId) throws Exception
 	{
-		Survey survey = surveyMaster.getSurveyByPk(surveyPk);
+		Survey survey = surveyMasterService.getSurveyByPk(surveyPk);
 
 		String surveyTable = survey.getDbTable();
 		String sql = Sqls.getResponseMaster;

@@ -20,7 +20,7 @@ import com.tathvatech.project.oid.ProjectPartOID;
 import com.tathvatech.project.service.ProjectService;
 import com.tathvatech.project.service.ProjectTemplateManager;
 import com.tathvatech.survey.service.SurveyDefFactory;
-import com.tathvatech.survey.service.SurveyMaster;
+import com.tathvatech.survey.service.SurveyMasterService;
 import com.tathvatech.survey.service.SurveyResponseService;
 import com.tathvatech.unit.common.*;
 import com.tathvatech.unit.dao.UnitDAO;
@@ -62,7 +62,7 @@ public class UnitServiceImpl implements UnitService{
     private final SurveyResponseService surveyResponseService;
     private final ProjectService projectService;
     private final CommonServiceManager commonServiceManager;
-    private final SurveyMaster surveyMaster;
+    private final SurveyMasterService surveyMasterService;
     private final SurveyDefFactory surveyDefFactory;
     private final  UnitInProjectListReport report;
     private final UnitDAO unitDAO;

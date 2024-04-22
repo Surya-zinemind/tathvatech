@@ -1,14 +1,12 @@
 package com.tathvatech.forms.processor;
 import com.tathvatech.common.wrapper.PersistWrapper;
-import com.tathvatech.survey.service.SurveyMaster;
 import com.tathvatech.forms.dao.TestProcDAO;
 import com.tathvatech.forms.entity.TestProcFormAssign;
 import com.tathvatech.forms.service.TestProcService;
-import com.tathvatech.project.service.ProjectService;
 import com.tathvatech.survey.entity.Survey;
+import com.tathvatech.survey.service.SurveyMasterService;
 import com.tathvatech.survey.service.SurveyResponseService;
 import com.tathvatech.unit.entity.UnitLocation;
-import com.tathvatech.unit.service.UnitService;
 import com.tathvatech.user.OID.FormOID;
 import com.tathvatech.user.OID.ProjectOID;
 import com.tathvatech.user.OID.TestProcOID;
@@ -30,13 +28,13 @@ public class FormUpgradeRevertProcessor
     private final SurveyResponseService surveyResponseService;
 	private final PersistWrapper persistWrapper;
 	private final TestProcService testProcService;
-	private final SurveyMaster surveyMaster;
-    public FormUpgradeRevertProcessor(@Lazy WorkstationService workstationService, SurveyResponseService surveyResponseService, PersistWrapper persistWrapper, TestProcService testProcService, SurveyMaster surveyMaster) {
+	private final SurveyMasterService surveyMasterService;
+    public FormUpgradeRevertProcessor(@Lazy WorkstationService workstationService, SurveyResponseService surveyResponseService, PersistWrapper persistWrapper, TestProcService testProcService, SurveyMasterService surveyMasterService) {
         this.workstationService = workstationService;
         this.surveyResponseService = surveyResponseService;
         this.persistWrapper = persistWrapper;
         this.testProcService = testProcService;
-        this.surveyMaster = surveyMaster;
+        this.surveyMasterService = surveyMasterService;
     }
 
     // we should remove the new records created as part of the upgrade. As this is a mistake by the user. we dont have to keep it in history.
@@ -72,7 +70,7 @@ public class FormUpgradeRevertProcessor
 		{
 			throw new AppException("Current form in request is not the current form assigned to the test, Form cannot be reverted");
 		}
-		Survey formCurrent = surveyMaster.getSurveyByPk((int) tpFormEntityCurrent.getFormFk());
+		Survey formCurrent = surveyMasterService.getSurveyByPk((int) tpFormEntityCurrent.getFormFk());
 		if(formCurrent == null)
 		{
 			throw new AppException("Invalid current form. Form cannot be reverted");
@@ -88,7 +86,7 @@ public class FormUpgradeRevertProcessor
 		{
 			throw new AppException("Revert to form in request was not assigned to the test earlier, Form cannot be reverted");
 		}
-		Survey formToRevertTo = surveyMaster.getSurveyByPk((int) tpFormToRevertTo.getFormFk());
+		Survey formToRevertTo = surveyMasterService.getSurveyByPk((int) tpFormToRevertTo.getFormFk());
 		if(formToRevertTo == null)
 		{
 			throw new AppException("Invalid form to revert to. Form cannot be reverted");

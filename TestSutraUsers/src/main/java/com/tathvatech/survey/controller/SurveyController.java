@@ -21,7 +21,7 @@ import com.tathvatech.forms.response.ResponseMasterNew;
 import com.tathvatech.pdf.config.PdfTemplatePrintLocationConfig;
 import com.tathvatech.survey.entity.Survey;
 import com.tathvatech.survey.exception.LockedByAnotherUserException;
-import com.tathvatech.survey.service.SurveyMaster;
+import com.tathvatech.survey.service.SurveyMasterService;
 import com.tathvatech.survey.service.SurveyResponseService;
 import com.tathvatech.user.OID.FormOID;
 import com.tathvatech.user.OID.ProjectOID;
@@ -38,12 +38,12 @@ import org.slf4j.LoggerFactory;
 public class SurveyController {
 
     private static final Logger logger = LoggerFactory.getLogger(SurveyController.class);
-    private final SurveyMaster surveyMaster;
+    private final SurveyMasterService surveyMasterService;
     private final SurveyResponseService surveyResponseService;
     private final WorkstationService workstationService;
 
-    public SurveyController(SurveyMaster surveyMaster, SurveyResponseService surveyResponseService, WorkstationService workstationService) {
-        this.surveyMaster = surveyMaster;
+    public SurveyController(SurveyMasterService surveyMasterService, SurveyResponseService surveyResponseService, WorkstationService workstationService) {
+        this.surveyMasterService = surveyMasterService;
         this.surveyResponseService = surveyResponseService;
         this.workstationService = workstationService;
     }
@@ -56,7 +56,7 @@ public class SurveyController {
      * @return
      */
     public String getSurveyDefFileName(int _surveyPk) throws Exception {
-        return surveyMaster.getSurveyDefFileName(_surveyPk);
+        return surveyMasterService.getSurveyDefFileName(_surveyPk);
     }
 
     /**
@@ -64,14 +64,14 @@ public class SurveyController {
      * @return
      */
     public Survey getSurveyByPk(int surveyPk) throws Exception {
-        return surveyMaster.getSurveyByPk(surveyPk);
+        return surveyMasterService.getSurveyByPk(surveyPk);
     }
 
 
     public Survey createSurvey(UserContext context, Survey survey) throws Exception {
 
 
-        Survey sur = surveyMaster.createSurvey(context, survey);
+        Survey sur = surveyMasterService.createSurvey(context, survey);
 
 
         return sur;
@@ -81,7 +81,7 @@ public class SurveyController {
     public Survey createSurveyNewVersion(UserContext context, Survey newVersion, FormQuery baseRevision) throws Exception {
 
 
-        Survey sur = surveyMaster.createSurveyNewVersion(context, newVersion, baseRevision);
+        Survey sur = surveyMasterService.createSurveyNewVersion(context, newVersion, baseRevision);
 
         return sur;
 
@@ -90,7 +90,7 @@ public class SurveyController {
     public Survey createSurveyByCopy(UserContext context, Survey survey, int sourceSurveyPk) throws Exception {
 
 
-        survey = surveyMaster.createSurveyByCopy(context, survey, sourceSurveyPk);
+        survey = surveyMasterService.createSurveyByCopy(context, survey, sourceSurveyPk);
 
 
         return survey;
@@ -106,68 +106,68 @@ public class SurveyController {
     public void deleteSurvey(int surveyPk) throws Exception {
 
 
-        surveyMaster.deleteSurvey(surveyPk);
+        surveyMasterService.deleteSurvey(surveyPk);
 
     }
 
     public Survey updateSurvey(Survey survey) throws Exception {
 
 
-        survey = surveyMaster.updateSurvey(survey);
+        survey = surveyMasterService.updateSurvey(survey);
         return survey;
 
     }
 
 
     public  FormQuery getFormByPk(int formPk) {
-        return surveyMaster.getFormByPk(formPk);
+        return surveyMasterService.getFormByPk(formPk);
     }
 
     public List<FormQuery> getSurveyList() throws Exception {
-        return surveyMaster.getSurveyList();
+        return surveyMasterService.getSurveyList();
     }
 
     public  List<FormQuery> getOpenSurveyList() throws Exception {
-        return surveyMaster.getOpenSurveyList();
+        return surveyMasterService.getOpenSurveyList();
     }
 
     public  List<FormQuery> getSurveyList(FormFilter filter) {
-        return surveyMaster.getSurveyList(filter);
+        return surveyMasterService.getSurveyList(filter);
     }
 
     public  List<FormQuery> getAllVersionsForForm(int formMainPk) {
-        return surveyMaster.getAllVersionsForForm(formMainPk);
+        return surveyMasterService.getAllVersionsForForm(formMainPk);
     }
 
     public  FormQuery getLatestVersionForForm(int formMainPk) throws Exception {
-        return surveyMaster.getLatestVersionForForm(formMainPk);
+        return surveyMasterService.getLatestVersionForForm(formMainPk);
     }
 
     public  FormQuery getLatestPublishedVersionForForm(int formMainPk) throws Exception {
-        return surveyMaster.getLatestPublishedVersionForForm(formMainPk);
+        return surveyMasterService.getLatestPublishedVersionForForm(formMainPk);
     }
 
     public  FormQuery getLatestPublishedVersionOfForm(int formPk) throws Exception {
-        return surveyMaster.getLatestPublishedVersionOfForm(formPk);
+        return surveyMasterService.getLatestPublishedVersionOfForm(formPk);
     }
 
     public void deleteSurveyVersion(UserContext context, int surveyVersionPk) throws Exception {
 
 
-        surveyMaster.deleteSurveyVersion(context, surveyVersionPk);
+        surveyMasterService.deleteSurveyVersion(context, surveyVersionPk);
 
 
     }
 
     public FormMain getFormMain(FormQuery formQuery) throws Exception {
-        return surveyMaster.getFormMain(formQuery);
+        return surveyMasterService.getFormMain(formQuery);
     }
 
     public  void publishSurvey(UserContext context, int surveyPk,
                                      List<ProjectOID> projectUpgradeList, HashMap<ProjectOID, User> projectNotificationMap, HashMap<ProjectOID, List<Integer>> formsUpgradeMap) throws Exception {
 
 
-        surveyMaster.publishSurvey(context, surveyPk, projectUpgradeList, projectNotificationMap, formsUpgradeMap);
+        surveyMasterService.publishSurvey(context, surveyPk, projectUpgradeList, projectNotificationMap, formsUpgradeMap);
 
 
     }
@@ -175,33 +175,33 @@ public class SurveyController {
     public  void applyFormUpgradePublish(UserContext context, int surveyPk, List projectListToUpgrade, List unitFormsListToUpgrade) throws Exception {
 
 
-        surveyMaster.applyFormUpgradePublish(context, surveyPk, projectListToUpgrade, unitFormsListToUpgrade);
+        surveyMasterService.applyFormUpgradePublish(context, surveyPk, projectListToUpgrade, unitFormsListToUpgrade);
 
 
     }
 
     public  UserQuery getAttributionUser(WorkItem workItem) throws Exception {
-        return surveyMaster.getAttributionUser(workItem);
+        return surveyMasterService.getAttributionUser(workItem);
     }
 
     public  void setAttribution(UserContext context, WorkItem workItem, UserOID attributeToUserOID) throws Exception {
 
 
-        surveyMaster.setAttribution(context, workItem, attributeToUserOID);
+        surveyMasterService.setAttribution(context, workItem, attributeToUserOID);
 
 
     }
 
     public void resetAttribution(UserContext context, WorkItem workItem) throws Exception {
 
-        surveyMaster.resetAttribution(context, workItem);
+        surveyMasterService.resetAttribution(context, workItem);
 
 
     }
 
     public synchronized ObjectLock lockSectionToEdit(UserContext context, User lockForUser, FormResponseOID responseOID, String sectionId) throws LockedByAnotherUserException, Exception {
 
-        ObjectLock l = surveyMaster.lockSectionToEdit(context, lockForUser, responseOID, sectionId);
+        ObjectLock l = surveyMasterService.lockSectionToEdit(context, lockForUser, responseOID, sectionId);
 
         //record in workstation
         ResponseMasterNew respMaster = surveyResponseService.getResponseMaster((int) responseOID.getPk());
@@ -212,25 +212,25 @@ public class SurveyController {
     }
 
     public  ObjectLockQuery getCurrentLock(FormResponseOID responseOID, String sectionId) throws Exception {
-        return surveyMaster.getCurrentLock(responseOID, sectionId);
+        return surveyMasterService.getCurrentLock(responseOID, sectionId);
     }
 
     public  List<ObjectLock> getLockedSectionIds(FormResponseOID responseOID) throws Exception {
-        return surveyMaster.getLockedSectionIds(responseOID);
+        return surveyMasterService.getLockedSectionIds(responseOID);
     }
 
     public  List<String> getLockedSectionIds(User user, FormResponseOID responseOID) throws Exception {
-        return surveyMaster.getLockedSectionIds(user, responseOID);
+        return surveyMasterService.getLockedSectionIds(user, responseOID);
     }
 
     public  boolean isSectionLocked(UserContext context, User user, FormResponseOID responseOID, String sectionId) throws Exception {
-        return surveyMaster.isSectionLocked(user, responseOID, sectionId);
+        return surveyMasterService.isSectionLocked(user, responseOID, sectionId);
     }
 
     public  void releaseSectionEditLock(UserContext context, User user, FormResponseOID responseOID, String sectionId) throws LockedByAnotherUserException, Exception {
 
 
-            surveyMaster.releaseSectionEditLock(context, user, responseOID, sectionId);
+            surveyMasterService.releaseSectionEditLock(context, user, responseOID, sectionId);
 
             ResponseMasterNew respMaster = surveyResponseService.getResponseMaster((int) responseOID.getPk());
             workstationService.recordWorkstationFormUnlock(new TestProcOID(respMaster.getTestProcPk()));
@@ -250,7 +250,7 @@ public class SurveyController {
      */
     public  void releaseSectionEditLock(UserContext context, FormResponseOID responseOID, String sectionId) throws Exception {
 
-        surveyMaster.releaseSectionEditLock(context, responseOID, sectionId);
+        surveyMasterService.releaseSectionEditLock(context, responseOID, sectionId);
 
         ResponseMasterNew respMaster = surveyResponseService.getResponseMaster((int) responseOID.getPk());
 
@@ -260,17 +260,17 @@ public class SurveyController {
     }
 
     public  FormPrintFormat getFormPrintFormat(FormOID formOID) {
-        return surveyMaster.getFormPrintFormat(formOID);
+        return surveyMasterService.getFormPrintFormat(formOID);
     }
 
     public  PdfTemplatePrintLocationConfig getFormPrintTemplateLocationConfig(FormOID formOID) throws Exception {
-        return surveyMaster.getFormPrintTemplateLocationConfig(formOID);
+        return surveyMasterService.getFormPrintTemplateLocationConfig(formOID);
     }
 
     public  PdfTemplatePrintLocationConfig saveFormPrintTemplateLocationConfig(UserContext context, FormOID formOID, PdfTemplatePrintLocationConfig config) throws Exception {
 
 
-        PdfTemplatePrintLocationConfig c = surveyMaster.saveFormPrintTemplateLocationConfig(context, formOID, config);
+        PdfTemplatePrintLocationConfig c = surveyMasterService.saveFormPrintTemplateLocationConfig(context, formOID, config);
 
 
         return c;

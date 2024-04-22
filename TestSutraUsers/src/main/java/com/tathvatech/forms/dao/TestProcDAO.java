@@ -8,7 +8,7 @@ import com.tathvatech.forms.entity.FormSection;
 import com.tathvatech.forms.entity.TestProcFormAssign;
 import com.tathvatech.forms.entity.TestProcFormSection;
 import com.tathvatech.survey.entity.Survey;
-import com.tathvatech.survey.service.SurveyMaster;
+import com.tathvatech.survey.service.SurveyMasterService;
 import com.tathvatech.unit.entity.UnitTestProc;
 import com.tathvatech.unit.entity.UnitTestProcH;
 import com.tathvatech.user.OID.*;
@@ -32,7 +32,7 @@ public class TestProcDAO
 	private PersistWrapper persistWrapper;
 
 	@Autowired
-	private SurveyMaster surveyMaster;
+	private SurveyMasterService surveyMasterService;
 	Logger logger = Logger.getLogger(String.valueOf(TestProcDAO.class));
 	Date now;
 	
@@ -68,7 +68,7 @@ public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 		if(currentTestProcFormEntity == null)
 			return null;
 		
-		Survey currentForm = surveyMaster.getSurveyByPk((int) currentTestProcFormEntity.getFormFk());
+		Survey currentForm = surveyMasterService.getSurveyByPk((int) currentTestProcFormEntity.getFormFk());
 
 		List<TestProcFormAssign> allFormList = persistWrapper.readList(TestProcFormAssign.class,
 				"select tfa.* from testproc_form_assign  tfa "

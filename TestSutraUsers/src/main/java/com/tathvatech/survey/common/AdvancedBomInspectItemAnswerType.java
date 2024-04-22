@@ -6,66 +6,13 @@
  */
 package com.tathvatech.survey.common;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.TimeZone;
-
 import com.tathvatech.common.common.DataTypes;
-import com.tathvatech.common.common.FileStoreManager;
-import com.tathvatech.user.common.Option;
-import com.tathvatech.common.enums.EntityTypeEnum;
-import com.tathvatech.common.exception.AppException;
-import com.tathvatech.common.exception.InvalidResponseException;
-import com.tathvatech.common.utils.LineSeperatorUtil;
-import com.tathvatech.common.utils.ListStringUtil;
+import com.tathvatech.survey.service.SurveyMasterService;
 import com.tathvatech.user.utils.OptionList;
-import com.tathvatech.forms.common.ExpectedNumericValue;
-import com.tathvatech.forms.common.FormDesignListener;
-import com.tathvatech.forms.common.FormEventListner;
-import com.tathvatech.forms.controller.TestProcController;
-import com.tathvatech.forms.entity.FormItemResponse;
-import com.tathvatech.forms.response.ResponseMasterNew;
-import com.tathvatech.logic.common.Logic;
-import com.tathvatech.ncr.common.NcrItemQuery;
-import com.tathvatech.ncr.oid.NcrItemOID;
-import com.tathvatech.openitem.andon.entity.OpenItemV2;
 import com.tathvatech.project.service.ProjectService;
-import com.tathvatech.report.enums.ReportTypes;
-import com.tathvatech.report.request.ReportRequest;
 
-import com.tathvatech.survey.entity.Survey;
-import com.tathvatech.survey.enums.AnswerPersistor;
-import com.tathvatech.survey.enums.BomTypesEnum;
-import com.tathvatech.survey.intf.LogicSubject;
-import com.tathvatech.survey.response.SimpleSurveyItemResponse;
-import com.tathvatech.survey.response.SurveyItemResponse;
-import com.tathvatech.survey.response.SurveyResponse;
-import com.tathvatech.survey.service.SurveyItemManager;
-import com.tathvatech.survey.service.SurveyMaster;
 import com.tathvatech.survey.service.SurveyResponseService;
-import com.tathvatech.unit.common.UnitFormQuery;
-import com.tathvatech.unit.common.UnitObj;
-import com.tathvatech.unit.common.UnitQuery;
-import com.tathvatech.unit.response.ResponseUnit;
 import com.tathvatech.unit.service.UnitService;
-import com.tathvatech.user.OID.ProjectOID;
-import com.tathvatech.user.OID.UnitOID;
-import com.tathvatech.user.common.AttachmentInfoBean;
-import com.tathvatech.user.common.SecurityContext;
-import com.tathvatech.user.common.UserContext;
-import com.tathvatech.user.entity.User;
-import com.tathvatech.user.service.PlanSecurityManager;
-import org.aspectj.apache.bcel.classfile.Field;
-import org.jdom2.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +28,7 @@ public class AdvancedBomInspectItemAnswerType //extends SurveySaveItem implement
 {
 	private static final Logger logger = LoggerFactory.getLogger(AdvancedBomInspectItemAnswerType.class);
 	private final SurveyResponseService surveyResponseService;
-	private final SurveyMaster surveyMaster;
+	private final SurveyMasterService surveyMasterService;
 	private final ProjectService projectService;
 	private final UnitService unitService;
 	private enum DisplayModeEnum {ViewMode, DataEntryMode}; // this is currently used only for the P8Transfer Menu.
@@ -142,12 +89,12 @@ public class AdvancedBomInspectItemAnswerType //extends SurveySaveItem implement
      *//*
      */
 
-	public AdvancedBomInspectItemAnswerType(SurveyResponseService surveyResponseService, SurveyMaster surveyMaster, ProjectService projectService, UnitService unitService)
+	public AdvancedBomInspectItemAnswerType(SurveyResponseService surveyResponseService, SurveyMasterService surveyMasterService, ProjectService projectService, UnitService unitService)
 	{
 		super();
 
         this.surveyResponseService = surveyResponseService;
-        this.surveyMaster = surveyMaster;
+        this.surveyMasterService = surveyMasterService;
         this.projectService = projectService;
         this.unitService = unitService;
     }
