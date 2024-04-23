@@ -143,7 +143,7 @@ public class SurveyController {
         return surveyMasterService.getOpenSurveyList();
     }
 
-    @GetMapping("/getSurveyList")
+    @GetMapping("/getSurveyLists")
     public  List<FormQuery> getSurveyList(@RequestBody FormFilter filter) {
         return surveyMasterService.getSurveyList(filter);
     }
@@ -245,7 +245,7 @@ public class SurveyController {
         return surveyMasterService.getLockedSectionIds(responseOID);
     }
 
-    @GetMapping("/getLockedSectionIds")
+    @GetMapping("/getLockedSectionIdss")
     public  List<String> getLockedSectionIds(@RequestBody GetLockedSectionIdsRequest getLockedSectionIdsRequest) throws Exception {
         return surveyMasterService.getLockedSectionIds(getLockedSectionIdsRequest.getUser(), getLockedSectionIdsRequest.getResponseOID());
     }
