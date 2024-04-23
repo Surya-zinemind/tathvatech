@@ -60,7 +60,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/survey")
+@RequestMapping("/surveyResponse")
 public class SurveyResponseController
 {
     private  final Logger logger = LoggerFactory
