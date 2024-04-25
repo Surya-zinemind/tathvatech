@@ -165,7 +165,7 @@ public class TestProcServiceImpl implements TestProcService
 	{
 		try 
 		{
-			return persistWrapper.read(UnitFormQuery.class, unitFormQuery.sql + " and ut.pk=?", testProcPk);
+			return persistWrapper.read(UnitFormQuery.class, unitFormQuery.getSql() + " and ut.pk=?", testProcPk);
 		} 
 		catch (Exception e) 
 		{

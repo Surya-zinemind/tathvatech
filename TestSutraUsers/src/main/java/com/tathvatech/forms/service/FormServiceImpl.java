@@ -62,9 +62,9 @@ public class FormServiceImpl implements  FormService{
     private final UnitInProjectDAO unitInProjectDAO;
     private final SurveyResponseService surveyResponseService;
     private final SurveyDefFactory surveyDefFactory;
-    private UnitFormQuery unitFormQuery;
+    private final UnitFormQuery unitFormQuery;
 
-    public FormServiceImpl(TestProcService testProcService, DummyWorkstation dummyWorkstation, PersistWrapper persistWrapper, @Lazy SurveyMasterService surveyMasterService, WorkstationService workstationService, UnitManager unitManager, CommonServiceManager commonServiceManager, UnitInProjectDAO unitInProjectDAO, SurveyResponseService surveyResponseService, SurveyDefFactory surveyDefFactory) {
+    public FormServiceImpl(TestProcService testProcService, DummyWorkstation dummyWorkstation, PersistWrapper persistWrapper, @Lazy SurveyMasterService surveyMasterService, WorkstationService workstationService, UnitManager unitManager, CommonServiceManager commonServiceManager, UnitInProjectDAO unitInProjectDAO, SurveyResponseService surveyResponseService, SurveyDefFactory surveyDefFactory, UnitFormQuery unitFormQuery) {
         this.testProcService = testProcService;
         this.dummyWorkstation = dummyWorkstation;
         this.persistWrapper = persistWrapper;
@@ -75,6 +75,7 @@ public class FormServiceImpl implements  FormService{
         this.unitInProjectDAO = unitInProjectDAO;
         this.surveyResponseService = surveyResponseService;
         this.surveyDefFactory = surveyDefFactory;
+        this.unitFormQuery = unitFormQuery;
     }
 
     @Override
@@ -468,7 +469,7 @@ public class FormServiceImpl implements  FormService{
     public  List<UnitFormQuery> getTestProcsByForm(FormQuery formQuery) throws Exception
     {
         List<UnitFormQuery> l = persistWrapper.readList(UnitFormQuery.class,
-                unitFormQuery.sql + " and tfa.formFk in "
+                unitFormQuery.getSql() + " and tfa.formFk in "
                         + "(select pk from TAB_SURVEY where formMainPk=? and formType = 1) order by unitPk desc",
                 formQuery.getFormMainPk());
 

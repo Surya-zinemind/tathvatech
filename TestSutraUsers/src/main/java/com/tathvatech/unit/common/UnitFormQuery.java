@@ -15,6 +15,7 @@ import com.tathvatech.user.OID.TestProcOID;
 import com.tathvatech.workstation.common.DummyWorkstation;
 import jakarta.persistence.Transient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 
 /**
@@ -23,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-
+@Component
 public class UnitFormQuery
 {
 	private int pk;
@@ -98,10 +99,14 @@ public class UnitFormQuery
 	private Integer forecastCreatedBy;
 	private Date forecastCreatedDate;
 	private String forecastCreatedByFirstName;
-	private String forecastCreatedByLastName;	
-		
-	
-	public String getDisplayDescriptor()
+	private String forecastCreatedByLastName;
+
+    public UnitFormQuery(DummyWorkstation dummyWorkstation) {
+        this.dummyWorkstation = dummyWorkstation;
+    }
+
+
+    public String getDisplayDescriptor()
 	{
 		if(name != null && name.trim().length() > 0)
 		{
@@ -670,9 +675,9 @@ public class UnitFormQuery
 		return false;			
 	}
 
-	@Autowired
+
 	@Transient
-	private DummyWorkstation dummyWorkstation;
+	private final DummyWorkstation dummyWorkstation;
 
 	@Override
 	public int hashCode() 
@@ -680,47 +685,54 @@ public class UnitFormQuery
 		return pk;
 	}
 
-	public  String sql = "select ut.pk as pk, uth.name as name, uth.projectTestProcPk as projectTestProcPk, "
-			+ " uth.projectPk as projectPk, p.projectName as projectName, p.projectDescription as projectDescription, tfa.appliedByUserFk, "
-			+ " part.pk as partPk, part.name as partName, partType.typeName as partType, pp.name as projectPartName, "
-			+ " uth.workstationPk as workstationPk, w.workstationName as workstationName, w.description as workstationDescription, "
-			+ " case when ul.status is null then '" + UnitLocation.STATUS_WAITING + "' else ul.status end as workstationStatus, site.name as workstationSiteName, site.timeZone as workstationTimezoneId, "
-			+ " uth.unitPk as unitPk, uh.unitName as unitName, uprh.projectPartPk as projectPartPk, tfa.formFk as formPk, f.formMainPk as formMainPk, "
-			+ " f.identityNumber as formName, f.description as formDescription, "
-			+ " f.responsibleDivision as formResponsibleDivision, f.revision as formRevision, "
-			+ " f.versionNo as formVersion, "
-			+ " res.responseId, res.responseRefNo, "
-			+ " res.noOfComments as noOfComments, res.percentComplete as percentComplete, "
-			+ " res.totalQCount, res.totalACount, res.passCount, res.failCount, res.dimentionalFailCount, res.naCount, "
-			+ " responseStartTime, responseCompleteTime, responseSyncTime, "
-			+ " res.userPk as preparedByPk, prepUser.firstName as preparedByFirstName, res.status as responseStatus, "
-			+ " prepUser.lastName as preparedByLastName, res.verifiedBy as verifiedByPk, verifyUser.firstName as verifiedByFirstName,"
-			+ " verifyUser.lastName as verifiedByLastName, res.approvedBy as approvedByPk, apprUser.firstName as approvedByFirstName,"
-			+ " apprUser.lastName as approvedByLastName, res.verifiedDate, res.verifyComment, res.approvedDate, res.approveComment, "
-			+ " es.forecastStartDate, es.forecastEndDate, es.estimateHours as forecastHours, es.comment as forecastComment, es.createdBy as forecastCreatedBy, es.createdDate as forecastCreatedDate,"
-			+ " esUser.firstName as forecastCreatedByFirstName, esUser.lastName as forecastCreatedByLastName "
-			+ " from unit_testproc ut"
-			+ " join testproc_form_assign tfa on tfa.testProcFk = ut.pk and tfa.current = 1 "
-    		+ " join unit_testproc_h uth on uth.unitTestProcFk = ut.pk and now() between uth.effectiveDateFrom and uth.effectiveDateTo "
-			+ " join TAB_UNIT u on uth.unitPk = u.pk "
-			+ " join TAB_UNIT_H uh on uh.unitPk = u.pk and now() between uh.effectiveDateFrom and uh.effectiveDateTo "
-			+ " join TAB_PROJECT p on uth.projectPk = p.pk  "
-			+ " join TAB_WORKSTATION w on uth.workstationPk = w.pk  and w.pk != " + dummyWorkstation.getPk()
-			+ " join site on w.sitePk = site.pk"
-			+ " join TAB_SURVEY f on tfa.formFk = f.pk "
-			+ " join unit_project_ref upr on upr.unitPk = uth.unitPk and upr.projectPk = uth.projectPk "
-			+ " join unit_project_ref_h uprh on uprh.unitInProjectPk = upr.pk and now() between uprh.effectiveDateFrom and uprh.effectiveDateTo and uprh.status != 'Removed' "
-			+ " join project_part pp on uprh.projectPartPk = pp.pk "
-			+ " join part on pp.partPk = part.pk "
-			+ " join part_type partType on pp.partTypePk = partType.pk  "
-			+ " left outer join TAB_UNIT_LOCATION ul on uth.unitPk = ul.unitPk and uth.projectPk = ul.projectPk and uth.workstationPk = ul.workstationPk and ul.current = 1"
-			+ " left outer join TAB_RESPONSE res on res.testProcPk = ut.pk and res.surveyPk = tfa.formFk and res.current = 1"
-			+ " left outer join entity_schedule es on es.objectPk = ut.pk and es.objectType = " + EntityTypeEnum.TestProc.getValue() + " and now() between es.effectiveDateFrom and es.effectiveDateTo "
-			+ " left outer join TAB_USER esUser on es.createdBy = esUser.pk "
-			+ " left join TAB_USER prepUser on res.userPk = prepUser.pk "
-			+ " left join TAB_USER verifyUser on res.verifiedBy = verifyUser.pk "
-			+ " left join TAB_USER apprUser on res.approvedBy = apprUser.pk "
-			+ " where 1 = 1";	
+	private String sql; // Declare the SQL string without initialization
 
+	// Method to initialize the SQL string
+	public String getSql() {
+		if (sql == null) { // Check if the SQL string is not initialized
+			sql = "select ut.pk as pk, uth.name as name, uth.projectTestProcPk as projectTestProcPk, "
+					+ " uth.projectPk as projectPk, p.projectName as projectName, p.projectDescription as projectDescription, tfa.appliedByUserFk, "
+					+ " part.pk as partPk, part.name as partName, partType.typeName as partType, pp.name as projectPartName, "
+					+ " uth.workstationPk as workstationPk, w.workstationName as workstationName, w.description as workstationDescription, "
+					+ " case when ul.status is null then '" + UnitLocation.STATUS_WAITING + "' else ul.status end as workstationStatus, site.name as workstationSiteName, site.timeZone as workstationTimezoneId, "
+					+ " uth.unitPk as unitPk, uh.unitName as unitName, uprh.projectPartPk as projectPartPk, tfa.formFk as formPk, f.formMainPk as formMainPk, "
+					+ " f.identityNumber as formName, f.description as formDescription, "
+					+ " f.responsibleDivision as formResponsibleDivision, f.revision as formRevision, "
+					+ " f.versionNo as formVersion, "
+					+ " res.responseId, res.responseRefNo, "
+					+ " res.noOfComments as noOfComments, res.percentComplete as percentComplete, "
+					+ " res.totalQCount, res.totalACount, res.passCount, res.failCount, res.dimentionalFailCount, res.naCount, "
+					+ " responseStartTime, responseCompleteTime, responseSyncTime, "
+					+ " res.userPk as preparedByPk, prepUser.firstName as preparedByFirstName, res.status as responseStatus, "
+					+ " prepUser.lastName as preparedByLastName, res.verifiedBy as verifiedByPk, verifyUser.firstName as verifiedByFirstName,"
+					+ " verifyUser.lastName as verifiedByLastName, res.approvedBy as approvedByPk, apprUser.firstName as approvedByFirstName,"
+					+ " apprUser.lastName as approvedByLastName, res.verifiedDate, res.verifyComment, res.approvedDate, res.approveComment, "
+					+ " es.forecastStartDate, es.forecastEndDate, es.estimateHours as forecastHours, es.comment as forecastComment, es.createdBy as forecastCreatedBy, es.createdDate as forecastCreatedDate,"
+					+ " esUser.firstName as forecastCreatedByFirstName, esUser.lastName as forecastCreatedByLastName "
+					+ " from unit_testproc ut"
+					+ " join testproc_form_assign tfa on tfa.testProcFk = ut.pk and tfa.current = 1 "
+					+ " join unit_testproc_h uth on uth.unitTestProcFk = ut.pk and now() between uth.effectiveDateFrom and uth.effectiveDateTo "
+					+ " join TAB_UNIT u on uth.unitPk = u.pk "
+					+ " join TAB_UNIT_H uh on uh.unitPk = u.pk and now() between uh.effectiveDateFrom and uh.effectiveDateTo "
+					+ " join TAB_PROJECT p on uth.projectPk = p.pk  "
+					+ " join TAB_WORKSTATION w on uth.workstationPk = w.pk  and w.pk != " + dummyWorkstation.getPk()
+					+ " join site on w.sitePk = site.pk"
+					+ " join TAB_SURVEY f on tfa.formFk = f.pk "
+					+ " join unit_project_ref upr on upr.unitPk = uth.unitPk and upr.projectPk = uth.projectPk "
+					+ " join unit_project_ref_h uprh on uprh.unitInProjectPk = upr.pk and now() between uprh.effectiveDateFrom and uprh.effectiveDateTo and uprh.status != 'Removed' "
+					+ " join project_part pp on uprh.projectPartPk = pp.pk "
+					+ " join part on pp.partPk = part.pk "
+					+ " join part_type partType on pp.partTypePk = partType.pk  "
+					+ " left outer join TAB_UNIT_LOCATION ul on uth.unitPk = ul.unitPk and uth.projectPk = ul.projectPk and uth.workstationPk = ul.workstationPk and ul.current = 1"
+					+ " left outer join TAB_RESPONSE res on res.testProcPk = ut.pk and res.surveyPk = tfa.formFk and res.current = 1"
+					+ " left outer join entity_schedule es on es.objectPk = ut.pk and es.objectType = " + EntityTypeEnum.TestProc.getValue() + " and now() between es.effectiveDateFrom and es.effectiveDateTo "
+					+ " left outer join TAB_USER esUser on es.createdBy = esUser.pk "
+					+ " left join TAB_USER prepUser on res.userPk = prepUser.pk "
+					+ " left join TAB_USER verifyUser on res.verifiedBy = verifyUser.pk "
+					+ " left join TAB_USER apprUser on res.approvedBy = apprUser.pk "
+					+ " where 1 = 1";
+		}
+		return sql;
+	}
 }
 
