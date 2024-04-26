@@ -28,10 +28,15 @@ public class PersistWrapperImpl implements PersistWrapper {
 	}
 
 	@Override
+	public AbstractEntity readByResponseId(Class <? extends AbstractEntity> objectClass, long id)
+	{
+		return context.getBean(GenericJpaDao.class).findOne(objectClass, id);
+	}
+	@Override
 	public <T> T read(final Class<T> objectClass, final String sql, final Object...parameters)
 	{
 		if(objectClass == Integer.class || objectClass == Long.class)
-			return jdbcTemplate.queryForObject(sql, objectClass);
+			return jdbcTemplate.queryForObject(sql, objectClass, parameters);
 		else
 		{
 			RowMapper<T> rowMapper = BeanPropertyRowMapper.newInstance(objectClass);
