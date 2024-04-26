@@ -9,6 +9,8 @@ public interface PersistWrapper {
 
 	AbstractEntity readByPrimaryKey(final Class <? extends AbstractEntity> objectClass, long id);
 
+	AbstractEntity readByResponseId(final Class <? extends AbstractEntity> objectClass, long id);
+
 	<T> List<T> readList(final Class<T> objectClass, final String sql, final Object...parameters);
 
 	<T> T read(final Class<T> objectClass, final String sql, final Object...parameters);
