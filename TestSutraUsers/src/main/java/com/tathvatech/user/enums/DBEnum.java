@@ -16,14 +16,14 @@ import com.tathvatech.ts.core.common.EStatusEnum;
 import com.tathvatech.ts.core.common.TSBeanBase;
 
 
-public abstract class DBEnum extends TSBeanBase implements
+public abstract class DBEnum extends TSBeanBase implements BaseEnum
 {
 	private static HashMap<String, DBEnumCacheValues> cache = new HashMap<String, DBEnumCacheValues>();
 
 	@Override
 	public abstract int getPk();
 	public abstract void setPk(int val);
-	@OverrideBaseEnum
+	@Override
 	public Integer getValue()
 	{
 		return getPk();
