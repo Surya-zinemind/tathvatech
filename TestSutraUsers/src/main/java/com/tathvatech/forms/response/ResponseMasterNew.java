@@ -40,13 +40,13 @@ public class ResponseMasterNew implements Serializable
 	private String	preparedByFirstName;
 	private String	preparedByLastName;
 
-	private int	verifiedByPk;
+	private Integer	verifiedByPk;
 	private String	verifiedByFirstName;
 	private String	verifiedByLastName;
 	private Date	verifiedDate;
 	private String verifyComment;
 
-	private int	approvedByPk;
+	private Integer	approvedByPk;
 	private String	approvedByFirstName;
 	private String	approvedByLastName;
 	private Date	approvedDate;
@@ -186,13 +186,12 @@ public class ResponseMasterNew implements Serializable
 		this.preparedByLastName = preparedByLastName;
 	}
 
-	public int getVerifiedByPk()
-	{
+
+	public Integer getVerifiedByPk() {
 		return verifiedByPk;
 	}
 
-	public void setVerifiedByPk(int verifiedByPk)
-	{
+	public void setVerifiedByPk(Integer verifiedByPk) {
 		this.verifiedByPk = verifiedByPk;
 	}
 
@@ -226,10 +225,7 @@ public class ResponseMasterNew implements Serializable
 		this.verifiedDate = verifiedDate;
 	}
 
-	public int getApprovedByPk()
-	{
-		return approvedByPk;
-	}
+
 
 	public String getVerifyComment()
 	{
@@ -241,8 +237,11 @@ public class ResponseMasterNew implements Serializable
 		this.verifyComment = verifyComment;
 	}
 
-	public void setApprovedByPk(int approvedByPk)
-	{
+	public Integer getApprovedByPk() {
+		return approvedByPk;
+	}
+
+	public void setApprovedByPk(Integer approvedByPk) {
 		this.approvedByPk = approvedByPk;
 	}
 

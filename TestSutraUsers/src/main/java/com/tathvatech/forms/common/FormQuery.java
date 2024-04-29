@@ -1,5 +1,6 @@
 package com.tathvatech.forms.common;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.tathvatech.common.utils.ListStringUtil;
 import com.tathvatech.user.OID.FormOID;
 
@@ -31,7 +32,7 @@ public class FormQuery
 	private Date createdDate;
 	private int versionNo;
 	private String versionComment;
-	private int superseded;
+	private Integer superseded;
 	
 	private String status;
 	public int getPk()
@@ -228,12 +229,11 @@ public class FormQuery
 		return versionComment;
 	}
 
-	public int getSuperseded()
-	{
+	public Integer getSuperseded() {
 		return superseded;
 	}
-	public void setSuperseded(int superseded)
-	{
+
+	public void setSuperseded(Integer superseded) {
 		this.superseded = superseded;
 	}
 

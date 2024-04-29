@@ -53,10 +53,12 @@ import com.tathvatech.workstation.service.WorkstationService;
 import com.tathvatech.unit.common.UnitFormQuery;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.output.XMLOutputter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -1301,8 +1303,8 @@ public class FormController {
     }
 
 */
-    @GetMapping("/getTestListOnItem")
-    public ResponseEntity<Element> getTestListOnItem() throws Exception
+    @GetMapping(value = "/getTestListOnItem",produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity<String> getTestListOnItem() throws Exception
     {
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<String> tests = new ArrayList<String>();
@@ -1324,7 +1326,8 @@ public class FormController {
                 message = e.getMessage();
             }
             Document doc = createReturnXML(status, message, tests);
-            return ResponseEntity.ok(doc.getRootElement());
+            String xmlString = new XMLOutputter().outputString(doc);
+            return ResponseEntity.ok(xmlString);
         }
         catch (Exception e)
         {
@@ -2589,8 +2592,8 @@ public class FormController {
          return aBean;
      }
  */
-    @GetMapping("/getSignatureCaptureAnswerTypeBean")
-    private FormItemBase getSignatureCaptureAnswerTypeBean(@RequestBody  SurveyItem sItem)
+
+    private FormItemBase getSignatureCaptureAnswerTypeBean(SurveyItem sItem)
     {
         SignatureCaptureAnswerType item = (SignatureCaptureAnswerType) sItem;
 

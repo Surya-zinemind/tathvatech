@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 public class GetQuestionsToSaveResponsesForRequest {
-    private SurveyDefinition surveyDef;
+    private Integer formPk;
     private List<Section> surveyQuestions;
     private FormResponseOID responseOID;
 }

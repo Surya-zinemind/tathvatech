@@ -58,7 +58,7 @@ public class WorkstationServiceImpl implements WorkstationService{
     private final PersistWrapper persistWrapper;
 
     private final SiteService siteService;
-    private TestProcDAO testProcDAO;
+    private final TestProcDAO testProcDAO;
     
     private final AccountService accountService;
 

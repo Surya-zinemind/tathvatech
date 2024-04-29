@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class GetSurveyResponseRequest {
-    private SurveyDefinition surveyDef;
+    private Integer formPk;
     private int responseId;
 }

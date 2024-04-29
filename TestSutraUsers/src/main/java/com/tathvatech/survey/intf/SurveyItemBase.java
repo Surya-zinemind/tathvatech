@@ -39,7 +39,7 @@ public abstract class SurveyItemBase {
      */
     public abstract void setConfiguration(Element element);
 
-    public abstract void setConfiguration(List<List<String>> fileContents);
+    //public abstract void setConfiguration(List<List<String>> fileContents);
 
     public abstract Element toXML();
 

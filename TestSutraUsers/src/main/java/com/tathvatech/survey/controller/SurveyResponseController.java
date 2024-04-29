@@ -24,6 +24,7 @@ import com.tathvatech.survey.common.*;
 import com.tathvatech.survey.entity.ResponseSubmissionBookmark;
 import com.tathvatech.survey.entity.Survey;
 import com.tathvatech.survey.response.SurveyItemResponse;
+import com.tathvatech.survey.service.SurveyDefFactory;
 import com.tathvatech.survey.service.SurveyMasterService;
 import com.tathvatech.survey.service.WorkflowManager;
 import com.tathvatech.unit.enums.Actions;
@@ -44,6 +45,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,6 +77,7 @@ public class SurveyResponseController
     private final WorkstationService workstationService;
 	private final PersistWrapper persistWrapper;
 	private  final WorkflowManager workflowManager;
+	private final SurveyDefFactory surveyDefFactory;
 
     /**
      * Called when the workstation is changed to in progress
@@ -602,7 +605,9 @@ public class SurveyResponseController
 	public  List getSurveyItemResponse(@RequestBody GetSurveyItemResponseRequest getSurveyItemResponseRequest)
 	    throws Exception
     {
-    	return surveyResponseService.getSurveyItemResponse(getSurveyItemResponseRequest.getSurveyDef(),
+		SurveyDefinition surveyDefinition = surveyDefFactory
+				.getSurveyDefinition(new FormOID(getSurveyItemResponseRequest.getFormPk(), null));
+    	return surveyResponseService.getSurveyItemResponse(surveyDefinition,
 		getSurveyItemResponseRequest.getSurveyItemId(), getSurveyItemResponseRequest.getResponseMasterSet());
     }
 
@@ -615,7 +620,9 @@ public class SurveyResponseController
 	@GetMapping("/getSurveyResponse")
 	public  SurveyResponse getSurveyResponse(@RequestBody GetSurveyResponseRequest getSurveyResponseRequest) throws Exception
     {
-    	return surveyResponseService.getSurveyResponse(getSurveyResponseRequest.getSurveyDef(), getSurveyResponseRequest.getResponseId());
+		SurveyDefinition surveyDefinition = surveyDefFactory
+				.getSurveyDefinition(new FormOID(getSurveyResponseRequest.getFormPk(), null));
+    	return surveyResponseService.getSurveyResponse(surveyDefinition, getSurveyResponseRequest.getResponseId());
     }
 
 
@@ -854,7 +861,9 @@ public class SurveyResponseController
 	{
 		UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		boolean hasSectionsLockedByOthers = false;
-		for (Iterator iter = getQuestionsToSaveResponsesForRequest.getSurveyDef().getQuestions().iterator(); iter.hasNext();)
+		SurveyDefinition surveyDefinition = surveyDefFactory
+				.getSurveyDefinition(new FormOID(getQuestionsToSaveResponsesForRequest.getFormPk(), null));
+		for (Iterator iter = surveyDefinition.getQuestions().iterator(); iter.hasNext();)
 		{
 			SurveyItem aItem = (SurveyItem) iter.next();
 			if(aItem instanceof Section)
@@ -881,7 +890,7 @@ public class SurveyResponseController
 		return hasSectionsLockedByOthers;
 	}
 
-	@GetMapping("/validateResponse")
+	@PostMapping (value = "/validateResponse", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public  LinkedHashMap<String, List<String>> validateResponse(@RequestBody ValidateResponseRequest validateResponseRequest)
 	{
 		LinkedHashMap<String, List<String>> errors = new LinkedHashMap<String, List<String>>();

@@ -62,8 +62,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-
-
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -760,7 +759,7 @@ if(formQuery!=null) {
     @Override
     public synchronized  ObjectLock lockSectionToEdit(UserContext context, User lockForUser, FormResponseOID responseOID, String sectionId)throws LockedByAnotherUserException, Exception
     {
-        FormResponseMaster respMaster /*= persistWrapper.readByResponseId(FormResponseMaster.class, responseOID.getPk())*/ = null;
+        FormResponseMaster respMaster = (FormResponseMaster) persistWrapper.readByResponseId(FormResponseMaster.class, responseOID.getPk());
         FormSection formSection = formDBManager.getFormSection(sectionId, respMaster.getSurveyPk());
 
         ObjectLock objectLock = persistWrapper.read(ObjectLock.class, "select * from tab_sectionlock where " +
@@ -963,6 +962,7 @@ if(formQuery!=null) {
         }
         return null;
     }
+    @Transactional
     @Override
     public  PdfTemplatePrintLocationConfig saveFormPrintTemplateLocationConfig(UserContext context, FormOID formOID, PdfTemplatePrintLocationConfig config) throws Exception
     {

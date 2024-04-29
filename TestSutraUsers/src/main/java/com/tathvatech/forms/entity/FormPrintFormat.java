@@ -14,6 +14,7 @@ import com.tathvatech.user.OID.Authorizable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 
 /**
@@ -31,7 +32,9 @@ public class FormPrintFormat extends AbstractEntity implements Serializable
 	private long pk;
 	private long formFk;
 	private String printClassName;
+	@Transient
 	private String templateName;
+	@Transient
 	private String printAreaDef;
 	private Date lastUpdated;
 

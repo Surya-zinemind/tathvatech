@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class GetSurveyItemResponseRequest {
-    private SurveyDefinition surveyDef;
+    private Integer formPk;
    private String surveyItemId;
    private ResponseMaster[] responseMasterSet;
 }

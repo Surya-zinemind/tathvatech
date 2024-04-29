@@ -23,6 +23,7 @@ import com.tathvatech.forms.oid.FormResponseOID;
 import com.tathvatech.forms.response.ResponseMasterNew;
 import com.tathvatech.pdf.config.PdfTemplatePrintLocationConfig;
 import com.tathvatech.survey.Request.*;
+import com.tathvatech.survey.common.WorkItemType;
 import com.tathvatech.survey.entity.Survey;
 import com.tathvatech.survey.exception.LockedByAnotherUserException;
 import com.tathvatech.survey.service.SurveyMasterService;
@@ -224,7 +225,7 @@ public class SurveyController {
     }
 
     @GetMapping("/getAttributionUser")
-    public  UserQuery getAttributionUser(@RequestBody WorkItem workItem) throws Exception {
+    public  UserQuery getAttributionUser(@RequestBody WorkItemType workItem) throws Exception {
         return surveyMasterService.getAttributionUser(workItem);
     }
 
@@ -238,7 +239,7 @@ public class SurveyController {
     }
 
     @PutMapping("/resetAttribution")
-    public void resetAttribution(@RequestBody WorkItem workItem) throws Exception {
+    public void resetAttribution(@RequestBody WorkItemType workItem) throws Exception {
         UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         surveyMasterService.resetAttribution(context, workItem);
 
