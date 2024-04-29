@@ -41,6 +41,9 @@ import com.tathvatech.workstation.common.UnitInProjectObj;
 import com.tathvatech.workstation.entity.UnitWorkstation;
 import com.tathvatech.workstation.oid.UnitWorkstationOID;
 import com.tathvatech.workstation.service.WorkstationService;
+import lombok.NonNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +51,6 @@ import java.util.*;
 import java.util.logging.Logger;
 
 @Service
-
 public class FormServiceImpl implements  FormService{
     private  final Logger logger = Logger.getLogger(String.valueOf(FormServiceImpl.class));
 
@@ -60,11 +62,15 @@ public class FormServiceImpl implements  FormService{
     private final UnitManager unitManager;
     private final CommonServiceManager commonServiceManager;
     private final UnitInProjectDAO unitInProjectDAO;
+
+    private final  TestProcDAO testProcDAO;
     private final SurveyResponseService surveyResponseService;
     private final SurveyDefFactory surveyDefFactory;
     private final UnitFormQuery unitFormQuery;
 
-    public FormServiceImpl(TestProcService testProcService, DummyWorkstation dummyWorkstation, PersistWrapper persistWrapper, @Lazy SurveyMasterService surveyMasterService, WorkstationService workstationService, UnitManager unitManager, CommonServiceManager commonServiceManager, UnitInProjectDAO unitInProjectDAO, SurveyResponseService surveyResponseService, SurveyDefFactory surveyDefFactory, UnitFormQuery unitFormQuery) {
+   private final TestProcOID testProcOID;
+
+    public FormServiceImpl(TestProcService testProcService, DummyWorkstation dummyWorkstation, PersistWrapper persistWrapper, @Lazy SurveyMasterService surveyMasterService, WorkstationService workstationService, UnitManager unitManager, CommonServiceManager commonServiceManager, UnitInProjectDAO unitInProjectDAO, TestProcDAO testProcDAO, SurveyResponseService surveyResponseService, SurveyDefFactory surveyDefFactory, UnitFormQuery unitFormQuery, TestProcOID testProcOID) {
         this.testProcService = testProcService;
         this.dummyWorkstation = dummyWorkstation;
         this.persistWrapper = persistWrapper;
@@ -73,9 +79,12 @@ public class FormServiceImpl implements  FormService{
         this.unitManager = unitManager;
         this.commonServiceManager = commonServiceManager;
         this.unitInProjectDAO = unitInProjectDAO;
+        this.testProcDAO = testProcDAO;
+
         this.surveyResponseService = surveyResponseService;
         this.surveyDefFactory = surveyDefFactory;
         this.unitFormQuery = unitFormQuery;
+        this.testProcOID = testProcOID;
     }
 
     @Override
@@ -85,20 +94,22 @@ public class FormServiceImpl implements  FormService{
         Date now = DateUtils.getNowDateForEffectiveDateFrom();
 
         UnitFormQuery testProc = testProcService.getTestProcQuery((int) testProcOID.getPk());
+        if(objectScheduleRequestBean!=null){
         if (Objects.equals(objectScheduleRequestBean.getStartForecast(), testProc.getForecastStartDate())
                 && Objects.equals(objectScheduleRequestBean.getEndForecast(), testProc.getForecastEndDate())
                 && Objects.equals(objectScheduleRequestBean.getHoursEstimate(), testProc.getForecastHours()))
+
         {
             return;
-        } else
-        {
+        }} else
+        { if(objectScheduleRequestBean!=null) {
             EntitySchedule es = persistWrapper.read(EntitySchedule.class,
                     "select * from entity_schedule where objectPk = ? and objectType = ? and now() between effectiveDateFrom and effectiveDateTo",
                     objectScheduleRequestBean.getObjectOID().getPk(),
                     objectScheduleRequestBean.getObjectOID().getEntityType().getValue());
 
-            if (es == null)
-            {
+
+            if (es == null) {
                 es = new EntitySchedule();
                 es.setObjectPk((int) objectScheduleRequestBean.getObjectOID().getPk());
                 es.setObjectType(objectScheduleRequestBean.getObjectOID().getEntityType().getValue());
@@ -110,8 +121,7 @@ public class FormServiceImpl implements  FormService{
                 es.setEffectiveDateFrom(now);
                 es.setEffectiveDateTo(DateUtils.getMaxDate());
                 persistWrapper.createEntity(es);
-            } else
-            {
+            } else {
                 Calendar calEx = new GregorianCalendar();
                 calEx.setTime(es.getCreatedDate());
                 calEx.setTimeZone(TimeZone.getTimeZone(testProc.getWorkstationTimezoneId()));
@@ -124,15 +134,13 @@ public class FormServiceImpl implements  FormService{
                 // so just update. else we create a history record.
                 if (calEx.get(Calendar.DAY_OF_MONTH) == calNow.get(Calendar.DAY_OF_MONTH)
                         && calEx.get(Calendar.MONTH) == calNow.get(Calendar.MONTH)
-                        && calEx.get(Calendar.YEAR) == calNow.get(Calendar.YEAR))
-                {
+                        && calEx.get(Calendar.YEAR) == calNow.get(Calendar.YEAR)) {
                     // so update
                     es.setForecastStartDate(objectScheduleRequestBean.getStartForecast());
                     es.setForecastEndDate(objectScheduleRequestBean.getEndForecast());
                     es.setEstimateHours(objectScheduleRequestBean.getHoursEstimate());
                     persistWrapper.update(es);
-                } else
-                {
+                } else {
                     // invalidate old and create new
                     es.setEffectiveDateTo(new Date(now.getTime() - 1000));
                     persistWrapper.update(es);
@@ -151,6 +159,7 @@ public class FormServiceImpl implements  FormService{
                 }
             }
         }
+        }
 
     }
 
@@ -168,11 +177,14 @@ public class FormServiceImpl implements  FormService{
 
         // create a hashmap of UnitWorkstationOID and the wsStatusSummary
         HashMap<UnitWorkstationOID, UnitWorkstationListReportResultRow> unitWorkstationMap = new HashMap<UnitWorkstationOID, UnitWorkstationListReportResultRow>();
-        for (Iterator iterator = wsSummaryRows.iterator(); iterator.hasNext();)
-        {
-            UnitWorkstationListReportResultRow unitWorkstationRow = (UnitWorkstationListReportResultRow) iterator
-                    .next();
-            unitWorkstationMap.put(new UnitWorkstationOID(unitWorkstationRow.getPk()), unitWorkstationRow);
+        if(wsSummaryRows!=null) {
+            for (Iterator iterator = wsSummaryRows.iterator(); iterator.hasNext(); ) {
+                UnitWorkstationListReportResultRow unitWorkstationRow = (UnitWorkstationListReportResultRow) iterator
+                        .next();
+                unitWorkstationMap.put(new UnitWorkstationOID(unitWorkstationRow.getPk()), unitWorkstationRow);
+            }
+        }else{
+
         }
 
         // load all the testprocs and create a hashmap of the TestProcOID and
@@ -183,10 +195,11 @@ public class FormServiceImpl implements  FormService{
         filter.setFetchWorkstationForecastAsTestForecast(false);
         List<UnitFormQuery> list = new TestProcListReport(context, filter, persistWrapper,  unitManager, dummyWorkstation).getTestProcs();
         HashMap<TestProcOID, UnitFormQuery> testProcMap = new HashMap<TestProcOID, UnitFormQuery>();
-        for (Iterator iterator = list.iterator(); iterator.hasNext();)
-        {
-            UnitFormQuery unitFormQuery = (UnitFormQuery) iterator.next();
-            testProcMap.put(new TestProcOID(unitFormQuery.getPk()), unitFormQuery);
+        if(list!=null) {
+            for (Iterator iterator = list.iterator(); iterator.hasNext(); ) {
+                UnitFormQuery unitFormQuery = (UnitFormQuery) iterator.next();
+                testProcMap.put(new TestProcOID(unitFormQuery.getPk()), unitFormQuery);
+            }
         }
 
         // load all the testprocs sections and create a hashmap of the
@@ -199,10 +212,11 @@ public class FormServiceImpl implements  FormService{
         List<TestProcSectionListReportResultRow> secList = new TestProcSectionListReport(context, secFilter, persistWrapper,  dummyWorkstation, unitManager)
                 .getTestProcs();
         HashMap<TestProcSectionOID, TestProcSectionListReportResultRow> testProcSectionMap = new HashMap<TestProcSectionOID, TestProcSectionListReportResultRow>();
-        for (Iterator iterator = secList.iterator(); iterator.hasNext();)
-        {
-            TestProcSectionListReportResultRow aSection = (TestProcSectionListReportResultRow) iterator.next();
-            testProcSectionMap.put(new TestProcSectionOID(aSection.getPk()), aSection);
+        if(secList!=null) {
+            for (Iterator iterator = secList.iterator(); iterator.hasNext(); ) {
+                TestProcSectionListReportResultRow aSection = (TestProcSectionListReportResultRow) iterator.next();
+                testProcSectionMap.put(new TestProcSectionOID(aSection.getPk()), aSection);
+            }
         }
 
         // now loop through the scheduleList from ui. and find the matching
@@ -265,7 +279,9 @@ public class FormServiceImpl implements  FormService{
     {
         List<WorkstationOID> workstations = new ArrayList<WorkstationOID>();
 
+
         UnitInProjectObj unitInProject = unitInProjectDAO.getUnitInProject(unitOIDToMoveTo, projectOIDToMoveTo);
+
         if (unitInProject == null)
             throw new AppException("Invalid target unit, or target unit is not part of the project.");
 
@@ -287,8 +303,8 @@ public class FormServiceImpl implements  FormService{
         {
             TestProcOID testProcOID = (TestProcOID) iterator.next();
 
-            TestProcDAO dao = new TestProcDAO();
-            TestProcObj testProc = dao.getTestProc((int) testProcOID.getPk());
+           ;
+            TestProcObj testProc = testProcDAO.getTestProc((int) testProcOID.getPk());
 
             if (testProc.getUnitPk() == unitOIDToMoveTo.getPk())
                 continue;
@@ -334,7 +350,7 @@ public class FormServiceImpl implements  FormService{
             }
 
             testProc.setUnitPk((int) unitOIDToMoveTo.getPk());
-            dao.saveTestProc(userContext, testProc);
+            testProcDAO.saveTestProc(userContext, testProc);
         }
 
         // now set the workstation status to Inprogress if the are inprogress
@@ -394,7 +410,7 @@ public class FormServiceImpl implements  FormService{
         HashMap<String, UnitFormQuery> targetUnitTestMap = new HashMap<String, UnitFormQuery>();
         if (selectedTestProcs.size() > 0)
         {
-            TestProcObj aTest = new TestProcDAO().getTestProc((int) selectedTestProcs.get(0).getPk());
+            TestProcObj aTest =testProcDAO.getTestProc((int) selectedTestProcs.get(0).getPk());
             int rootUnitPk = unitManager.getRootUnitPk(new UnitOID(aTest.getUnitPk()),
                     new ProjectOID(aTest.getProjectPk()));
 
@@ -416,8 +432,8 @@ public class FormServiceImpl implements  FormService{
         {
             TestProcOID testProcOID = (TestProcOID) iterator.next();
 
-            TestProcDAO dao = new TestProcDAO();
-            TestProcObj testProc = dao.getTestProc((int) testProcOID.getPk());
+
+            TestProcObj testProc = testProcDAO.getTestProc((int) testProcOID.getPk());
 
             Survey form = surveyMasterService.getSurveyByPk(testProc.getFormPk());
 
@@ -449,7 +465,7 @@ public class FormServiceImpl implements  FormService{
                 } else
                 {
                     testProc.setName(newName);
-                    dao.saveTestProc(userContext, testProc);
+                    testProcDAO.saveTestProc(userContext, testProc);
                 }
 
             }
@@ -477,7 +493,7 @@ public class FormServiceImpl implements  FormService{
     }
 
     @Override
-    public  TestProcObj upgradeFormForUnit(UserContext context, TestProcOID testProcOID, int surveyPk)
+    public  TestProcObj upgradeFormForUnit(UserContext context,@Autowired TestProcOID testProcOID, int surveyPk)
             throws Exception
     {
         // we have to delete the responses for the selected projects
@@ -494,46 +510,47 @@ public class FormServiceImpl implements  FormService{
         // int[]{aResponse.getResponseId()});
         // }
 
-        TestProcDAO tpDAO = new TestProcDAO();
-        TestProcObj testProc = tpDAO.getTestProc((int) testProcOID.getPk());
+if(testProcOID!=null) {
+    TestProcObj testProc = testProcDAO.getTestProc((int) testProcOID.getPk());
 
-        // now mark the old response as old and create the new dummy response
-        // for the updated testProc if one existed for it...
-        ResponseMasterNew response = surveyResponseService.getLatestResponseMasterForTest(testProc.getOID());
-        if (response != null && response.getFormPk() != surveyPk)
-        {
-            // means the response for this testProc already exists.. now the
-            // formPk on the testProc changes..
-            surveyResponseService.markResponseAsOld(context, response);
-        }
+    // now mark the old response as old and create the new dummy response
+    // for the updated testProc if one existed for it...
+    ResponseMasterNew response = surveyResponseService.getLatestResponseMasterForTest(testProc.getOID());
+    if (response != null && response.getFormPk() != surveyPk) {
+        // means the response for this testProc already exists.. now the
+        // formPk on the testProc changes..
+        surveyResponseService.markResponseAsOld(context, response);
+    }
 
-        // update the formPk in the testProc. A new _H record will get created.
-        testProc.setFormPk(surveyPk);
-        testProc.setAppliedByUserFk((int) context.getUser().getPk());
-        testProc = tpDAO.saveTestProc(context, testProc);
+    // update the formPk in the testProc. A new _H record will get created.
+    testProc.setFormPk(surveyPk);
+    testProc.setAppliedByUserFk((int) context.getUser().getPk());
+    testProc = testProcDAO.saveTestProc(context, testProc);
 
-        // create the new dummy response for the updated testProc if one existed
-        // for the old response...
-        if (response != null && response.getFormPk() != surveyPk)
-        {
-            SurveyDefinition sd = surveyDefFactory.getSurveyDefinition(new FormOID(surveyPk, null));
-            SurveyResponse sResponse = new SurveyResponse(sd);
-            sResponse.setSurveyPk(surveyPk);
-            sResponse.setTestProcPk(testProc.getPk());
-            sResponse.setResponseStartTime(new Date());
-            sResponse.setResponseCompleteTime(new Date());
-            // ipaddress and mode set
-            sResponse.setIpaddress("0.0.0.0");
-            sResponse.setResponseMode(SurveyForm.RESPONSEMODE_NORMAL);
-            sResponse.setUser((User) context.getUser());
-            sResponse = surveyResponseService.ceateDummyResponse(context, sResponse);
-            // the createDummyResponse automatically creates a new workflow
-            // entry for you..
-            // so we need not create another one..
-            logger.info("Created the new dummy response");
-        }
+    // create the new dummy response for the updated testProc if one existed
+    // for the old response...
+    if (response != null && response.getFormPk() != surveyPk) {
+        SurveyDefinition sd = surveyDefFactory.getSurveyDefinition(new FormOID(surveyPk, null));
+        SurveyResponse sResponse = new SurveyResponse(sd);
+        sResponse.setSurveyPk(surveyPk);
+        sResponse.setTestProcPk(testProc.getPk());
+        sResponse.setResponseStartTime(new Date());
+        sResponse.setResponseCompleteTime(new Date());
+        // ipaddress and mode set
+        sResponse.setIpaddress("0.0.0.0");
+        sResponse.setResponseMode(SurveyForm.RESPONSEMODE_NORMAL);
+        sResponse.setUser((User) context.getUser());
+        sResponse = surveyResponseService.ceateDummyResponse(context, sResponse);
+        // the createDummyResponse automatically creates a new workflow
+        // entry for you..
+        // so we need not create another one..
+        logger.info("Created the new dummy response");
+    }
 
-        return testProc;
+
+    return testProc;
+}
+        return null;
     }
     public  List<AssignedTestsQuery> getAssignedFormsNew(UserOID user, String role) throws Exception
     {

@@ -58,6 +58,7 @@ public class WorkstationServiceImpl implements WorkstationService{
     private final PersistWrapper persistWrapper;
 
     private final SiteService siteService;
+    private TestProcDAO testProcDAO;
     
     private final AccountService accountService;
 
@@ -649,8 +650,8 @@ public class WorkstationServiceImpl implements WorkstationService{
     {
         try
         {
-            TestProcDAO dao = new TestProcDAO();
-            TestProcObj testProc = dao.getTestProc((int) testProcOID.getPk());
+
+            TestProcObj testProc =testProcDAO.getTestProc((int) testProcOID.getPk());
             UnitLocation currentRec = getUnitWorkstation(testProc.getUnitPk(),
                     new ProjectOID(testProc.getProjectPk(), null),
                     new WorkstationOID(testProc.getWorkstationPk(), null));
@@ -674,8 +675,8 @@ public class WorkstationServiceImpl implements WorkstationService{
     {
         try
         {
-            TestProcDAO dao = new TestProcDAO();
-            TestProcObj testProc = dao.getTestProc((int) testProcOID.getPk());
+
+            TestProcObj testProc =testProcDAO.getTestProc((int) testProcOID.getPk());
             UnitLocation currentRec = getUnitWorkstation(testProc.getUnitPk(),
                     new ProjectOID(testProc.getProjectPk(), null),
                     new WorkstationOID(testProc.getWorkstationPk(), null));
@@ -699,8 +700,8 @@ public class WorkstationServiceImpl implements WorkstationService{
     {
         try
         {
-            TestProcDAO dao = new TestProcDAO();
-            TestProcObj testProc = dao.getTestProc((int) testProcOID.getPk());
+
+            TestProcObj testProc = testProcDAO.getTestProc((int) testProcOID.getPk());
             UnitLocation currentRec = getUnitWorkstation(testProc.getUnitPk(),
                     new ProjectOID(testProc.getProjectPk(), null),
                     new WorkstationOID(testProc.getWorkstationPk(), null));
@@ -724,8 +725,8 @@ public class WorkstationServiceImpl implements WorkstationService{
     {
         try
         {
-            TestProcDAO dao = new TestProcDAO();
-            TestProcObj testProc = dao.getTestProc((int) testProcOID.getPk());
+
+            TestProcObj testProc = testProcDAO.getTestProc((int) testProcOID.getPk());
             UnitLocation currentRec = getUnitWorkstation(testProc.getUnitPk(),
                     new ProjectOID(testProc.getProjectPk(), null),
                     new WorkstationOID(testProc.getWorkstationPk(), null));

@@ -3,12 +3,14 @@ package com.tathvatech.workstation.common;
 
 
 import com.tathvatech.unit.oid.UnitInProjectOID;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
 
 
 
+@Component
 public class UnitInProjectObj
 {
 	private int pk;

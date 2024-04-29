@@ -16,6 +16,7 @@ import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,6 +27,7 @@ import java.util.Objects;
 import java.util.logging.Logger;
 
 
+@Repository
 public class TestProcDAO
 {
 	@Autowired

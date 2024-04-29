@@ -54,6 +54,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UnitServiceImpl implements UnitService{
     private final UnitInProjectDAO unitInProjectDAO;
+    private TestProcDAO testProcDAO;
     private final TestProcServiceImpl testProcService;
     private final PersistWrapper persistWrapper;
     private final AndonManager andonManager;
@@ -629,7 +630,7 @@ public class UnitServiceImpl implements UnitService{
             unitForm.setName(pForm.getName());
             unitForm.setAppliedByUserFk(pForm.getAppliedByUserFk());
 
-            new TestProcDAO().saveTestProc(context, unitForm);
+            testProcDAO.saveTestProc(context, unitForm);
         }
     }
     public  void setUnitWorkstationStatus(UserContext userContext, int unitPk, ProjectOID projectOID,
@@ -997,7 +998,7 @@ public  void updateUnit(UnitObj unit) throws Exception
     public  void removeAllFormsFromUnit(UserContext context, int unitPk, ProjectOID projectOID,
                                               WorkstationOID workstationOID) throws Exception
     {
-        new TestProcDAO().deleteAllTestProcsMatching(context, new UnitOID(unitPk), projectOID, workstationOID);
+       testProcDAO.deleteAllTestProcsMatching(context, new UnitOID(unitPk), projectOID, workstationOID);
     }
 
     public  void deleteTestProcFromUnit(UserContext context, TestProcOID testProcOID) throws Exception
@@ -1011,7 +1012,7 @@ public  void updateUnit(UnitObj unit) throws Exception
             throw new FormApprovedException("The form is already approved, It cannot be removed.");
         }
 
-        new TestProcDAO().deleteTestProc(context, testProcOID);
+        testProcDAO.deleteTestProc(context, testProcOID);
     }
     //Fix after forms
    /* public  List<FormQuery> getAllFormsForUnit(UnitOID unitOID, ProjectOID projectOID) throws Exception
@@ -1839,7 +1840,7 @@ public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID p
         }
 
         // forms
-        TestProcDAO testProcDAO = new TestProcDAO();
+
         for (int i = 0; i < selectedUnitsForForm.length; i++)
         {
             int unitPk = selectedUnitsForForm[i];
@@ -1881,7 +1882,7 @@ public  void addReadonlyUserToUnit(UserContext context, int unitPk, ProjectOID p
                         if (previousRevTestProc != null)
                         {
                             // upgrade the testproc with the new form version
-                            TestProcObj testProc = new TestProcDAO().getTestProc(previousRevTestProc.getPk());
+                            TestProcObj testProc = testProcDAO.getTestProc(previousRevTestProc.getPk());
                             testProc.setFormPk(aPForm.getFormPk());
                             testProc.setAppliedByUserFk((int) context.getUser().getPk());
 

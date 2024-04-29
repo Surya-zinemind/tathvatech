@@ -50,13 +50,15 @@ import java.util.logging.Logger;
  */
 @Service
 
-@RequiredArgsConstructor
 public class TestProcServiceImpl implements TestProcService
 {
     private  final Logger logger = Logger.getLogger(String.valueOf(TestProcServiceImpl.class));
     private final PersistWrapper persistWrapper;
     private final UnitManager unitManager;
 	private final DummyWorkstation dummyWorkstation;
+	@Autowired
+	@Lazy
+	private   TestProcDAO testProcDAO;
 	@Autowired
 	@Lazy
 	private  SurveyDefFactory surveyDefFactory;
@@ -68,9 +70,17 @@ public class TestProcServiceImpl implements TestProcService
 	@Autowired
 	@Lazy
 	private  SurveyResponseService surveyResponseService;
-	private UnitFormQuery unitFormQuery;
+	private final UnitFormQuery unitFormQuery;
 
-	@Override
+    public TestProcServiceImpl(PersistWrapper persistWrapper, UnitManager unitManager, DummyWorkstation dummyWorkstation, TestProcSectionDAO testProcSectionDAO, UnitFormQuery unitFormQuery) {
+        this.persistWrapper = persistWrapper;
+        this.unitManager = unitManager;
+        this.dummyWorkstation = dummyWorkstation;
+        this.testProcSectionDAO = testProcSectionDAO;
+        this.unitFormQuery = unitFormQuery;
+    }
+
+    @Override
 	public  void activateTestProcs(UserContext userContext,
 								   List<UnitFormQuery> formsToActivate) throws Exception
 	{
@@ -158,7 +168,7 @@ public class TestProcServiceImpl implements TestProcService
 	@Override
 	public  TestProcObj getTestProc(int testProcPk) throws Exception
 	{
-		return new TestProcDAO().getTestProc(testProcPk);
+		return testProcDAO.getTestProc(testProcPk);
 	}
 	@Override
 	public  UnitFormQuery getTestProcQuery(int testProcPk)
@@ -204,12 +214,12 @@ public class TestProcServiceImpl implements TestProcService
 	@Override
 	public  TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 	{
-		return new TestProcDAO().getCurrentTestProcFormEntity(testProcOID);
+		return testProcDAO.getCurrentTestProcFormEntity(testProcOID);
 	}
 	@Override
 	public  List<TestProcFormAssignBean> getTestProcFormUpgradeHistory(TestProcOID testProcOID) throws Exception
 	{
-		return new TestProcDAO().getTestProcFormUpgradeHistory(testProcOID);
+		return testProcDAO.getTestProcFormUpgradeHistory(testProcOID);
 	}
 	@Override
 	public TestProcSectionObj getTestProcSection(TestProcOID testProcOID, FormSectionOID formSectionOID)
@@ -225,7 +235,7 @@ public class TestProcServiceImpl implements TestProcService
 	@Override
 	public  TestProcFormAssign getTestProcFormEntity(TestProcOID testProcOID, FormOID formOID)
 	{
-		return new TestProcDAO().getTestProcFormEntity(testProcOID, formOID);
+		return testProcDAO.getTestProcFormEntity(testProcOID, formOID);
 	}
 
 	@Override

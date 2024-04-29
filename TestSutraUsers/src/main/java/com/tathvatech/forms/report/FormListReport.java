@@ -8,11 +8,13 @@ import com.tathvatech.forms.enums.FormTypeEnum;
 import com.tathvatech.report.request.ReportRequest;
 import com.tathvatech.report.response.ReportResponse;
 import com.tathvatech.survey.entity.Survey;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
+@Component
 public class FormListReport
 {
 	private final PersistWrapper persistWrapper;

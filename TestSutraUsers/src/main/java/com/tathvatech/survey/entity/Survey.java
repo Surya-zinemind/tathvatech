@@ -40,7 +40,7 @@ public class Survey extends AbstractEntity implements Serializable
 	private int responsibleDivision;
 	private int versionNo;
 	private String versionComment;
-	private int superseded;
+	private Integer superseded;
 	private int createdBy;
 	private Date createdDate;
 	private int approvedBy;
@@ -175,12 +175,12 @@ public class Survey extends AbstractEntity implements Serializable
 		this.versionComment = versionComment;
 	}
 
-	public int getSuperseded()
+	public Integer getSuperseded()
 	{
 		return superseded;
 	}
 
-	public void setSuperseded(int superseded)
+	public void setSuperseded(Integer superseded)
 	{
 		this.superseded = superseded;
 	}

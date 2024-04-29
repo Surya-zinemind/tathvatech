@@ -3,13 +3,14 @@ package com.tathvatech.report.request;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.tathvatech.forms.common.FormFilter;
 import com.tathvatech.forms.common.TestProcFilter;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({/* Uncomment later @JsonSubTypes.Type(value = OpenItemListReportFilter.class, name = "OpenItemListReportFilter"),
 		@JsonSubTypes.Type(value = OpenItemStatusSummaryReportRequest.class, name = "OpenItemStatusSummaryReportFilter"),
-		*/@JsonSubTypes.Type(value = TestProcFilter.class, name = "TestProcListReportFilter")/*,
+		*/@JsonSubTypes.Type(value = TestProcFilter.class, name = "TestProcListReportFilter"),@JsonSubTypes.Type(value = FormFilter.class, name = "FormFilter")/*,
 		@JsonSubTypes.Type(value = TestProcStatusSummaryReportRequest.class, name = "TestProcStatusSummaryReportFilter"),
 		@JsonSubTypes.Type(value = UserFilter.class, name = "UserListReportFilter"),
 		@JsonSubTypes.Type(value = NcrItemListReportFilter.class, name = "NcrItemListReportFilter"),

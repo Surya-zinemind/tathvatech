@@ -27,12 +27,15 @@ public class FormUpgradeRevertProcessor
 	private final WorkstationService workstationService;
     private final SurveyResponseService surveyResponseService;
 	private final PersistWrapper persistWrapper;
+	private  final TestProcDAO testProcDAO;
 	private final TestProcService testProcService;
 	private final SurveyMasterService surveyMasterService;
-    public FormUpgradeRevertProcessor(@Lazy WorkstationService workstationService, SurveyResponseService surveyResponseService, PersistWrapper persistWrapper, TestProcService testProcService, SurveyMasterService surveyMasterService) {
+    public FormUpgradeRevertProcessor(@Lazy WorkstationService workstationService, SurveyResponseService surveyResponseService, PersistWrapper persistWrapper, TestProcDAO testProcDAO, TestProcService testProcService, SurveyMasterService surveyMasterService) {
         this.workstationService = workstationService;
         this.surveyResponseService = surveyResponseService;
         this.persistWrapper = persistWrapper;
+        this.testProcDAO = testProcDAO;
+
         this.testProcService = testProcService;
         this.surveyMasterService = surveyMasterService;
     }
@@ -41,14 +44,15 @@ public class FormUpgradeRevertProcessor
 	public void process(TestProcOID testProcOID, FormOID currentFormOID, FormOID revertToFormOID) throws Exception
 	{
 		//make sure that the workstation is in Waiting status when reverting the form
-		TestProcObj testProc = new TestProcDAO().getTestProc((int) testProcOID.getPk());
+		TestProcObj testProc =testProcDAO.getTestProc((int) testProcOID.getPk());
 		UnitLocation unitLocation = workstationService.getUnitWorkstation(testProc.getUnitPk(), new ProjectOID(testProc.getProjectPk()), new WorkstationOID(testProc.getWorkstationPk()));
-		if(unitLocation != null 
-				&& (UnitLocation.STATUS_COMPLETED.equals(unitLocation.getStatus()) || UnitLocation.STATUS_IN_PROGRESS.equals(unitLocation.getStatus()) )
-				)
-		{
-			throw new AppException("Workstation should be in Waiting status before a form can be reverted.");
-		}
+
+			if (unitLocation != null
+					&& (UnitLocation.STATUS_COMPLETED.equals(unitLocation.getStatus()) || UnitLocation.STATUS_IN_PROGRESS.equals(unitLocation.getStatus()))
+			) {
+				throw new AppException("Workstation should be in Waiting status before a form can be reverted.");
+			}
+
 		
 		ResponseMasterNew respMasterCurrent = surveyResponseService.getLatestResponseMasterForTest(testProcOID);
 		if(respMasterCurrent != null && respMasterCurrent.getFormPk() != currentFormOID.getPk())

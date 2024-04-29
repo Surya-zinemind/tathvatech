@@ -157,14 +157,14 @@ public class UnitManager
 		}
 	}
 
-	public static UnitEntityQuery getUnitEntityQueryByPk(UnitOID unitOID)
+	public  UnitEntityQuery getUnitEntityQueryByPk(UnitOID unitOID)
 	{
 		List<UnitEntityQuery> list = null;
 		try
 		{
 			UnitEntityListReportRequest req = new UnitEntityListReportRequest();
 			req.setUnitOID(unitOID);
-			list = new UnitEntityListReport(req).runReport();
+			list = new UnitEntityListReport(req ,persistWrapper ).runReport();
 		}
 		catch (Exception e)
 		{

@@ -44,6 +44,7 @@ import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.Site;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.user.service.AccountService;
+import com.tathvatech.user.service.CommonServiceManager;
 import com.tathvatech.user.service.CommonServicesDelegate;
 import com.tathvatech.user.utils.DateUtils;
 import com.tathvatech.workstation.common.DummyWorkstation;
@@ -54,7 +55,9 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,9 +70,10 @@ public class FormController {
     private  final Logger logger = LoggerFactory.getLogger(FormController.class);
    private final FormService formService;
 
-    public FormController(@Lazy FormService formService, CommonServicesDelegate commonServicesDelegate, AccountService accountService, @Lazy FormUpgradeRevertProcessor formUpgradeRevertProcessor, NcrDelegate ncrDelegate, ProjectService projectService, WorkorderManager workorderManager, TestProcService testProcService, PersistWrapper persistWrapper, UnitManager unitManager, @Lazy UnitService unitService, DummyWorkstation dummyWorkstation, SurveyResponseService surveyResponseService, SurveyMasterService surveyMasterService, SiteService siteService, FormDBManager formDBManager, WorkstationService workstationService, SurveyDefFactory surveyDefFactory) {
+    public FormController(@Lazy FormService formService, CommonServiceManager commonServiceManager, AccountService accountService, @Lazy FormUpgradeRevertProcessor formUpgradeRevertProcessor, NcrDelegate ncrDelegate, ProjectService projectService, WorkorderManager workorderManager, TestProcService testProcService, PersistWrapper persistWrapper, UnitManager unitManager, @Lazy UnitService unitService, DummyWorkstation dummyWorkstation, SurveyResponseService surveyResponseService, SurveyMasterService surveyMasterService, SiteService siteService, FormDBManager formDBManager, WorkstationService workstationService, SurveyDefFactory surveyDefFactory) {
         this.formService = formService;
-        this.commonServicesDelegate = commonServicesDelegate;
+        this.commonServiceManager = commonServiceManager;
+
         this.accountService = accountService;
         this.formUpgradeRevertProcessor = formUpgradeRevertProcessor;
         this.ncrDelegate = ncrDelegate;
@@ -87,7 +91,7 @@ public class FormController {
         this.workstationService = workstationService;
         this.surveyDefFactory = surveyDefFactory;
     }
-   private final CommonServicesDelegate commonServicesDelegate;
+ private final CommonServiceManager commonServiceManager;
    private final AccountService accountService;
 
    private final FormUpgradeRevertProcessor formUpgradeRevertProcessor;
@@ -143,7 +147,7 @@ public class FormController {
     {
         UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<EntityReferenceBean> returnList = new ArrayList<EntityReferenceBean>();
-        List<EntityReference> refList = commonServicesDelegate.getEntityReferences(oid);
+        List<EntityReference> refList = commonServiceManager.getEntityReferences(oid);
         for (Iterator iterator = refList.iterator(); iterator.hasNext();)
         {
             EntityReference aRef = (EntityReference) iterator.next();
@@ -244,7 +248,7 @@ public class FormController {
                 ProjectConfigSettings projectConfig =  projectSettingsMap.get(new ProjectOID(tBean.getProjectPk()));
                 if(projectConfig == null || projectConfig.EnableInterimSubmitForChecksheets == null)
                 {
-                    Boolean enableInterimSubmitForChecksheets = (Boolean) commonServicesDelegate.getEntityPropertyValue(new ProjectOID(tBean.getProjectPk()), ProjectPropertyEnum.EnableInterimSubmitForChecksheets.getId(), Boolean.class);
+                    Boolean enableInterimSubmitForChecksheets = (Boolean) commonServiceManager.getEntityPropertyValue(new ProjectOID(tBean.getProjectPk()), ProjectPropertyEnum.EnableInterimSubmitForChecksheets.getId(),null,null, Boolean.class);
                     if(projectConfig == null)
                     {
                         projectConfig = new ProjectConfigSettings();
@@ -592,7 +596,7 @@ public class FormController {
             if (!(ResponseMasterNew.STATUS_INPROGRESS.equals(respMaster.getStatus())
                     || ResponseMasterNew.STATUS_NOTSTARTED.equals(respMaster.getStatus())))
             {
-                throw new RestAppException("Form is not open, Sections cannot be locked.");
+                //throw new RestAppException("Form is not open, Sections cannot be locked.");
             }
             String[] sections = formRequestBean.getSections();
             SectionResponseBean[] sectionResponseBeans = new SectionResponseBean[sections.length];
@@ -1298,7 +1302,7 @@ public class FormController {
 
 */
     @GetMapping("/getTestListOnItem")
-    public Element getTestListOnItem() throws Exception
+    public ResponseEntity<Element> getTestListOnItem() throws Exception
     {
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<String> tests = new ArrayList<String>();
@@ -1320,7 +1324,7 @@ public class FormController {
                 message = e.getMessage();
             }
             Document doc = createReturnXML(status, message, tests);
-            return doc.getRootElement();
+            return ResponseEntity.ok(doc.getRootElement());
         }
         catch (Exception e)
         {
@@ -1472,7 +1476,9 @@ public class FormController {
 
             Workstation workstation = new Workstation();
             Project project = new Project();
-            UnitEntityQuery unit = new UnitEntityQuery();
+
+            UnitEntityQuery unit=new UnitEntityQuery();
+
             Site site = new Site();
             if (formSummaryRequestBean.getWorkstationOID() != null)
                 workstation = workstationService.getWorkstation(new WorkstationOID((int) formSummaryRequestBean.getWorkstationOID().getPk()));
@@ -1495,8 +1501,18 @@ public class FormController {
             formSummaryResponseBean.setProjectPk((int) project.getPk());
             formSummaryResponseBean.setProjectName(project.getProjectName());
             formSummaryResponseBean.setProjectDescription(project.getProjectDescription());
-            formSummaryResponseBean.setUnitPk(unit.getPk());
-            formSummaryResponseBean.setUnitName(unit.getUnitName());
+            if(unit!=null) {
+                formSummaryResponseBean.setUnitPk(unit.getPk());
+            }
+            else{
+
+            }
+            if(unit!=null) {
+                formSummaryResponseBean.setUnitName(unit.getUnitName());
+            }
+            else{
+
+            }
             Date beginningOfToday = dateUtils.getBeginningDayNew(new Date());
             TestProcStatusSummaryReportRequest summaryReportRequest = new TestProcStatusSummaryReportRequest();
             summaryReportRequest.setProjectOIDList(Arrays.asList(formSummaryRequestBean.getProjectOID()));

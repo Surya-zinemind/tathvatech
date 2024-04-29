@@ -7,8 +7,11 @@ package com.tathvatech.survey.controller;
  */
 
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import com.tathvatech.common.enums.WorkItem;
 import com.tathvatech.forms.common.FormFilter;
 import com.tathvatech.forms.common.FormQuery;
@@ -32,9 +35,16 @@ import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.user.entity.UserQuery;
 import com.tathvatech.workstation.service.WorkstationService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -110,6 +120,7 @@ public class SurveyController {
      *
      * @param
      */
+    @Transactional
     @DeleteMapping("/deleteSurvey/{surveyPk}")
     public void deleteSurvey(@PathVariable("surveyPk") int surveyPk) throws Exception {
 
@@ -118,6 +129,7 @@ public class SurveyController {
 
     }
 
+    @Transactional
     @PutMapping("/updateSurvey")
     public Survey updateSurvey(@RequestBody Survey survey) throws Exception {
 
@@ -182,14 +194,25 @@ public class SurveyController {
         return surveyMasterService.getFormMain(formQuery);
     }
 
+
+
     @PutMapping("/publishSurvey")
-    public  void publishSurvey( @RequestBody PublishSurveyRequest publishSurveyRequest) throws Exception {
+    public void publishSurvey(@RequestBody PublishSurveyRequest publishSurveyRequest,
+                              @RequestParam HashMap<ProjectOID, User> projectNotificationMap,
+                              @RequestParam HashMap<ProjectOID, List<Integer>> formsUpgradeMap) throws Exception {
 
         UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        surveyMasterService.publishSurvey(context, publishSurveyRequest.getSurveyPk(), publishSurveyRequest.getProjectUpgradeList(),publishSurveyRequest.getProjectNotificationMap(), publishSurveyRequest.getFormsUpgradeMap());
-
-
+        surveyMasterService.publishSurvey(context, publishSurveyRequest.getSurveyPk(),
+                publishSurveyRequest.getProjectUpgradeList(),
+                projectNotificationMap,
+                formsUpgradeMap);
     }
+
+
+
+
+
+
 
     @PutMapping("/applyFormUpgradePublish")
     public  void applyFormUpgradePublish( @RequestBody ApplyFormUpgradePublishRequest applyFormUpgradePublishRequest) throws Exception {

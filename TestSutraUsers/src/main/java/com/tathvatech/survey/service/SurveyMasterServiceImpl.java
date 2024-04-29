@@ -60,6 +60,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 
@@ -92,9 +93,9 @@ public class SurveyMasterServiceImpl implements SurveyMasterService
     private final TimeEntryManager timeEntryManager;
 
     private final FormService formService;
-    private FormListReport formListReport;
+    private final FormListReport formListReport;
 
-    public SurveyMasterServiceImpl(PersistWrapper persistWrapper, ProjectService projectService, SurveyResponseService surveyResponseService, SequenceIdGenerator sequenceIdGenerator, UnitManager unitManager, SurveyDefFactory surveyDefFactory, TestProcService testProcService, AccountService accountService, FormDBManager formDBManager, TasksDelegate tasksDelegate, WorkorderManager workorderManager, TestProcSectionDAO testProcSectionDAO, TimeEntryManager timeEntryManager, FormService formService) {
+    public SurveyMasterServiceImpl(PersistWrapper persistWrapper, ProjectService projectService, SurveyResponseService surveyResponseService, SequenceIdGenerator sequenceIdGenerator, UnitManager unitManager, SurveyDefFactory surveyDefFactory, TestProcService testProcService, AccountService accountService, FormDBManager formDBManager, TasksDelegate tasksDelegate, WorkorderManager workorderManager, TestProcSectionDAO testProcSectionDAO, TimeEntryManager timeEntryManager, @Lazy FormService formService, FormListReport formListReport) {
         this.persistWrapper = persistWrapper;
         this.projectService = projectService;
         this.surveyResponseService = surveyResponseService;
@@ -110,6 +111,7 @@ public class SurveyMasterServiceImpl implements SurveyMasterService
         this.testProcSectionDAO = testProcSectionDAO;
         this.timeEntryManager = timeEntryManager;
         this.formService = formService;
+        this.formListReport = formListReport;
     }
 
 
@@ -511,25 +513,27 @@ public class SurveyMasterServiceImpl implements SurveyMasterService
         List errors = new ArrayList();
 
         Survey surveyConfig = getSurveyByPk(surveyVersionPk);
-        if(!(Survey.STATUS_CLOSED.equals(surveyConfig.getStatus())))
-        {
-            throw new AppException("Only a form in draft status can be deleted.");
+        if(surveyConfig!=null) {
+            if (!(Survey.STATUS_CLOSED.equals(surveyConfig.getStatus()))) {
+                throw new AppException("Only a form in draft status can be deleted.");
+            }
         }
-
+if(surveyConfig!=null){
         surveyConfig.setStatus(Survey.STATUS_DELETED);
         persistWrapper.update(surveyConfig);
-
-        //if there are no active versions of the form, delete the formMain
-        Integer formCountInSet = persistWrapper.read(Integer.class,
-                "select count(*) from tab_survey where formMainPk = ? and status != ? ", surveyConfig.getFormMainPk(), Survey.STATUS_DELETED);
-        if(formCountInSet == 0)
-        {
-            FormMain formMain = (FormMain) persistWrapper.readByPrimaryKey(FormMain.class, surveyConfig.getFormMainPk());
-            formMain.setIdentityNumber(surveyConfig.getIdentityNumber() + "-del-" + formMain.getPk());
-            formMain.setStatus(FormMain.STATUS_DELETED);
-            persistWrapper.update(formMain);
         }
 
+        //if there are no active versions of the form, delete the formMain
+        if(surveyConfig!=null) {
+            Integer formCountInSet = persistWrapper.read(Integer.class,
+                    "select count(*) from tab_survey where formMainPk = ? and status != ? ", surveyConfig.getFormMainPk(), Survey.STATUS_DELETED);
+            if (formCountInSet == 0) {
+                FormMain formMain = (FormMain) persistWrapper.readByPrimaryKey(FormMain.class, surveyConfig.getFormMainPk());
+                formMain.setIdentityNumber(surveyConfig.getIdentityNumber() + "-del-" + formMain.getPk());
+                formMain.setStatus(FormMain.STATUS_DELETED);
+                persistWrapper.update(formMain);
+            }
+        }
 
 
 //		String fileName = SurveyMaster.getSurveyDefFileName(surveyVersionPk);
@@ -551,20 +555,25 @@ public class SurveyMasterServiceImpl implements SurveyMasterService
                                List<ProjectOID> projectUpgradeList, HashMap<ProjectOID, User> projectNotificationMap, HashMap<ProjectOID, List<Integer>> formsUpgradeMap)throws Exception
     {
         Survey survey = (Survey) persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
-        if(!(Survey.STATUS_CLOSED.equals(survey.getStatus())))
-            return;
+        if(survey!=null) {
+            if (!(Survey.STATUS_CLOSED.equals(survey.getStatus())))
+                return;
 
-        survey.setStatus(Survey.STATUS_OPEN);
-        survey.setApprovedBy((int) context.getUser().getPk());
-        Date now = new Date();
-        survey.setApprovedDate(now);
-        survey.setEffectiveDate(now);
-        persistWrapper.update(survey);
-        survey = (Survey) persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
+            survey.setStatus(Survey.STATUS_OPEN);
+            survey.setApprovedBy((int) context.getUser().getPk());
+            Date now = new Date();
+            survey.setApprovedDate(now);
+            survey.setEffectiveDate(now);
+            persistWrapper.update(survey);
+            survey = (Survey) persistWrapper.readByPrimaryKey(Survey.class, surveyPk);
 
-        supersedPreviousFormVersions(survey);
+            supersedPreviousFormVersions(survey);
 
-        formDBManager.addSurveyToDB(context, survey);
+            formDBManager.addSurveyToDB(context, survey);
+        }
+        else{
+
+        }
 
         notifyFormPublish(context, surveyPk, projectUpgradeList, projectNotificationMap, formsUpgradeMap);
     }
@@ -577,29 +586,28 @@ public class SurveyMasterServiceImpl implements SurveyMasterService
 
         StringBuffer sbText = new StringBuffer();
         StringBuffer sbHtml = new StringBuffer();
+if(formQuery!=null) {
+    sbText.append("Hi\n\n").append("Revision ").append(formQuery.getRevision()).append("(")
+            .append(formQuery.getVersionNo()).append(") of form ").append(formQuery.getIdentityNumber()).append(" - ")
+            .append(formQuery.getDescription()).append(" has been published and recommended for upgrade on project ");
+    sbText.append("<project>").append("\n\n");
+    sbText.append("The version comment for the new revision is ").append(formQuery.getVersionComment()).append("\n\n");
+    sbText.append("Please login to TestSutra and approve the upgrade request. \n");
+    sbText.append("Thank You\n").append("TestSutra Support\n");
 
-        sbText.append("Hi\n\n").append("Revision ").append(formQuery.getRevision()).append("(")
-                .append(formQuery.getVersionNo()).append(") of form ").append(formQuery.getIdentityNumber()).append(" - ")
-                .append(formQuery.getDescription()).append(" has been published and recommended for upgrade on project ");
-        sbText.append("<project>").append("\n\n");
-        sbText.append("The version comment for the new revision is ").append(formQuery.getVersionComment()).append("\n\n");
-        sbText.append("Please login to TestSutra and approve the upgrade request. \n");
-        sbText.append("Thank You\n").append("TestSutra Support\n");
+    sbHtml.append("Hi<br/><br/>").append("Revision ").append(formQuery.getRevision()).append("(")
+            .append(formQuery.getVersionNo()).append(") of form ").append(formQuery.getIdentityNumber()).append(" - ")
+            .append(formQuery.getDescription()).append(" has been published and recommended for upgrade on project ");
+    sbHtml.append("<project>").append("<br/><br/>");
+    sbHtml.append("The version comment for the new revision is ").append(formQuery.getVersionComment()).append("<br/><br/>");
+    sbHtml.append("Please login to TestSutra and approve the upgrade request. <br/>");
+    sbHtml.append("Thank You<br/>").append("TestSutra Support<br/>");
 
-        sbHtml.append("Hi<br/><br/>").append("Revision ").append(formQuery.getRevision()).append("(")
-                .append(formQuery.getVersionNo()).append(") of form ").append(formQuery.getIdentityNumber()).append(" - ")
-                .append(formQuery.getDescription()).append(" has been published and recommended for upgrade on project ");
-        sbHtml.append("<project>").append("<br/><br/>");
-        sbHtml.append("The version comment for the new revision is ").append(formQuery.getVersionComment()).append("<br/><br/>");
-        sbHtml.append("Please login to TestSutra and approve the upgrade request. <br/>");
-        sbHtml.append("Thank You<br/>").append("TestSutra Support<br/>");
-
-        String subject = "New revision of form"  + formQuery.getIdentityNumber() + " - "  + formQuery.getDescription() +" published";
+    String subject = "New revision of form" + formQuery.getIdentityNumber() + " - " + formQuery.getDescription() + " published";
 
         //create a task for the approver of these projects
         for (Iterator iterator = projectNotificationMap.keySet().iterator(); iterator
-                .hasNext();)
-        {
+                .hasNext();) {
             ProjectOID projectOID = (ProjectOID) iterator.next();
             Project project = projectService.getProject(projectOID.getPk());
             User manager = projectNotificationMap.get(projectOID);
@@ -613,7 +621,7 @@ public class SurveyMasterServiceImpl implements SurveyMasterService
             taskBean.setNewRevision(formQuery.getRevision());
             taskBean.setNewVersion(formQuery.getVersionNo());
             taskBean.setRevisionLog(formQuery.getVersionComment());
-            if(projectUpgradeList.contains(projectOID))
+            if (projectUpgradeList.contains(projectOID))
                 taskBean.setUpgradeProjectForm(true);
             taskBean.setUnitForms(formsUpgradeMap.get(projectOID));
 
@@ -627,6 +635,7 @@ public class SurveyMasterServiceImpl implements SurveyMasterService
             EmailMessageInfo emailInfo = new EmailMessageInfo(ApplicationProperties.getEmailFromAddress(), null,
                     new String[]{manager.getEmail()}, subject, text, html, null);
             AsyncProcessor.scheduleEmail(emailInfo);
+        }
         }
 
     }
@@ -713,18 +722,19 @@ public class SurveyMasterServiceImpl implements SurveyMasterService
     @Override
     public void setAttribution(UserContext context, WorkItem workItem, UserOID attributeToUserOID)throws Exception
     {
-        if(EntityTypeEnum.TestProcSection == workItem.getEntityType())
-        {
-            TestProcSectionObj testProcSectionObj = testProcService.getTestProcSection(new TestProcSectionOID((int) workItem.getPk()));
-            TestProcObj testProc = testProcService.getTestProc(new TestProcSectionOID((int) workItem.getPk()));
-            ResponseMasterNew resp = surveyResponseService.getLatestResponseMasterForTest(testProc.getOID());
+        if(workItem!=null) {
+            if (EntityTypeEnum.TestProcSection == workItem.getEntityType()) {
+                TestProcSectionObj testProcSectionObj = testProcService.getTestProcSection(new TestProcSectionOID((int) workItem.getPk()));
+                TestProcObj testProc = testProcService.getTestProc(new TestProcSectionOID((int) workItem.getPk()));
+                ResponseMasterNew resp = surveyResponseService.getLatestResponseMasterForTest(testProc.getOID());
 
-            ObjectLock ol = getObjectLock(resp.getResponseId(), (int) testProcSectionObj.getFormSectionFk());
-            if(attributeToUserOID != null)
-                ol.setAttributionUserFk((int) attributeToUserOID.getPk());
-            else
-                ol.setAttributionUserFk(ol.getUserPk());
-            persistWrapper.update(ol);
+                ObjectLock ol = getObjectLock(resp.getResponseId(), (int) testProcSectionObj.getFormSectionFk());
+                if (attributeToUserOID != null)
+                    ol.setAttributionUserFk((int) attributeToUserOID.getPk());
+                else
+                    ol.setAttributionUserFk(ol.getUserPk());
+                persistWrapper.update(ol);
+            }
         }
     }
     @Override
@@ -825,17 +835,21 @@ public class SurveyMasterServiceImpl implements SurveyMasterService
     @Override
     public  List<String> getLockedSectionIds(User user, FormResponseOID responseOID)throws Exception
     {
-        List l = persistWrapper.readList(ObjectLock.class, ObjectLockQuery.sql +
-                        " and userPk = ? and responseFk=?",
-                user.getPk(), responseOID.getPk());
+        if(user!=null) {
+            List l = persistWrapper.readList(ObjectLock.class, ObjectLockQuery.sql +
+                            " and userPk = ? and responseFk=?",
+                    user.getPk(), responseOID.getPk());
 
-        List returnList = new ArrayList<String>();
-        for (Iterator iterator = l.iterator(); iterator.hasNext();)
-        {
-            ObjectLock object = (ObjectLock) iterator.next();
-            returnList.add(object.getSectionId());
+
+            List returnList = new ArrayList<String>();
+            for (Iterator iterator = l.iterator(); iterator.hasNext(); ) {
+                ObjectLock object = (ObjectLock) iterator.next();
+                returnList.add(object.getSectionId());
+            }
+
+            return returnList;
         }
-        return returnList;
+        return null;
     }
     @Override
     public  List<ObjectLock> getLockedSectionIds(FormResponseOID responseOID)throws Exception
@@ -855,13 +869,16 @@ public class SurveyMasterServiceImpl implements SurveyMasterService
     @Override
     public  boolean isSectionLocked(User user, FormResponseOID responseOID, String sectionId)throws Exception
     {
-        ObjectLock objectLock = persistWrapper.read(ObjectLock.class, ObjectLockQuery.sql +
-                        " and userPk = ? and responseFk=? and sectionId=?",
-                user.getPk(), responseOID.getPk(), sectionId);
-        if(objectLock == null)
-            return false;
-        else
-            return true;
+        if(user!=null) {
+            ObjectLock objectLock = persistWrapper.read(ObjectLock.class, ObjectLockQuery.sql +
+                            " and userPk = ? and responseFk=? and sectionId=?",
+                    user.getPk(), responseOID.getPk(), sectionId);
+            if (objectLock == null)
+                return false;
+            else
+                return true;
+        }
+        return false;
     }
     @Override
     public  void releaseSectionEditLock(UserContext context, User user, FormResponseOID responseOID, String sectionId)throws LockedByAnotherUserException, Exception

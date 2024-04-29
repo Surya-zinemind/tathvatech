@@ -11,6 +11,6 @@ import java.util.List;
 public class PublishSurveyRequest {
     private int surveyPk;
     private List<ProjectOID> projectUpgradeList;
-    private HashMap<ProjectOID, User> projectNotificationMap;
-  private   HashMap<ProjectOID, List<Integer>> formsUpgradeMap;
+
+
 }

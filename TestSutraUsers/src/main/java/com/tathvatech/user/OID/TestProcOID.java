@@ -2,9 +2,11 @@ package com.tathvatech.user.OID;
 
 
 import com.tathvatech.common.enums.EntityTypeEnum;
+import org.springframework.stereotype.Component;
 
+@Component
 public class TestProcOID extends OID {
-
+public TestProcOID(){ }
 	public TestProcOID(int pk)
 	{
 		super(pk, EntityTypeEnum.TestProc, null);

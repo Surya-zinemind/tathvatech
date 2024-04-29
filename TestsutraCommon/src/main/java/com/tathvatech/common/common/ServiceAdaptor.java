@@ -29,16 +29,22 @@ public class ServiceAdaptor implements EnvironmentInterface
 			Connection conn;
 			try
 			{
-				conn = ds.getConnection();
-				MyConnection myCon = new MyConnection(conn);
-				return myCon;
+				if(ds!=null) {
+					conn = ds.getConnection();
+					MyConnection myCon = new MyConnection(conn);
+					return myCon;
+				}
+				else{
+
+				}
 			}
 			catch (Exception e)
 			{
 				e.printStackTrace();
 				throw new RuntimeException("Could not get database connection");
 			}
-		};
+            return null;
+        };
 	};
 	
 	private static InitialContext ctx = null;
@@ -128,16 +134,20 @@ public class ServiceAdaptor implements EnvironmentInterface
 //		return ds;
 //	}
 	
-	public Connection getConnection()throws Exception
-	{
-		MyConnection conn = connection.get();
-		if(conn.isClosed())
-		{
-			conn = new MyConnection(ds.getConnection());
-			connection.set(conn);
-		}
-		return conn;
-	}
+	public Connection getConnection()throws Exception {
+        MyConnection conn = null;
+        if (conn != null) {
+            conn = connection.get();
+            if (conn.isClosed()) {
+                conn = new MyConnection(ds.getConnection());
+                connection.set(conn);
+            }
+            return conn;
+        } else {
+
+        }
+        return null;
+    }
 	
 	public void closeConnection()throws Exception
 	{

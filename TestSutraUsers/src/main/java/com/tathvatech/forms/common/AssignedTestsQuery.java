@@ -37,7 +37,7 @@ public class AssignedTestsQuery implements WorkstationOrderComparable
 	private int dimentionalFailCount;
 	private int naCount;
 	private int commentCount;
-	private int oilTransferCount;
+	private Integer oilTransferCount;
 	public int totalQCount;
 	public int totalACount;
 	
@@ -273,11 +273,11 @@ public class AssignedTestsQuery implements WorkstationOrderComparable
 	{
 		this.commentCount = commentCount;
 	}
-	public int getOilTransferCount()
+	public Integer getOilTransferCount()
 	{
 		return oilTransferCount;
 	}
-	public void setOilTransferCount(int oilTransferCount)
+	public void setOilTransferCount(Integer oilTransferCount)
 	{
 		this.oilTransferCount = oilTransferCount;
 	}

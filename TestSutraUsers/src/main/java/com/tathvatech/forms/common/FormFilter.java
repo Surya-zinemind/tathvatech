@@ -73,8 +73,12 @@ public class FormFilter extends ReportFilter
 		this.unitFormFilter = unitFormFilter;
 	}
 
-	public class ProjectFormAssignmentFilter
+	public  static  class ProjectFormAssignmentFilter
 	{
+		public ProjectFormAssignmentFilter(){
+
+		}
+
 		ProjectOID projectOID;
 		WorkstationOID workstationOID;
 		Boolean notNullWorkstationsOnly;
@@ -122,7 +126,7 @@ public class FormFilter extends ReportFilter
 		}
 	}
 	
-	public class UnitFormAssignmentFilter
+	public static class UnitFormAssignmentFilter
 	{
 		UnitOID unitOID;
 		ProjectOID projectOID;

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.tathvatech.user.OID.UnitOID;
+import org.springframework.stereotype.Component;
 
 
 /**
@@ -13,8 +14,10 @@ import com.tathvatech.user.OID.UnitOID;
  *
  */
 
+@Component
 public class UnitEntityQuery implements Serializable
 {
+
     int pk;
 	private String partName;
     private int partPk;

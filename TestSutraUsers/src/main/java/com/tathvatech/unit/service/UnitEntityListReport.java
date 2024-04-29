@@ -13,12 +13,13 @@ public class UnitEntityListReport
 {
 	private UnitEntityListReportRequest unitFilter;
 
-	@Autowired
-	private PersistWrapper persistWrapper;
-	public UnitEntityListReport(UnitEntityListReportRequest reportRequest)
+
+	private final  PersistWrapper persistWrapper;
+	public UnitEntityListReport(UnitEntityListReportRequest reportRequest, PersistWrapper persistWrapper)
 	{
 		this.unitFilter = reportRequest;
-	}
+        this.persistWrapper = persistWrapper;
+    }
 	
 	public List<UnitEntityQuery> runReport()
 	{

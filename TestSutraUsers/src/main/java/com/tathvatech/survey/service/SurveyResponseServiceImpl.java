@@ -97,8 +97,8 @@ private final CommonServiceManager commonServiceManager;
 	private final WorkstationService workstationService;
 	private final ActivityLoggingDelegate activityLoggingDelegate;
 	private final SiteService siteService;
-
-    public SurveyResponseServiceImpl(PersistWrapper persistWrapper, DummyWorkstation dummyWorkstation, FormDBManager formDBManager, @Lazy SurveyDefFactory surveyDefFactory, UnitManager unitManager, @Lazy SurveyMasterService surveyMasterService, CommonServiceManager commonServiceManager, AccountService accountService, TestProcService testProcService, WorkflowManager workflowManager, @Lazy WorkstationService workstationService, ActivityLoggingDelegate activityLoggingDelegate, SiteService siteService) {
+    private final TestProcDAO testProcDAO;
+    public SurveyResponseServiceImpl(PersistWrapper persistWrapper, DummyWorkstation dummyWorkstation, FormDBManager formDBManager, @Lazy SurveyDefFactory surveyDefFactory, UnitManager unitManager, @Lazy SurveyMasterService surveyMasterService, CommonServiceManager commonServiceManager, AccountService accountService, TestProcService testProcService, WorkflowManager workflowManager, @Lazy WorkstationService workstationService, ActivityLoggingDelegate activityLoggingDelegate, SiteService siteService,@Lazy TestProcDAO testProcDAO) {
         this.persistWrapper = persistWrapper;
         this.dummyWorkstation = dummyWorkstation;
         this.formDBManager = formDBManager;
@@ -114,6 +114,7 @@ private final CommonServiceManager commonServiceManager;
         this.workstationService = workstationService;
         this.activityLoggingDelegate = activityLoggingDelegate;
         this.siteService = siteService;
+        this.testProcDAO = testProcDAO;
     }
 	@Override
     public  void changeResponseStatus(UserContext userContext, int responseId, String responseStatus)
@@ -2062,23 +2063,27 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 		Statement stmt = null;
 		try
 		{
-			conn = ServiceLocator.locate().getConnection();
-			stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(sql);
-			while (rs.next())
-			{
-				ResponseMaster rMaster = new ResponseMaster();
-				rMaster.setResponseId(rs.getInt("responseId"));
-				rMaster.setResponseRefNo(rs.getString("responseRefNo"));
+			if(conn!=null) {
+				conn = ServiceLocator.locate().getConnection();
+				stmt = conn.createStatement();
+				ResultSet rs = stmt.executeQuery(sql);
+				while (rs.next()) {
+					ResponseMaster rMaster = new ResponseMaster();
+					rMaster.setResponseId(rs.getInt("responseId"));
+					rMaster.setResponseRefNo(rs.getString("responseRefNo"));
 
-				Date date = new Date(((Timestamp) rs.getObject("responseTime")).getTime());
-				rMaster.setResponseTime(date);
-				Date cdate = new Date(((Timestamp) rs.getObject("responseCompleteTime")).getTime());
-				rMaster.setResponseCompleteTime(cdate);
+					Date date = new Date(((Timestamp) rs.getObject("responseTime")).getTime());
+					rMaster.setResponseTime(date);
+					Date cdate = new Date(((Timestamp) rs.getObject("responseCompleteTime")).getTime());
+					rMaster.setResponseCompleteTime(cdate);
 
-				rMaster.setStatus(rs.getString("status"));
+					rMaster.setStatus(rs.getString("status"));
 
-				responseMasterList.add(rMaster);
+					responseMasterList.add(rMaster);
+				}
+			}
+			else{
+
 			}
 		}
 		catch (SQLException e)
@@ -2123,8 +2128,8 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 		String surveyTable = survey.getDbTable();
 		String sql = Sqls.getResponseMaster;
 		sql = sql.replaceAll("<tableName>", survey.getDbTable());
-		sql = sql.replaceAll("<responseId>", responseId);
-		sql = sql.replaceAll("<surveyPk>", new Integer((int) survey.getPk()).toString());
+		sql = sql.replaceAll("<responseId>", String.valueOf(responseId));
+		sql = sql.replaceAll("<surveyPk>", String.valueOf(survey.getPk()));
 
 		if (logger.isDebugEnabled())
 		{
@@ -2137,21 +2142,26 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 		Statement stmt = null;
 		try
 		{
-			conn = ServiceLocator.locate().getConnection();
-			stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(sql);
-			if (rs.next())
-			{
-				rMaster = new ResponseMaster();
-				rMaster.setResponseId(rs.getInt("responseId"));
-				rMaster.setResponseRefNo(rs.getString("responseRefNo"));
+			if(conn!=null) {
 
-				Date date = new Date(((Timestamp) rs.getObject("responseTime")).getTime());
-				rMaster.setResponseTime(date);
-				Date cdate = new Date(((Timestamp) rs.getObject("responseCompleteTime")).getTime());
-				rMaster.setResponseCompleteTime(cdate);
+				conn = ServiceLocator.locate().getConnection();
+				stmt = conn.createStatement();
+				ResultSet rs = stmt.executeQuery(sql);
+				if (rs.next()) {
+					rMaster = new ResponseMaster();
+					rMaster.setResponseId(rs.getInt("responseId"));
+					rMaster.setResponseRefNo(rs.getString("responseRefNo"));
 
-				rMaster.setStatus(rs.getString("status"));
+					Date date = new Date(((Timestamp) rs.getObject("responseTime")).getTime());
+					rMaster.setResponseTime(date);
+					Date cdate = new Date(((Timestamp) rs.getObject("responseCompleteTime")).getTime());
+					rMaster.setResponseCompleteTime(cdate);
+
+					rMaster.setStatus(rs.getString("status"));
+				}
+			}
+			else {
+
 			}
 		}
 		catch (SQLException e)
@@ -2262,7 +2272,7 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 	{
 		try
 		{
-			TestProcObj tp = new TestProcDAO().getTestProc((int) testProcOID.getPk());
+			TestProcObj tp = testProcDAO.getTestProc((int) testProcOID.getPk());
 			if(tp == null)
 				logger.error("Null testproc at pk - " + testProcOID.getPk());
 
@@ -2482,15 +2492,16 @@ private  void getChildrenQuestions(SurveyItem aItem, List surveyQuestions)
 		PreparedStatement stmt = null;
 		try
 		{
-			conn = ServiceLocator.locate().getConnection();
+			if(conn!=null) {
+				conn = ServiceLocator.locate().getConnection();
 
-			stmt = conn.prepareStatement(sql);
-			stmt.setInt(1, (int) userContext.getUser().getPk());
-			stmt.setString(2, comments);
-			stmt.setLong(3, resp.getResponseId());
+				stmt = conn.prepareStatement(sql);
+				stmt.setInt(1, (int) userContext.getUser().getPk());
+				stmt.setString(2, comments);
+				stmt.setLong(3, resp.getResponseId());
 
-			stmt.execute();
-
+				stmt.execute();
+			}
 
 			workflowManager.addWorkflowEntry(FormWorkflow.ACTION_APPROVED, (int) userContext.getUser().getPk(), resp.getResponseId(),
 					resp.getTestProcPk(), ResponseMasterNew.STATUS_APPROVED, comments);
@@ -2535,14 +2546,19 @@ public  void approveResponseWithComments(UserContext userContext, ResponseMaster
 		PreparedStatement stmt = null;
 		try
 		{
-			conn = ServiceLocator.locate().getConnection();
+			if(conn!=null) {
+				conn = ServiceLocator.locate().getConnection();
 
-			stmt = conn.prepareStatement(sql);
-			stmt.setInt(1, (int) userContext.getUser().getPk());
-			stmt.setString(2, comments);
-			stmt.setLong(3, resp.getResponseId());
+				stmt = conn.prepareStatement(sql);
+				stmt.setInt(1, (int) userContext.getUser().getPk());
+				stmt.setString(2, comments);
+				stmt.setLong(3, resp.getResponseId());
 
-			stmt.execute();
+				stmt.execute();
+			}
+			else{
+
+			}
 
 
 			workflowManager.addWorkflowEntry(FormWorkflow.ACTION_APPROVED_WITH_COMMENTS, (int) userContext.getUser().getPk(), resp.getResponseId(),

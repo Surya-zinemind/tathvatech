@@ -86,8 +86,13 @@ public class UnitWorkstationListReport
 						" and ( (upr.unitPk = ? and upr.projectPk = ?) or (uprh.rootParentPk = ? and uprh.heiCode like ?) ) ");
 				params.add(filter.getUnitOID().getPk());
 				params.add(filter.getProjectOID().getPk());
-				params.add(unit.getRootParentPk());
-				params.add(unit.getHeiCode() + ".%");
+				if(unit!=null) {
+					params.add(unit.getRootParentPk());
+					params.add(unit.getHeiCode() + ".%");
+				}
+				else{
+
+				}
 			} else
 			{
 				sb.append(" and u.pk = ?");

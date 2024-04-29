@@ -6,11 +6,7 @@
  */
 package com.tathvatech.survey.controller;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 import com.tathvatech.activitylogging.common.ActivityLogQuery;
 import com.tathvatech.activitylogging.controller.ActivityLoggingDelegate;
@@ -47,7 +43,10 @@ import com.tathvatech.workstation.service.WorkstationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -736,7 +735,8 @@ public class SurveyResponseController
 
     }
 
-   @PutMapping("/approveResponse")
+  @Transactional
+  @PutMapping("/approveResponse")
    public  void approveResponse(
     		@RequestBody ApproveResponseRequest  approveResponseRequest) throws Exception
     {
@@ -755,7 +755,8 @@ public class SurveyResponseController
 
     }
 
-    @PutMapping("/approveResponseWithComments")
+   @Transactional
+   @PutMapping("/approveResponseWithComments")
 	public  void approveResponseWithComments(
     		@RequestBody ApproveResponseWithCommentsRequest approveResponseWithCommentsRequest) throws Exception
     {
@@ -962,6 +963,7 @@ public class SurveyResponseController
 	}
 
 	
+	@Transactional
 	@PostMapping("/createFormItemResponse")
 	public  FormItemResponse createFormItemResponse(@RequestBody CreateFormItemResponseRequest createFormItemResponseRequest) throws Exception {
 
@@ -971,6 +973,7 @@ public class SurveyResponseController
 			return r;
 	}
 
+	@Transactional
 	@GetMapping("/getFormItemResponse")
 	public  FormItemResponse getFormItemResponse(@RequestBody GetFormItemResponseRequest getFormItemResponseRequest) throws Exception {
 
@@ -983,9 +986,30 @@ public class SurveyResponseController
 	}
 
 	@GetMapping("/getFormItemResponses/{responseId}")
-	public  HashMap<String, FormItemResponse> getFormItemResponses(@PathVariable("responseId") int responseId)
-	{
-		return	surveyResponseService.getFormItemResponses(responseId);
+	public ResponseEntity<?> getFormItemResponses(@PathVariable("responseId") int responseId) {
+		try {
+			// Retrieve form item responses from service
+			HashMap<String, FormItemResponse> formItemResponses = surveyResponseService.getFormItemResponses(responseId);
+
+			// Remove null keys from the HashMap
+			HashMap<String, FormItemResponse> filteredMap = removeNullKeys(formItemResponses);
+
+			// Return the filtered HashMap
+			return ResponseEntity.ok(filteredMap);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred: " + e.getMessage());
+		}
+	}
+
+	// Custom method to remove null keys from a HashMap
+	private HashMap<String, FormItemResponse> removeNullKeys(HashMap<String, FormItemResponse> map) {
+		HashMap<String, FormItemResponse> filteredMap = new HashMap<>();
+		for (Map.Entry<String, FormItemResponse> entry : map.entrySet()) {
+			if (entry.getKey() != null) {
+				filteredMap.put(entry.getKey(), entry.getValue());
+			}
+		}
+		return filteredMap;
 	}
 
 
@@ -995,6 +1019,7 @@ public class SurveyResponseController
 		return surveyResponseService.getFormClientSubmissionRevision(responseId);
 }
 	
+	@Transactional
 	@PostMapping("/saveFormClientSubmissionRevision")
 	public  FormResponseClientSubmissionRev saveFormClientSubmissionRevision(@RequestBody SaveFormClientSubmissionRevisionRequest saveFormClientSubmissionRevisionRequest) throws Exception
 	{
@@ -1007,6 +1032,7 @@ public class SurveyResponseController
 	}
 
 
+	@Transactional
 	@PostMapping("/saveSyncErrorResponse")
 	public  void saveSyncErrorResponse(@RequestBody SaveSyncErrorResponseRequest saveSyncErrorResponseRequest) throws Exception
 	{

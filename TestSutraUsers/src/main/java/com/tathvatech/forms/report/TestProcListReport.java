@@ -194,11 +194,16 @@ public class TestProcListReport
 				sb.append(" join (select upr.unitPk from unit_project_ref upr "
 						+ " join unit_project_ref_h uprh on uprh.unitInProjectPk = upr.pk and now() between uprh.effectiveDateFrom and uprh.effectiveDateTo and uprh.status != 'Removed' "
 						+ " where ( (upr.unitPk = ? and upr.projectPk = ?) or (upr.projectPk = ? and uprh.rootParentPk = ? and uprh.heiCode like ?) ) )units on units.unitPk = uth.unitPk ");
-				params.add(unit.getUnitPk());
-				params.add(filter.getProjectOIDForUnitHeirarchy().getPk());
-				params.add(filter.getProjectOIDForUnitHeirarchy().getPk());
-				params.add(unit.getRootParentPk());
-				params.add(unit.getHeiCode()+".%");
+				if(unit!=null) {
+					params.add(unit.getUnitPk());
+					params.add(filter.getProjectOIDForUnitHeirarchy().getPk());
+					params.add(filter.getProjectOIDForUnitHeirarchy().getPk());
+					params.add(unit.getRootParentPk());
+					params.add(unit.getHeiCode() + ".%");
+				}
+				else{
+
+				}
 			}
 			else
 			{
