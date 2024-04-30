@@ -24,11 +24,12 @@ public class EmailServiceManager
 	private final PersistWrapper persistWrapper;
 
 
-	private final AccountService accountServiceImpl;
+	private final AccountService accountService;
 
-    public EmailServiceManager(PersistWrapper persistWrapper, AccountService accountServiceImpl) {
+    public EmailServiceManager(PersistWrapper persistWrapper, AccountService accountService) {
         this.persistWrapper = persistWrapper;
-        this.accountServiceImpl = accountServiceImpl;
+        this.accountService = accountService;
+
     }
 
 	@Transactional
@@ -52,7 +53,7 @@ public class EmailServiceManager
 		for (int i = 0; i < emailMessage.getToAddress().length; i++)
 		{
 			String emailAddress = emailMessage.getToAddress()[i];
-			User user = accountServiceImpl.findUserByEmail(emailAddress);
+			User user = accountService.findUserByEmail(emailAddress);
 			if(user != null)
 			{
 				if(User.STATUS_ACTIVE.contentEquals(user.getStatus()))
