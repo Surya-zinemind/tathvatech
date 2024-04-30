@@ -5,9 +5,7 @@ import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.common.enums.EntityTypeEnum;
 
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-@JsonTypeName("UserOID")
+
 public class UserOID extends OID{
 
 	public UserOID()

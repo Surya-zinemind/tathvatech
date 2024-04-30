@@ -94,10 +94,18 @@ public class EquipmentDAO {
                 || calibrationSiteCurrency.getAbbreviation() == null
                 || calibrationSiteCurrency.getAbbreviation().trim().length() == 0)
         {
-            throw new AppException("Equipment abbreviation is not available for this site.");
+            try {
+                throw new AppException("Equipment abbreviation is not available for this site.");
+            }catch(Exception e){
+
+            }
         }
-        String seq = new EquipmentSequenceKeyGenerator().getNextSeq(calibrationSiteCurrency.getAbbreviation());
-        return seq;
+        if(calibrationSiteCurrency!=null) {
+            String seq = new EquipmentSequenceKeyGenerator().getNextSeq(calibrationSiteCurrency.getAbbreviation());
+
+            return seq;
+        }
+        return null;
     }
 
     public EquipmentObj saveEquipment(UserContext context, EquipmentObj obj) throws Exception
@@ -108,7 +116,11 @@ public class EquipmentDAO {
                 || calibrationSiteCurrency.getAbbreviation() == null
                 || calibrationSiteCurrency.getAbbreviation().trim().length() == 0)
         {
-            throw new AppException("Equipment abbreviation is not available in this site.");
+            try {
+                throw new AppException("Equipment abbreviation is not available in this site.");
+            }catch(Exception e) {
+
+            }
         }
         // boolean siteUpdated = false;
         Equipment equipment = null;

@@ -6,8 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.user.OID.OID;
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-@JsonTypeName("EquipmentTypeOID")
+
 public class EquipmentTypeOID extends OID
 {
     @JsonCreator

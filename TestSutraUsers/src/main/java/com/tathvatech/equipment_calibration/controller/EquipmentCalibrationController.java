@@ -273,25 +273,23 @@ public class EquipmentCalibrationController {
     {
         UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             EquipmentBean bean =equipmentCalibrationService.saveEquipment(context,saveEquipmentandAddCalibrationRequest.getEquipmentBean());
+if(saveEquipmentandAddCalibrationRequest.getCalibrationBean()!=null) {
+    if (saveEquipmentandAddCalibrationRequest.getCalibrationBean().getPk() > 0) {
+        EquipmentCalibrationBean ecBean = equipmentCalibrationService.updateCalibrationData(context, saveEquipmentandAddCalibrationRequest.getCalibrationBean());
+    } else {
+        EquipmentCalibrationBean ecBean = equipmentCalibrationService.saveCalibrationData(context, bean.getOID(),
+                saveEquipmentandAddCalibrationRequest.getCalibrationBean());
+    }
+    // if (bean.getApprovedBy() != null)
+    // {
 
-            if (saveEquipmentandAddCalibrationRequest.getCalibrationBean().getPk() > 0)
-            {
-                EquipmentCalibrationBean ecBean = equipmentCalibrationService.updateCalibrationData(context, saveEquipmentandAddCalibrationRequest.getCalibrationBean());
-            } else
-            {
-                EquipmentCalibrationBean ecBean =equipmentCalibrationService.saveCalibrationData(context, bean.getOID(),
-                        saveEquipmentandAddCalibrationRequest.getCalibrationBean());
-            }
-            // if (bean.getApprovedBy() != null)
-            // {
+    // } else
+    // {
+    // throw new AppException("Equipment is not in the approved
+    // state.");
+    // }
 
-            // } else
-            // {
-            // throw new AppException("Equipment is not in the approved
-            // state.");
-            // }
-
-
+}
             return bean;
 
     }

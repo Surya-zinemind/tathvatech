@@ -6,7 +6,7 @@ import org.apache.commons.collections4.map.ReferenceMap;
 import org.springframework.stereotype.Service;
 
 
-@Service
+
 public class UserRepository {
 
 	private static UserRepository instance;

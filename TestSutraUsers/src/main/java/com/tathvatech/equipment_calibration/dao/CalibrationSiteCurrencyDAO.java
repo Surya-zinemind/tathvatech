@@ -89,9 +89,14 @@ public class CalibrationSiteCurrencyDAO {
 
     public CalibrationSiteCurrency getCurrency(SiteOID siteOID)
     {
-        return persistWrapper.read(CalibrationSiteCurrency.class,
-                fetchSql + " and calibration_site_currency_ref.siteFk=? and calibration_site_currency_ref.estatus=? ",
-                siteOID.getPk(), EStatusEnum.Active.getValue());
+        try {
+            return persistWrapper.read(CalibrationSiteCurrency.class,
+                    fetchSql + " and calibration_site_currency_ref.siteFk=? and calibration_site_currency_ref.estatus=? ",
+                    siteOID.getPk(), EStatusEnum.Active.getValue());
+        }catch(Exception e){
+
+        }
+        return null;
     }
 
     public void delete(UserContext context, int pk) throws Exception {
