@@ -115,8 +115,8 @@ public class EquipmentCalibrationController {
         return equipmentCalibrationService.getLocations(searchString);
     }
 
-   @GetMapping("/getLocationsofTypes/{int}")
-   public  List<LocationMasterBean> getLocationsofTypes(@PathVariable("int") int locationTypeFk)
+   @GetMapping("/getLocationsofTypes/{locationTypeFk}")
+   public  List<LocationMasterBean> getLocationsofTypes(@PathVariable("locationTypeFk") int locationTypeFk)
     {
         return equipmentCalibrationService.getLocationsofTypes(locationTypeFk);
     }
