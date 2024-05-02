@@ -13,7 +13,7 @@ import com.tathvatech.equipment_calibration.oid.EquipmentTypeOID;
 import com.tathvatech.equipment_calibration.oid.LocationOID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({
     @JsonSubTypes.Type(value = UserOID.class, name = "UserOID"),
     @JsonSubTypes.Type(value = PersonOID.class, name = "PersonOID"),
