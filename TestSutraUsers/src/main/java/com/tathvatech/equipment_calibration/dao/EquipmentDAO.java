@@ -46,7 +46,13 @@ public class EquipmentDAO {
 
     public EquipmentObj getEquipment(EquipmentOID equipmentOID)
     {
-        return persistWrapper.read(EquipmentObj.class, fetchSql + " and eq.pk = ? ", equipmentOID.getPk());
+        try {
+            return persistWrapper.read(EquipmentObj.class, fetchSql + " and eq.pk = ? ", equipmentOID.getPk());
+        }
+        catch(Exception e){
+
+        }
+        return null;
     }
 
     public List<EquipmentObj> getEquipmentHistory(EquipmentOID equipmentOID)
@@ -160,46 +166,46 @@ public class EquipmentDAO {
             int pk = (int) persistWrapper.createEntity(equipment);
             equipment = (Equipment) persistWrapper.readByPrimaryKey(Equipment.class, pk);
         }
-        EquipmentH eqHCurrent = persistWrapper.read(EquipmentH.class,
-                "select * from equipment_h where equipmentFk = ? and now() between effectiveFrom and effectiveTo",
-                equipment.getPk());
-        // if (eqHCurrent == null || obj.getSiteFk() != eqHCurrent.getSiteFk())
-        // {
-        // siteUpdated = true;
-        // }
-        //
-        // if (siteUpdated)
-        // {
-        // Site site = SiteManager.getSite(obj.getSiteFk());
-        // String seq = new
-        // EquipmentSequenceKeyGenerator().getNextSeq(site.getName());
-        // obj.setEquipmentId(seq);
-        // }
+        try {
+            EquipmentH eqHCurrent = persistWrapper.read(EquipmentH.class,
+                    "select * from equipment_h where equipmentFk = ? and now() between effectiveFrom and effectiveTo",
+                    equipment.getPk());
+            // if (eqHCurrent == null || obj.getSiteFk() != eqHCurrent.getSiteFk())
+            // {
+            // siteUpdated = true;
+            // }
+            //
+            // if (siteUpdated)
+            // {
+            // Site site = SiteManager.getSite(obj.getSiteFk());
+            // String seq = new
+            // EquipmentSequenceKeyGenerator().getNextSeq(site.getName());
+            // obj.setEquipmentId(seq);
+            // }
 
-        if (eqHCurrent == null)
-        {
-            EquipmentH eqHNew = new EquipmentH();
-            eqHNew.setEquipmentFK((int) equipment.getPk());
-            populateEquipmentHDataToEntityDate(context, obj, eqHNew);
-            eqHNew.setEffectiveFrom(now);
-            eqHNew.setEffectiveTo(DateUtils.getMaxDate());
-            persistWrapper.createEntity(eqHNew);
-        } else
-        {
-            if (isNewHistoryRequired(obj, eqHCurrent))
-            {
-                eqHCurrent.setEffectiveTo(new Date(now.getTime() - 1000));
-                persistWrapper.update( eqHCurrent);
-
+            if (eqHCurrent == null) {
                 EquipmentH eqHNew = new EquipmentH();
                 eqHNew.setEquipmentFK((int) equipment.getPk());
                 populateEquipmentHDataToEntityDate(context, obj, eqHNew);
                 eqHNew.setEffectiveFrom(now);
                 eqHNew.setEffectiveTo(DateUtils.getMaxDate());
                 persistWrapper.createEntity(eqHNew);
-            }
-        }
+            } else {
+                if (isNewHistoryRequired(obj, eqHCurrent)) {
+                    eqHCurrent.setEffectiveTo(new Date(now.getTime() - 1000));
+                    persistWrapper.update(eqHCurrent);
 
+                    EquipmentH eqHNew = new EquipmentH();
+                    eqHNew.setEquipmentFK((int) equipment.getPk());
+                    populateEquipmentHDataToEntityDate(context, obj, eqHNew);
+                    eqHNew.setEffectiveFrom(now);
+                    eqHNew.setEffectiveTo(DateUtils.getMaxDate());
+                    persistWrapper.createEntity(eqHNew);
+                }
+            }
+        }catch (Exception e){
+
+        }
         return getEquipment(new EquipmentOID((int) equipment.getPk(), null));
     }
 
@@ -288,8 +294,14 @@ public class EquipmentDAO {
 
     public EquipmentCalibration getEquipmentCalibration(EquipmentOID equipmentOID)
     {
-        return persistWrapper.read(EquipmentCalibration.class,
-                "select * from equipment_calibration where equipmentFk = ? and current = 1 ", equipmentOID.getPk());
+        try {
+            return persistWrapper.read(EquipmentCalibration.class,
+                    "select * from equipment_calibration where equipmentFk = ? and current = 1 ", equipmentOID.getPk());
+        }
+        catch(Exception e){
+
+        }
+        return null;
     }
 
     public List<EquipmentCalibration> getEquipmentCalibrations(EquipmentOID equipmentOID)

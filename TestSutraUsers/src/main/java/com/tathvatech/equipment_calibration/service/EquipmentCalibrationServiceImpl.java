@@ -470,7 +470,8 @@ public class EquipmentCalibrationServiceImpl implements EquipmentCalibrationServ
         EquipmentType duplicate = getEquipmentTypeswithName(equipmentType.getName());
         if (duplicate != null && duplicate.getPk() != item.getPk())
         {
-            throw new AppException(" Duplicate equipment type.");
+
+                throw new AppException(" Duplicate equipment type.");
         }
         item.setName(equipmentType.getName());
         item.setDescription(equipmentType.getDescription());
@@ -534,7 +535,13 @@ public class EquipmentCalibrationServiceImpl implements EquipmentCalibrationServ
 
     public  EquipmentType getEquipmentType(EquipmentTypeOID typeOID)
     {
-        return persistWrapper.read(EquipmentType.class, "select *  from equipment_type where pk = ? ", typeOID.getPk());
+        try {
+            return persistWrapper.read(EquipmentType.class, "select *  from equipment_type where pk = ? ", typeOID.getPk());
+        }
+        catch(Exception e){
+
+        }
+        return null;
     }
 
     public  EquipmentCalibrationAuthority saveEquipmentCalibrationAuthority(UserContext context,
@@ -560,7 +567,12 @@ public class EquipmentCalibrationServiceImpl implements EquipmentCalibrationServ
                     new SiteOID(equipmentCalibrationAuthority.getSiteFk()));
             if (duplicate != null && duplicate.getPk() != equipmentCalibrationAuthority.getPk())
             {
-                throw new AppException(" This Calibration Authority already exists");
+                try {
+                    throw new AppException(" This Calibration Authority already exists");
+                }
+                catch(Exception e){
+
+                }
             }
         }
         item.setName(equipmentCalibrationAuthority.getName());
@@ -628,8 +640,14 @@ public class EquipmentCalibrationServiceImpl implements EquipmentCalibrationServ
 
     public  EquipmentCalibrationAuthority getCalibrationAuthority(int pk)
     {
-        return persistWrapper.read(EquipmentCalibrationAuthority.class,
-                "select *  from equipment_calibration_authority where pk = ? ", pk);
+        try {
+            return persistWrapper.read(EquipmentCalibrationAuthority.class,
+                    "select *  from equipment_calibration_authority where pk = ? ", pk);
+        }
+        catch(Exception e){
+
+        }
+        return null;
     }
 
     public  List<EquipmentBean> getEquipmentHistory(EquipmentOID equipmentOID)
@@ -1066,8 +1084,13 @@ public class EquipmentCalibrationServiceImpl implements EquipmentCalibrationServ
             obj.setApprovedComment(eBean.getApprovedComment());
         if (eBean.getApprovedDate() != null)
             obj.setApprovedDate(eBean.getApprovedDate());
-        obj = equipmentDAO.saveEquipment(context, obj);
-        updateNextCaliberationDate(new EquipmentOID(obj.getPk()), eBean.getCalibrationInterval());
+
+            obj = equipmentDAO.saveEquipment(context, obj);
+if(obj!=null) {
+    updateNextCaliberationDate(new EquipmentOID(obj.getPk()), eBean.getCalibrationInterval());
+}else {
+
+}
 
         List<AttachmentIntf> attachmentlist = new ArrayList<AttachmentIntf>();
 
@@ -1078,31 +1101,39 @@ public class EquipmentCalibrationServiceImpl implements EquipmentCalibrationServ
                 attachmentlist.add(attachmentIntf);
             }
         }
-        commonServiceManager.saveAttachments(context, obj.getPk(), EntityTypeEnum.Equipment.getValue(), attachmentlist,
-                true);
-
-        EquipmentBean newBean = getEquipmentBean(new EquipmentOID(obj.getPk()));
-        if (eBean.getPk() < 1
-                && authorizationManager .isUserInRole(context, SiteRolesEnum.CalibrationCoordinator.getId()))
-        {
-            /*
-             * If equipment is created by calibration coordinator then it can be
-             * automatically approved
-             */
-            newBean = approveEquipment(context, new EquipmentOID(obj.getPk()),
-                    "Created and approved by calibration coordinator: " + context.getUser().getOID().getDisplayText());
-        } else if (eBean.getPk() < 1)
-        {
-            /*
-             * if the equipment is not created by calibration coordinator then
-             * sent created notification email to calibration coordinator and
-             * created user
-             */
-
-            equipmentEmailSender.notifyEquipmentCreated(context, newBean);
+        if(obj!=null) {
+            commonServiceManager.saveAttachments(context, obj.getPk(), EntityTypeEnum.Equipment.getValue(), attachmentlist,
+                    true);
         }
+        else{
 
-        return newBean;
+        }
+if(obj!=null) {
+    EquipmentBean newBean = getEquipmentBean(new EquipmentOID(obj.getPk()));
+    if (eBean.getPk() < 1
+            && authorizationManager.isUserInRole(context, SiteRolesEnum.CalibrationCoordinator.getId())) {
+        /*
+         * If equipment is created by calibration coordinator then it can be
+         * automatically approved
+         */
+        newBean = approveEquipment(context, new EquipmentOID(obj.getPk()),
+                "Created and approved by calibration coordinator: " + context.getUser().getOID().getDisplayText());
+    } else if (eBean.getPk() < 1) {
+        /*
+         * if the equipment is not created by calibration coordinator then
+         * sent created notification email to calibration coordinator and
+         * created user
+         */
+
+        equipmentEmailSender.notifyEquipmentCreated(context, newBean);
+    }
+
+
+    return newBean;
+}
+else {
+}
+        return eBean;
     }
 
     public  EquipmentBean getEquipmentwithReference(String reference) throws Exception
