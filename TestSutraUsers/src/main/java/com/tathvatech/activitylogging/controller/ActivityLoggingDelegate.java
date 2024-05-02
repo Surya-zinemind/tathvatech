@@ -16,6 +16,7 @@ import com.tathvatech.common.exception.AppException;
 import com.tathvatech.common.wrapper.PersistWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -118,7 +119,7 @@ public class ActivityLoggingDelegate {
 				sql.toString(), 
 				params);
 	}
-	
+	@Transactional
 	public  void logActivity(ActivityLogQuery act) throws Exception
     {
     	ActivityLog aLog = new ActivityLog();
@@ -142,6 +143,7 @@ public class ActivityLoggingDelegate {
     	aLog.setDimentionalFailCount(act.getDimentionalFailCount());
     	aLog.setNaCount(act.getNaCount());
     	aLog.setCommentsCount(act.getCommentsCount());
+		aLog.setLastUpdated(new Date());
     	
     	persistWrapper.createEntity(aLog);
     }

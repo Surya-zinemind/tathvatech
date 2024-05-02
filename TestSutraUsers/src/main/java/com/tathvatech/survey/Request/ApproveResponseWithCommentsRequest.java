@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class ApproveResponseWithCommentsRequest {
-    private ResponseMasterNew resp;
+    private Integer responseId;
     private String comments;
 }

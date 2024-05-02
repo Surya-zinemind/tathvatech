@@ -16,6 +16,7 @@ import com.tathvatech.forms.common.AssignedTestsQuery;
 import com.tathvatech.forms.common.EntityVersionReviewProxy;
 import com.tathvatech.forms.common.ObjectLockQuery;
 import com.tathvatech.forms.entity.*;
+import com.tathvatech.forms.oid.FormResponseOID;
 import com.tathvatech.forms.response.FormResponseBean;
 import com.tathvatech.forms.response.ResponseMaster;
 import com.tathvatech.project.service.ProjectService;
@@ -40,6 +41,7 @@ import com.tathvatech.unit.service.UnitService;
 import com.tathvatech.user.OID.*;
 import com.tathvatech.user.common.TestProcObj;
 import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.User;
 import com.tathvatech.workstation.service.WorkstationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -82,16 +84,30 @@ public class SurveyResponseController
     /**
      * Called when the workstation is changed to in progress
      */
-    @PostMapping("/ceateDummyResponse")
-	public SurveyResponse ceateDummyResponse(@RequestBody
-											 SurveyResponse surveyResponse) throws Exception
+    @PostMapping("/ceateDummyResponse/{formPk}")
+	public SurveyResponse ceateDummyResponse(@PathVariable("formPk") int formPk) throws Exception
     {
+		SurveyResponse sResponse = getResponse(formPk);
+
 		UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		sResponse.setUser((User) context.getUser());
 		SurveyResponse resp = surveyResponseService.ceateDummyResponse(context,
-			    surveyResponse);
+				sResponse);
         return resp;
     }
-    // Commenting the methods using Vaadin
+
+	private SurveyResponse getResponse(int formPk) throws Exception {
+		SurveyDefinition sd = surveyDefFactory.getSurveyDefinition(new FormOID(formPk, null));
+		SurveyResponse sResponse = new SurveyResponse(sd);
+		sResponse.setSurveyPk(formPk);
+		sResponse.setResponseStartTime(new Date());
+		sResponse.setResponseCompleteTime(new Date());
+		// ipaddress and mode set
+		sResponse.setIpaddress("0.0.0.0");
+		sResponse.setResponseMode(SurveyForm.RESPONSEMODE_NORMAL);
+		return sResponse;
+	}
+	// Commenting the methods using Vaadin
     
     /**
      * 
@@ -706,14 +722,15 @@ public class SurveyResponseController
     {
 
 		UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		SurveyResponse sResponse = getResponse(verifyResponseRequest.getFormPk());
 			surveyResponseService.verifyResponse(userContext,
-				   verifyResponseRequest.getSResponse(), verifyResponseRequest.getComments());
-			TestProcObj testProc = testProcService.getTestProc(verifyResponseRequest.getSResponse().getTestProcPk());
+					sResponse, verifyResponseRequest.getComments());
+			TestProcObj testProc = testProcService.getTestProc(sResponse.getTestProcPk());
 		    UnitObj unit =unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 		    Project project = projectService.getProject(testProc.getProjectPk());
 		    ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), (BaseActions) Actions.verifyForm,
 					"Form Verified", new Date(), new Date(), (int) project.getPk(), testProc.getPk(), (int) unit.getPk(), testProc.getWorkstationPk(),
-					verifyResponseRequest.getSResponse().getSurveyPk(), null, verifyResponseRequest.getSResponse().getResponseId());
+					sResponse.getSurveyPk(), null, sResponse.getResponseId());
 			activityLoggingDelegate.logActivity(aLog);
 
 
@@ -726,16 +743,19 @@ public class SurveyResponseController
 	    @RequestBody RejectResponseRequest rejectResponseRequest) throws Exception
     {
 		UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-	
+
+		SurveyResponse sResponse = getResponse(rejectResponseRequest.getFormPk());
+		surveyResponseService.verifyResponse(userContext,
+				sResponse, rejectResponseRequest.getComments());
 			surveyResponseService.rejectResponse(userContext,
-				    rejectResponseRequest.getSResponse(),rejectResponseRequest.getComments());
-			TestProcObj testProc = testProcService.getTestProc(rejectResponseRequest.getSResponse().getTestProcPk());
+					sResponse,rejectResponseRequest.getComments());
+			TestProcObj testProc = testProcService.getTestProc(sResponse.getTestProcPk());
 		    UnitObj unit = unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 		    Project project = projectService.getProject(testProc.getProjectPk());
 			ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), (BaseActions) Actions.rejectVerifyForm,
 					"Form Verification Rejected", new Date(), new Date(), (int) project.getPk(), testProc.getPk(),
                     (int) unit.getPk(), testProc.getWorkstationPk(),
-					rejectResponseRequest.getSResponse().getSurveyPk(), null, rejectResponseRequest.getSResponse().getResponseId());
+					sResponse.getSurveyPk(), null, sResponse.getResponseId());
 			activityLoggingDelegate.logActivity(aLog);
 	
 
@@ -748,15 +768,16 @@ public class SurveyResponseController
     		@RequestBody ApproveResponseRequest  approveResponseRequest) throws Exception
     {
 		UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-	
-	    	surveyResponseService.approveResponse(userContext,approveResponseRequest.getResp(), approveResponseRequest.getComments());
-	    	TestProcObj testProc = testProcService.getTestProc(approveResponseRequest.getResp().getTestProcPk());
+		ResponseMasterNew responseMaster = surveyResponseService.getResponseMaster(approveResponseRequest.getResponseId());
+
+		surveyResponseService.approveResponse(userContext,responseMaster, approveResponseRequest.getComments());
+	    	TestProcObj testProc = testProcService.getTestProc(responseMaster.getTestProcPk());
 //		    UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 //		    Project project = ProjectManager.getProject(testProc.getProjectPk());
 	    	ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), Actions.approveForm,
 	    				"Form Approved", new Date(), new Date(), testProc.getProjectPk(), testProc.getPk(), 
 	    				testProc.getUnitPk(), testProc.getWorkstationPk(), 
-	    				testProc.getFormPk(), null, approveResponseRequest.getResp().getResponseId());
+	    				testProc.getFormPk(), null, responseMaster.getResponseId());
 	    	activityLoggingDelegate.logActivity(aLog);
 	
 
@@ -769,14 +790,15 @@ public class SurveyResponseController
     {
 
 		UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-	    	surveyResponseService.approveResponseWithComments(userContext, approveResponseWithCommentsRequest.getResp(), approveResponseWithCommentsRequest.getComments());
-	    	TestProcObj testProc = testProcService.getTestProc(approveResponseWithCommentsRequest.getResp().getTestProcPk());
+		ResponseMasterNew responseMaster = surveyResponseService.getResponseMaster(approveResponseWithCommentsRequest.getResponseId());
+	    	surveyResponseService.approveResponseWithComments(userContext, responseMaster, approveResponseWithCommentsRequest.getComments());
+	    	TestProcObj testProc = testProcService.getTestProc(responseMaster.getTestProcPk());
 //		    UnitObj unit = ProjectManager.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 //		    Project project = ProjectManager.getProject(testProc.getProjectPk());
 	    	ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), Actions.approveForm,
 	    				"Form approved with comments", new Date(), new Date(), testProc.getProjectPk(), testProc.getPk(), 
 	    				testProc.getUnitPk(), testProc.getWorkstationPk(), 
-	    				testProc.getFormPk(), null, approveResponseWithCommentsRequest.getResp().getResponseId());
+	    				testProc.getFormPk(), null, responseMaster.getResponseId());
 	    	activityLoggingDelegate.logActivity(aLog);
 	
 
@@ -808,19 +830,20 @@ public class SurveyResponseController
     
     @PutMapping("/rejectApproval")
 	public  void rejectApproval(
-	    @RequestBody RejectApprovalRequest  rejectApprovalRequest) throws Exception
+	    @RequestBody RejectResponseRequest  rejectApprovalRequest) throws Exception
     {
 
 		UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		SurveyResponse sResponse = getResponse(rejectApprovalRequest.getFormPk());
 			surveyResponseService.rejectApproval(userContext,
-				    rejectApprovalRequest.getSResponse(), rejectApprovalRequest.getComments());
-			TestProcObj testProc = testProcService.getTestProc(rejectApprovalRequest.getSResponse().getTestProcPk());
+				    sResponse, rejectApprovalRequest.getComments());
+			TestProcObj testProc = testProcService.getTestProc(sResponse.getTestProcPk());
 		    UnitObj unit =unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 		    Project project = projectService.getProject(testProc.getProjectPk());
 			ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), (BaseActions) Actions.rejectApproveForm,
 					"Form Approval Rejected", new Date(), new Date(), (int) project.getPk(), testProc.getPk(),
 					testProc.getUnitPk(), testProc.getWorkstationPk(), 
-					rejectApprovalRequest.getSResponse().getSurveyPk(), null, rejectApprovalRequest.getSResponse().getResponseId());
+					sResponse.getSurveyPk(), null, sResponse.getResponseId());
 		activityLoggingDelegate.logActivity(aLog);
 	
 
@@ -832,15 +855,16 @@ public class SurveyResponseController
     {
 
 		UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		SurveyResponse sResponse = getResponse(reopenApprovedRequest.getFormPk());
 	    	surveyResponseService.reopenApprovedForm(userContext,
-	    		    reopenApprovedRequest.getSResponse(), reopenApprovedRequest.getComments());
-	    	TestProcObj testProc = testProcService.getTestProc(reopenApprovedRequest.getSResponse().getTestProcPk());
+	    		   sResponse, reopenApprovedRequest.getComments());
+	    	TestProcObj testProc = testProcService.getTestProc(sResponse.getTestProcPk());
 		    UnitObj unit = unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 		    Project project = projectService.getProject(testProc.getProjectPk());
 	    	ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), (BaseActions) Actions.rejectApproveForm,
 	    			"Approved form reopened", new Date(), new Date(), (int) project.getPk(), testProc.getPk(),
 	    			testProc.getUnitPk(), testProc.getWorkstationPk(), 
-	    			reopenApprovedRequest.getSResponse().getSurveyPk(), null, reopenApprovedRequest.getSResponse().getResponseId());
+	    			sResponse.getSurveyPk(), null,sResponse.getResponseId());
 	    	activityLoggingDelegate.logActivity(aLog);
 	
 
@@ -856,19 +880,18 @@ public class SurveyResponseController
      * @return
      * @throws Exception
      */
-	@GetMapping("/getQuestionsToSaveResponsesFor")
-	private  boolean getQuestionsToSaveResponsesFor(@RequestBody GetQuestionsToSaveResponsesForRequest getQuestionsToSaveResponsesForRequest)throws Exception
+
+	private  boolean getQuestionsToSaveResponsesFor( SurveyDefinition surveyDef, List<Section> surveyQuestions,
+													 FormResponseOID responseOID)throws Exception
 	{
 		UserContext context = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		boolean hasSectionsLockedByOthers = false;
-		SurveyDefinition surveyDefinition = surveyDefFactory
-				.getSurveyDefinition(new FormOID(getQuestionsToSaveResponsesForRequest.getFormPk(), null));
-		for (Iterator iter = surveyDefinition.getQuestions().iterator(); iter.hasNext();)
+		for (Iterator iter = surveyDef.getQuestions().iterator(); iter.hasNext();)
 		{
 			SurveyItem aItem = (SurveyItem) iter.next();
 			if(aItem instanceof Section)
 			{
-				ObjectLockQuery lock = surveyMasterService.getCurrentLock(getQuestionsToSaveResponsesForRequest.getResponseOID(),
+				ObjectLockQuery lock = surveyMasterService.getCurrentLock(responseOID,
 						aItem.getSurveyItemId());
 			
 				if(lock == null)
@@ -878,7 +901,7 @@ public class SurveyResponseController
 				else if(lock.getUserPk() == context.getUser().getPk())
 				{
 					//locked my me.. 
-					getQuestionsToSaveResponsesForRequest.getSurveyQuestions().add((Section)aItem);
+					surveyQuestions.add((Section)aItem);
 				}
 				else
 				{
@@ -890,7 +913,7 @@ public class SurveyResponseController
 		return hasSectionsLockedByOthers;
 	}
 
-	@PostMapping (value = "/validateResponse", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping (value = "/validateResponse")
 	public  LinkedHashMap<String, List<String>> validateResponse(@RequestBody ValidateResponseRequest validateResponseRequest)
 	{
 		LinkedHashMap<String, List<String>> errors = new LinkedHashMap<String, List<String>>();
