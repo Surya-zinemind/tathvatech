@@ -20,6 +20,10 @@ public class LocationMasterBean extends BaseResponseBean implements Serializable
     private UserOID createdBy;
     private Date createdDate;
     private Date lastUpdated;
+    public String getSiteName() {
+        return (site != null) ? site.getName() : null;
+    }
+
 
     public int getPk()
     {
@@ -151,10 +155,14 @@ public class LocationMasterBean extends BaseResponseBean implements Serializable
         return getName();
     }
 
-    public LocationOID getOID()
-    {
-        return new LocationOID(pk, site.getName() + "_" + locationType.getName() + "_" + name);
+    public LocationOID getOID() {
+        if (site != null && locationType != null && name != null) {
+            return new LocationOID(pk, site.getName() + "_" + locationType.getName() + "_" + name);
+        } else {
+        }
+        return null;
     }
+
 
 
 }
