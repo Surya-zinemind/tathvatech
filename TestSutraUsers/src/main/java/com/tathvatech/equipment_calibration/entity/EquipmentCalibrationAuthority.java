@@ -2,9 +2,7 @@ package com.tathvatech.equipment_calibration.entity;
 
 import com.tathvatech.common.entity.AbstractEntity;
 import com.tathvatech.user.OID.TSBeanBase;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -14,6 +12,7 @@ import java.util.Date;
 @Table(name = "equipment_calibration_authority")
 public class EquipmentCalibrationAuthority  extends AbstractEntity implements Serializable
 {
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private long pk;
     private String name;

@@ -1,9 +1,7 @@
 package com.tathvatech.equipment_calibration.entity;
 
 import com.tathvatech.common.entity.AbstractEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -12,7 +10,8 @@ import java.util.Date;
 @Entity
 @Table(name = "location_type")
 public class LocationType extends AbstractEntity implements Serializable {
-  @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     private long pk;
     private String name;
     private String description;

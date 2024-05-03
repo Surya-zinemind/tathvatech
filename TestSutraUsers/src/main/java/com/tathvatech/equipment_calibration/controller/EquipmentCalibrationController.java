@@ -15,8 +15,11 @@ import com.tathvatech.equipment_calibration.report.EquipmentListFilter;
 import com.tathvatech.equipment_calibration.report.EquipmentListReportRow;
 import com.tathvatech.equipment_calibration.service.EquipmentCalibrationService;
 
+import com.tathvatech.project.controller.ProjectController;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.OID.SiteOID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +29,7 @@ import java.util.List;
 @RequestMapping("/equipmentCalibration")
 @RestController
 public class EquipmentCalibrationController {
+    private  final Logger logger = LoggerFactory.getLogger(EquipmentCalibrationController.class);
     private final EquipmentCalibrationService equipmentCalibrationService;
 
     public EquipmentCalibrationController(EquipmentCalibrationService equipmentCalibrationService) {
@@ -131,7 +135,7 @@ public class EquipmentCalibrationController {
      * Location master methods end
      */
 
-    @Transactional
+
     @PostMapping("/saveLocationType")
     public  LocationType saveLocationType(@RequestBody LocationType locationType) throws Exception
     {

@@ -354,54 +354,47 @@ public class EquipmentCalibrationServiceImpl implements EquipmentCalibrationServ
     /*
      * Location type methods start
      */
-    public  LocationType saveLocationType(UserContext context, LocationType locationType) throws Exception
-    {
+    @Transactional
+    public LocationType saveLocationType(UserContext context, LocationType locationType) throws Exception {
         LocationType item;
 
-        if (locationType.getPk() > 0)
-        {
+        if (locationType.getPk() > 0) {
+
             item = (LocationType) persistWrapper.readByPrimaryKey(LocationType.class, locationType.getPk());
         } else {
+
             item = new LocationType();
-            if (item!= null) {
-                item.setCreatedBy((int) context.getUser().getPk());
-                item.setCreatedDate(new Date());
-                item.setEstatus(EStatusEnum.Active.getValue());
-            }
+            item.setCreatedBy((int) context.getUser().getPk());
+            item.setCreatedDate(new Date());
+            item.setEstatus(EStatusEnum.Active.getValue());
         }
-        if(item!=null) {
-            item.setName(locationType.getName());
-            item.setDescription(locationType.getDescription());
-        }
-        int pk = 0;
+
+        item.setName(locationType.getName());
+        item.setDescription(locationType.getDescription());
+
+        int pk;
         if (locationType.getPk() > 0) {
-            if (item != null) {
-                persistWrapper.update(item);
-                pk = (int) locationType.getPk();
-            } else {
-                if(item!=null) {
-                    pk = (int) persistWrapper.createEntity(item);
-                }
-            }
-            return getLocationType(pk);
+            persistWrapper.update(item);
+            pk = (int) locationType.getPk();
+        } else {
+            pk = (int) persistWrapper.createEntity(item);
         }
-        return item;
+
+        return getLocationType(pk);
     }
 
+
+    @Transactional
     public  void deleteLocationType(UserContext context, int pk) throws Exception
     {
+        LocationType item;
+        if (pk > 0)
+        {
+            item = (LocationType) persistWrapper.readByPrimaryKey(LocationType.class, pk);
+            item.setEstatus(EStatusEnum.Deleted.getValue());
+            persistWrapper.update(item);
 
-        LocationType item = null;
-        
-            if (pk > 0) {
-                if (item != null) {
-                    item = (LocationType) persistWrapper.readByPrimaryKey(LocationType.class, pk);
-                    item.setEstatus(EStatusEnum.Deleted.getValue());
-                    persistWrapper.update(item);
-
-                }
-            }
-        
+        }
     }
 
     public  List<LocationType> getLocationTypes(String searchString)
