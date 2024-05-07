@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class ApproveResponseRequest {
-    private Integer responseId;
+    private ResponseMasterNew resp;
     private String comments;
 }

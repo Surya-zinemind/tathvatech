@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class VerifyResponseRequest {
-    private Integer formPk;
+    private SurveyResponse sResponse;
     private String comments;
 }
