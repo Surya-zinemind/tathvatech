@@ -6,7 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-import java.io.Serializable;
 import java.util.Date;
 
 @Table(name = "ncr_disposition_master")
@@ -21,19 +20,14 @@ public class NcrDispositionTypes extends DBEnum   {
     private int createdBy;
     private Date lastUpdated;
 
-
-
+    protected NcrDispositionTypes(PersistWrapper persistWrapper) {
+        super(persistWrapper);
+    }
 
     @Override
     public long getPk() {
         return pk;
     }
-
-    @Override
-    public void setingPk(int val) {
-
-    }
-
 
 
     public void setPk(long pk) {

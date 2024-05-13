@@ -4,10 +4,12 @@ import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.report.request.ReportRequest;
 import com.tathvatech.report.response.ReportResponse;
 import com.tathvatech.user.entity.User;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class UserListReport
 {
     private final PersistWrapper persistWrapper;

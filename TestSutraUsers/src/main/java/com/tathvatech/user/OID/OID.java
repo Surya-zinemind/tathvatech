@@ -8,9 +8,9 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.tathvatech.common.enums.EntityType;
 import com.tathvatech.common.enums.EntityTypeEnum;
-import com.tathvatech.equipment_calibration.oid.EquipmentOID;
-import com.tathvatech.equipment_calibration.oid.EquipmentTypeOID;
-import com.tathvatech.equipment_calibration.oid.LocationOID;
+import com.tathvatech.equipmentcalibration.oid.EquipmentOID;
+import com.tathvatech.equipmentcalibration.oid.EquipmentTypeOID;
+import com.tathvatech.equipmentcalibration.oid.LocationOID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)

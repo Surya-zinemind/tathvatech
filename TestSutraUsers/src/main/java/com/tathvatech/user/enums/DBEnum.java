@@ -8,30 +8,30 @@ import java.util.List;
 
 import com.tathvatech.common.enums.EStatusEnum;
 import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.equipmentcalibration.enums.BaseEnum;
 import com.tathvatech.user.OID.TSBeanBase;
 import jakarta.persistence.Table;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-
-public abstract class DBEnum extends TSBeanBase
+public abstract class DBEnum extends TSBeanBase implements BaseEnum
 {
-	private PersistWrapper persistWrapper;
+	private  final   PersistWrapper persistWrapper;
 	private static HashMap<String, DBEnumCacheValues> cache = new HashMap<String, DBEnumCacheValues>();
-
-
-
-    protected DBEnum() {
+	protected DBEnum(PersistWrapper persistWrapper) {
+        this.persistWrapper = persistWrapper;
     }
-
-
-    @Override
+	@Override
 	public abstract long getPk();
-	public abstract void setingPk(int val);
+	public abstract void setPk(long val);
 
+	@Override
 	public Integer getValue()
 	{
 		return (int) getPk();
 	}
-	
+
 	@Override
 	public String getDisplayText()
 	{
@@ -39,7 +39,7 @@ public abstract class DBEnum extends TSBeanBase
 	}
 	public abstract String getName();
 	public abstract void setName(String string);
-	
+
 	private String description;
 	public void setDescription(String description)
 	{
@@ -49,8 +49,8 @@ public abstract class DBEnum extends TSBeanBase
 	{
 		return getDescription();
 	}
-	
-	public <T extends DBEnum> DBEnum getEnum(Class<? extends DBEnum> type, Integer value)
+
+	public  <T extends DBEnum> DBEnum getEnum(Class<? extends DBEnum> type, Integer value)
 	{
 		if(value == null)
 			return null;
@@ -59,8 +59,9 @@ public abstract class DBEnum extends TSBeanBase
 	}
 	public <T extends DBEnum> DBEnum getEnum(Class<? extends DBEnum> type, int value)
 	{
-		try 
+		try
 		{
+
 			String tableName = type.getAnnotation(Table.class).name();
 			DBEnumCacheValues enumMap = cache.get(tableName);
 			if(enumMap == null)
@@ -78,10 +79,10 @@ public abstract class DBEnum extends TSBeanBase
 		}
 		return null;
 	}
-	
+
 	public <T extends DBEnum> DBEnum getEnum(Class<? extends DBEnum> type, String name)
 	{
-		try 
+		try
 		{
 			String tableName = type.getAnnotation(Table.class).name();
 			DBEnumCacheValues enumMap = cache.get(tableName);
@@ -107,10 +108,10 @@ public abstract class DBEnum extends TSBeanBase
 		}
 		return null;
 	}
-	
+
 	public <T extends DBEnum> LinkedHashMap<Integer, DBEnum> getEnumList(Class<? extends DBEnum> type)
 	{
-		try 
+		try
 		{
 			String tableName = type.getAnnotation(Table.class).name();
 			DBEnumCacheValues enumMap = cache.get(tableName);
@@ -120,7 +121,7 @@ public abstract class DBEnum extends TSBeanBase
 				enumMap = cache.get(tableName); // get it again after loading.
 			}
 			LinkedHashMap<Integer, DBEnum> returnlist = new LinkedHashMap<Integer, DBEnum>();
-			for (Iterator iterator = enumMap.values.values().iterator(); iterator.hasNext();) 
+			for (Iterator iterator = enumMap.values.values().iterator(); iterator.hasNext();)
 			{
 				DBEnum aEnum = (DBEnum) iterator.next();
 				returnlist.put(aEnum.getValue(), aEnum);
@@ -133,33 +134,33 @@ public abstract class DBEnum extends TSBeanBase
 		}
 		return null;
 	}
-	
+
 	private  synchronized void loadDbEnum(Class<? extends DBEnum> type)
 	{
 		String tableName = type.getAnnotation(Table.class).name();
-		try 
+		try
 		{
 			DBEnumCacheValues enumMap = new DBEnumCacheValues();
 			LinkedHashMap<Integer, DBEnum> map = new LinkedHashMap<Integer, DBEnum>();
 			List<DBEnum> dbenums = (List<DBEnum>) persistWrapper.readList(Class.forName(type.getName()),"select pk as pk, name as name, description as description from " + tableName + " where estatus = " + EStatusEnum.Active.getValue());
-			for (Iterator iterator = dbenums.iterator(); iterator.hasNext();) 
+			for (Iterator iterator = dbenums.iterator(); iterator.hasNext();)
 			{
 				DBEnum aDbEnum = (DBEnum) iterator.next();
 				map.put(aDbEnum.getValue(), aDbEnum);
 			}
 			enumMap.loadedDate = new Date();
 			enumMap.values = map;
-			
+
 			cache.put(tableName, enumMap);
 		}
-		catch (Exception e) 
+		catch (Exception e)
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	private static class DBEnumCacheValues
 	{
 		Date loadedDate;
@@ -172,11 +173,11 @@ public abstract class DBEnum extends TSBeanBase
 	{
 		if(inVal == null)
 			return false;
-		
+
 		DBEnum val = (DBEnum)inVal;
 		if(inVal.getClass().equals(this.getClass()) && val.getPk() == this.getPk())
 			return true;
-		
+
 		return false;
 	}
 }

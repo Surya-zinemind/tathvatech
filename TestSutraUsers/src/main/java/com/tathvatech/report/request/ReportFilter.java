@@ -3,7 +3,7 @@ package com.tathvatech.report.request;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.tathvatech.equipment_calibration.report.EquipmentListFilter;
+import com.tathvatech.equipmentcalibration.report.EquipmentListFilter;
 import com.tathvatech.forms.common.TestProcFilter;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
