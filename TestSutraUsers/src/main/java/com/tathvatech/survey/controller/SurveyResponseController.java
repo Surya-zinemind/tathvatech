@@ -702,18 +702,17 @@ public class SurveyResponseController
 
     @PutMapping("/verifyResponse")
 	public  void verifyResponse(
-	    @RequestBody VerifyResponseRequest verifyResponseRequest) throws Exception
-    {
+	    @RequestBody VerifyResponseRequest verifyResponseRequest) throws Exception {
 
 		UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 			surveyResponseService.verifyResponse(userContext,
-				   verifyResponseRequest.getSResponse(), verifyResponseRequest.getComments());
-			TestProcObj testProc = testProcService.getTestProc(verifyResponseRequest.getSResponse().getTestProcPk());
+				   verifyResponseRequest.getSurveyResponse(), verifyResponseRequest.getComments());
+			TestProcObj testProc = testProcService.getTestProc(verifyResponseRequest.getSurveyResponse().getTestProcPk());
 		    UnitObj unit =unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 		    Project project = projectService.getProject(testProc.getProjectPk());
 		    ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), (BaseActions) Actions.verifyForm,
 					"Form Verified", new Date(), new Date(), (int) project.getPk(), testProc.getPk(), (int) unit.getPk(), testProc.getWorkstationPk(),
-					verifyResponseRequest.getSResponse().getSurveyPk(), null, verifyResponseRequest.getSResponse().getResponseId());
+					verifyResponseRequest.getSurveyResponse().getSurveyPk(), null, verifyResponseRequest.getSurveyResponse().getResponseId());
 			activityLoggingDelegate.logActivity(aLog);
 
 
@@ -728,14 +727,14 @@ public class SurveyResponseController
 		UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 	
 			surveyResponseService.rejectResponse(userContext,
-				    rejectResponseRequest.getSResponse(),rejectResponseRequest.getComments());
-			TestProcObj testProc = testProcService.getTestProc(rejectResponseRequest.getSResponse().getTestProcPk());
+				    rejectResponseRequest.getSurveyResponse(),rejectResponseRequest.getComments());
+			TestProcObj testProc = testProcService.getTestProc(rejectResponseRequest.getSurveyResponse().getTestProcPk());
 		    UnitObj unit = unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 		    Project project = projectService.getProject(testProc.getProjectPk());
 			ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), (BaseActions) Actions.rejectVerifyForm,
 					"Form Verification Rejected", new Date(), new Date(), (int) project.getPk(), testProc.getPk(),
                     (int) unit.getPk(), testProc.getWorkstationPk(),
-					rejectResponseRequest.getSResponse().getSurveyPk(), null, rejectResponseRequest.getSResponse().getResponseId());
+					rejectResponseRequest.getSurveyResponse().getSurveyPk(), null, rejectResponseRequest.getSurveyResponse().getResponseId());
 			activityLoggingDelegate.logActivity(aLog);
 	
 
@@ -813,34 +812,34 @@ public class SurveyResponseController
 
 		UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 			surveyResponseService.rejectApproval(userContext,
-				    rejectApprovalRequest.getSResponse(), rejectApprovalRequest.getComments());
-			TestProcObj testProc = testProcService.getTestProc(rejectApprovalRequest.getSResponse().getTestProcPk());
+				    rejectApprovalRequest.getSurveyResponse(), rejectApprovalRequest.getComments());
+			TestProcObj testProc = testProcService.getTestProc(rejectApprovalRequest.getSurveyResponse().getTestProcPk());
 		    UnitObj unit =unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 		    Project project = projectService.getProject(testProc.getProjectPk());
 			ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), (BaseActions) Actions.rejectApproveForm,
 					"Form Approval Rejected", new Date(), new Date(), (int) project.getPk(), testProc.getPk(),
 					testProc.getUnitPk(), testProc.getWorkstationPk(), 
-					rejectApprovalRequest.getSResponse().getSurveyPk(), null, rejectApprovalRequest.getSResponse().getResponseId());
+					rejectApprovalRequest.getSurveyResponse().getSurveyPk(), null, rejectApprovalRequest.getSurveyResponse().getResponseId());
 		activityLoggingDelegate.logActivity(aLog);
 	
 
     }
     
 
-    @PutMapping("/reopenApproved ")
+    @PutMapping("/reopenApproved")
 	public  void reopenApproved( @RequestBody ReopenApprovedRequest reopenApprovedRequest) throws Exception
     {
 
 		UserContext userContext = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 	    	surveyResponseService.reopenApprovedForm(userContext,
-	    		    reopenApprovedRequest.getSResponse(), reopenApprovedRequest.getComments());
-	    	TestProcObj testProc = testProcService.getTestProc(reopenApprovedRequest.getSResponse().getTestProcPk());
+	    		    reopenApprovedRequest.getSurveyResponse(), reopenApprovedRequest.getComments());
+	    	TestProcObj testProc = testProcService.getTestProc(reopenApprovedRequest.getSurveyResponse().getTestProcPk());
 		    UnitObj unit = unitService.getUnitByPk(new UnitOID(testProc.getUnitPk()));
 		    Project project = projectService.getProject(testProc.getProjectPk());
 	    	ActivityLogQuery aLog = new ActivityLogQuery((int) userContext.getUser().getPk(), (BaseActions) Actions.rejectApproveForm,
 	    			"Approved form reopened", new Date(), new Date(), (int) project.getPk(), testProc.getPk(),
 	    			testProc.getUnitPk(), testProc.getWorkstationPk(), 
-	    			reopenApprovedRequest.getSResponse().getSurveyPk(), null, reopenApprovedRequest.getSResponse().getResponseId());
+	    			reopenApprovedRequest.getSurveyResponse().getSurveyPk(), null, reopenApprovedRequest.getSurveyResponse().getResponseId());
 	    	activityLoggingDelegate.logActivity(aLog);
 	
 
@@ -890,7 +889,7 @@ public class SurveyResponseController
 		return hasSectionsLockedByOthers;
 	}
 
-	@PostMapping (value = "/validateResponse", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value ="/validateResponse", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public  LinkedHashMap<String, List<String>> validateResponse(@RequestBody ValidateResponseRequest validateResponseRequest)
 	{
 		LinkedHashMap<String, List<String>> errors = new LinkedHashMap<String, List<String>>();

@@ -74,6 +74,7 @@ public class WorkflowManager
 			nwf.setComments(comments);
 		
 		nwf.setDate(new Date());
+		nwf.setLastUpdated(new Date());
 		
 		persistWrapper.createEntity(nwf);
 	}

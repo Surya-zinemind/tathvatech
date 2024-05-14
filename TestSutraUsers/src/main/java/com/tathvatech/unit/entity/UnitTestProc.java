@@ -11,9 +11,7 @@ import java.util.Date;
 
 import com.tathvatech.common.entity.AbstractEntity;
 import com.tathvatech.user.OID.TestProcOID;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 
 /**
@@ -27,10 +25,12 @@ import jakarta.persistence.Table;
 public class UnitTestProc extends AbstractEntity implements Serializable
 {
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long pk;
 	private int createdBy;
 	private Date createdDate;
-	private int estatus; 
+	private int estatus;
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Date lastUpdated;
 
 	@Override

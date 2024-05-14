@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.tathvatech.forms.oid.FormResponseOID;
 import com.tathvatech.forms.response.FormResponseStats;
 import com.tathvatech.forms.response.ResponseMasterNew;
@@ -25,6 +26,7 @@ import com.tathvatech.user.entity.User;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.Transient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +36,7 @@ import org.slf4j.LoggerFactory;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SurveyResponse
 {
     private static final Logger logger = LoggerFactory.getLogger(SurveyResponse.class);
@@ -58,12 +61,13 @@ public class SurveyResponse
     private Date lastUpdated;
 
     
-    @JsonIgnore
+
     private SurveyDefinition surveyDefinition;
     
     
     // we are making this hashmap ignore. but we are creating a hashmap with the surveyItemId and the SimpleSurveyItemResponse into the serialize object to save this
     @JsonIgnore
+	@Transient
     private HashMap<SurveySaveItemBase,SurveyItemResponse> answerMap = new HashMap();
     private User user;
     private ResponseFlags flag;
@@ -71,11 +75,16 @@ public class SurveyResponse
     private User verifiedBy;
     private User approvedBy;
 
+	public SurveyResponse() {
+	}
+
+	@JsonIgnore
     public SurveyResponse(SurveyDefinition sd)
     {
     	this.surveyDefinition = sd;
     }
-    
+
+	@JsonIgnore
     public SurveyResponse(SurveyDefinition sd, UnitTestProc unitForm, UnitQuery uq, User user)
     {
 		this(sd);
@@ -323,7 +332,8 @@ public class SurveyResponse
     	this.surveyDefinition = sDef;
     }
     
-
+@Transient
+@JsonIgnore
     public void addAnswer(SurveySaveItemBase sItem, SurveyItemResponse answer)
     {
         AnswerPersistor ap = sItem.getPersistor(answer);
@@ -336,23 +346,27 @@ public class SurveyResponse
     }
 
 
-
+	@Transient
+	@JsonIgnore
     public SurveyItemResponse getAnswer(SurveySaveItemBase sItem)
     {
         return (SurveyItemResponse)answerMap.get(sItem);
     }
 
-
+	@Transient
+	@JsonIgnore
     public void clearAnswer(SurveySaveItemBase ssItem)
     {
         answerMap.remove(ssItem);
     }
-    
+	@Transient
+	@JsonIgnore
     public HashMap<SurveySaveItemBase,SurveyItemResponse> getSurveyItemAnswerMap()
     {
     	return answerMap;
     }
-
+	@Transient
+	@JsonIgnore
     public SurveyItemResponse getAnswerBySurveyItemId(String itemId)
     {
     	SurveyItemResponse ires = null;

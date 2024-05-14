@@ -11,9 +11,7 @@ import java.util.Date;
 
 import com.tathvatech.common.entity.AbstractEntity;
 import com.tathvatech.forms.common.TestProcFormAssignBean;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 
 /**
@@ -34,6 +32,7 @@ public class TestProcFormAssign extends AbstractEntity implements Serializable
 	private int current;
 	private int createdBy;
 	private Date createdDate;
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Date lastUpdated;
 
 

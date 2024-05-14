@@ -69,13 +69,13 @@ public class UnitFormQuery
 	private String	preparedByFirstName;
 	private String	preparedByLastName;
 
-	private int	verifiedByPk;
+	private Integer	verifiedByPk;
 	private String	verifiedByFirstName;
 	private String	verifiedByLastName;
 	private Date	verifiedDate;
 	private String verifyComment;
 
-	private int	approvedByPk;
+	private Integer	approvedByPk;
 	private String	approvedByFirstName;
 	private String	approvedByLastName;
 	private Date	approvedDate;
@@ -105,8 +105,10 @@ public class UnitFormQuery
         this.dummyWorkstation = dummyWorkstation;
     }
 
+	public UnitFormQuery() {
+	}
 
-    public String getDisplayDescriptor()
+	public String getDisplayDescriptor()
 	{
 		if(name != null && name.trim().length() > 0)
 		{
@@ -117,7 +119,8 @@ public class UnitFormQuery
 			return formName;
 		}
 	}
-	
+
+
 	public int getPk()
 	{
 		return pk;
@@ -168,7 +171,15 @@ public class UnitFormQuery
 		this.projectDescription = projectDescription;
 	}
 
-	public int getWorkstationPk() 
+	public Integer getApprovedByPk() {
+		return approvedByPk;
+	}
+
+	public void setApprovedByPk(Integer approvedByPk) {
+		this.approvedByPk = approvedByPk;
+	}
+
+	public int getWorkstationPk()
 	{
 		return workstationPk;
 	}
@@ -406,13 +417,11 @@ public class UnitFormQuery
 		this.preparedByLastName = preparedByLastName;
 	}
 
-	public int getVerifiedByPk()
-	{
+	public Integer getVerifiedByPk() {
 		return verifiedByPk;
 	}
 
-	public void setVerifiedByPk(int verifiedByPk)
-	{
+	public void setVerifiedByPk(Integer verifiedByPk) {
 		this.verifiedByPk = verifiedByPk;
 	}
 
@@ -456,15 +465,7 @@ public class UnitFormQuery
 		this.verifyComment = verifyComment;
 	}
 
-	public int getApprovedByPk()
-	{
-		return approvedByPk;
-	}
 
-	public void setApprovedByPk(int approvedByPk)
-	{
-		this.approvedByPk = approvedByPk;
-	}
 
 	public String getApprovedByFirstName()
 	{
@@ -677,7 +678,7 @@ public class UnitFormQuery
 
 
 	@Transient
-	private final DummyWorkstation dummyWorkstation;
+	private  DummyWorkstation dummyWorkstation;
 
 	@Override
 	public int hashCode() 

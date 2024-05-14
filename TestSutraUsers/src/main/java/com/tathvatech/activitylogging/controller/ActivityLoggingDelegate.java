@@ -142,6 +142,7 @@ public class ActivityLoggingDelegate {
     	aLog.setDimentionalFailCount(act.getDimentionalFailCount());
     	aLog.setNaCount(act.getNaCount());
     	aLog.setCommentsCount(act.getCommentsCount());
+		aLog.setLastUpdated(new Date());
     	
     	persistWrapper.createEntity(aLog);
     }

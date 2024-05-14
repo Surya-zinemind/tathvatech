@@ -17,6 +17,7 @@ import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -91,7 +92,8 @@ public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 		}
 		return returnList;
 	}
-	
+
+	@Transactional
 	public TestProcObj saveTestProc(UserContext context, TestProcObj obj) throws Exception
 	{
 		UnitTestProc unitForm = null;
@@ -214,6 +216,7 @@ public TestProcFormAssign getCurrentTestProcFormEntity(TestProcOID testProcOID)
 					uHNew.setEffectiveDateFrom(now);
 					uHNew.setEffectiveDateTo(DateUtils.getMaxDate());
 					uHNew.setUpdatedBy((int) context.getUser().getPk());
+					uHNew.setLastUpdated(new Date());
 					persistWrapper.createEntity(uHNew);
 				}
 			}

@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class RejectResponseRequest {
-    private SurveyResponse sResponse;
+    private SurveyResponse surveyResponse;
     private String comments;
 }
