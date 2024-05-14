@@ -42,10 +42,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CommonServicesDelegate 
 {
-	
+	private final UserRepository userRepository;
 	 private final PersistWrapper persistWrapper;
 	 private final CommonServiceManager commonServiceManager;
-	
+
 	public List<TSTimeZone> getSupportedTimeZoneIDs()
 	{
 		List<TSTimeZone> ts = persistWrapper.readList(TSTimeZone.class, "select * from timezones order by id", null);
@@ -244,7 +244,7 @@ public class CommonServicesDelegate
             {
             	b.setAnchorEntityOID(new OIDGeneric(e.getEntityPk(), EntityTypeEnum.fromValue(e.getEntityType())));
             }
-            b.setUserOID(UserRepository.getInstance().getUser(e.getUserPk()).getOID());
+            b.setUserOID(userRepository.getInstance().getUser(e.getUserPk()).getOID());
             b.setValue(e.getValue());
             
             con.commit();
@@ -277,7 +277,7 @@ public class CommonServicesDelegate
             {
             	b.setAnchorEntityOID(new OIDGeneric(e.getEntityPk(), EntityTypeEnum.fromValue(e.getEntityType())));
             }
-            b.setUserOID(UserRepository.getInstance().getUser(e.getUserPk()).getOID());
+            b.setUserOID(userRepository.getInstance().getUser(e.getUserPk()).getOID());
             b.setValue(e.getValue());
             
             returnList.add(b);

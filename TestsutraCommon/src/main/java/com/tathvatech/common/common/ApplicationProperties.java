@@ -181,7 +181,8 @@ public class ApplicationProperties
 		String result = null;
 		try
 		{
-			Node  node  = XPathAPI.selectSingleNode(configDoc, name);
+				Node node = XPathAPI.selectSingleNode(configDoc, name);
+
 			if(node == null)
 			{
 				logger.warn("Can't find the node: " + name);

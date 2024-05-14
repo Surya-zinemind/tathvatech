@@ -8,12 +8,18 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.tathvatech.common.enums.EntityType;
 import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.equipmentcalibration.oid.EquipmentOID;
+import com.tathvatech.equipmentcalibration.oid.EquipmentTypeOID;
+import com.tathvatech.equipmentcalibration.oid.LocationOID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({
     @JsonSubTypes.Type(value = UserOID.class, name = "UserOID"),
     @JsonSubTypes.Type(value = PersonOID.class, name = "PersonOID"),
+		@JsonSubTypes.Type(value = EquipmentOID.class, name = "EquipmentOID"),
+		@JsonSubTypes.Type(value = EquipmentTypeOID.class, name = "EquipmentTypeOID"),
+		@JsonSubTypes.Type(value = LocationOID.class, name = "LocationOID"),
     @JsonSubTypes.Type(value = SiteOID.class, name = "SiteOID"),
     @JsonSubTypes.Type(value = PartOID.class, name = "PartOID"),
     @JsonSubTypes.Type(value = PartRevisionOID.class, name = "PartRevisionOID"),
