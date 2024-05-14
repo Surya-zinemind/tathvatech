@@ -19,7 +19,7 @@ public abstract class DBEnum extends TSBeanBase implements BaseEnum
 {
 	private  final   PersistWrapper persistWrapper;
 	private static HashMap<String, DBEnumCacheValues> cache = new HashMap<String, DBEnumCacheValues>();
-	protected DBEnum(PersistWrapper persistWrapper) {
+	public  DBEnum(PersistWrapper persistWrapper) {
         this.persistWrapper = persistWrapper;
     }
 	@Override

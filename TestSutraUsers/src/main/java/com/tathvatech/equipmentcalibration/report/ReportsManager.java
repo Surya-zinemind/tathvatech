@@ -11,7 +11,7 @@ import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.report.UserListReport;
 import com.tathvatech.user.service.AuthorizationManager;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
+
 
 @Component
 public class ReportsManager

@@ -1,14 +1,10 @@
 package com.tathvatech.equipmentcalibration.report;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.tathvatech.equipmentcalibration.enums.CalibrationStatusEnum;
 import com.tathvatech.equipmentcalibration.enums.EquipmentStatusEnum;
 import com.tathvatech.equipmentcalibration.oid.EquipmentOID;
 import com.tathvatech.equipmentcalibration.oid.EquipmentTypeOID;
 import com.tathvatech.equipmentcalibration.oid.LocationOID;
-import com.tathvatech.forms.common.TestProcFilter;
 import com.tathvatech.report.request.ReportFilter;
 import com.tathvatech.user.OID.SiteOID;
 import com.tathvatech.user.OID.UserOID;

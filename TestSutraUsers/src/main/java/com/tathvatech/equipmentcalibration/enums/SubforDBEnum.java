@@ -7,27 +7,36 @@ import org.springframework.stereotype.Component;
 @Component
 public class SubforDBEnum extends DBEnum {
 
-    protected SubforDBEnum(PersistWrapper persistWrapper) {
+  private long pk;
+  private String Name;
+
+    public SubforDBEnum(PersistWrapper persistWrapper) {
         super(persistWrapper);
     }
 
     @Override
-    public long getPk() {
-        return 0;
-    }
-
-    @Override
-    public void setPk(long val) {
-
-    }
-
-    @Override
     public String getName() {
-        return null;
+        return Name;
     }
 
     @Override
-    public void setName(String string) {
-
+    public void setName(String name) {
+        Name = name;
     }
+
+    @Override
+    public long getPk() {
+        return pk;
+    }
+
+    @Override
+    public void setPk(long pk) {
+        this.pk = pk;
+    }
+
+
+
+
+
+
 }

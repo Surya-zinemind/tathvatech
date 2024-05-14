@@ -10,7 +10,6 @@ import com.tathvatech.equipmentcalibration.oid.EquipmentTypeOID;
 import com.tathvatech.equipmentcalibration.oid.LocationOID;
 import com.tathvatech.user.OID.SiteOID;
 import com.tathvatech.user.OID.UserOID;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;

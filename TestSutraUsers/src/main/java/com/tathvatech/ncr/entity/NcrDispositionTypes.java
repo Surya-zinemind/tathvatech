@@ -20,7 +20,7 @@ public class NcrDispositionTypes extends DBEnum   {
     private int createdBy;
     private Date lastUpdated;
 
-    protected NcrDispositionTypes(PersistWrapper persistWrapper) {
+    public NcrDispositionTypes(PersistWrapper persistWrapper) {
         super(persistWrapper);
     }
 

@@ -1,14 +1,8 @@
 package com.tathvatech.equipmentcalibration.common;
 import com.tathvatech.equipmentcalibration.common.EquipmentBean.AUTHORITY_TYPE;
-
 import com.tathvatech.equipmentcalibration.entity.EquipmentCalibrationAuthority;
 import com.tathvatech.equipmentcalibration.enums.CalibrationStatusEnum;
 import com.tathvatech.user.OID.UserOID;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-
 import java.util.Date;
 
 public class EquipmentCalibrationBean {
@@ -24,7 +18,7 @@ public class EquipmentCalibrationBean {
     private Date createdDate;
     private String comment;
 
-    private EquipmentBean.AUTHORITY_TYPE authorityType;
+    private AUTHORITY_TYPE authorityType;
     private Date lastUpdated;
     private AttachmentInfoBean attachment;
 
