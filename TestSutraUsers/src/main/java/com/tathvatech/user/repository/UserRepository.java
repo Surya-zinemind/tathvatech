@@ -16,7 +16,7 @@ public class UserRepository {
 	private static long EXPIRY = 1000*60*15; //15 mins
 	private boolean isReportRunning = false;
 	private ReferenceMap<Integer, UserQuery> map;
-	private UserRepository(AccountService accountService)
+	public UserRepository(AccountService accountService)
 	{
         this.accountService = accountService;
         map = new ReferenceMap<>();
