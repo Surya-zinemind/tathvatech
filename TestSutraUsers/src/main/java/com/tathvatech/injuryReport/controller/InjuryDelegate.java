@@ -8,34 +8,21 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.tathvatech.testsutra.injury.common.InjuryAfterTreatmentQuery;
-import com.tathvatech.testsutra.injury.common.InjuryBean;
-import com.tathvatech.testsutra.injury.common.InjuryFilter;
-import com.tathvatech.testsutra.injury.common.InjuryOID;
-import com.tathvatech.testsutra.injury.common.InjuryQuery;
-import com.tathvatech.testsutra.injury.common.InjuryReportGraphQuery;
-import com.tathvatech.testsutra.injury.common.InjuryReportQueryFilter;
-import com.tathvatech.testsutra.injury.common.InjuryUserQuery;
-import com.tathvatech.testsutra.injury.common.WatcherQuery;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.injuryReport.common.*;
+import com.tathvatech.injuryReport.entity.InjuryAfterTreatment;
+import com.tathvatech.injuryReport.processor.InjuryQuerySecurityProcessor;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.enums.SiteRolesEnum;
+import com.tathvatech.user.service.CommonServiceManager;
+import com.tathvatech.common.entity.AttachmentIntf;
+import com.tathvatech.injuryReport.email.InjuryEmailSender;
+import com.tathvatech.injuryReport.entity.Injury;
+import com.tathvatech.injuryReport.oid.InjuryOID;
+import com.tathvatech.injuryReport.service.InjuryManager;
 import com.tathvatech.testsutra.injury.web.InjuryReportPrinter;
-import com.tathvatech.ts.caf.ApplicationProperties;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.caf.util.ServiceLocator;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.accounts.delegate.AccountDelegate;
-import com.tathvatech.ts.core.authorization.AuthorizationDelegate;
-import com.tathvatech.ts.core.authorization.AuthorizationManager;
-import com.tathvatech.ts.core.common.Attachment;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.service.CommonServiceManager;
-import com.tathvatech.ts.core.common.service.CommonServicesDelegate;
-import com.tathvatech.ts.core.common.utils.AsyncProcessor;
-import com.tathvatech.ts.core.common.utils.AttachmentIntf;
-import com.tathvatech.ts.core.common.utils.EmailMessageInfo;
-import com.tathvatech.ts.core.sites.SiteOID;
-import com.tathvatech.ts.core.sites.SiteRolesEnum;
 import com.tathvatech.ts.core.utils.TempFileUtil;
+import com.tathvatech.user.common.UserContext;
 
 public class InjuryDelegate
 {

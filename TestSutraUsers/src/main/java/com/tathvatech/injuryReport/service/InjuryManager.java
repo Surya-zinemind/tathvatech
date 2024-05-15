@@ -2,53 +2,49 @@ package com.tathvatech.injuryReport.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
+import com.tathvatech.common.common.QueryObject;
+import com.tathvatech.injuryReport.common.*;
+import com.tathvatech.injuryReport.controller.InjuryAssignAfterTreatmentDeligate;
+import com.tathvatech.injuryReport.controller.WatcherDeligate;
+import com.tathvatech.injuryReport.email.InjuryEmailSender;
+import com.tathvatech.injuryReport.entity.InjuryAfterTreatment;
+import com.tathvatech.injuryReport.enums.DateLimit;
+import com.tathvatech.injuryReport.oid.InjuryOID;
+import com.tathvatech.user.service.CommonServiceManager;
+import com.tathvatech.common.entity.AttachmentIntf;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.injuryReport.controller.InjuryLocationMasterDeligate;
+import com.tathvatech.injuryReport.entity.Injury;
+import com.tathvatech.injuryReport.entity.InjuryLocationMaster;
+import com.tathvatech.injuryReport.utils.InjuryReportSequenceKeyGenerator;
+import com.tathvatech.site.service.SiteServiceImpl;
+import com.tathvatech.user.OID.LocationTypeOID;
+import com.tathvatech.user.OID.WorkstationOID;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.Site;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.workstation.common.DummyWorkstation;
+import com.tathvatech.workstation.common.WorkstationQuery;
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.lang3.time.DateUtils;
-import org.apache.log4j.Logger;
-
 import com.sarvasutra.etest.EtestApplication;
 import com.sarvasutra.etest.mod.Mode;
 import com.tathvatech.testsutra.andon.connector.Attachments;
-import com.tathvatech.testsutra.injury.common.InjuryAfterTreatmentQuery;
-import com.tathvatech.testsutra.injury.common.InjuryAssignAfterTreatmentBean;
-import com.tathvatech.testsutra.injury.common.InjuryBean;
-import com.tathvatech.testsutra.injury.common.InjuryFilter;
-import com.tathvatech.testsutra.injury.common.InjuryHelper;
-import com.tathvatech.testsutra.injury.common.InjuryLocationMasterBean;
-import com.tathvatech.testsutra.injury.common.InjuryLocationMasterQuery;
-import com.tathvatech.testsutra.injury.common.InjuryOID;
-import com.tathvatech.testsutra.injury.common.InjuryQuery;
-import com.tathvatech.testsutra.injury.common.InjuryReportGraphQuery;
-import com.tathvatech.testsutra.injury.common.InjuryReportQueryBuilder;
-import com.tathvatech.testsutra.injury.common.InjuryReportQueryFilter;
-import com.tathvatech.testsutra.injury.common.InjuryUserQuery;
-import com.tathvatech.testsutra.injury.common.LimitObject;
-import com.tathvatech.testsutra.injury.common.DateLimit;
-import com.tathvatech.testsutra.injury.common.WatcherBean;
-import com.tathvatech.testsutra.ncr.common.QueryObject;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.AccountManager;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.common.DummyWorkstation;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.service.CommonServiceManager;
-import com.tathvatech.ts.core.common.utils.AttachmentIntf;
-import com.tathvatech.ts.core.project.LocationTypeOID;
-import com.tathvatech.ts.core.project.WorkstationOID;
-import com.tathvatech.ts.core.project.WorkstationQuery;
-import com.tathvatech.ts.core.sites.Site;
-import com.thirdi.surveyside.project.ProjectManager;
-import com.thirdi.surveyside.project.SiteDelegate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class InjuryManager
 {
-    private static Logger logger = Logger.getLogger(InjuryManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(SiteServiceImpl.class);
+    private final PersistWrapper persistWrapper;
     private static String ACTIVE = "Active";
+
+    public InjuryManager(PersistWrapper persistWrapper) {
+        this.persistWrapper = persistWrapper;
+    }
 
     public static InjuryBean save(UserContext context, InjuryBean bean, List<AttachmentIntf> attachments)
             throws Exception
@@ -58,7 +54,7 @@ public class InjuryManager
         Injury injury = null;
         if (bean.getPk() > 0)
         {
-            injury = PersistWrapper.readByPrimaryKey(Injury.class, bean.getPk());
+            injury = persistWrapper.readByPrimaryKey(Injury.class, bean.getPk());
         } else
         {
             injury = new Injury();
