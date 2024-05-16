@@ -2,12 +2,11 @@ package com.tathvatech.injuryReport.utils;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-
-import com.tathvatech.ts.caf.core.SequenceIdGenerator;
-import com.tathvatech.ts.core.sites.SiteOID;
+import com.tathvatech.common.utils.SequenceIdGenerator;
 
 public class InjuryReportSequenceKeyGenerator
 {
+    private SequenceIdGenerator sequenceIdGenerator;
     private static String SEQUENCE_KEY = "INJURY";
     private static String PREFIX = "INJ";
     private int siteFk;
@@ -22,7 +21,7 @@ public class InjuryReportSequenceKeyGenerator
     {
         Calendar cal = new GregorianCalendar();
         int year = cal.get(Calendar.YEAR);
-        int seqNo = SequenceIdGenerator.getNextSequence(SEQUENCE_KEY, ""+siteFk, year + "", null, null);
+        int seqNo = sequenceIdGenerator.getNextSequence(SEQUENCE_KEY, ""+siteFk, year + "", null, null);
         if(seqNo < 10)
             return PREFIX + "_" + siteName + "_" + year + "_" + "00" + seqNo;
         else if(seqNo < 100)

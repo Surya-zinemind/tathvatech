@@ -4,9 +4,8 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import net.sf.persist.annotations.NoTable;
 
-@NoTable
+
 public class InjuryQuery implements Serializable {
     private int pk;
     private Integer projectPk;

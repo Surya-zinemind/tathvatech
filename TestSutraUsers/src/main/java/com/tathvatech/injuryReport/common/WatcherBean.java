@@ -4,11 +4,9 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sarvasutra.etest.api.BaseResponseBean;
 
-import net.sf.persist.annotations.NoTable;
 
-@NoTable
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WatcherBean extends BaseResponseBean implements Serializable
 {

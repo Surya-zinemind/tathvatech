@@ -1,38 +1,38 @@
 package com.tathvatech.injuryReport.common;
 
+import com.tathvatech.common.common.QueryObject;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.injuryReport.entity.Injury;
+import com.tathvatech.injuryReport.enums.DateLimit;
+import com.tathvatech.project.entity.Project;
+import com.tathvatech.project.service.ProjectService;
+import com.tathvatech.user.OID.InjuryAfterTreatmentOID;
+import com.tathvatech.user.OID.LocationTypeOID;
+import com.tathvatech.user.OID.Role;
+import com.tathvatech.user.OID.WorkstationOID;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.enums.SiteRolesEnum;
+import com.tathvatech.user.service.AuthorizationManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import com.tathvatech.testsutra.injury.service.Injury;
-import com.tathvatech.testsutra.ncr.common.QueryObject;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.authorization.AuthorizationDelegate;
-import com.tathvatech.ts.core.authorization.AuthorizationManager;
-import com.tathvatech.ts.core.authorization.Role;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.InjuryAfterTreatmentOID;
-import com.tathvatech.ts.core.project.LocationTypeOID;
-import com.tathvatech.ts.core.project.WorkstationOID;
-import com.tathvatech.ts.core.sites.SiteRolesEnum;
-import com.thirdi.surveyside.project.Project;
-import com.thirdi.surveyside.project.ProjectDelegate;
-
 public class InjuryReportQueryBuilder
 {
+    private final AuthorizationManager authorizationManager;
+    private final ProjectService projectService;
     private QueryObject query;
     private UserContext context;
     private InjuryReportQueryFilter injuryQueryFilter;
 
-    public InjuryReportQueryBuilder(UserContext context, InjuryReportQueryFilter injuryQueryFilter)
-    {
-        super();
-        this.context = context;
-        this.injuryQueryFilter = injuryQueryFilter;
+    public InjuryReportQueryBuilder(AuthorizationManager authorizationManager, ProjectService projectService) {
+        this.authorizationManager = authorizationManager;
+        this.projectService = projectService;
     }
+
 
     public InjuryReportQueryFilter getInjuryQueryFilter()
     {
@@ -196,7 +196,7 @@ public class InjuryReportQueryBuilder
             if (injuryQueryFilter.getPendingVerificationLimit() != null)
             {
                 LimitObject limitObject = injuryQueryFilter.getPendingVerificationLimit();
-                AuthorizationManager authorizationManager = new AuthorizationManager();
+
                 List<Integer> sitePks = null;
                 if (limitObject.getLimit().equals(DateLimit.MORETHAN1DAYS))
                 {
@@ -470,10 +470,10 @@ public class InjuryReportQueryBuilder
     {
         if (User.USER_PRIMARY.equals(context.getUser().getUserType()))
             return;
-        List<Integer> hseDPks = new AuthorizationDelegate().getEntitiesWithRole(context, EntityTypeEnum.Site,
+        List<Integer> hseDPks =authorizationManager.getEntitiesWithRole(context, EntityTypeEnum.Site,
                 SiteRolesEnum.HSEDirector);
         // get the roles related to NCR for the user.
-        List<Integer> hseCPks = new AuthorizationDelegate().getEntitiesWithRole(context, EntityTypeEnum.Site,
+        List<Integer> hseCPks = authorizationManager.getEntitiesWithRole(context, EntityTypeEnum.Site,
                 SiteRolesEnum.HSECoordinator);
         List<Integer> sitePks = new ArrayList<Integer>();
         if (hseDPks != null)
@@ -485,7 +485,7 @@ public class InjuryReportQueryBuilder
             sitePks.addAll(hseCPks);
         }
 
-        List<Project> projects = ProjectDelegate.getProjectsWhereTheUserIsReadOnly(context);
+        List<Project> projects = projectService.getProjectsWhereTheUserIsReadOnly(context);
         if ((sitePks == null || sitePks.size() == 0) && (projects == null || projects.size() == 0))
         {
             sqlQuery.append(" and injury.pk = -1 "); // items to be displayed.

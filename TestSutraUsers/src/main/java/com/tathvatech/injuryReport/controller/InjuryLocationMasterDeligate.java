@@ -1,95 +1,63 @@
 package com.tathvatech.injuryReport.controller;
 
+import com.tathvatech.injuryReport.common.InjuryLocationMasterBean;
+import com.tathvatech.injuryReport.common.InjuryLocationMasterQuery;
+import com.tathvatech.injuryReport.entity.InjuryLocationMaster;
+import com.tathvatech.injuryReport.service.InjuryLocationMasterManager;
+import com.tathvatech.user.common.UserContext;
+import lombok.RequiredArgsConstructor;
+
 import java.sql.Connection;
 import java.util.List;
 
-import com.tathvatech.testsutra.injury.common.InjuryLocationMasterBean;
-import com.tathvatech.testsutra.injury.common.InjuryLocationMasterQuery;
-import com.tathvatech.ts.caf.util.ServiceLocator;
-import com.tathvatech.ts.core.UserContext;
 
+@RequiredArgsConstructor
 public class InjuryLocationMasterDeligate {
-    public static InjuryLocationMaster createInjuryLocationMaster(UserContext context,
+    private final InjuryLocationMasterManager injuryLocationMasterManager;
+
+    public  InjuryLocationMaster createInjuryLocationMaster(UserContext context,
                                                                   InjuryLocationMasterBean injuryLocationMasterBean) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-            return InjuryLocationMasterManager.create(context, injuryLocationMasterBean);
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
+            return injuryLocationMasterManager.create(context, injuryLocationMasterBean);
+
     }
-    public static InjuryLocationMaster  UpdateInjuryReport(UserContext context,
+    public  InjuryLocationMaster  UpdateInjuryReport(UserContext context,
                                                            InjuryLocationMasterBean injuryLocationMasterBean) throws Exception
     {
-        Connection con = null;
-        InjuryLocationMaster aat=null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-            aat=InjuryLocationMasterManager.update(context, injuryLocationMasterBean);
 
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+        InjuryLocationMaster aat=null;
+
+            aat=injuryLocationMasterManager.update(context, injuryLocationMasterBean);
+
+
         return aat;
     }
-    public static List<InjuryLocationMasterQuery> getAllList(String search) throws Exception
+    public  List<InjuryLocationMasterQuery> getAllList(String search) throws Exception
     {
-        List<InjuryLocationMasterQuery> l = InjuryLocationMasterManager.getAllList(search);
+        List<InjuryLocationMasterQuery> l = injuryLocationMasterManager.getAllList(search);
         return l;
     }
-    public static List<InjuryLocationMasterQuery> getInjuryLocationMasterList() throws Exception
+    public  List<InjuryLocationMasterQuery> getInjuryLocationMasterList() throws Exception
     {
-        List<InjuryLocationMasterQuery> l = InjuryLocationMasterManager.getInjuryLocationManagerList();
+        List<InjuryLocationMasterQuery> l = injuryLocationMasterManager.getInjuryLocationManagerList();
         return l;
     }
-    public static List<InjuryLocationMasterQuery> getInjuryLocationMasterChildList(int parentId) throws Exception
+    public  List<InjuryLocationMasterQuery> getInjuryLocationMasterChildList(int parentId) throws Exception
     {
-        List<InjuryLocationMasterQuery> l = InjuryLocationMasterManager.getInjuryLocationMasterChildList(parentId);
+        List<InjuryLocationMasterQuery> l = injuryLocationMasterManager.getInjuryLocationMasterChildList(parentId);
         return l;
     }
-    public static  InjuryLocationMasterQuery getInjuryLocationMasterByInjuryPk(int pk) throws Exception
+    public   InjuryLocationMasterQuery getInjuryLocationMasterByInjuryPk(int pk) throws Exception
     {
-        return InjuryLocationMasterManager.getInjuryLocationManagerByPk(pk);
+        return injuryLocationMasterManager.getInjuryLocationManagerByPk(pk);
     }
-    public static void deleteInjuryLocationMaster(int pk)throws Exception
+    public void deleteInjuryLocationMaster(int pk)throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-            InjuryLocationMasterManager.deleteInjuryLocationMaster(pk);
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
+            injuryLocationMasterManager.deleteInjuryLocationMaster(pk);
+
     }
 }
 

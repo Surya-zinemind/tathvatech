@@ -4,24 +4,20 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
+import com.tathvatech.common.common.FileStoreManager;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.common.wrapper.PersistWrapper;
+import com.tathvatech.user.common.UserContext;
 import java.util.List;
-
 import javax.imageio.ImageIO;
-
+import com.tathvatech.user.entity.Attachment;
+import com.tathvatech.user.service.CommonServiceManager;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
-
-import com.sarvasutra.etest.api.model.AttachmentInfoBean;
-import com.tathvatech.ts.caf.db.PersistWrapper;
-import com.tathvatech.ts.caf.util.ServiceLocator;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.common.Attachment;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.FileStoreManager;
-import com.tathvatech.ts.core.common.service.CommonServicesDelegate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Hari
@@ -29,11 +25,14 @@ import com.tathvatech.ts.core.common.service.CommonServicesDelegate;
  *         TODO To change the template for this generated type comment go to
  *         Window - Preferences - Java - Code Style - Code Templates
  */
+@RequiredArgsConstructor
 public class Attachments
 {
-    private static final Logger logger = Logger.getLogger(Attachments.class);
+    private static final Logger logger = LoggerFactory.getLogger(Attachments.class);
+    private final CommonServiceManager commonServiceManager;
+    private final PersistWrapper persistWrapper;
 
-    public static void saveResponseImage(UserContext context, int Pk, EntityTypeEnum type,
+    public  void saveResponseImage(UserContext context, int Pk, EntityTypeEnum type,
                                          List<AttachmentInfoBean> attachments) throws Exception
     {
         if (attachments != null && attachments.size() > 0)
@@ -55,7 +54,7 @@ public class Attachments
                     attachedFiles.add(att);
                 }
 
-                CommonServicesDelegate.saveAttachments(context, Pk, type.getValue(), attachedFiles, true);
+                commonServiceManager.saveAttachments(context, Pk, type.getValue(), attachedFiles, true);
 
             }
             catch (IOException e)
@@ -66,16 +65,12 @@ public class Attachments
         }
     }
 
-    public static void addResponseImage(UserContext context, int Pk, EntityTypeEnum type,
+    public  void addResponseImage(UserContext context, int Pk, EntityTypeEnum type,
                                         List<AttachmentInfoBean> attachments) throws Exception
     {
         if (attachments != null && attachments.size() > 0)
         {
-            Connection con = null;
-            try
-            {
-                con = ServiceLocator.locate().getConnection();
-                con.setAutoCommit(false);
+
 
                 for (int i = 0; i < attachments.size(); i++)
                 {
@@ -95,23 +90,14 @@ public class Attachments
                         att.setCreatedBy(context.getUser().getPk());
                         att.setObjectType(type.getValue());
                         att.setObjectPk(Pk);
-                        int pk = PersistWrapper.createEntity(att);
+                        int pk = (int) persistWrapper.createEntity(att);
                     } else
                     {
-                        PersistWrapper.update(att);
+                        persistWrapper.update(att);
                     }
                 }
-                con.commit();
-            }
-            catch (IOException e)
-            {
-                con.rollback();
-                e.printStackTrace();
                 throw new Exception("Image could not be saved, Please try again later");
-            }
-            finally
-            {
-            }
+
 
         }
     }

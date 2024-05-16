@@ -1,41 +1,49 @@
 package com.tathvatech.injuryReport.common;
 
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.injuryReport.entity.Injury;
+import com.tathvatech.injuryReport.service.InjuryAssignAfterTreatmentManager;
+import com.tathvatech.injuryReport.service.InjuryLocationMasterManager;
+import com.tathvatech.injuryReport.service.WatcherManager;
+import com.tathvatech.project.entity.Project;
+import com.tathvatech.project.service.ProjectService;
+import com.tathvatech.site.service.SiteService;
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.SiteOID;
+import com.tathvatech.user.OID.WorkstationOID;
+import com.tathvatech.user.entity.Site;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.service.AccountService;
+import com.tathvatech.user.service.CommonServiceManager;
+import com.tathvatech.workstation.common.WorkstationQuery;
+import com.tathvatech.workstation.service.WorkstationService;
+import lombok.RequiredArgsConstructor;
+
 import java.util.List;
 
-import com.sarvasutra.etest.api.model.CommentInfoBean;
-import com.tathvatech.testsutra.injury.service.Injury;
-import com.tathvatech.testsutra.injury.service.InjuryAssignAfterTreatmentManager;
-import com.tathvatech.testsutra.injury.service.InjuryLocationMasterManager;
-import com.tathvatech.testsutra.injury.service.WatcherManager;
-import com.tathvatech.testsutra.suggestionscheme.SuggestionSchemeEntityTypeEnum;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.accounts.delegate.AccountDelegate;
-import com.tathvatech.ts.core.common.Comment;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.service.CommonServicesDelegate;
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.project.WorkstationOID;
-import com.tathvatech.ts.core.project.WorkstationQuery;
-import com.tathvatech.ts.core.sites.Site;
-import com.tathvatech.ts.core.sites.SiteOID;
-import com.thirdi.surveyside.project.Project;
-import com.thirdi.surveyside.project.ProjectDelegate;
-import com.thirdi.surveyside.project.ProjectManager;
-import com.thirdi.surveyside.project.SiteDelegate;
 
+@RequiredArgsConstructor
 public class InjuryHelper
 {
-    public static InjuryBean getBean(Injury injury)
+    private final ProjectService projectService;
+    private final WorkstationService workstationService;
+    private final SiteService siteService;
+    private final AccountService accountService;
+    private final CommonServiceManager commonServiceManager;
+    private final InjuryAssignAfterTreatmentManager injuryAssignAfterTreatmentManager;
+    private final WatcherManager watcherManager;
+    private final InjuryLocationMasterManager injuryLocationMasterManager;
+    public  InjuryBean getBean(Injury injury)
     {
         InjuryBean bean = null;
         if (injury != null && injury.getPk() > 0)
         {
             bean = new InjuryBean();
-            bean.setPk(injury.getPk());
+            bean.setPk((int) injury.getPk());
             bean.setProjectPk(injury.getProjectPk());
             if (injury.getProjectPk() != null && injury.getProjectPk() > 0)
             {
-                Project project = ProjectDelegate.getProject(injury.getProjectPk());
+                Project project = projectService.getProject(injury.getProjectPk());
                 if (project != null)
                 {
                     ProjectOID projectOID = project.getOID();
@@ -55,10 +63,10 @@ public class InjuryHelper
                     WorkstationQuery workstation;
                     try
                     {
-                        workstation = ProjectManager
+                        workstation =workstationService
                                 .getWorkstationQueryByPk(new WorkstationOID(injury.getLocationPk()));
                         bean.setLocationName(workstation.getOID().getDisplayText());
-                        bean.setLocation(new WorkstationOID(workstation.getPk(), workstation.getDisplayText()));
+                        bean.setLocation(new WorkstationOID((int) workstation.getPk(), workstation.getDisplayText()));
 
                     }
                     catch (Exception e)
@@ -71,7 +79,7 @@ public class InjuryHelper
                     InjuryLocationMasterQuery inLocationMaster;
                     try
                     {
-                        inLocationMaster = InjuryLocationMasterManager
+                        inLocationMaster = injuryLocationMasterManager
                                 .getInjuryLocationMasterQueryByPk(injury.getLocationPk());
                         bean.setLocationName(inLocationMaster.getName());
                         bean.setLocation(inLocationMaster.getOID());
@@ -88,7 +96,7 @@ public class InjuryHelper
             bean.setSitePk(injury.getSitePk());
             if (injury.getSitePk() > 0)
             {
-                Site site = SiteDelegate.getSite(injury.getSitePk());
+                Site site = siteService.getSite(injury.getSitePk());
                 SiteOID siteOID = site.getOID();
                 bean.setSiteName(siteOID.getDisplayText());
                 bean.setSiteOID(new SiteOID(site.getPk(), site.getName() + " - " + site.getDescription()));
@@ -116,7 +124,7 @@ public class InjuryHelper
             bean.setLastUpdated(injury.getLastUpdated());
             if (injury.getSupervisedBy() != null)
             {
-                User supervisor = AccountDelegate.getUser(injury.getSupervisedBy());
+                User supervisor = accountService.getUser(injury.getSupervisedBy());
                 bean.setSupervisedByOID(supervisor.getOID());
                 bean.setSupervisedBy(injury.getSupervisedBy());
             }
@@ -183,28 +191,28 @@ public class InjuryHelper
                 bean.setCreatedByInitial(injury.getCreatedByInitial());
             } else
             {
-                User user = AccountDelegate.getUser(injury.getCreatedBy());
+                User user =accountService.getUser(injury.getCreatedBy());
                 bean.setCreatedByInitial(user.getDisplayString());
             }
             bean.setCreatedDate(injury.getCreatedDate());
             if (injury.getAcknowledgedBy() != null)
             {
                 bean.setAcknowledgedBy(injury.getAcknowledgedBy());
-                User acknowledgedBy = AccountDelegate.getUser(injury.getAcknowledgedBy());
+                User acknowledgedBy =accountService.getUser(injury.getAcknowledgedBy());
                 bean.setAknowledgeName(acknowledgedBy.getDisplayString());
                 bean.setAcknowledgedDate(injury.getAcknowledgedDate());
             }
             if (injury.getVerifiedBy() != null)
             {
                 bean.setVerifiedBy(injury.getVerifiedBy());
-                User verifiedBy = AccountDelegate.getUser(injury.getVerifiedBy());
+                User verifiedBy = accountService.getUser(injury.getVerifiedBy());
                 bean.setVerifiedByName(verifiedBy.getDisplayString());
                 bean.setVerifiedDate(injury.getVerifiedDate());
             }
             if (injury.getClosedBy() != null)
             {
                 bean.setClosedBy(injury.getClosedBy());
-                User closedBy = AccountDelegate.getUser(injury.getClosedBy());
+                User closedBy = accountService.getUser(injury.getClosedBy());
                 bean.setClosedByName(closedBy.getDisplayString());
                 bean.setClosedDate(injury.getClosedDate());
             }
@@ -213,7 +221,7 @@ public class InjuryHelper
             try
             {
                 bean.setInjuryAssignAfterTreatment(
-                        InjuryAssignAfterTreatmentManager.getAssignAfterTreatmentBeanByInjuryPk(injury.getPk()));
+                        injuryAssignAfterTreatmentManager.getAssignAfterTreatmentBeanByInjuryPk((int) injury.getPk()));
             }
             catch (Exception e)
             {
@@ -222,14 +230,14 @@ public class InjuryHelper
             try
             {
                 bean.setWatcherBean(
-                        WatcherManager.getWatcherBeanByObjectTypeAndObjectPk(injury.getPk(), EntityTypeEnum.Injury));
+                        watcherManager.getWatcherBeanByObjectTypeAndObjectPk((int) injury.getPk(), EntityTypeEnum.Injury));
             }
             catch (Exception e)
             {
                 e.printStackTrace();
             }
             bean.setAttachments(
-                    CommonServicesDelegate.getAttachments(injury.getPk(), EntityTypeEnum.Injury.getValue()));
+                    commonServiceManager.getAttachments((int) injury.getPk(), EntityTypeEnum.Injury.getValue()));
 
         }
         return bean;

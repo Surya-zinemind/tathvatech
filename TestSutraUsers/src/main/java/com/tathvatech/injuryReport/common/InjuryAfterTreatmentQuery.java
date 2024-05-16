@@ -1,14 +1,12 @@
 package com.tathvatech.injuryReport.common;
 
+import com.tathvatech.user.OID.InjuryAfterTreatmentOID;
+import com.tathvatech.user.OID.TSBeanBase;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.tathvatech.ts.core.common.InjuryAfterTreatmentOID;
-import com.tathvatech.ts.core.common.TSBeanBase;
 
-import net.sf.persist.annotations.NoTable;
 
-@NoTable
 public class InjuryAfterTreatmentQuery extends TSBeanBase implements Serializable
 {
     private int pk;
@@ -17,7 +15,7 @@ public class InjuryAfterTreatmentQuery extends TSBeanBase implements Serializabl
     private Integer createdBy;
     private Date createdDate;
 
-    public int getPk()
+    public long getPk()
     {
         return pk;
     }
@@ -69,7 +67,7 @@ public class InjuryAfterTreatmentQuery extends TSBeanBase implements Serializabl
 
     public InjuryAfterTreatmentOID getOID()
     {
-        return new InjuryAfterTreatmentOID(getPk(), getName());
+        return new InjuryAfterTreatmentOID((int) getPk(), getName());
     }
 
     @Override

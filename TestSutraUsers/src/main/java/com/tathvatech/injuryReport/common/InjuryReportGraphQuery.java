@@ -1,24 +1,21 @@
 package com.tathvatech.injuryReport.common;
 
+import com.tathvatech.common.common.QueryObject;
+import com.tathvatech.workstation.common.WorkstationQuery;
+import com.tathvatech.workstation.common.DummyWorkstation;
+import lombok.RequiredArgsConstructor;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.time.DateUtils;
 
-import com.tathvatech.testsutra.injury.common.InjuryFilter.GraphType;
-import com.tathvatech.testsutra.ncr.common.QueryObject;
-import com.tathvatech.ts.core.common.DummyWorkstation;
-import com.tathvatech.ts.core.project.WorkstationQuery;
-
-import net.sf.persist.annotations.NoTable;
-
-@NoTable
+@RequiredArgsConstructor
 public class InjuryReportGraphQuery implements Serializable
 {
+    private final DummyWorkstation dummyWorkstation;
     private int pk;
     private Integer locationPk;
     private String locationType;
@@ -495,13 +492,13 @@ public class InjuryReportGraphQuery implements Serializable
         this.locationDescription = locationDescription;
     }
 
-    public static QueryObject getQuery(InjuryFilter injuryFilter)
+    public  QueryObject getQuery(InjuryFilter injuryFilter)
     {
         List<Object> params = new ArrayList();
         StringBuffer sql = new StringBuffer();
         String comma = "";
         sql.append("select ");
-        if (injuryFilter.getGraphType().equals(GraphType.lcation))
+        if (injuryFilter.getGraphType().equals(InjuryFilter.GraphType.lcation))
         {
             sql.append("location.pk as pk,location.locationType as locationType,location.orderNo as orderNo, location.locationName as locationName,location.locationDescription as locationDescription ");
             comma = ",";
@@ -526,7 +523,7 @@ public class InjuryReportGraphQuery implements Serializable
         sql.append(" ( ");
         sql.append(" select injury.pk as injuryPk, ");
         comma = "";
-        if (injuryFilter.getGraphType().equals(GraphType.lcation))
+        if (injuryFilter.getGraphType().equals(InjuryFilter.GraphType.lcation))
         {
             sql.append(
                     " injury.locationPk as pk,injury.locationType as locationType");
@@ -698,7 +695,7 @@ public class InjuryReportGraphQuery implements Serializable
 
 
 
-        if (injuryFilter.getGraphType().equals(GraphType.lcation))
+        if (injuryFilter.getGraphType().equals(InjuryFilter.GraphType.lcation))
         {
             sql.append(" right outer join (");
             sql.append(
@@ -706,7 +703,7 @@ public class InjuryReportGraphQuery implements Serializable
             sql.append(" inner join tab_project_workstations tpw on tpw.workstationPk=TAB_WORKSTATION.pk ");
 
             sql.append(" where TAB_WORKSTATION.pk !=? ");
-            params.add(DummyWorkstation.getPk());
+            params.add(dummyWorkstation.getPk());
             if (injuryFilter.getSitePks() != null && injuryFilter.getSitePks().length > 0 )
             {
                 sql.append(" and TAB_WORKSTATION.sitePk in ( ");

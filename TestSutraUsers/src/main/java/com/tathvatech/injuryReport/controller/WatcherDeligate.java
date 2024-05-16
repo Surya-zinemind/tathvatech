@@ -1,150 +1,79 @@
 package com.tathvatech.injuryReport.controller;
 
+import com.tathvatech.common.enums.EntityType;
+import com.tathvatech.injuryReport.common.WatcherBean;
+import com.tathvatech.injuryReport.common.WatcherQuery;
+import com.tathvatech.injuryReport.entity.ItemWatcher;
+import com.tathvatech.injuryReport.service.WatcherManager;
+import com.tathvatech.user.common.UserContext;
+import lombok.RequiredArgsConstructor;
+
 import java.sql.Connection;
 import java.util.List;
 
-import com.tathvatech.testsutra.injury.common.WatcherBean;
-import com.tathvatech.testsutra.injury.common.WatcherQuery;
-import com.tathvatech.ts.caf.util.ServiceLocator;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.common.EntityType;
 
+@RequiredArgsConstructor
 public class WatcherDeligate {
-    public static void create(UserContext context,
+    private final WatcherManager watcherManager;
+    public  void create(UserContext context,
                               WatcherBean watcherBean) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-            WatcherManager.create(context, watcherBean);
 
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+            watcherManager.create(context, watcherBean);
+
+
     }
-    public static  WatcherBean createNewWatcher(UserContext context,
+    public  WatcherBean createNewWatcher(UserContext context,
                                                 WatcherBean watcherBean) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-            WatcherBean wl = WatcherManager.createWatcher(context, watcherBean);
+
+            WatcherBean wl = watcherManager.createWatcher(context, watcherBean);
             return wl;
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
     }
-    public static ItemWatcher saveWatcher(UserContext context, ItemWatcher watcherList) throws Exception
+    public ItemWatcher saveWatcher(UserContext context, ItemWatcher watcherList) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
 
-            ItemWatcher wl = WatcherManager.saveWatcher(context, watcherList);
 
-            con.commit();
+            ItemWatcher wl = watcherManager.saveWatcher(context, watcherList);
+
 
             return wl;
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
+
+
     }
-    public static ItemWatcher  UpdateWatcher(UserContext context,
+    public  ItemWatcher  UpdateWatcher(UserContext context,
                                              WatcherBean watcherBean) throws Exception
     {
-        Connection con = null;
-        ItemWatcher wl=null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-            wl=WatcherManager.update(context, watcherBean);
 
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+        ItemWatcher wl=null;
+
+            wl=watcherManager.update(context, watcherBean);
+
+
         return wl;
     }
-    public static List<WatcherQuery> getWatcherList() throws Exception
+    public  List<WatcherQuery> getWatcherList() throws Exception
     {
-        List<WatcherQuery> l = WatcherManager.getWatcherList();
+        List<WatcherQuery> l = watcherManager.getWatcherList();
         return l;
     }
-    public static  List<WatcherQuery> getWatcherByObjectTypeAndObjectPk(int objectPk,EntityType objectType) throws Exception
+    public  List<WatcherQuery> getWatcherByObjectTypeAndObjectPk(int objectPk, EntityType objectType) throws Exception
     {
-        return WatcherManager.getWatcherByObjectTypeAndObjectPk( objectPk, objectType);
+        return watcherManager.getWatcherByObjectTypeAndObjectPk( objectPk, objectType);
     }
-    public static void deleteWatcherList(int objectPk,EntityType objectType)throws Exception
+    public  void deleteWatcherList(int objectPk,EntityType objectType)throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-            WatcherManager.deleteWatcherList(objectPk, objectType);
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
+            watcherManager.deleteWatcherList(objectPk, objectType);
+
     }
-    public static void deleteWatcher(int pk)throws Exception
+    public void deleteWatcher(int pk)throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-            WatcherManager.deleteWatcher(pk);
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
+            watcherManager.deleteWatcher(pk);
+
     }
 }
 

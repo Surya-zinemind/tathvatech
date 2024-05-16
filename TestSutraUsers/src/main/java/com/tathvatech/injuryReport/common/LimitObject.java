@@ -1,6 +1,8 @@
 package com.tathvatech.injuryReport.common;
 
-import com.tathvatech.ts.core.accounts.UserOID;
+
+import com.tathvatech.injuryReport.enums.DateLimit;
+import com.tathvatech.user.OID.UserOID;
 
 public class LimitObject
 {

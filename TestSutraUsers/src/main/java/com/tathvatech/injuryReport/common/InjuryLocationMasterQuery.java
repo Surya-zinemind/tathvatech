@@ -5,11 +5,10 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.tathvatech.ts.core.common.TSBeanBase;
-import com.tathvatech.ts.core.project.LocationTypeOID;
+import com.tathvatech.user.OID.LocationTypeOID;
+import com.tathvatech.user.OID.TSBeanBase;
 
-import net.sf.persist.annotations.NoTable;
-@NoTable
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeName("InjuryLocationMasterQuery")
 public class InjuryLocationMasterQuery extends TSBeanBase implements Serializable {
@@ -20,7 +19,7 @@ public class InjuryLocationMasterQuery extends TSBeanBase implements Serializabl
     private Date createdDate;
     private Date lastUpdated;
 
-    public int getPk() {
+    public long getPk() {
         return pk;
     }
     public void setPk(int pk) {

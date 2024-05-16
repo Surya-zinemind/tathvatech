@@ -1,9 +1,11 @@
 package com.tathvatech.injuryReport.common;
 
-import java.util.Date;
+
+import com.tathvatech.user.common.DateRangeFilter;
+
 import java.util.List;
 
-import com.sarvasutra.etest.components.bocomponents.DateRangeFilter;
+
 
 public class InjuryFilter implements Cloneable
 {

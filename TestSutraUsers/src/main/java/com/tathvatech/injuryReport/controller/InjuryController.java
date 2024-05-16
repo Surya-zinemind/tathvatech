@@ -1,50 +1,52 @@
 package com.tathvatech.injuryReport.controller;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.sql.Connection;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.injuryReport.common.*;
 import com.tathvatech.injuryReport.entity.InjuryAfterTreatment;
 import com.tathvatech.injuryReport.processor.InjuryQuerySecurityProcessor;
+import com.tathvatech.injuryReport.service.InjuryService;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.user.enums.SiteRolesEnum;
+import com.tathvatech.user.service.AuthorizationManager;
 import com.tathvatech.user.service.CommonServiceManager;
 import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.injuryReport.email.InjuryEmailSender;
 import com.tathvatech.injuryReport.entity.Injury;
 import com.tathvatech.injuryReport.oid.InjuryOID;
-import com.tathvatech.injuryReport.service.InjuryManager;
-import com.tathvatech.testsutra.injury.web.InjuryReportPrinter;
-import com.tathvatech.ts.core.utils.TempFileUtil;
 import com.tathvatech.user.common.UserContext;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RestController;
 
-public class InjuryDelegate
+
+@RestController
+@RequiredArgsConstructor
+public class InjuryController
 {
-    public static InjuryQuery createInjuryReport(UserContext context, InjuryBean injuryBean,
+    private  final Logger logger = LoggerFactory.getLogger(InjuryController.class);
+    private final InjuryService injuryService;
+    private final PersistWrapper persistWrapper;
+    private final CommonServiceManager commonServiceManager;
+    private final AuthorizationManager authorizationManager;
+    private InjuryEmailSender injuryEmailSender;
+    private InjuryQuerySecurityProcessor injuryQuerySecurityProcessor;
+
+
+
+    public  InjuryQuery createInjuryReport(UserContext context, InjuryBean injuryBean,
                                                  List<AttachmentIntf> attachments, boolean isAndroidDevice) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-            InjuryQuery inj = InjuryManager.create(context, injuryBean, attachments, isAndroidDevice);
-
-            con.commit();
-
-            Injury injuryToBackup = InjuryManager.get(new InjuryOID(inj.getPk(), null));
-            CommonServiceManager.saveSnapshot(context, injuryToBackup);
-            con.commit();
-
-            InjuryQuery iQ = InjuryManager.getInjuryReportByPk(inj.getPk());
-            InjuryEmailSender.notifyInjuryReportCreated(context, iQ);
+        InjuryQuery inj = injuryService.create(context, injuryBean, attachments, isAndroidDevice);
+        Injury injuryToBackup = injuryService.get(new InjuryOID(inj.getPk(), null));
+            commonServiceManager.saveSnapshot(context, injuryToBackup);
+            InjuryQuery iQ =injuryService .getInjuryReportByPk(inj.getPk());
+            injuryEmailSender.notifyInjuryReportCreated(context, iQ);
             // StringBuffer sbText = new StringBuffer();
             // StringBuffer sbHtml = new StringBuffer();
             //
@@ -74,51 +76,30 @@ public class InjuryDelegate
             // sendEmail(context, subject, text, html, iQ);
 
             return inj;
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
+
     }
 
-    public static InjuryBean save(UserContext context, InjuryBean injuryBean, List<AttachmentIntf> attachments)
+    public  InjuryBean save(UserContext context, InjuryBean injuryBean, List<AttachmentIntf> attachments)
             throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
+
             boolean isNewInjury = false;
             if (injuryBean.getPk() < 1)
             {
                 isNewInjury = true;
             }
-            InjuryBean inj = InjuryManager.save(context, injuryBean, attachments);
-            con.commit();
+            InjuryBean inj =injuryService .save(context, injuryBean, attachments);
 
-            Injury injuryToBackup = InjuryManager.get(new InjuryOID(inj.getPk(), null));
-            CommonServiceManager.saveSnapshot(context, injuryToBackup);
-            con.commit();
+            Injury injuryToBackup = injuryService.get(new InjuryOID(inj.getPk(), null));
+            commonServiceManager.saveSnapshot(context, injuryToBackup);
+
             if (isNewInjury)
             {
-                InjuryQuery iQ = InjuryManager.getInjuryReportByPk(inj.getPk());
-                InjuryEmailSender.notifyInjuryReportCreated(context, iQ);
+                InjuryQuery iQ =injuryService .getInjuryReportByPk(inj.getPk());
+                injuryEmailSender.notifyInjuryReportCreated(context, iQ);
             }
             return inj;
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
+
     }
 
     // public static Injury saveInjuryBean1(UserContext context, Injury injury,
@@ -131,12 +112,12 @@ public class InjuryDelegate
     // con = ServiceLocator.locate().getConnection();
     // con.setAutoCommit(false);
     //
-    // Injury inj = InjuryManager.saveInjuryReport(context, injury,
+    // Injury inj = .saveInjuryReport(context, injury,
     // attachments);
     //
     // con.commit();
     //
-    // Injury injuryToBackup = InjuryManager.get(new InjuryOID(inj.getPk(),
+    // Injury injuryToBackup = .get(new InjuryOID(inj.getPk(),
     // null));
     // CommonServiceManager.saveSnapshot(context, injuryToBackup);
     // con.commit();
@@ -163,10 +144,10 @@ public class InjuryDelegate
     // {
     // con = ServiceLocator.locate().getConnection();
     // con.setAutoCommit(false);
-    // inj = InjuryManager.update(context, injuryBean, attachments);
+    // inj = .update(context, injuryBean, attachments);
     // con.commit();
     //
-    // Injury injuryToBackup = InjuryManager.get(new InjuryOID(inj.getPk(),
+    // Injury injuryToBackup =.get(new InjuryOID(inj.getPk(),
     // null));
     // CommonServiceManager.saveSnapshot(context, injuryToBackup);
     // con.commit();
@@ -185,24 +166,17 @@ public class InjuryDelegate
     // return inj;
     // }
     //
-    public static InjuryBean verifyInjuryReport(UserContext context, InjuryOID injuryOID, String message)
+    public  InjuryBean verifyInjuryReport(UserContext context, InjuryOID injuryOID, String message)
             throws Exception
     {
-        Connection con = null;
+
         InjuryBean inj = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-            inj = InjuryManager.verifyInjuryReport(context, injuryOID, message);
-            con.commit();
 
-            Injury injuryToBackup = InjuryManager.get(new InjuryOID(inj.getPk(), null));
-            CommonServiceManager.saveSnapshot(context, injuryToBackup);
-            con.commit();
-
-            InjuryQuery iQ = InjuryManager.getInjuryReportByPk(inj.getPk());
-            InjuryEmailSender.notifyVerifyInjuryReport(context, iQ);
+            inj =injuryService.verifyInjuryReport(context, injuryOID, message);
+            Injury injuryToBackup =injuryService .get(new InjuryOID(inj.getPk(), null));
+            commonServiceManager.saveSnapshot(context, injuryToBackup);
+            InjuryQuery iQ =injuryService .getInjuryReportByPk(inj.getPk());
+            injuryEmailSender.notifyVerifyInjuryReport(context, iQ);
 
             // StringBuffer sbText = new StringBuffer();
             // StringBuffer sbHtml = new StringBuffer();
@@ -228,38 +202,22 @@ public class InjuryDelegate
             // verified";
             //
             // sendEmail(context, subject, text, html, iQ);
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
         return inj;
     }
 
-    public static InjuryBean closeInjuryReport(UserContext context, InjuryOID injuryOID, String message)
+    public InjuryBean closeInjuryReport(UserContext context, InjuryOID injuryOID, String message)
             throws Exception
     {
-        Connection con = null;
+
         InjuryBean inj = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-            inj = InjuryManager.closeInjuryReport(context, injuryOID, message);
-            con.commit();
 
-            Injury injuryToBackup = InjuryManager.get(new InjuryOID(inj.getPk(), null));
-            CommonServiceManager.saveSnapshot(context, injuryToBackup);
-            con.commit();
+            inj =injuryService .closeInjuryReport(context, injuryOID, message);
 
-            InjuryQuery iQ = InjuryManager.getInjuryReportByPk(inj.getPk());
-            InjuryEmailSender.notifyCloseInjuryReport(context, iQ);
+            Injury injuryToBackup =injuryService .get(new InjuryOID(inj.getPk(), null));
+            commonServiceManager.saveSnapshot(context, injuryToBackup);
+            InjuryQuery iQ =injuryService.getInjuryReportByPk(inj.getPk());
+            injuryEmailSender.notifyCloseInjuryReport(context, iQ);
 
             // StringBuffer sbText = new StringBuffer();
             // StringBuffer sbHtml = new StringBuffer();
@@ -284,38 +242,22 @@ public class InjuryDelegate
             // " closed";
             //
             // sendEmail(context, subject, text, html, iQ);
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
         return inj;
     }
 
-    public static InjuryBean reopenInjuryReport(UserContext context, InjuryOID injuryOID, String messsage)
+    public  InjuryBean reopenInjuryReport(UserContext context, InjuryOID injuryOID, String messsage)
             throws Exception
     {
-        Connection con = null;
         InjuryBean inj = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-            inj = InjuryManager.reopenInjuryReport(context, injuryOID, messsage);
-            con.commit();
 
-            Injury injuryToBackup = InjuryManager.get(new InjuryOID(inj.getPk(), null));
-            CommonServiceManager.saveSnapshot(context, injuryToBackup);
-            con.commit();
+            inj =injuryService .reopenInjuryReport(context, injuryOID, messsage);
 
-            InjuryQuery iQ = InjuryManager.getInjuryReportByPk(inj.getPk());
-            InjuryEmailSender.notifyReopenInjuryReport(context, iQ);
+
+            Injury injuryToBackup =injuryService .get(new InjuryOID(inj.getPk(), null));
+            commonServiceManager.saveSnapshot(context, injuryToBackup);
+            InjuryQuery iQ =injuryService.getInjuryReportByPk(inj.getPk());
+            injuryEmailSender.notifyReopenInjuryReport(context, iQ);
             // StringBuffer sbText = new StringBuffer();
             // StringBuffer sbHtml = new StringBuffer();
             // sbText.append("Hi\n\n").append("Injury report " +
@@ -340,108 +282,70 @@ public class InjuryDelegate
             // reopened";
             //
             // sendEmail(context, subject, text, html, iQ);
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
         return inj;
     }
 
-    public static List<InjuryQuery> getInjuryReportList(UserContext context, InjuryFilter injuryFilter) throws Exception
+    public List<InjuryQuery> getInjuryReportList(UserContext context, InjuryFilter injuryFilter) throws Exception
     {
-        new InjuryQuerySecurityProcessor().addAuthorizationFilterParams(context, injuryFilter);
-        List<InjuryQuery> l = InjuryManager.getInjuryReportList(injuryFilter);
+        injuryQuerySecurityProcessor.addAuthorizationFilterParams(context, injuryFilter);
+        List<InjuryQuery> l =injuryService .getInjuryReportList(injuryFilter);
         return l;
     }
 
-    public static List<InjuryQuery> getPendingVerificationMorethan1daysForHSECordinator(UserContext context)
+    public  List<InjuryQuery> getPendingVerificationMorethan1daysForHSECordinator(UserContext context)
             throws Exception
     {
-        List<InjuryQuery> l = InjuryManager.getPendingVerificationMorethan1daysForHSECordinator(context);
+        List<InjuryQuery> l =injuryService.getPendingVerificationMorethan1daysForHSECordinator(context);
         return l;
     }
 
-    public static List<InjuryQuery> getPendingVerificationMorethan2daysForHSEDirector(UserContext context)
+    public  List<InjuryQuery> getPendingVerificationMorethan2daysForHSEDirector(UserContext context)
             throws Exception
     {
-        List<InjuryQuery> l = InjuryManager.getPendingVerificationMorethan2daysForHSEDirector(context);
+        List<InjuryQuery> l =injuryService.getPendingVerificationMorethan2daysForHSEDirector(context);
         return l;
     }
 
-    public static List<InjuryQuery> getInjuryReportList(UserContext context, InjuryReportQueryFilter injuryQueryFilter)
+    public  List<InjuryQuery> getInjuryReportList(UserContext context, InjuryReportQueryFilter injuryQueryFilter)
             throws Exception
     {
-        return InjuryManager.getInjuryReportList(context, injuryQueryFilter);
+        return injuryService.getInjuryReportList(context, injuryQueryFilter);
     }
 
-    public static InjuryQuery getInjuryReportByPk(int injuryPk) throws Exception
+    public  InjuryQuery getInjuryReportByPk(int injuryPk) throws Exception
     {
-        return InjuryManager.getInjuryReportByPk(injuryPk);
+        return injuryService.getInjuryReportByPk(injuryPk);
     }
 
-    public static InjuryBean getInjuryReportBean(InjuryOID injuryOID) throws Exception
+    public  InjuryBean getInjuryReportBean(InjuryOID injuryOID) throws Exception
     {
-        return InjuryManager.getInjuryReportBean(injuryOID);
+        return getInjuryReportBean(injuryOID);
     }
 
-    public static void deleteInjuryReport(int injuryPk) throws Exception
+    public  void deleteInjuryReport(int injuryPk) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-            InjuryManager.deleteInjuryReport(injuryPk);
-
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+      injuryService.deleteInjuryReport(injuryPk);
     }
 
-    public static List<InjuryUserQuery> getInjuryUserList(UserContext context, int sitePk) throws Exception
+    public  List<InjuryUserQuery> getInjuryUserList(UserContext context, int sitePk) throws Exception
     {
-        Connection con = null;
+
         List<InjuryUserQuery> l = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-            l = InjuryManager.getInjuryUserList(sitePk);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
+            l = injuryService.getInjuryUserList(sitePk);
+
+
 
         return l;
     }
 
-    public static List<InjuryQuery> getMyAssignedInjuryReportsForVerification(UserContext userContext, Object object)
+    public  List<InjuryQuery> getMyAssignedInjuryReportsForVerification(UserContext userContext, Object object)
             throws Exception
     {
         List<Object> params = new ArrayList();
         StringBuffer sql = new StringBuffer(InjuryQuery.sql);
-        List<Integer> sitePks = new AuthorizationDelegate().getEntitiesWithRole(userContext, EntityTypeEnum.Site,
+        List<Integer> sitePks =authorizationManager.getEntitiesWithRole(userContext, EntityTypeEnum.Site,
                 SiteRolesEnum.HSECoordinator);
         if (sitePks != null && sitePks.size() > 0)
         {
@@ -469,12 +373,12 @@ public class InjuryDelegate
 
         }
 
-        return PersistWrapper.readList(InjuryQuery.class, sql.toString(),
+        return persistWrapper.readList(InjuryQuery.class, sql.toString(),
                 (params.size() > 0) ? params.toArray(new Object[params.size()]) : null);
 
     }
 
-    public static List<InjuryQuery> getMyAssignedInjuryReportsForClose(UserContext userContext)
+    public List<InjuryQuery> getMyAssignedInjuryReportsForClose(UserContext userContext)
             throws Exception
     {
         /*
@@ -482,7 +386,7 @@ public class InjuryDelegate
          */
         List<Object> params = new ArrayList();
         StringBuffer sql = new StringBuffer(InjuryQuery.sql);
-        List<Integer> sitePks = new AuthorizationDelegate().getEntitiesWithRole(userContext, EntityTypeEnum.Site,
+        List<Integer> sitePks =authorizationManager .getEntitiesWithRole(userContext, EntityTypeEnum.Site,
                 SiteRolesEnum.HSECoordinator);
 
         if (sitePks != null && sitePks.size() > 0)
@@ -498,7 +402,7 @@ public class InjuryDelegate
                 sep = ",";
             }
             sql.append(" ) and injury.status in ('Verified') ");
-            return PersistWrapper.readList(InjuryQuery.class, sql.toString(),
+            return persistWrapper.readList(InjuryQuery.class, sql.toString(),
                     (params.size() > 0) ? params.toArray(new Object[params.size()]) : null);
 
         }
@@ -506,7 +410,7 @@ public class InjuryDelegate
 
     }
 
-    public static List<InjuryQuery> getMyAssignedInjuryReportsForCloseMorethan7Days(UserContext userContext)
+    public  List<InjuryQuery> getMyAssignedInjuryReportsForCloseMorethan7Days(UserContext userContext)
             throws Exception
     {
         /*
@@ -514,7 +418,7 @@ public class InjuryDelegate
          */
         List<Object> params = new ArrayList();
         StringBuffer sql = new StringBuffer(InjuryQuery.sql);
-        List<Integer> sitePks = new AuthorizationDelegate().getEntitiesWithRole(userContext, EntityTypeEnum.Site,
+        List<Integer> sitePks = authorizationManager.getEntitiesWithRole(userContext, EntityTypeEnum.Site,
                 SiteRolesEnum.HSEDirector);
 
         if (sitePks != null && sitePks.size() > 0)
@@ -530,7 +434,7 @@ public class InjuryDelegate
                 sep = ",";
             }
             sql.append(" ) and injury.status in ('Verified') and injury.verifiedDate <= subdate(NOW(), 7)");
-            return PersistWrapper.readList(InjuryQuery.class, sql.toString(),
+            return persistWrapper.readList(InjuryQuery.class, sql.toString(),
                     (params.size() > 0) ? params.toArray(new Object[params.size()]) : null);
 
         }
@@ -538,11 +442,11 @@ public class InjuryDelegate
 
     }
 
-    public static List<InjuryQuery> getMyAssignedInjuryReports(UserContext userContext, Object object) throws Exception
+    public  List<InjuryQuery> getMyAssignedInjuryReports(UserContext userContext, Object object) throws Exception
     {
         List<Object> params = new ArrayList();
         StringBuffer sql = new StringBuffer(InjuryQuery.sql);
-        List<Integer> sitePks = new AuthorizationDelegate().getEntitiesWithRole(userContext, EntityTypeEnum.Site,
+        List<Integer> sitePks = authorizationManager.getEntitiesWithRole(userContext, EntityTypeEnum.Site,
                 SiteRolesEnum.HSECoordinator);
         if (sitePks != null && sitePks.size() > 0)
         {
@@ -570,77 +474,37 @@ public class InjuryDelegate
 
         }
 
-        return PersistWrapper.readList(InjuryQuery.class, sql.toString(),
+        return persistWrapper.readList(InjuryQuery.class, sql.toString(),
                 (params.size() > 0) ? params.toArray(new Object[params.size()]) : null);
 
     }
 
-    public static List<InjuryReportGraphQuery> getInjuriesOfWorkstation(InjuryFilter injuryFilter) throws Exception
+    public  List<InjuryReportGraphQuery> getInjuriesOfWorkstation(InjuryFilter injuryFilter) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-            return InjuryManager.getInjuriesOfWorkstation(injuryFilter);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
+            return injuryService.getInjuriesOfWorkstation(injuryFilter);
 
     }
 
-    public static List<InjuryAfterTreatmentQuery> getInjuryAfterTreatmentList() throws Exception
+    public  List<InjuryAfterTreatmentQuery> getInjuryAfterTreatmentList() throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-            return InjuryManager.getInjuryAfterTreatmentList();
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
+            return injuryService.getInjuryAfterTreatmentList();
+
 
     }
 
-    public static InjuryAfterTreatment getInjuryAfterTreatment(int pk) throws Exception
+    public  InjuryAfterTreatment getInjuryAfterTreatment(int pk) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-            return InjuryManager.getInjuryAfterTreatment(pk);
-        }
-        catch (Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
+            return injuryService.getInjuryAfterTreatment(pk);
+
 
     }
 
-    public static List<User> getAssignedSupervisors(UserContext context, String filterString) throws Exception
+    public  List<User> getAssignedSupervisors(UserContext context, String filterString) throws Exception
     {
-        return InjuryManager.getAssignedSupervisors(filterString);
+        return injuryService.getAssignedSupervisors(filterString);
     }
 }
 

@@ -10,8 +10,11 @@ import com.tathvatech.injuryReport.controller.InjuryAssignAfterTreatmentDeligate
 import com.tathvatech.injuryReport.controller.WatcherDeligate;
 import com.tathvatech.injuryReport.email.InjuryEmailSender;
 import com.tathvatech.injuryReport.entity.InjuryAfterTreatment;
+import com.tathvatech.injuryReport.entity.Mode;
 import com.tathvatech.injuryReport.enums.DateLimit;
 import com.tathvatech.injuryReport.oid.InjuryOID;
+import com.tathvatech.site.service.SiteService;
+import com.tathvatech.user.service.AccountService;
 import com.tathvatech.user.service.CommonServiceManager;
 import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.common.enums.EntityTypeEnum;
@@ -20,7 +23,6 @@ import com.tathvatech.injuryReport.controller.InjuryLocationMasterDeligate;
 import com.tathvatech.injuryReport.entity.Injury;
 import com.tathvatech.injuryReport.entity.InjuryLocationMaster;
 import com.tathvatech.injuryReport.utils.InjuryReportSequenceKeyGenerator;
-import com.tathvatech.site.service.SiteServiceImpl;
 import com.tathvatech.user.OID.LocationTypeOID;
 import com.tathvatech.user.OID.WorkstationOID;
 import com.tathvatech.user.common.UserContext;
@@ -28,25 +30,40 @@ import com.tathvatech.user.entity.Site;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.workstation.common.DummyWorkstation;
 import com.tathvatech.workstation.common.WorkstationQuery;
-import org.apache.commons.beanutils.BeanUtils;
-import com.sarvasutra.etest.EtestApplication;
-import com.sarvasutra.etest.mod.Mode;
-import com.tathvatech.testsutra.andon.connector.Attachments;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
 
 
-public class InjuryManager
+@Service
+public class InjuryServiceImpl implements  InjuryService
 {
-    private static final Logger logger = LoggerFactory.getLogger(SiteServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(InjuryServiceImpl.class);
     private final PersistWrapper persistWrapper;
+    private final SiteService siteService;
+    private final AccountService accountService;
+    private final CommonServiceManager commonServiceManager;
+    private final WatcherManager watcherManager;
+    private final InjuryAssignAfterTreatmentManager injuryAssignAfterTreatmentManager;
+    private InjuryEmailSender injuryEmailSender;
+    private Injury injury;
+    private  InjuryHelper injuryHelper;
+    private InjuryReportGraphQuery injuryReportGraphQuery;
     private static String ACTIVE = "Active";
 
-    public InjuryManager(PersistWrapper persistWrapper) {
+    public InjuryServiceImpl(PersistWrapper persistWrapper, SiteService siteService, AccountService accountService, CommonServiceManager commonServiceManager, WatcherManager watcherManager, InjuryAssignAfterTreatmentManager injuryAssignAfterTreatmentManager) {
         this.persistWrapper = persistWrapper;
+        this.siteService = siteService;
+        this.accountService = accountService;
+        this.commonServiceManager = commonServiceManager;
+
+        this.watcherManager = watcherManager;
+        this.injuryAssignAfterTreatmentManager = injuryAssignAfterTreatmentManager;
     }
 
-    public static InjuryBean save(UserContext context, InjuryBean bean, List<AttachmentIntf> attachments)
+
+    public  InjuryBean save(UserContext context, InjuryBean bean, List<AttachmentIntf> attachments)
             throws Exception
     {
         boolean isSupervisorUpdated = false;
@@ -54,38 +71,38 @@ public class InjuryManager
         Injury injury = null;
         if (bean.getPk() > 0)
         {
-            injury = persistWrapper.readByPrimaryKey(Injury.class, bean.getPk());
+            injury = (Injury) persistWrapper.readByPrimaryKey(Injury.class, bean.getPk());
         } else
         {
-            injury = new Injury();
-            injury.setCreatedBy(context.getUser().getPk());
+
+            injury.setCreatedBy((int) context.getUser().getPk());
             injury.setCreatedDate(new Date());
             injury.setCreatedByInitial(bean.getCreatedByInitial());
             Site site = null;
             if (bean.getSiteOID() != null)
             {
-                site = SiteDelegate.getSite(bean.getSiteOID().getPk());
+                site = siteService.getSite((int) bean.getSiteOID().getPk());
 
             } else
             {
-                site = SiteDelegate.getSite(bean.getSitePk());
+                site = siteService.getSite(bean.getSitePk());
 
             }
-            String seqNo = new InjuryReportSequenceKeyGenerator(site.getPk(),site.getName()).getNextSeq();
+            String seqNo = new InjuryReportSequenceKeyGenerator((int) site.getPk(),site.getName()).getNextSeq();
             injury.setInjuryReportNo(seqNo);
             injury.setStatus(Injury.StatusEnum.Open.name());
         }
 
         if (bean.getSiteOID() != null)
         {
-            injury.setSitePk(bean.getSiteOID().getPk());
+            injury.setSitePk((int) bean.getSiteOID().getPk());
         } else
         {
             injury.setSitePk(bean.getSitePk());
         }
         if (bean.getProjectOID() != null)
         {
-            injury.setProjectPk(bean.getProjectOID().getPk());
+            injury.setProjectPk((int) bean.getProjectOID().getPk());
         } else
         {
             injury.setProjectPk(bean.getProjectPk());
@@ -95,14 +112,14 @@ public class InjuryManager
             if (bean.getLocation() instanceof WorkstationOID)
             {
                 WorkstationOID wQuery = (WorkstationOID) bean.getLocation();
-                injury.setLocationPk(wQuery.getPk());
+                injury.setLocationPk((int) wQuery.getPk());
                 injury.setLocationType(EntityTypeEnum.Workstation.name());
             } else if (bean.getLocation() instanceof LocationTypeOID)
             {
                 LocationTypeOID wQuery = (LocationTypeOID) bean.getLocation();
                 if (wQuery.getPk() > 0)
                 {
-                    injury.setLocationPk(wQuery.getPk());
+                    injury.setLocationPk((int) wQuery.getPk());
                     injury.setLocationType("Location");
                 } else
                 {
@@ -113,7 +130,7 @@ public class InjuryManager
                     ilmBean.setStatus("Active");
                     InjuryLocationMaster locationMaster = InjuryLocationMasterDeligate
                             .createInjuryLocationMaster(context, ilmBean);
-                    injury.setLocationPk(locationMaster.getPk());
+                    injury.setLocationPk((int) locationMaster.getPk());
                     injury.setLocationType("Location");
                 }
             }
@@ -146,7 +163,7 @@ public class InjuryManager
         injury.setDetailsWitnesStatus(bean.getDetailsWitnesStatus());
         if (bean.getSupervisedByOID() == null && bean.getSupervisedBy() != null)
         {
-            User supervisor = AccountManager.getUser(bean.getSupervisedBy());
+            User supervisor = accountService.getUser(bean.getSupervisedBy());
             bean.setSupervisedByOID(supervisor.getOID());
         }
         if (injury.getSupervisedBy() != null && bean.getSupervisedByOID() != null
@@ -157,7 +174,7 @@ public class InjuryManager
         }
         if (bean.getSupervisedByOID() != null)
         {
-            injury.setSupervisedBy(bean.getSupervisedByOID().getPk());
+            injury.setSupervisedBy((int) bean.getSupervisedByOID().getPk());
         } else
         {
             injury.setSupervisedBy(null);
@@ -209,18 +226,18 @@ public class InjuryManager
         int pk;
         if (bean.getPk() > 0)
         {
-            PersistWrapper.update(injury);
-            pk = injury.getPk();
+            persistWrapper.update(injury);
+            pk = (int) injury.getPk();
         } else
         {
-            pk = PersistWrapper.createEntity(injury);
+            pk = (int) persistWrapper.createEntity(injury);
         }
         // fetch the new project back
 
         CommonServiceManager.saveAttachments(EtestApplication.getInstance().getUserContext(), pk,
                 EntityTypeEnum.Injury.getValue(), attachments, true);
 
-        List<WatcherBean> previousWatcher = WatcherManager.getWatcherBeanByObjectTypeAndObjectPk(pk,
+        List<WatcherBean> previousWatcher = watcherManager.getWatcherBeanByObjectTypeAndObjectPk(pk,
                 EntityTypeEnum.Injury);
         if (bean.getWatcherBean() != null)
         {
@@ -232,7 +249,7 @@ public class InjuryManager
                     watcherBean.setObjectType(Integer.toString(EntityTypeEnum.Injury.getValue()));
                     watcherBean.setCreatedDate(new Date());
                     watcherBean.setStatus("Active");
-                    watcherBean = WatcherManager.createWatcher(context, watcherBean);
+                    watcherBean = watcherManager.createWatcher(context, watcherBean);
                 }
                 previousWatcher.remove(watcherBean);
             }
@@ -241,10 +258,10 @@ public class InjuryManager
         {
             for (WatcherBean watcherBean : previousWatcher)
             {
-                WatcherManager.deleteWatcher(watcherBean.getPk());
+                watcherManager.deleteWatcher(watcherBean.getPk());
             }
         }
-        List<InjuryAssignAfterTreatmentBean> previousAfterTreatment = InjuryAssignAfterTreatmentManager
+        List<InjuryAssignAfterTreatmentBean> previousAfterTreatment = injuryAssignAfterTreatmentManager
                 .getAssignAfterTreatmentBeanByInjuryPk(pk);
         if (bean.getInjuryAssignAfterTreatment() != null)
         {
@@ -262,41 +279,41 @@ public class InjuryManager
         {
             for (InjuryAssignAfterTreatmentBean assignAfterTreatmentBean : previousAfterTreatment)
             {
-                InjuryAssignAfterTreatmentManager.deleteAssignAfterTreatment(pk,
+                injuryAssignAfterTreatmentManager.deleteAssignAfterTreatment(pk,
                         assignAfterTreatmentBean.getAfterTreatmentMasterPk());
             }
         }
         if (isSupervisorUpdated)
         {
             InjuryQuery iQ = getInjuryReportByPk(pk);
-            User supervisor = AccountManager.getUser(previousSupervisor);
+            User supervisor = accountService.getUser(previousSupervisor);
             ProjectManager.addComment(
                     context, pk, EntityTypeEnum.Injury.getValue(), "Supervisor changed from " + iQ.getSupervisedByName()
                             + " to " + supervisor.getDisplayString() + " by " + context.getUser(),
                     Mode.COMMENTCONTEXT_GENERAL);
-            InjuryEmailSender.notifyInjuryReportSupervisorChanged(context, iQ, supervisor);
+            injuryEmailSender.notifyInjuryReportSupervisorChanged(context, iQ, supervisor);
         }
         return getInjuryReportBean(new InjuryOID(pk, injury.getInjuryReportNo()));
     }
 
-    public static InjuryQuery create(UserContext context, InjuryBean bean, List<AttachmentIntf> attachments,
+    public  InjuryQuery create(UserContext context, InjuryBean bean, List<AttachmentIntf> attachments,
                                      boolean isAndroidDevice) throws Exception
     {
-        Injury dbReport = new Injury();
-        BeanUtils.copyProperties(dbReport, bean);
-        dbReport.setCreatedDate(new Date());
 
-        Site site = SiteDelegate.getSite(bean.getSitePk());
-        String seqNo = new InjuryReportSequenceKeyGenerator(site.getPk(),site.getName()).getNextSeq();
-        dbReport.setInjuryReportNo(seqNo);
+        BeanUtils.copyProperties(injury, bean);
+        injury.setCreatedDate(new Date());
+
+        Site site = siteService.getSite(bean.getSitePk());
+        String seqNo = new InjuryReportSequenceKeyGenerator((int) site.getPk(),site.getName()).getNextSeq();
+        injury.setInjuryReportNo(seqNo);
         if (bean.getLocationPk() == 1 && bean.getLocationType().equals("Location"))
         {
-            InjuryLocationMaster injuryLocationMaster = PersistWrapper.read(InjuryLocationMaster.class,
+            InjuryLocationMaster injuryLocationMaster = persistWrapper.read(InjuryLocationMaster.class,
                     "select * from injury_location_master where name=?", bean.getLocationOther().trim());
             if (injuryLocationMaster != null && injuryLocationMaster.getPk() > 0)
             {
-                dbReport.setLocationPk(injuryLocationMaster.getPk());
-                dbReport.setLocationType("Location");
+                injury.setLocationPk((int) injuryLocationMaster.getPk());
+                injury.setLocationType("Location");
             } else
             {
                 InjuryLocationMasterBean ilmBean = new InjuryLocationMasterBean();
@@ -306,12 +323,12 @@ public class InjuryManager
                 ilmBean.setStatus("Active");
                 InjuryLocationMaster locationMaster = InjuryLocationMasterDeligate.createInjuryLocationMaster(context,
                         ilmBean);
-                dbReport.setLocationPk(locationMaster.getPk());
-                dbReport.setLocationType("Location");
+                injury.setLocationPk((int) locationMaster.getPk());
+                injury.setLocationType("Location");
             }
         }
 
-        int pk = PersistWrapper.createEntity(dbReport);
+        int pk = (int) persistWrapper.createEntity(injury);
         if (isAndroidDevice)
         {
             if (bean.getAttachments() != null && bean.getAttachments().size() > 0)
@@ -322,7 +339,7 @@ public class InjuryManager
         {
             if (attachments != null)
             {
-                CommonServiceManager.saveAttachments(context, pk, EntityTypeEnum.Injury.getValue(), attachments, true);
+                commonServiceManager.saveAttachments(context, pk, EntityTypeEnum.Injury.getValue(), attachments, true);
             }
         }
         if (bean.getInjuryAssignAfterTreatment() != null)
@@ -483,18 +500,18 @@ public class InjuryManager
     // return dbReport;
     // }
 
-    public static InjuryBean verifyInjuryReport(UserContext context, InjuryOID injuryOID, String message)
+    public  InjuryBean verifyInjuryReport(UserContext context, InjuryOID injuryOID, String message)
             throws Exception
     {
         if (injuryOID == null || injuryOID.getPk() < 1)
             return null;
-        Injury inj = PersistWrapper.readByPrimaryKey(Injury.class, injuryOID.getPk());
+        Injury inj = (Injury) persistWrapper.readByPrimaryKey(Injury.class, injuryOID.getPk());
         if (!Injury.StatusEnum.Verified.name().equals(inj.getStatus()))
         {
             inj.setStatus(Injury.StatusEnum.Verified.name());
             inj.setVerifiedDate(new Date());
-            inj.setVerifiedBy(context.getUser().getPk());
-            PersistWrapper.update(inj);
+            inj.setVerifiedBy((int) context.getUser().getPk());
+            persistWrapper.update(inj);
             if (message != null)
             {
                 ProjectManager.addComment(context, injuryOID.getPk(), EntityTypeEnum.Injury.getValue(),
@@ -504,12 +521,12 @@ public class InjuryManager
         return getInjuryReportBean(injuryOID);
     }
 
-    public static InjuryBean closeInjuryReport(UserContext context, InjuryOID injuryOID, String message)
+    public  InjuryBean closeInjuryReport(UserContext context, InjuryOID injuryOID, String message)
             throws Exception
     {
         if (injuryOID == null || injuryOID.getPk() < 1)
             return null;
-        Injury inj = PersistWrapper.readByPrimaryKey(Injury.class, injuryOID.getPk());
+        Injury inj = (Injury) persistWrapper.readByPrimaryKey(Injury.class, injuryOID.getPk());
 
         if (!Injury.StatusEnum.Closed.name().equals(inj.getStatus()))
         {
@@ -517,11 +534,11 @@ public class InjuryManager
             {
                 verifyInjuryReport(context, injuryOID, message);
             }
-            inj = PersistWrapper.readByPrimaryKey(Injury.class, injuryOID.getPk());
+            inj = (Injury) persistWrapper.readByPrimaryKey(Injury.class, injuryOID.getPk());
             inj.setStatus(Injury.StatusEnum.Closed.name());
             inj.setClosedDate(new Date());
-            inj.setClosedBy(context.getUser().getPk());
-            PersistWrapper.update(inj);
+            inj.setClosedBy((int) context.getUser().getPk());
+            persistWrapper.update(inj);
             if (message != null)
             {
                 ProjectManager.addComment(context, injuryOID.getPk(), EntityTypeEnum.Injury.getValue(),
@@ -532,12 +549,12 @@ public class InjuryManager
         return getInjuryReportBean(injuryOID);
     }
 
-    public static InjuryBean reopenInjuryReport(UserContext context, InjuryOID injuryOID, String message)
+    public  InjuryBean reopenInjuryReport(UserContext context, InjuryOID injuryOID, String message)
             throws Exception
     {
         if (injuryOID == null || injuryOID.getPk() < 1)
             return null;
-        Injury inj = PersistWrapper.readByPrimaryKey(Injury.class, injuryOID.getPk());
+        Injury inj = (Injury) persistWrapper.readByPrimaryKey(Injury.class, injuryOID.getPk());
         if (!Injury.StatusEnum.Reopened.name().equals(inj.getStatus()))
         {
             inj.setStatus(Injury.StatusEnum.Reopened.name());
@@ -545,7 +562,7 @@ public class InjuryManager
             inj.setVerifiedDate(null);
             inj.setClosedDate(null);
             inj.setClosedBy(null);
-            PersistWrapper.update(inj);
+            persistWrapper.update(inj);
             ProjectManager.addComment(context, injuryOID.getPk(), EntityTypeEnum.Injury.getValue(),
                     "Re-Open comment:- " + message, Mode.COMMENTCONTEXT_GENERAL);
         }
@@ -553,19 +570,19 @@ public class InjuryManager
         return getInjuryReportBean(injuryOID);
     }
 
-    public static Injury get(InjuryOID oid) throws Exception
+    public  Injury get(InjuryOID oid) throws Exception
     {
-        return PersistWrapper.readByPrimaryKey(Injury.class, oid.getPk());
+        return (Injury) persistWrapper.readByPrimaryKey(Injury.class, oid.getPk());
     }
 
-    public static List<InjuryQuery> list(InjuryFilter filter) throws Exception
+    public  List<InjuryQuery> list(InjuryFilter filter) throws Exception
     {
         String sql = InjuryQuery.sql + " and  ws.workstationName != ? order by ws.orderNo";
-        PersistWrapper p = new PersistWrapper();
-        return p.readList(InjuryQuery.class, sql, DummyWorkstation.DUMMY);
+
+        return persistWrapper.readList(InjuryQuery.class, sql, DummyWorkstation.DUMMY);
     }
 
-    public static List<InjuryQuery> getInjuryReportList(InjuryFilter injuryFilter) throws Exception
+    public  List<InjuryQuery> getInjuryReportList(InjuryFilter injuryFilter) throws Exception
     {
 
         StringBuffer sql = new StringBuffer(InjuryQuery.sql);
@@ -754,15 +771,14 @@ public class InjuryManager
             }
         }
 
-        PersistWrapper p = new PersistWrapper();
-        return p.readList(InjuryQuery.class, sql.toString() + InjuryQuery.sql_order,
+        return persistWrapper.readList(InjuryQuery.class, sql.toString() + InjuryQuery.sql_order,
                 (params.size() > 0) ? params.toArray(new Object[params.size()]) : null);
     }
 
     /*
      * For getting injury list based on NOnContainerFIlter
      */
-    public static List<InjuryQuery> getInjuryReportList(UserContext context, InjuryReportQueryFilter injuryQueryFilter)
+    public  List<InjuryQuery> getInjuryReportList(UserContext context, InjuryReportQueryFilter injuryQueryFilter)
     {
         List<InjuryQuery> injuryQueryList = null;
         try
@@ -770,8 +786,8 @@ public class InjuryManager
 
             InjuryReportQueryBuilder injuryFilter = new InjuryReportQueryBuilder(context, injuryQueryFilter);
             QueryObject result = injuryFilter.getQuery();
-            PersistWrapper p = new PersistWrapper();
-            injuryQueryList = p.readList(InjuryQuery.class, result.getQuery(),
+
+            injuryQueryList = persistWrapper.readList(InjuryQuery.class, result.getQuery(),
                     (result.getParams().size() > 0) ? result.getParams().toArray(new Object[result.getParams().size()])
                             : null);
 
@@ -783,7 +799,7 @@ public class InjuryManager
         return injuryQueryList;
     }
 
-    public static List<InjuryQuery> getPendingVerificationMorethan1daysForHSECordinator(UserContext context)
+    public  List<InjuryQuery> getPendingVerificationMorethan1daysForHSECordinator(UserContext context)
     {
         List<InjuryQuery> injuryQueryList = null;
         try
@@ -796,8 +812,8 @@ public class InjuryManager
             injuryQueryFilter.setStatusList(statusList);
             InjuryReportQueryBuilder injuryFilter = new InjuryReportQueryBuilder(context, injuryQueryFilter);
             QueryObject result = injuryFilter.getQuery();
-            PersistWrapper p = new PersistWrapper();
-            injuryQueryList = p.readList(InjuryQuery.class, result.getQuery(),
+
+            injuryQueryList = persistWrapper.readList(InjuryQuery.class, result.getQuery(),
                     (result.getParams().size() > 0) ? result.getParams().toArray(new Object[result.getParams().size()])
                             : null);
 
@@ -808,7 +824,7 @@ public class InjuryManager
         }
         return injuryQueryList;
     }
-    public static List<InjuryQuery> getPendingVerificationMorethan2daysForHSEDirector(UserContext context)
+    public  List<InjuryQuery> getPendingVerificationMorethan2daysForHSEDirector(UserContext context)
     {
         List<InjuryQuery> injuryQueryList = null;
         try
@@ -821,8 +837,8 @@ public class InjuryManager
             injuryQueryFilter.setStatusList(statusList);
             InjuryReportQueryBuilder injuryFilter = new InjuryReportQueryBuilder(context, injuryQueryFilter);
             QueryObject result = injuryFilter.getQuery();
-            PersistWrapper p = new PersistWrapper();
-            injuryQueryList = p.readList(InjuryQuery.class, result.getQuery(),
+
+            injuryQueryList = persistWrapper.readList(InjuryQuery.class, result.getQuery(),
                     (result.getParams().size() > 0) ? result.getParams().toArray(new Object[result.getParams().size()])
                             : null);
 
@@ -834,51 +850,51 @@ public class InjuryManager
         return injuryQueryList;
     }
 
-    public static void deleteInjuryReport(int injuryPk) throws Exception
+    public  void deleteInjuryReport(int injuryPk) throws Exception
     {
-        PersistWrapper.delete("delete from injury where pk=?", injuryPk);
+        persistWrapper.delete("delete from injury where pk=?", injuryPk);
     }
 
-    public static InjuryBean getInjuryReportBean(InjuryOID injuryOID) throws Exception
+    public  InjuryBean getInjuryReportBean(InjuryOID injuryOID) throws Exception
     {
         if (injuryOID == null || injuryOID.getPk() < 1)
             return null;
         InjuryBean injuryBean = null;
-        Injury injury = PersistWrapper.readByPrimaryKey(Injury.class, injuryOID.getPk());
+        Injury injury = (Injury) persistWrapper.readByPrimaryKey(Injury.class, injuryOID.getPk());
         if (injury != null && injury.getPk() > 0)
         {
-            injuryBean = InjuryHelper.getBean(injury);
+            injuryBean = injuryHelper.getBean(injury);
         }
         return injuryBean;
     }
 
-    public static InjuryQuery getInjuryReportByPk(int injuryPk) throws Exception
+    public  InjuryQuery getInjuryReportByPk(int injuryPk) throws Exception
     {
-        InjuryQuery injuryQuery = PersistWrapper.read(InjuryQuery.class,
+        InjuryQuery injuryQuery = persistWrapper.read(InjuryQuery.class,
                 InjuryQuery.sql + " and injury.pk=?" + InjuryQuery.sql_order, injuryPk);
         if (injuryQuery != null)
         {
             injuryQuery.setInjuryAssignAfterTreatment(
-                    InjuryAssignAfterTreatmentManager.getAssignAfterTreatmentBeanByInjuryPk(injuryPk));
+                    injuryAssignAfterTreatmentManager.getAssignAfterTreatmentBeanByInjuryPk(injuryPk));
             injuryQuery.setWatcherBean(
-                    WatcherManager.getWatcherBeanByObjectTypeAndObjectPk(injuryPk, EntityTypeEnum.Injury));
+                    watcherManager.getWatcherBeanByObjectTypeAndObjectPk(injuryPk, EntityTypeEnum.Injury));
         }
         return injuryQuery;
     }
 
-    public static List<InjuryUserQuery> getInjuryUserList(int sitePk) throws Exception
+    public  List<InjuryUserQuery> getInjuryUserList(int sitePk) throws Exception
     {
-        return PersistWrapper.readList(InjuryUserQuery.class,
+        return persistWrapper.readList(InjuryUserQuery.class,
                 InjuryUserQuery.sql_TAB_USER.toString() + " and TAB_USER.sitePk=? " + InjuryUserQuery.sql_union
                         + InjuryUserQuery.sql_injury_injuryperson + " and injury.sitePk=? " + InjuryUserQuery.sql_union
                         + InjuryUserQuery.sql_injury_treatedBy + " and injury.sitePk=? " + InjuryUserQuery.sql_order,
                 sitePk, sitePk, sitePk);
     }
 
-    public static List<InjuryReportGraphQuery> getInjuriesOfWorkstation(InjuryFilter injuryFilter)
+    public  List<InjuryReportGraphQuery> getInjuriesOfWorkstation(InjuryFilter injuryFilter)
     {
-        QueryObject resultQuery = InjuryReportGraphQuery.getQuery(injuryFilter);
-        List<InjuryReportGraphQuery> listInjuryQuery = PersistWrapper.readList(InjuryReportGraphQuery.class,
+        QueryObject resultQuery = injuryReportGraphQuery.getQuery(injuryFilter);
+        List<InjuryReportGraphQuery> listInjuryQuery = persistWrapper.readList(InjuryReportGraphQuery.class,
                 resultQuery.getQuery(),
                 (resultQuery.getParams().size() > 0)
                         ? resultQuery.getParams().toArray(new Object[resultQuery.getParams().size()])
@@ -888,10 +904,10 @@ public class InjuryManager
 
     }
 
-    public static List<InjuryAfterTreatmentQuery> getInjuryAfterTreatmentList()
+    public  List<InjuryAfterTreatmentQuery> getInjuryAfterTreatmentList()
     {
         List<InjuryAfterTreatmentQuery> injuryAfterTreatmentQuery = null;
-        injuryAfterTreatmentQuery = PersistWrapper.readList(InjuryAfterTreatmentQuery.class,
+        injuryAfterTreatmentQuery = persistWrapper.readList(InjuryAfterTreatmentQuery.class,
                 " SELECT injury_after_treatment_master.pk as pk,injury_after_treatment_master.name as name,injury_after_treatment_master.createdBy as createdBy,"
                         + " injury_after_treatment_master.status as status,injury_after_treatment_master.createdDate as createdDate"
                         + " from injury_after_treatment_master where 1 = 1 and status = ?",
@@ -899,14 +915,14 @@ public class InjuryManager
         return injuryAfterTreatmentQuery;
     }
 
-    public static InjuryAfterTreatment getInjuryAfterTreatment(int pk)
+    public  InjuryAfterTreatment getInjuryAfterTreatment(int pk)
     {
-        InjuryAfterTreatment treatment = PersistWrapper.readByPrimaryKey(InjuryAfterTreatment.class, pk);
+        InjuryAfterTreatment treatment = (InjuryAfterTreatment) persistWrapper.readByPrimaryKey(InjuryAfterTreatment.class, pk);
         ;
         return treatment;
     }
 
-    public static List<User> getAssignedSupervisors(String filterString)
+    public  List<User> getAssignedSupervisors(String filterString)
     {
         String sql = "Select distinct TAB_USER.* from TAB_USER inner join injury on injury.supervisedBy=TAB_USER.pk";
         if(filterString != null && filterString.trim().length() > 0) {
@@ -914,7 +930,7 @@ public class InjuryManager
                     + filterString.toUpperCase() + "%' or upper(lastName) like '" + filterString.toUpperCase() + "%')";
         }
         sql = sql + " order by TAB_USER.firstName asc";
-        return PersistWrapper.readList(User.class,sql);
+        return persistWrapper.readList(User.class,sql);
     }
 }
 

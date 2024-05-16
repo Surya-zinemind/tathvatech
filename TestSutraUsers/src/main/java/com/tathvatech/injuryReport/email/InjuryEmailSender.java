@@ -1,5 +1,24 @@
 package com.tathvatech.injuryReport.email;
 
+import com.tathvatech.common.common.ApplicationProperties;
+import com.tathvatech.common.email.EmailMessageInfo;
+import com.tathvatech.common.entity.AttachmentIntf;
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.injuryReport.common.InjuryQuery;
+import com.tathvatech.injuryReport.common.InjuryReportPrinter;
+import com.tathvatech.injuryReport.common.WatcherBean;
+import com.tathvatech.injuryReport.common.WatcherQuery;
+import com.tathvatech.injuryReport.service.WatcherManager;
+import com.tathvatech.user.Asynch.AsyncProcessor;
+import com.tathvatech.user.OID.SiteOID;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.Attachment;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.enums.SiteRolesEnum;
+import com.tathvatech.user.service.AccountService;
+import com.tathvatech.user.service.AuthorizationManager;
+import lombok.RequiredArgsConstructor;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -8,28 +27,15 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import com.tathvatech.testsutra.injury.common.InjuryQuery;
-import com.tathvatech.testsutra.injury.common.WatcherBean;
-import com.tathvatech.testsutra.injury.common.WatcherQuery;
-import com.tathvatech.testsutra.injury.web.InjuryReportPrinter;
-import com.tathvatech.ts.caf.ApplicationProperties;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.accounts.delegate.AccountDelegate;
-import com.tathvatech.ts.core.authorization.AuthorizationManager;
-import com.tathvatech.ts.core.common.Attachment;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.utils.AsyncProcessor;
-import com.tathvatech.ts.core.common.utils.AttachmentIntf;
-import com.tathvatech.ts.core.common.utils.EmailMessageInfo;
-import com.tathvatech.ts.core.sites.SiteOID;
-import com.tathvatech.ts.core.sites.SiteRolesEnum;
-import com.tathvatech.ts.core.utils.TempFileUtil;
 
+@RequiredArgsConstructor
 public class InjuryEmailSender
 {
-    public static void notifyInjuryReportSupervisorChanged(UserContext context, InjuryQuery injuryQuery,
-                                                           User previousSupervisor)
+    private final AccountService accountService;
+    private final AuthorizationManager authorizationManager;
+    private final WatcherManager watcherManager;
+    public void notifyInjuryReportSupervisorChanged(UserContext context, InjuryQuery injuryQuery,
+                                                    User previousSupervisor)
     {
         try
         {
@@ -60,7 +66,7 @@ public class InjuryEmailSender
 
     }
 
-    public static void notifyInjuryReportCreated(UserContext context, InjuryQuery injuryQuery)
+    public void notifyInjuryReportCreated(UserContext context, InjuryQuery injuryQuery)
     {
 
         try
@@ -101,7 +107,7 @@ public class InjuryEmailSender
         }
     }
 
-    public static void notifyVerifyInjuryReport(UserContext context, InjuryQuery injuryQuery)
+    public void notifyVerifyInjuryReport(UserContext context, InjuryQuery injuryQuery)
     {
 
         try
@@ -130,7 +136,7 @@ public class InjuryEmailSender
         }
     }
 
-    public static void notifyCloseInjuryReport(UserContext context, InjuryQuery injuryQuery)
+    public void notifyCloseInjuryReport(UserContext context, InjuryQuery injuryQuery)
     {
 
         try
@@ -158,7 +164,7 @@ public class InjuryEmailSender
         }
     }
 
-    public static void notifyReopenInjuryReport(UserContext context, InjuryQuery injuryQuery)
+    public void notifyReopenInjuryReport(UserContext context, InjuryQuery injuryQuery)
     {
 
         try
@@ -199,7 +205,7 @@ public class InjuryEmailSender
         }
     }
 
-    public static void sendEmail(UserContext context, String subject, String text, String html, InjuryQuery iQ)
+    public  void sendEmail(UserContext context, String subject, String text, String html, InjuryQuery iQ)
             throws Exception
     {
         List<Integer> sentList = new ArrayList<>();
@@ -221,7 +227,7 @@ public class InjuryEmailSender
         // email to person who created the report
         if (iQ.getCreatedBy() != null)
         {
-            User user = AccountDelegate.getUser(iQ.getCreatedBy());
+            User user = accountService.getUser(iQ.getCreatedBy());
             if (user != null && user.getEmail() != null && User.STATUS_ACTIVE.equals(user.getStatus()))
             {
                 if (!(sentList.contains(user.getPk())))
@@ -231,7 +237,7 @@ public class InjuryEmailSender
 //							new String[] { user.getEmail() }, subject, text, html, emailAttachments);
 //					AsyncProcessor.scheduleEmail(emailInfo);
 
-                    sentList.add(user.getPk());
+                    sentList.add((int) user.getPk());
                 }
             }
         }
@@ -243,7 +249,7 @@ public class InjuryEmailSender
         {
             for (WatcherBean watcherBean : iQ.getWatcherBean())
             {
-                User user = AccountDelegate.getUser(watcherBean.getUserPk());
+                User user = accountService.getUser(watcherBean.getUserPk());
                 if (user != null && user.getEmail() != null && User.STATUS_ACTIVE.equals(user.getStatus()))
                 {
                     if (!(sentList.contains(user.getPk())))
@@ -252,7 +258,7 @@ public class InjuryEmailSender
 //								new String[] { user.getEmail() }, subject, text, html, emailAttachments);
 //						AsyncProcessor.scheduleEmail(emailInfo);
                         userListArr.add(user.getEmail());
-                        sentList.add(user.getPk());
+                        sentList.add((int) user.getPk());
                     }
                 }
             }
@@ -261,7 +267,7 @@ public class InjuryEmailSender
         // email to supervisor
         if (iQ.getSupervisedBy() != null)
         {
-            User user = AccountDelegate.getUser(iQ.getSupervisedBy());
+            User user = accountService.getUser(iQ.getSupervisedBy());
             if (user != null && user.getEmail() != null && User.STATUS_ACTIVE.equals(user.getStatus()))
             {
                 if (!(sentList.contains(user.getPk())))
@@ -270,7 +276,7 @@ public class InjuryEmailSender
 //							new String[] { user.getEmail() }, subject, text, html, emailAttachments);
 //					AsyncProcessor.scheduleEmail(emailInfo);
                     userListArr.add(user.getEmail());
-                    sentList.add(user.getPk());
+                    sentList.add((int) user.getPk());
                 }
             }
         }
@@ -279,7 +285,7 @@ public class InjuryEmailSender
 
         try
         {
-            List<User> users = new AuthorizationManager().getUsersInRole(new SiteOID(iQ.getSitePk(), null),
+            List<User> users =authorizationManager .getUsersInRole(new SiteOID(iQ.getSitePk(), null),
                     SiteRolesEnum.HSECoordinator);
 
             for (Iterator iterator = users.iterator(); iterator.hasNext();)
@@ -294,7 +300,7 @@ public class InjuryEmailSender
 //						AsyncProcessor.scheduleEmail(emailInfo);
                         userListArr.add(user.getEmail());
 
-                        sentList.add(user.getPk());
+                        sentList.add((int) user.getPk());
                     }
                 }
             }
@@ -348,7 +354,7 @@ public class InjuryEmailSender
 //		}
     }
 
-    public static void sendEmailforSuperVisorChange(UserContext context, String subject, String text, String html,
+    public  void sendEmailforSuperVisorChange(UserContext context, String subject, String text, String html,
                                                     InjuryQuery iQ, User previousSupervisor) throws Exception
     {
         List<Integer> sentList = new ArrayList<>();
@@ -369,7 +375,7 @@ public class InjuryEmailSender
         // email to person who created the report
         if (iQ.getCreatedBy() != null)
         {
-            User user = AccountDelegate.getUser(iQ.getCreatedBy());
+            User user =accountService.getUser(iQ.getCreatedBy());
             if (user != null && user.getEmail() != null && User.STATUS_ACTIVE.equals(user.getStatus()))
             {
                 if (!(sentList.contains(user.getPk())))
@@ -378,7 +384,7 @@ public class InjuryEmailSender
                             new String[] { user.getEmail() }, subject, text, html, emailAttachments);
                     AsyncProcessor.scheduleEmail(emailInfo);
 
-                    sentList.add(user.getPk());
+                    sentList.add((int) user.getPk());
                 }
             }
         }
@@ -386,7 +392,7 @@ public class InjuryEmailSender
         // email to supervisor
         if (iQ.getSupervisedBy() != null)
         {
-            User user = AccountDelegate.getUser(iQ.getSupervisedBy());
+            User user = accountService.getUser(iQ.getSupervisedBy());
             if (user != null && user.getEmail() != null && User.STATUS_ACTIVE.equals(user.getStatus()))
             {
                 if (!(sentList.contains(user.getPk())))
@@ -394,7 +400,7 @@ public class InjuryEmailSender
                     EmailMessageInfo emailInfo = new EmailMessageInfo(ApplicationProperties.getEmailFromAddress(), null,
                             new String[] { user.getEmail() }, subject, text, html, emailAttachments);
                     AsyncProcessor.scheduleEmail(emailInfo);
-                    sentList.add(user.getPk());
+                    sentList.add((int) user.getPk());
                 }
             }
         }
@@ -408,7 +414,7 @@ public class InjuryEmailSender
                 EmailMessageInfo emailInfo = new EmailMessageInfo(ApplicationProperties.getEmailFromAddress(), null,
                         new String[] { previousSupervisor.getEmail() }, subject, text, html, emailAttachments);
                 AsyncProcessor.scheduleEmail(emailInfo);
-                sentList.add(previousSupervisor.getPk());
+                sentList.add((int) previousSupervisor.getPk());
             }
         }
 
@@ -416,7 +422,7 @@ public class InjuryEmailSender
 
         try
         {
-            List<User> users = new AuthorizationManager().getUsersInRole(new SiteOID(iQ.getSitePk(), null),
+            List<User> users = authorizationManager.getUsersInRole(new SiteOID(iQ.getSitePk(), null),
                     SiteRolesEnum.HSECoordinator);
 
             for (Iterator iterator = users.iterator(); iterator.hasNext();)
@@ -430,7 +436,7 @@ public class InjuryEmailSender
                                 null, new String[] { user.getEmail() }, subject, text, html, emailAttachments);
                         AsyncProcessor.scheduleEmail(emailInfo);
 
-                        sentList.add(user.getPk());
+                        sentList.add((int) user.getPk());
                     }
                 }
             }
@@ -444,7 +450,7 @@ public class InjuryEmailSender
         // email to additional watchers
         try
         {
-            List<WatcherQuery> ListWatcher = WatcherManager.getWatcherByObjectTypeAndObjectPk(iQ.getPk(),
+            List<WatcherQuery> ListWatcher = watcherManager.getWatcherByObjectTypeAndObjectPk(iQ.getPk(),
                     EntityTypeEnum.Injury);
 
             for (Iterator iterator = ListWatcher.iterator(); iterator.hasNext();)
@@ -455,7 +461,7 @@ public class InjuryEmailSender
                     continue;
                 }
 
-                User user = AccountDelegate.getUser(watcherQuery.getUserPk());
+                User user = accountService.getUser(watcherQuery.getUserPk());
                 if (user != null && user.getEmail() != null && User.STATUS_ACTIVE.equals(user.getStatus()))
                 {
                     if (!(sentList.contains(user.getPk())))
@@ -463,7 +469,7 @@ public class InjuryEmailSender
                         EmailMessageInfo emailInfo = new EmailMessageInfo(ApplicationProperties.getEmailFromAddress(),
                                 null, new String[] { user.getEmail() }, subject, text, html, emailAttachments);
                         AsyncProcessor.scheduleEmail(emailInfo);
-                        sentList.add(user.getPk());
+                        sentList.add((int) user.getPk());
                     }
                 }
             }

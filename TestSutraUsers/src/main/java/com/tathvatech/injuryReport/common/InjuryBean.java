@@ -1,25 +1,25 @@
 package com.tathvatech.injuryReport.common;
 
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.injuryReport.oid.InjuryOID;
+import com.tathvatech.user.OID.OID;
+import com.tathvatech.user.OID.ProjectOID;
+import com.tathvatech.user.OID.SiteOID;
+import com.tathvatech.user.OID.UserOID;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.service.AccountService;
+import lombok.RequiredArgsConstructor;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.sarvasutra.etest.api.BaseResponseBean;
-import com.sarvasutra.etest.api.model.AttachmentInfoBean;
-import com.sarvasutra.etest.api.model.CommentInfoBean;
-import com.tathvatech.ts.core.accounts.AccountManager;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.accounts.UserOID;
-import com.tathvatech.ts.core.common.Comment;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.OID;
-import com.tathvatech.ts.core.project.ProjectOID;
-import com.tathvatech.ts.core.sites.SiteOID;
-import com.thirdi.surveyside.project.ProjectManager;
 
+@RequiredArgsConstructor
 public class InjuryBean extends BaseResponseBean implements Serializable
 {
+    private final AccountService accountService;
     private int pk;
     private Integer projectPk;
     private String projectName;
@@ -289,7 +289,7 @@ public class InjuryBean extends BaseResponseBean implements Serializable
         return new InjuryOID(pk, injuryReportNo);
     }
 
-    public static InjuryBean getInjuryBean(InjuryQuery injuryQuery)
+    public  InjuryBean getInjuryBean(InjuryQuery injuryQuery)
     {
         InjuryBean ibeam = new InjuryBean();
         ibeam.setPk(injuryQuery.getPk());
@@ -376,7 +376,7 @@ public class InjuryBean extends BaseResponseBean implements Serializable
         ibeam.setLocationOther(injuryQuery.getLocationOther());
         if (injuryQuery.getSupervisedBy() != null)
         {
-            User user = AccountManager.getUser(injuryQuery.getSupervisedBy());
+            User user = accountService.getUser(injuryQuery.getSupervisedBy());
             ibeam.setSupervisedByOID(user.getOID());
             ibeam.setSupervisedBy(injuryQuery.getSupervisedBy());
         }

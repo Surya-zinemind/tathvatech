@@ -1,24 +1,28 @@
 package com.tathvatech.injuryReport.processor;
 
+import com.tathvatech.common.enums.EntityTypeEnum;
+import com.tathvatech.injuryReport.common.InjuryFilter;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.enums.SiteRolesEnum;
+import com.tathvatech.user.service.AuthorizationManager;
+import lombok.RequiredArgsConstructor;
+
 import java.util.List;
 
-import com.tathvatech.testsutra.injury.common.InjuryFilter;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.authorization.AuthorizationDelegate;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.sites.SiteRolesEnum;
 
+
+@RequiredArgsConstructor
 public class InjuryQuerySecurityProcessor {
-
+     private final AuthorizationManager  authorizationManager;
     public void addAuthorizationFilterParams(UserContext context, InjuryFilter injuryFilter) throws Exception
     {
         if(User.USER_PRIMARY.equals(context.getUser().getUserType()))
         {
             return;
         }
-        List<Integer> list = new AuthorizationDelegate().getEntitiesWithRole(context, EntityTypeEnum.Site, SiteRolesEnum.HSECoordinator);
-        list.addAll(new AuthorizationDelegate().getEntitiesWithRole(context, EntityTypeEnum.Site, SiteRolesEnum.HSEDirector));
+        List<Integer> list = authorizationManager.getEntitiesWithRole(context, EntityTypeEnum.Site, SiteRolesEnum.HSECoordinator);
+        list.addAll(authorizationManager.getEntitiesWithRole(context, EntityTypeEnum.Site, SiteRolesEnum.HSEDirector));
         if(list == null || list.size() == 0)
         {
             injuryFilter.setSitePks(new int[]{-1});

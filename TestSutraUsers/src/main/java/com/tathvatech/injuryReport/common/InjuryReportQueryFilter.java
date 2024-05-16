@@ -3,11 +3,11 @@ package com.tathvatech.injuryReport.common;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sarvasutra.etest.components.bocomponents.DateRangeFilter;
-import com.tathvatech.testsutra.injury.common.InjuryFilter.GraphType;
-import com.tathvatech.ts.core.common.InjuryAfterTreatmentOID;
-import com.tathvatech.ts.core.common.OID;
-import com.thirdi.surveyside.reportv2.ReportFilter;
+import com.tathvatech.report.request.ReportFilter;
+import com.tathvatech.user.OID.InjuryAfterTreatmentOID;
+import com.tathvatech.user.OID.OID;
+import com.tathvatech.user.common.DateRangeFilter;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InjuryReportQueryFilter extends ReportFilter implements Cloneable
 {
@@ -41,7 +41,7 @@ public class InjuryReportQueryFilter extends ReportFilter implements Cloneable
     // private int projectPk;
     private List<Integer> projectPks;
     private String[] natureOfInjury;
-    private GraphType graphType = GraphType.lcation;
+    private InjuryFilter.GraphType graphType = InjuryFilter.GraphType.lcation;
     private Integer typeOfInjury;
     private Integer typeOfPerson;
     private LimitObject pendingVerificationLimit;
@@ -256,12 +256,12 @@ public class InjuryReportQueryFilter extends ReportFilter implements Cloneable
         this.natureOfInjury = natureOfInjury;
     }
 
-    public GraphType getGraphType()
+    public InjuryFilter.GraphType getGraphType()
     {
         return graphType;
     }
 
-    public void setGraphType(GraphType graphType)
+    public void setGraphType(InjuryFilter.GraphType graphType)
     {
         this.graphType = graphType;
     }

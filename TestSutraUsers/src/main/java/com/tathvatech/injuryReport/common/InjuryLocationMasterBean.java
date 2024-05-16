@@ -3,8 +3,6 @@ package com.tathvatech.injuryReport.common;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.sarvasutra.etest.api.BaseResponseBean;
-import com.tathvatech.testsutra.ncr.common.NcrItemBean;
 
 public class InjuryLocationMasterBean extends BaseResponseBean implements Serializable {
     private int pk;

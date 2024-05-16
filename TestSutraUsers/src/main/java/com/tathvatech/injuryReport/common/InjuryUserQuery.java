@@ -1,11 +1,9 @@
 package com.tathvatech.injuryReport.common;
 
 import java.io.Serializable;
-import java.util.Date;
 
-import net.sf.persist.annotations.NoTable;
 
-@NoTable
+
 public class InjuryUserQuery implements Serializable {
     private int pk;
     private String name;

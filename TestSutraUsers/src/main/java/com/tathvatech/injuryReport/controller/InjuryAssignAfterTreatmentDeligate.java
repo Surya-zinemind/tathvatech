@@ -1,113 +1,59 @@
 package com.tathvatech.injuryReport.controller;
 
+import com.tathvatech.injuryReport.common.InjuryAssignAfterTreatmentBean;
+import com.tathvatech.injuryReport.entity.InjuryAssignAfterTreatment;
+import com.tathvatech.injuryReport.service.InjuryAssignAfterTreatmentManager;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.injuryReport.common.InjuryAssignAfterTreatmentQuery;
+import lombok.RequiredArgsConstructor;
+
 import java.sql.Connection;
 import java.util.List;
 
-import com.tathvatech.testsutra.injury.common.InjuryAssignAfterTreatmentBean;
-import com.tathvatech.testsutra.injury.common.InjuryAssignAfterTreatmentQuery;
-import com.tathvatech.ts.caf.util.ServiceLocator;
-import com.tathvatech.ts.core.UserContext;
 
+@RequiredArgsConstructor
 public class InjuryAssignAfterTreatmentDeligate {
-    public static void createAssignAfterTreatment(UserContext context,
+    private final InjuryAssignAfterTreatmentManager injuryAssignAfterTreatmentManager;
+    public  void createAssignAfterTreatment(UserContext context,
                                                   InjuryAssignAfterTreatmentBean assignAfterTreatmentBean) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
 
-            InjuryAssignAfterTreatmentManager.create(context, assignAfterTreatmentBean);
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
+            injuryAssignAfterTreatmentManager.create(context, assignAfterTreatmentBean);
+
     }
-    public static InjuryAssignAfterTreatment saveAssignAfterTreatment(UserContext context, InjuryAssignAfterTreatment assignAfterTreatment) throws Exception
+    public  InjuryAssignAfterTreatment saveAssignAfterTreatment(UserContext context, InjuryAssignAfterTreatment assignAfterTreatment) throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-
-
-            InjuryAssignAfterTreatment aat = InjuryAssignAfterTreatmentManager.saveAssignAfterTreatment(context, assignAfterTreatment);
-
-            con.commit();
-
+        InjuryAssignAfterTreatment aat = injuryAssignAfterTreatmentManager.saveAssignAfterTreatment(context, assignAfterTreatment);
             return aat;
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-        }
+
     }
-    public static InjuryAssignAfterTreatment  UpdateInjuryReport(UserContext context,
+    public  InjuryAssignAfterTreatment  UpdateInjuryReport(UserContext context,
                                                                  InjuryAssignAfterTreatmentBean assignAfterTreatmentBean) throws Exception
     {
-        Connection con = null;
-        InjuryAssignAfterTreatment aat=null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-            aat=InjuryAssignAfterTreatmentManager.update(context, assignAfterTreatmentBean);
 
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+        InjuryAssignAfterTreatment aat=null;
+        aat=injuryAssignAfterTreatmentManager.update(context, assignAfterTreatmentBean);
         return aat;
     }
-    public static List<InjuryAssignAfterTreatmentQuery> getAssignAfterTreatmentList() throws Exception
+    public  List<InjuryAssignAfterTreatmentQuery> getAssignAfterTreatmentList() throws Exception
     {
-        List<InjuryAssignAfterTreatmentQuery> l = InjuryAssignAfterTreatmentManager.getAssignAfterTreatmentList();
+        List<InjuryAssignAfterTreatmentQuery> l = injuryAssignAfterTreatmentManager.getAssignAfterTreatmentList();
         return l;
     }
-    public static  List<InjuryAssignAfterTreatmentQuery> getAssignAfterTreatmentByInjuryPk(int AssignAfterTreatmentInjuryPk) throws Exception
+    public   List<InjuryAssignAfterTreatmentQuery> getAssignAfterTreatmentByInjuryPk(int AssignAfterTreatmentInjuryPk) throws Exception
     {
-        return InjuryAssignAfterTreatmentManager.getAssignAfterTreatmentByInjuryPk(AssignAfterTreatmentInjuryPk);
+        return injuryAssignAfterTreatmentManager.getAssignAfterTreatmentByInjuryPk(AssignAfterTreatmentInjuryPk);
     }
-    public static  List<InjuryAssignAfterTreatmentQuery> getAssignAfterTreatmentListByInjuryPk(int injuryPk) throws Exception
+    public   List<InjuryAssignAfterTreatmentQuery> getAssignAfterTreatmentListByInjuryPk(int injuryPk) throws Exception
     {
-        return InjuryAssignAfterTreatmentManager.getAssignAfterTreatmentListByInjuryPk(injuryPk);
+        return injuryAssignAfterTreatmentManager.getAssignAfterTreatmentListByInjuryPk(injuryPk);
     }
-    public static void deleteAssignAfterTreatment(int injuryPk,int AfterTreatmentMasterPk)throws Exception
+    public  void deleteAssignAfterTreatment(int injuryPk,int AfterTreatmentMasterPk)throws Exception
     {
-        Connection con = null;
-        try
-        {
-            con = ServiceLocator.locate().getConnection();
-            con.setAutoCommit(false);
-            InjuryAssignAfterTreatmentManager.deleteAssignAfterTreatment(injuryPk,AfterTreatmentMasterPk);
-        }
-        catch(Exception ex)
-        {
-            con.rollback();
-            throw ex;
-        }
-        finally
-        {
-            con.commit();
-        }
+
+            injuryAssignAfterTreatmentManager.deleteAssignAfterTreatment(injuryPk,AfterTreatmentMasterPk);
+
     }
 
 }

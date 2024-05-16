@@ -3,11 +3,8 @@ package com.tathvatech.injuryReport.common;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.sarvasutra.etest.api.BaseResponseBean;
 
-import net.sf.persist.annotations.NoTable;
 
-@NoTable
 public class InjuryAssignAfterTreatmentBean extends BaseResponseBean implements Serializable
 {
     private int pk;

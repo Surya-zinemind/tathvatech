@@ -1,5 +1,7 @@
 package com.tathvatech.injuryReport.common;
 
+
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -11,53 +13,17 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.ExceptionConverter;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.FontFactory;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.BaseFont;
-import com.itextpdf.text.pdf.ColumnText;
-import com.itextpdf.text.pdf.PdfCopy;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfPageEventHelper;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfSmartCopy;
-import com.itextpdf.text.pdf.PdfStamper;
-import com.itextpdf.text.pdf.PdfTemplate;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.sarvasutra.etest.EtestApplication;
-import com.sarvasutra.etest.util.ListStringUtil;
-import com.tathvatech.testsutra.injury.common.InjuryAssignAfterTreatmentQuery;
-import com.tathvatech.testsutra.injury.common.InjuryQuery;
-import com.tathvatech.testsutra.injury.common.InjuryReportUtil;
-import com.tathvatech.testsutra.injury.service.InjuryAssignAfterTreatmentManager;
-import com.tathvatech.ts.caf.ApplicationProperties;
-import com.tathvatech.ts.core.UserContext;
-import com.tathvatech.ts.core.accounts.User;
-import com.tathvatech.ts.core.accounts.delegate.AccountDelegate;
-import com.tathvatech.ts.core.common.Attachment;
-import com.tathvatech.ts.core.common.Comment;
-import com.tathvatech.ts.core.common.EntityTypeEnum;
-import com.tathvatech.ts.core.common.FileStoreManager;
-import com.tathvatech.ts.core.common.service.CommonServicesDelegate;
-import com.thirdi.surveyside.appconfig.AppConfigConstants;
-import com.thirdi.surveyside.project.ProjectDelegate;
-import com.thirdi.surveyside.utils.DateFormatter;
-import com.vaadin.ui.UI;
+import com.tathvatech.common.common.ApplicationProperties;
+import com.tathvatech.common.common.FileStoreManager;
+import com.tathvatech.injuryReport.utils.DateFormatter;
+import com.tathvatech.user.common.UserContext;
+import com.tathvatech.user.entity.Attachment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InjuryReportPrinter
 {
-    private Logger logger = Logger.getLogger(InjuryReportPrinter.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(InjuryReportPrinter.class);
     UserContext context;
 
     public static String OPTION_PRINT_RESPONSE = "OPT_PRINT_RESPONSE";
