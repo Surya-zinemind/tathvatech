@@ -52,6 +52,7 @@ public class InjuryServiceImpl implements  InjuryService
     private Injury injury;
     private  InjuryHelper injuryHelper;
     private InjuryReportGraphQuery injuryReportGraphQuery;
+  private Attachments attachmentsObj;
     private static String ACTIVE = "Active";
 
     public InjuryServiceImpl(PersistWrapper persistWrapper, SiteService siteService, AccountService accountService, CommonServiceManager commonServiceManager, WatcherManager watcherManager, InjuryAssignAfterTreatmentManager injuryAssignAfterTreatmentManager) {
@@ -130,9 +131,8 @@ public class InjuryServiceImpl implements  InjuryService
                     ilmBean.setName(wQuery.getDisplayText());
                     ilmBean.setParentPk(1);
                     ilmBean.setStatus("Active");
-                    InjuryLocationMaster locationMaster = InjuryLocationMasterController
-                            .createInjuryLocationMaster(context, ilmBean);
-                    injury.setLocationPk((int) locationMaster.getPk());
+                    //InjuryLocationMaster locationMaster = injuryLocationMasterManager.create(context, injuryLocationMasterBean);
+                   // injury.setLocationPk((int) locationMaster.getPk());
                     injury.setLocationType("Location");
                 }
             }
@@ -236,7 +236,7 @@ public class InjuryServiceImpl implements  InjuryService
         }
         // fetch the new project back
 
-        CommonServiceManager.saveAttachments(EtestApplication.getInstance().getUserContext(), pk,
+        commonServiceManager.saveAttachments( context, pk,
                 EntityTypeEnum.Injury.getValue(), attachments, true);
 
         List<WatcherBean> previousWatcher = watcherManager.getWatcherBeanByObjectTypeAndObjectPk(pk,
@@ -272,7 +272,7 @@ public class InjuryServiceImpl implements  InjuryService
                 if (assignAfterTreatmentBean.getPk() < 1)
                 {
                     assignAfterTreatmentBean.setInjuryPk(pk);
-                    InjuryAssignAfterTreatmentController.createAssignAfterTreatment(context, assignAfterTreatmentBean);
+                    //injuryAssignAfterTreatmentManager.create(context, assignAfterTreatmentBean);
                 }
                 previousAfterTreatment.remove(assignAfterTreatmentBean);
             }
@@ -323,9 +323,8 @@ public class InjuryServiceImpl implements  InjuryService
                 ilmBean.setName(bean.getLocationOther());
                 ilmBean.setParentPk(1);
                 ilmBean.setStatus("Active");
-                InjuryLocationMaster locationMaster = InjuryLocationMasterController.createInjuryLocationMaster(context,
-                        ilmBean);
-                injury.setLocationPk((int) locationMaster.getPk());
+               // InjuryLocationMaster locationMaster = injuryLocationMasterManager.create(context, injuryLocationMasterBean);
+                //injury.setLocationPk((int) locationMaster.getPk());
                 injury.setLocationType("Location");
             }
         }
@@ -335,7 +334,7 @@ public class InjuryServiceImpl implements  InjuryService
         {
             if (bean.getAttachments() != null && bean.getAttachments().size() > 0)
             {
-                Attachments.saveResponseImage(context, pk, EntityTypeEnum.Injury, bean.getAttachments());
+                attachmentsObj.saveResponseImage(context, pk, EntityTypeEnum.Injury, bean.getAttachments());
             }
         } else
         {
@@ -354,7 +353,7 @@ public class InjuryServiceImpl implements  InjuryService
                 assignAfterTreatmentBean
                         .setAfterTreatmentMasterPk(listAssignAfterTreatmentBean.get(i).getAfterTreatmentMasterPk());
 
-                InjuryAssignAfterTreatmentController.createAssignAfterTreatment(context, assignAfterTreatmentBean);
+                //injuryAssignAfterTreatmentManager.create(context, assignAfterTreatmentBean);
             }
         }
         if (bean.getWatcherBean() != null)
@@ -371,7 +370,7 @@ public class InjuryServiceImpl implements  InjuryService
                 // watcherBean.setCreatedBy(context.getUser().getPk());
                 watcherBean.setCreatedDate(new Date());
                 watcherBean.setStatus("Active");
-                watcherBean = WatcherController.createNewWatcher(context, watcherBean);
+               // watcherBean = watcherManager.createWatcher(context, watcherBean);
             }
         }
         // fetch the new project back

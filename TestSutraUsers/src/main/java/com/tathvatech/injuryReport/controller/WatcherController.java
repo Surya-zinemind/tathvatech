@@ -1,43 +1,47 @@
 package com.tathvatech.injuryReport.controller;
 
-import com.tathvatech.common.enums.EntityType;
+
 import com.tathvatech.injuryReport.common.WatcherBean;
 import com.tathvatech.injuryReport.common.WatcherQuery;
 import com.tathvatech.injuryReport.entity.ItemWatcher;
+import com.tathvatech.injuryReport.request.GetWatcherByObjectTypeAndObjectPkRequest;
 import com.tathvatech.injuryReport.service.WatcherManager;
 import com.tathvatech.user.common.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/watcher")
 @RequiredArgsConstructor
 public class WatcherController {
     private  final Logger logger = LoggerFactory.getLogger(WatcherController.class);
     private final WatcherManager watcherManager;
-    public  void create(UserContext context,
-                              WatcherBean watcherBean) throws Exception
+    @PostMapping("/create")
+    public  void create(@RequestBody WatcherBean watcherBean) throws Exception
     {
-
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             watcherManager.create(context, watcherBean);
 
 
     }
-    public  WatcherBean createNewWatcher(UserContext context,
-                                                WatcherBean watcherBean) throws Exception
+    @PostMapping("/createNewWatcher")
+    public  WatcherBean createNewWatcher(@RequestBody WatcherBean watcherBean) throws Exception
     {
-
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             WatcherBean wl = watcherManager.createWatcher(context, watcherBean);
             return wl;
 
     }
-    public ItemWatcher saveWatcher(UserContext context, ItemWatcher watcherList) throws Exception
+    @PostMapping("/saveWatcher")
+    public ItemWatcher saveWatcher(@RequestBody ItemWatcher watcherList) throws Exception
     {
 
-
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
             ItemWatcher wl = watcherManager.saveWatcher(context, watcherList);
 
@@ -46,10 +50,10 @@ public class WatcherController {
 
 
     }
-    public  ItemWatcher  UpdateWatcher(UserContext context,
-                                             WatcherBean watcherBean) throws Exception
+    @PutMapping("/updateWatcher")
+    public  ItemWatcher  UpdateWatcher(@RequestBody WatcherBean watcherBean) throws Exception
     {
-
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ItemWatcher wl=null;
 
             wl=watcherManager.update(context, watcherBean);
@@ -57,22 +61,26 @@ public class WatcherController {
 
         return wl;
     }
+    @GetMapping("/getWatcherList")
     public  List<WatcherQuery> getWatcherList() throws Exception
     {
         List<WatcherQuery> l = watcherManager.getWatcherList();
         return l;
     }
-    public  List<WatcherQuery> getWatcherByObjectTypeAndObjectPk(int objectPk, EntityType objectType) throws Exception
+    @GetMapping("/getWatcherByObjectTypeAndObjectPk")
+    public  List<WatcherQuery> getWatcherByObjectTypeAndObjectPk(@RequestBody GetWatcherByObjectTypeAndObjectPkRequest getWatcherByObjectTypeAndObjectPkRequest) throws Exception
     {
-        return watcherManager.getWatcherByObjectTypeAndObjectPk( objectPk, objectType);
+        return watcherManager.getWatcherByObjectTypeAndObjectPk( getWatcherByObjectTypeAndObjectPkRequest.getObjectPk(), getWatcherByObjectTypeAndObjectPkRequest.getObjectType());
     }
-    public  void deleteWatcherList(int objectPk,EntityType objectType)throws Exception
+    @DeleteMapping("/deleteWatcherList")
+    public  void deleteWatcherList(@RequestBody GetWatcherByObjectTypeAndObjectPkRequest getWatcherByObjectTypeAndObjectPkRequest)throws Exception
     {
 
-            watcherManager.deleteWatcherList(objectPk, objectType);
+            watcherManager.deleteWatcherList(getWatcherByObjectTypeAndObjectPkRequest.getObjectPk(), getWatcherByObjectTypeAndObjectPkRequest.getObjectType());
 
     }
-    public void deleteWatcher(int pk)throws Exception
+    @DeleteMapping("/deleteWatcher/{pk}")
+    public void deleteWatcher(@PathVariable("pk") int pk)throws Exception
     {
 
             watcherManager.deleteWatcher(pk);

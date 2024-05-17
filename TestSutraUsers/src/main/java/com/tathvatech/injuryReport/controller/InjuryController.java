@@ -9,12 +9,14 @@ import com.tathvatech.common.wrapper.PersistWrapper;
 import com.tathvatech.injuryReport.common.*;
 import com.tathvatech.injuryReport.entity.InjuryAfterTreatment;
 import com.tathvatech.injuryReport.processor.InjuryQuerySecurityProcessor;
+import com.tathvatech.injuryReport.request.CreateInjuryReportRequest;
+import com.tathvatech.injuryReport.request.SaveRequest;
+import com.tathvatech.injuryReport.request.VerifyInjuryReportRequest;
 import com.tathvatech.injuryReport.service.InjuryService;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.user.enums.SiteRolesEnum;
 import com.tathvatech.user.service.AuthorizationManager;
 import com.tathvatech.user.service.CommonServiceManager;
-import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.injuryReport.email.InjuryEmailSender;
 import com.tathvatech.injuryReport.entity.Injury;
 import com.tathvatech.injuryReport.oid.InjuryOID;
@@ -22,10 +24,12 @@ import com.tathvatech.user.common.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
+@RequestMapping("/injury")
 @RequiredArgsConstructor
 public class InjuryController
 {
@@ -39,10 +43,11 @@ public class InjuryController
 
 
 
-    public  InjuryQuery createInjuryReport(UserContext context, InjuryBean injuryBean,
-                                                 List<AttachmentIntf> attachments, boolean isAndroidDevice) throws Exception
+    @PostMapping("/createInjuryReport")
+    public  InjuryQuery createInjuryReport(@RequestBody CreateInjuryReportRequest createInjuryReportRequest) throws Exception
     {
-        InjuryQuery inj = injuryService.create(context, injuryBean, attachments, isAndroidDevice);
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        InjuryQuery inj = injuryService.create(context, createInjuryReportRequest.getInjuryBean(),createInjuryReportRequest.getAttachments(), createInjuryReportRequest.isAndroidDevice());
         Injury injuryToBackup = injuryService.get(new InjuryOID(inj.getPk(), null));
             commonServiceManager.saveSnapshot(context, injuryToBackup);
             InjuryQuery iQ =injuryService .getInjuryReportByPk(inj.getPk());
@@ -79,16 +84,17 @@ public class InjuryController
 
     }
 
-    public  InjuryBean save(UserContext context, InjuryBean injuryBean, List<AttachmentIntf> attachments)
+   @PostMapping("/save")
+   public  InjuryBean save(@RequestBody SaveRequest saveRequest)
             throws Exception
     {
-
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             boolean isNewInjury = false;
-            if (injuryBean.getPk() < 1)
+            if (saveRequest.getInjuryBean().getPk() < 1)
             {
                 isNewInjury = true;
             }
-            InjuryBean inj =injuryService .save(context, injuryBean, attachments);
+            InjuryBean inj =injuryService .save(context, saveRequest.getInjuryBean(), saveRequest.getAttachments());
 
             Injury injuryToBackup = injuryService.get(new InjuryOID(inj.getPk(), null));
             commonServiceManager.saveSnapshot(context, injuryToBackup);
@@ -166,13 +172,14 @@ public class InjuryController
     // return inj;
     // }
     //
-    public  InjuryBean verifyInjuryReport(UserContext context, InjuryOID injuryOID, String message)
+    @PutMapping("/verifyInjuryReport")
+    public  InjuryBean verifyInjuryReport(@RequestBody VerifyInjuryReportRequest verifyInjuryReportRequest)
             throws Exception
     {
-
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         InjuryBean inj = null;
 
-            inj =injuryService.verifyInjuryReport(context, injuryOID, message);
+            inj =injuryService.verifyInjuryReport(context, verifyInjuryReportRequest.getInjuryOID(), verifyInjuryReportRequest.getMessage());
             Injury injuryToBackup =injuryService .get(new InjuryOID(inj.getPk(), null));
             commonServiceManager.saveSnapshot(context, injuryToBackup);
             InjuryQuery iQ =injuryService .getInjuryReportByPk(inj.getPk());
@@ -206,13 +213,15 @@ public class InjuryController
         return inj;
     }
 
-    public InjuryBean closeInjuryReport(UserContext context, InjuryOID injuryOID, String message)
+    @PutMapping("/closeInjuryReport")
+    public InjuryBean closeInjuryReport(@RequestBody VerifyInjuryReportRequest verifyInjuryReportRequest)
             throws Exception
     {
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         InjuryBean inj = null;
 
-            inj =injuryService .closeInjuryReport(context, injuryOID, message);
+            inj =injuryService .closeInjuryReport(context,verifyInjuryReportRequest.getInjuryOID(),verifyInjuryReportRequest.getMessage());
 
             Injury injuryToBackup =injuryService .get(new InjuryOID(inj.getPk(), null));
             commonServiceManager.saveSnapshot(context, injuryToBackup);
@@ -246,12 +255,14 @@ public class InjuryController
         return inj;
     }
 
-    public  InjuryBean reopenInjuryReport(UserContext context, InjuryOID injuryOID, String messsage)
+    @PutMapping("/reopenInjuryReport")
+    public  InjuryBean reopenInjuryReport(@RequestBody VerifyInjuryReportRequest verifyInjuryReportRequest)
             throws Exception
     {
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         InjuryBean inj = null;
 
-            inj =injuryService .reopenInjuryReport(context, injuryOID, messsage);
+            inj =injuryService .reopenInjuryReport(context, verifyInjuryReportRequest.getInjuryOID(), verifyInjuryReportRequest.getMessage());
 
 
             Injury injuryToBackup =injuryService .get(new InjuryOID(inj.getPk(), null));
@@ -286,51 +297,63 @@ public class InjuryController
         return inj;
     }
 
-    public List<InjuryQuery> getInjuryReportList(UserContext context, InjuryFilter injuryFilter) throws Exception
+    @GetMapping("/getInjuryReportList")
+    public List<InjuryQuery> getInjuryReportList(@RequestBody InjuryFilter injuryFilter) throws Exception
     {
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         injuryQuerySecurityProcessor.addAuthorizationFilterParams(context, injuryFilter);
         List<InjuryQuery> l =injuryService .getInjuryReportList(injuryFilter);
         return l;
     }
 
-    public  List<InjuryQuery> getPendingVerificationMorethan1daysForHSECordinator(UserContext context)
+    @GetMapping("/getPendingVerificationMorethan1daysForHSECordinator")
+    public  List<InjuryQuery> getPendingVerificationMorethan1daysForHSECordinator()
             throws Exception
     {
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<InjuryQuery> l =injuryService.getPendingVerificationMorethan1daysForHSECordinator(context);
         return l;
     }
 
-    public  List<InjuryQuery> getPendingVerificationMorethan2daysForHSEDirector(UserContext context)
+    @GetMapping("/getPendingVerificationMorethan2daysForHSEDirector")
+    public  List<InjuryQuery> getPendingVerificationMorethan2daysForHSEDirector()
             throws Exception
     {
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<InjuryQuery> l =injuryService.getPendingVerificationMorethan2daysForHSEDirector(context);
         return l;
     }
 
-    public  List<InjuryQuery> getInjuryReportList(UserContext context, InjuryReportQueryFilter injuryQueryFilter)
+    @GetMapping("/getInjuryReportList")
+    public  List<InjuryQuery> getInjuryReportList(@RequestBody InjuryReportQueryFilter injuryQueryFilter)
             throws Exception
     {
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return injuryService.getInjuryReportList(context, injuryQueryFilter);
     }
 
-    public  InjuryQuery getInjuryReportByPk(int injuryPk) throws Exception
+    @GetMapping("/getInjuryReportByPk/{injuryPk}")
+    public  InjuryQuery getInjuryReportByPk(@PathVariable("injuryPk") int injuryPk) throws Exception
     {
         return injuryService.getInjuryReportByPk(injuryPk);
     }
 
-    public  InjuryBean getInjuryReportBean(InjuryOID injuryOID) throws Exception
+    @GetMapping("/getInjuryReportBean")
+    public  InjuryBean getInjuryReportBean(@RequestBody InjuryOID injuryOID) throws Exception
     {
         return getInjuryReportBean(injuryOID);
     }
 
-    public  void deleteInjuryReport(int injuryPk) throws Exception
+    @DeleteMapping("/deleteInjuryReport/{injuryPk}")
+    public  void deleteInjuryReport(@PathVariable("injuryPk") int injuryPk) throws Exception
     {
       injuryService.deleteInjuryReport(injuryPk);
     }
 
-    public  List<InjuryUserQuery> getInjuryUserList(UserContext context, int sitePk) throws Exception
+    @GetMapping("/getInjuryUserList/{sitePk}")
+    public  List<InjuryUserQuery> getInjuryUserList(@PathVariable("sitePk") int sitePk) throws Exception
     {
-
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<InjuryUserQuery> l = null;
 
             l = injuryService.getInjuryUserList(sitePk);
@@ -340,9 +363,11 @@ public class InjuryController
         return l;
     }
 
-    public  List<InjuryQuery> getMyAssignedInjuryReportsForVerification(UserContext userContext, Object object)
+    @GetMapping("/getMyAssignedInjuryReportsForVerification")
+    public  List<InjuryQuery> getMyAssignedInjuryReportsForVerification( @RequestBody Object object)
             throws Exception
     {
+        UserContext userContext= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<Object> params = new ArrayList();
         StringBuffer sql = new StringBuffer(InjuryQuery.sql);
         List<Integer> sitePks =authorizationManager.getEntitiesWithRole(userContext, EntityTypeEnum.Site,
@@ -378,9 +403,11 @@ public class InjuryController
 
     }
 
-    public List<InjuryQuery> getMyAssignedInjuryReportsForClose(UserContext userContext)
+    @GetMapping("/getMyAssignedInjuryReportsForClose")
+    public List<InjuryQuery> getMyAssignedInjuryReportsForClose()
             throws Exception
     {
+        UserContext userContext= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         /*
          * injury report for close assigned to HSE coordinators
          */
@@ -410,9 +437,11 @@ public class InjuryController
 
     }
 
-    public  List<InjuryQuery> getMyAssignedInjuryReportsForCloseMorethan7Days(UserContext userContext)
+   @GetMapping("/getMyAssignedInjuryReportsForCloseMorethan7Days")
+   public  List<InjuryQuery> getMyAssignedInjuryReportsForCloseMorethan7Days()
             throws Exception
     {
+        UserContext userContext= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         /*
          * injury report for close assigned to HSE coordinators
          */
@@ -442,8 +471,10 @@ public class InjuryController
 
     }
 
-    public  List<InjuryQuery> getMyAssignedInjuryReports(UserContext userContext, Object object) throws Exception
+    @GetMapping("/getMyAssignedInjuryReports")
+    public  List<InjuryQuery> getMyAssignedInjuryReports(@RequestBody Object object) throws Exception
     {
+        UserContext userContext= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<Object> params = new ArrayList();
         StringBuffer sql = new StringBuffer(InjuryQuery.sql);
         List<Integer> sitePks = authorizationManager.getEntitiesWithRole(userContext, EntityTypeEnum.Site,
@@ -479,13 +510,15 @@ public class InjuryController
 
     }
 
-    public  List<InjuryReportGraphQuery> getInjuriesOfWorkstation(InjuryFilter injuryFilter) throws Exception
+   @GetMapping("/getInjuriesOfWorkstation")
+   public  List<InjuryReportGraphQuery> getInjuriesOfWorkstation(@RequestBody InjuryFilter injuryFilter) throws Exception
     {
 
             return injuryService.getInjuriesOfWorkstation(injuryFilter);
 
     }
 
+    @GetMapping("/getInjuryAfterTreatmentList")
     public  List<InjuryAfterTreatmentQuery> getInjuryAfterTreatmentList() throws Exception
     {
 
@@ -494,7 +527,8 @@ public class InjuryController
 
     }
 
-    public  InjuryAfterTreatment getInjuryAfterTreatment(int pk) throws Exception
+    @GetMapping("/getInjuryAfterTreatment/{pk}")
+    public  InjuryAfterTreatment getInjuryAfterTreatment(@PathVariable("pk") int pk) throws Exception
     {
 
             return injuryService.getInjuryAfterTreatment(pk);
@@ -502,8 +536,10 @@ public class InjuryController
 
     }
 
-    public  List<User> getAssignedSupervisors(UserContext context, String filterString) throws Exception
+    @GetMapping("/getAssignedSupervisors/{filterString}")
+    public  List<User> getAssignedSupervisors(@PathVariable("filterString") String filterString) throws Exception
     {
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return injuryService.getAssignedSupervisors(filterString);
     }
 }

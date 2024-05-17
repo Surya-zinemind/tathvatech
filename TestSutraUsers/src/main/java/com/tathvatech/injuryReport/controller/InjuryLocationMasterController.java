@@ -8,28 +8,30 @@ import com.tathvatech.user.common.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/injury/locationmaster")
 @RequiredArgsConstructor
 public class InjuryLocationMasterController {
     private  final Logger logger = LoggerFactory.getLogger(InjuryLocationMasterController.class);
     private final InjuryLocationMasterManager injuryLocationMasterManager;
 
-    public  InjuryLocationMaster createInjuryLocationMaster(UserContext context,
-                                                                  InjuryLocationMasterBean injuryLocationMasterBean) throws Exception
+    @PostMapping("/createInjuryLocationMaster")
+    public  InjuryLocationMaster createInjuryLocationMaster(@RequestBody InjuryLocationMasterBean injuryLocationMasterBean) throws Exception
     {
 
-
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return injuryLocationMasterManager.create(context, injuryLocationMasterBean);
 
     }
-    public  InjuryLocationMaster  UpdateInjuryReport(UserContext context,
-                                                           InjuryLocationMasterBean injuryLocationMasterBean) throws Exception
+   @PutMapping("/updateInjuryReport")
+   public  InjuryLocationMaster  UpdateInjuryReport(@RequestBody  InjuryLocationMasterBean injuryLocationMasterBean) throws Exception
     {
-
+        UserContext context= (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         InjuryLocationMaster aat=null;
 
             aat=injuryLocationMasterManager.update(context, injuryLocationMasterBean);
@@ -37,26 +39,31 @@ public class InjuryLocationMasterController {
 
         return aat;
     }
-    public  List<InjuryLocationMasterQuery> getAllList(String search) throws Exception
+    @GetMapping("/getAllList/{search}")
+    public  List<InjuryLocationMasterQuery> getAllList(@PathVariable("search") String search) throws Exception
     {
         List<InjuryLocationMasterQuery> l = injuryLocationMasterManager.getAllList(search);
         return l;
     }
+    @GetMapping("/getInjuryLocationMasterList")
     public  List<InjuryLocationMasterQuery> getInjuryLocationMasterList() throws Exception
     {
         List<InjuryLocationMasterQuery> l = injuryLocationMasterManager.getInjuryLocationManagerList();
         return l;
     }
-    public  List<InjuryLocationMasterQuery> getInjuryLocationMasterChildList(int parentId) throws Exception
+    @GetMapping("/getInjuryLocationMasterChildList/{parentId}")
+    public  List<InjuryLocationMasterQuery> getInjuryLocationMasterChildList(@PathVariable("parentId") int parentId) throws Exception
     {
         List<InjuryLocationMasterQuery> l = injuryLocationMasterManager.getInjuryLocationMasterChildList(parentId);
         return l;
     }
-    public   InjuryLocationMasterQuery getInjuryLocationMasterByInjuryPk(int pk) throws Exception
+    @GetMapping("/getInjuryLocationMasterByInjuryPk/{pk}")
+    public   InjuryLocationMasterQuery getInjuryLocationMasterByInjuryPk(@PathVariable("pk") int pk) throws Exception
     {
         return injuryLocationMasterManager.getInjuryLocationManagerByPk(pk);
     }
-    public void deleteInjuryLocationMaster(int pk)throws Exception
+    @DeleteMapping("/deleteInjuryLocationMaster/{pk}")
+    public void deleteInjuryLocationMaster(@PathVariable("pk") int pk)throws Exception
     {
 
             injuryLocationMasterManager.deleteInjuryLocationMaster(pk);
