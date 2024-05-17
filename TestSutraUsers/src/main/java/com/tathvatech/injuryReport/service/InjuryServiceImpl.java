@@ -131,6 +131,7 @@ public class InjuryServiceImpl implements  InjuryService
                     ilmBean.setName(wQuery.getDisplayText());
                     ilmBean.setParentPk(1);
                     ilmBean.setStatus("Active");
+                    //Method calling need to be resolved
                     //InjuryLocationMaster locationMaster = injuryLocationMasterManager.create(context, injuryLocationMasterBean);
                    // injury.setLocationPk((int) locationMaster.getPk());
                     injury.setLocationType("Location");
@@ -272,6 +273,7 @@ public class InjuryServiceImpl implements  InjuryService
                 if (assignAfterTreatmentBean.getPk() < 1)
                 {
                     assignAfterTreatmentBean.setInjuryPk(pk);
+                    //method calling need to be resolved
                     //injuryAssignAfterTreatmentManager.create(context, assignAfterTreatmentBean);
                 }
                 previousAfterTreatment.remove(assignAfterTreatmentBean);
@@ -323,6 +325,7 @@ public class InjuryServiceImpl implements  InjuryService
                 ilmBean.setName(bean.getLocationOther());
                 ilmBean.setParentPk(1);
                 ilmBean.setStatus("Active");
+                //Method calling need to be resolved
                // InjuryLocationMaster locationMaster = injuryLocationMasterManager.create(context, injuryLocationMasterBean);
                 //injury.setLocationPk((int) locationMaster.getPk());
                 injury.setLocationType("Location");
@@ -352,7 +355,7 @@ public class InjuryServiceImpl implements  InjuryService
                 assignAfterTreatmentBean.setInjuryPk(pk);
                 assignAfterTreatmentBean
                         .setAfterTreatmentMasterPk(listAssignAfterTreatmentBean.get(i).getAfterTreatmentMasterPk());
-
+                //method calling need to be resolved
                 //injuryAssignAfterTreatmentManager.create(context, assignAfterTreatmentBean);
             }
         }
@@ -370,6 +373,7 @@ public class InjuryServiceImpl implements  InjuryService
                 // watcherBean.setCreatedBy(context.getUser().getPk());
                 watcherBean.setCreatedDate(new Date());
                 watcherBean.setStatus("Active");
+                //method calling need to be resolved
                // watcherBean = watcherManager.createWatcher(context, watcherBean);
             }
         }
