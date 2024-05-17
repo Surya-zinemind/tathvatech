@@ -7,13 +7,16 @@ import com.tathvatech.injuryReport.entity.ItemWatcher;
 import com.tathvatech.injuryReport.service.WatcherManager;
 import com.tathvatech.user.common.UserContext;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.Connection;
 import java.util.List;
 
-
+@RestController
 @RequiredArgsConstructor
-public class WatcherDeligate {
+public class WatcherController {
+    private  final Logger logger = LoggerFactory.getLogger(WatcherController.class);
     private final WatcherManager watcherManager;
     public  void create(UserContext context,
                               WatcherBean watcherBean) throws Exception

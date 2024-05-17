@@ -6,20 +6,22 @@ import java.util.Date;
 import java.util.List;
 import com.tathvatech.common.common.QueryObject;
 import com.tathvatech.injuryReport.common.*;
-import com.tathvatech.injuryReport.controller.InjuryAssignAfterTreatmentDeligate;
-import com.tathvatech.injuryReport.controller.WatcherDeligate;
+import com.tathvatech.injuryReport.controller.InjuryAssignAfterTreatmentController;
+import com.tathvatech.injuryReport.controller.WatcherController;
 import com.tathvatech.injuryReport.email.InjuryEmailSender;
 import com.tathvatech.injuryReport.entity.InjuryAfterTreatment;
 import com.tathvatech.injuryReport.entity.Mode;
 import com.tathvatech.injuryReport.enums.DateLimit;
 import com.tathvatech.injuryReport.oid.InjuryOID;
+import com.tathvatech.project.service.ProjectService;
 import com.tathvatech.site.service.SiteService;
 import com.tathvatech.user.service.AccountService;
+import com.tathvatech.user.service.AuthorizationManager;
 import com.tathvatech.user.service.CommonServiceManager;
 import com.tathvatech.common.entity.AttachmentIntf;
 import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.common.wrapper.PersistWrapper;
-import com.tathvatech.injuryReport.controller.InjuryLocationMasterDeligate;
+import com.tathvatech.injuryReport.controller.InjuryLocationMasterController;
 import com.tathvatech.injuryReport.entity.Injury;
 import com.tathvatech.injuryReport.entity.InjuryLocationMaster;
 import com.tathvatech.injuryReport.utils.InjuryReportSequenceKeyGenerator;
@@ -128,7 +130,7 @@ public class InjuryServiceImpl implements  InjuryService
                     ilmBean.setName(wQuery.getDisplayText());
                     ilmBean.setParentPk(1);
                     ilmBean.setStatus("Active");
-                    InjuryLocationMaster locationMaster = InjuryLocationMasterDeligate
+                    InjuryLocationMaster locationMaster = InjuryLocationMasterController
                             .createInjuryLocationMaster(context, ilmBean);
                     injury.setLocationPk((int) locationMaster.getPk());
                     injury.setLocationType("Location");
@@ -270,7 +272,7 @@ public class InjuryServiceImpl implements  InjuryService
                 if (assignAfterTreatmentBean.getPk() < 1)
                 {
                     assignAfterTreatmentBean.setInjuryPk(pk);
-                    InjuryAssignAfterTreatmentDeligate.createAssignAfterTreatment(context, assignAfterTreatmentBean);
+                    InjuryAssignAfterTreatmentController.createAssignAfterTreatment(context, assignAfterTreatmentBean);
                 }
                 previousAfterTreatment.remove(assignAfterTreatmentBean);
             }
@@ -321,7 +323,7 @@ public class InjuryServiceImpl implements  InjuryService
                 ilmBean.setName(bean.getLocationOther());
                 ilmBean.setParentPk(1);
                 ilmBean.setStatus("Active");
-                InjuryLocationMaster locationMaster = InjuryLocationMasterDeligate.createInjuryLocationMaster(context,
+                InjuryLocationMaster locationMaster = InjuryLocationMasterController.createInjuryLocationMaster(context,
                         ilmBean);
                 injury.setLocationPk((int) locationMaster.getPk());
                 injury.setLocationType("Location");
@@ -352,7 +354,7 @@ public class InjuryServiceImpl implements  InjuryService
                 assignAfterTreatmentBean
                         .setAfterTreatmentMasterPk(listAssignAfterTreatmentBean.get(i).getAfterTreatmentMasterPk());
 
-                InjuryAssignAfterTreatmentDeligate.createAssignAfterTreatment(context, assignAfterTreatmentBean);
+                InjuryAssignAfterTreatmentController.createAssignAfterTreatment(context, assignAfterTreatmentBean);
             }
         }
         if (bean.getWatcherBean() != null)
@@ -369,7 +371,7 @@ public class InjuryServiceImpl implements  InjuryService
                 // watcherBean.setCreatedBy(context.getUser().getPk());
                 watcherBean.setCreatedDate(new Date());
                 watcherBean.setStatus("Active");
-                watcherBean = WatcherDeligate.createNewWatcher(context, watcherBean);
+                watcherBean = WatcherController.createNewWatcher(context, watcherBean);
             }
         }
         // fetch the new project back
@@ -784,7 +786,7 @@ public class InjuryServiceImpl implements  InjuryService
         try
         {
 
-            InjuryReportQueryBuilder injuryFilter = new InjuryReportQueryBuilder(context, injuryQueryFilter);
+            InjuryReportQueryBuilder injuryFilter = new InjuryReportQueryBuilder((AuthorizationManager) context, (ProjectService) injuryQueryFilter);
             QueryObject result = injuryFilter.getQuery();
 
             injuryQueryList = persistWrapper.readList(InjuryQuery.class, result.getQuery(),
@@ -810,7 +812,7 @@ public class InjuryServiceImpl implements  InjuryService
             List<String> statusList = new ArrayList<>();
             statusList.add(Injury.StatusEnum.Open.name());
             injuryQueryFilter.setStatusList(statusList);
-            InjuryReportQueryBuilder injuryFilter = new InjuryReportQueryBuilder(context, injuryQueryFilter);
+            InjuryReportQueryBuilder injuryFilter = new InjuryReportQueryBuilder((AuthorizationManager) context, (ProjectService) injuryQueryFilter);
             QueryObject result = injuryFilter.getQuery();
 
             injuryQueryList = persistWrapper.readList(InjuryQuery.class, result.getQuery(),
@@ -835,7 +837,7 @@ public class InjuryServiceImpl implements  InjuryService
             List<String> statusList = new ArrayList<>();
             statusList.add(Injury.StatusEnum.Open.name());
             injuryQueryFilter.setStatusList(statusList);
-            InjuryReportQueryBuilder injuryFilter = new InjuryReportQueryBuilder(context, injuryQueryFilter);
+            InjuryReportQueryBuilder injuryFilter = new InjuryReportQueryBuilder((AuthorizationManager) context, (ProjectService) injuryQueryFilter);
             QueryObject result = injuryFilter.getQuery();
 
             injuryQueryList = persistWrapper.readList(InjuryQuery.class, result.getQuery(),

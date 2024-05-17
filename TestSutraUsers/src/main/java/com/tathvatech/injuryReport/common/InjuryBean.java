@@ -291,7 +291,7 @@ public class InjuryBean extends BaseResponseBean implements Serializable
 
     public  InjuryBean getInjuryBean(InjuryQuery injuryQuery)
     {
-        InjuryBean ibeam = new InjuryBean();
+        InjuryBean ibeam = new InjuryBean(accountService);
         ibeam.setPk(injuryQuery.getPk());
         ibeam.setProjectPk(injuryQuery.getProjectPk());
         ibeam.setProjectName(injuryQuery.getProjectName());

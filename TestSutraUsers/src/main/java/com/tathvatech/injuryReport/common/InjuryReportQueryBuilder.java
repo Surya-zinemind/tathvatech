@@ -14,12 +14,15 @@ import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.User;
 import com.tathvatech.user.enums.SiteRolesEnum;
 import com.tathvatech.user.service.AuthorizationManager;
+import lombok.RequiredArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+@RequiredArgsConstructor
 public class InjuryReportQueryBuilder
 {
     private final AuthorizationManager authorizationManager;
@@ -27,11 +30,6 @@ public class InjuryReportQueryBuilder
     private QueryObject query;
     private UserContext context;
     private InjuryReportQueryFilter injuryQueryFilter;
-
-    public InjuryReportQueryBuilder(AuthorizationManager authorizationManager, ProjectService projectService) {
-        this.authorizationManager = authorizationManager;
-        this.projectService = projectService;
-    }
 
 
     public InjuryReportQueryFilter getInjuryQueryFilter()

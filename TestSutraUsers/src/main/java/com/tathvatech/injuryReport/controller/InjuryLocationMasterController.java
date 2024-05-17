@@ -6,13 +6,16 @@ import com.tathvatech.injuryReport.entity.InjuryLocationMaster;
 import com.tathvatech.injuryReport.service.InjuryLocationMasterManager;
 import com.tathvatech.user.common.UserContext;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.Connection;
 import java.util.List;
 
-
+@RestController
 @RequiredArgsConstructor
-public class InjuryLocationMasterDeligate {
+public class InjuryLocationMasterController {
+    private  final Logger logger = LoggerFactory.getLogger(InjuryLocationMasterController.class);
     private final InjuryLocationMasterManager injuryLocationMasterManager;
 
     public  InjuryLocationMaster createInjuryLocationMaster(UserContext context,

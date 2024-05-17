@@ -34,6 +34,7 @@ public class InjuryEmailSender
     private final AccountService accountService;
     private final AuthorizationManager authorizationManager;
     private final WatcherManager watcherManager;
+
     public void notifyInjuryReportSupervisorChanged(UserContext context, InjuryQuery injuryQuery,
                                                     User previousSupervisor)
     {
@@ -211,7 +212,7 @@ public class InjuryEmailSender
         List<Integer> sentList = new ArrayList<>();
         List<String> userListArr = new ArrayList<String>();
 
-        ByteArrayOutputStream pdfPrintStream = new InjuryReportPrinter(context).printForm(iQ);
+        ByteArrayOutputStream pdfPrintStream = new InjuryReportPrinter(accountService,context).printForm(iQ);
         String tempFile = TempFileUtil.getNewTempFile();
         File pdfFile = new File(tempFile);
         FileOutputStream mbuffer = new FileOutputStream(pdfFile);
@@ -359,7 +360,7 @@ public class InjuryEmailSender
     {
         List<Integer> sentList = new ArrayList<>();
 
-        ByteArrayOutputStream pdfPrintStream = new InjuryReportPrinter(context).printForm(iQ);
+        ByteArrayOutputStream pdfPrintStream = new InjuryReportPrinter(accountService,context).printForm(iQ);
         String tempFile = TempFileUtil.getNewTempFile();
         File pdfFile = new File(tempFile);
         FileOutputStream mbuffer = new FileOutputStream(pdfFile);

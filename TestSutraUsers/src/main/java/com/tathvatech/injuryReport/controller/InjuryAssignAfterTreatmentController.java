@@ -6,13 +6,17 @@ import com.tathvatech.injuryReport.service.InjuryAssignAfterTreatmentManager;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.injuryReport.common.InjuryAssignAfterTreatmentQuery;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.Connection;
 import java.util.List;
 
 
+@RestController
 @RequiredArgsConstructor
-public class InjuryAssignAfterTreatmentDeligate {
+public class InjuryAssignAfterTreatmentController {
+    private  final Logger logger = LoggerFactory.getLogger(InjuryAssignAfterTreatmentController.class);
     private final InjuryAssignAfterTreatmentManager injuryAssignAfterTreatmentManager;
     public  void createAssignAfterTreatment(UserContext context,
                                                   InjuryAssignAfterTreatmentBean assignAfterTreatmentBean) throws Exception

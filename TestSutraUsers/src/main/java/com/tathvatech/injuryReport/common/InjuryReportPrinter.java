@@ -15,15 +15,22 @@ import java.util.List;
 
 import com.tathvatech.common.common.ApplicationProperties;
 import com.tathvatech.common.common.FileStoreManager;
+import com.tathvatech.common.enums.EntityTypeEnum;
 import com.tathvatech.injuryReport.utils.DateFormatter;
 import com.tathvatech.user.common.UserContext;
 import com.tathvatech.user.entity.Attachment;
+import com.tathvatech.user.entity.User;
+import com.tathvatech.user.service.AccountService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 public class InjuryReportPrinter
 {
     private static final Logger logger = LoggerFactory.getLogger(InjuryReportPrinter.class);
+
+    private final AccountService accountService;
     UserContext context;
 
     public static String OPTION_PRINT_RESPONSE = "OPT_PRINT_RESPONSE";
@@ -50,8 +57,9 @@ public class InjuryReportPrinter
     private static Font fontStyleUnderLine = FontFactory.getFont(FontFactory.HELVETICA, 7, Font.UNDERLINE);
     private static Font fontStyleContent = FontFactory.getFont(FontFactory.HELVETICA, 9, Font.BOLD);
 
-    public InjuryReportPrinter(UserContext context)
+    public InjuryReportPrinter(AccountService accountService, UserContext context)
     {
+        this.accountService = accountService;
         this.context = context;
         BaseFont base = null;
         try
@@ -540,7 +548,7 @@ public class InjuryReportPrinter
             for (Iterator iterator2 = c.iterator(); iterator2.hasNext();)
             {
                 Comment comment = (Comment) iterator2.next();
-                User user = AccountDelegate.getUser(comment.getCreatedBy());
+                User user = accountService.getUser(comment.getCreatedBy());
                 String time = dateFormatter.formatDate(comment.getCreatedDate());
                 sbComments.append(user.getDisplayString() + " : " + time + "\n");
                 sbComments.append(comment.getCommentText());

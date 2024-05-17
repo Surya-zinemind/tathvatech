@@ -38,7 +38,7 @@ public class InjuryHelper
         InjuryBean bean = null;
         if (injury != null && injury.getPk() > 0)
         {
-            bean = new InjuryBean();
+            bean = new InjuryBean(accountService);
             bean.setPk((int) injury.getPk());
             bean.setProjectPk(injury.getProjectPk());
             if (injury.getProjectPk() != null && injury.getProjectPk() > 0)
